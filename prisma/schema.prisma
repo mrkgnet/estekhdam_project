@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ========= ENUMS =========
+// Enum ها به شما کمک می‌کنند تا مقادیر فیلدها را به گزینه‌های مشخصی محدود کنید.
+
+enum Role {
+  user
+  admin
+}
+
+enum DurationType {
+  instant
+  hours
+}
+
+type Spec {
+  label String
+  value String
+}
+
+enum OrderStatus {
+  PENDING // در انتظار پرداخت
+  COMPLETED // پرداخت موفق
+  FAILED // پرداخت ناموفق
+  CANCELED // لغو شده
+}
+
+// ========= MODELS =========
+
+model User {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber String    @unique
+  username    String?
+  otpCode     String?
+  email       String?
+  orders      Order[]
+  otpExpires  DateTime?
+  userWallet  Int       @default(100000)
+  role        Role      @default(user)
+  isActive    Boolean   @default(true)
+  cart        Cart?
+
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Product {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  slug         String       @unique
+  features     String[]
+  price        Int
+  durationType DurationType
+  duration     String
+  hours        Int?
+  description  String?
+  images       String[]
+  specs        Spec[]
+  badge        String? // مثلا "پرفروش"
+  rating       Float?
+  reviewsCount Int?
+  likesCount   Int?
+  viewsCount   Int?
+  orderItems   OrderItem[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  cartItems    CartItem[]
+}
+
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String     @unique // هر کاربر فقط یک سبد خرید دارد
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[] // لیستی از آیتم‌های داخل این سبد
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  quantity  Int     @default(1) // تعداد محصول
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+  cartId    String  @db.ObjectId
+  cart      Cart    @relation(fields: [cartId], references: [id])
+
+  @@unique([cartId, productId]) // جلوگیری از ثبت محصول تکراری در یک سبد (به جای آن تعدادش زیاد می‌شود)
+}
+
+model Order {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String      @db.ObjectId
+  user       User        @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+  totalPrice Int
+  adminNote  String?
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model OrderItem {
+  id                    String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId               String  @db.ObjectId
+  order                 Order   @relation(fields: [orderId], references: [id])
+  productId             String  @db.ObjectId
+  product               Product @relation(fields: [productId], references: [id])
+  quantity              Int
+  priceAtTimeOfPurchase Int // ✨ مهم: قیمت محصول در لحظه خرید را ذخیره می‌کنیم
+}
