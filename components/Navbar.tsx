@@ -1,17 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, User, Camera, Trophy, MessageSquareText, LogIn, ShoppingCart } from "lucide-react";
-
+import {
+  Menu,
+  Search,
+  User,
+  MessageSquareText,
+  LogIn,
+  ShoppingCart,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useUiStore } from "@/store/useUiStore";
 
 export default function Navbar() {
- 
-  const cartCount = 1; // بعداً از Zustand یا API بگیر
+  const cartCount = 1;
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  // بستن با کلیک بیرون
-  // بستن با کلیک بیرون
+
+  const toggleSidebarMode = useUiStore((s) => s.toggleSidebarMode);
+  const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
+
+  // تشخیص موبایل (lg = 1024)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!wrapperRef.current) return;
@@ -32,17 +49,19 @@ export default function Navbar() {
 
   return (
     <header className="w-full border-b bg-white text-[14px]">
-      <div className=" mx-auto px-2  pl-6 h-[62px] flex items-center justify-between gap-4">
+      <div className="mx-auto px-2 pl-6 h-[62px] flex items-center justify-between gap-4">
         {/* Right Section */}
         <div className="flex items-center gap-4">
           <button
-            
+            type="button"
+            onClick={isMobile ? toggleMobileSidebar : toggleSidebarMode}
             className="w-10 h-10 flex cursor-pointer items-center justify-center rounded-xl hover:bg-gray-100 transition"
+            aria-label="Toggle sidebar"
           >
             <Menu size={24} />
           </button>
 
-          <Link href="/" className=" font-extrabold tracking-tight">
+          <Link href="/" className="font-extrabold tracking-tight">
             برند استخدامی
           </Link>
         </div>
@@ -50,7 +69,10 @@ export default function Navbar() {
         {/* Center Search */}
         <div className="flex-1 hidden md:flex justify-center">
           <div className="relative w-full max-w-[450px]">
-            <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search
+              size={18}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
             <input
               type="text"
               placeholder="جستجو (نام آزمون، شرکت، درس و...)"
@@ -68,10 +90,9 @@ export default function Navbar() {
                  text-white shadow-md 
                  hover:shadow-lg hover:scale-105 
                  transition-all duration-200"
+            aria-label="Cart"
           >
             <ShoppingCart size={20} strokeWidth={2.5} />
-
-            {/* Badge */}
             {cartCount > 0 && (
               <span
                 className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 
@@ -83,6 +104,7 @@ export default function Navbar() {
               </span>
             )}
           </Link>
+
           {/* حساب کاربری + دراپ‌داون */}
           <div className="relative" ref={wrapperRef}>
             <button
@@ -96,7 +118,6 @@ export default function Navbar() {
               حساب کاربری
             </button>
 
-            {/* Dropdown */}
             <div
               className={[
                 "absolute left-0 z-10 top-[calc(100%+10px)] w-56 rounded-xl bg-white shadow-lg border border-slate-100 overflow-hidden",

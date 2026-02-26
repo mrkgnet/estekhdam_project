@@ -1,16 +1,27 @@
-// import { create } from "zustand";
+import { create } from "zustand";
 
-// type UiState = {
-//   sidebarOpen: boolean;
-//   toggleSidebar: () => void;
-//   openSidebar: () => void;
-//   closeSidebar: () => void;
-// };
+type SidebarMode = "full" | "mini";
 
-// export const useUiStore = create<UiState>((set) => ({
-//   sidebarOpen: true,
-//   toggleSidebar: () =>
-//     set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-//   openSidebar: () => set({ sidebarOpen: true }),
-//   closeSidebar: () => set({ sidebarOpen: false }),
-// }));
+type UiState = {
+  sidebarMode: SidebarMode;
+  mobileOpen: boolean;
+  toggleSidebarMode: () => void;
+  toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
+};
+
+export const useUiStore = create<UiState>((set) => ({
+  sidebarMode: "full",
+  mobileOpen: false,
+
+  toggleSidebarMode: () =>
+    set((s) => ({
+      sidebarMode: s.sidebarMode === "full" ? "mini" : "full",
+    })),
+
+  toggleMobileSidebar: () =>
+    set((s) => ({ mobileOpen: !s.mobileOpen })),
+
+  closeMobileSidebar: () =>
+    set({ mobileOpen: false }),
+}));
