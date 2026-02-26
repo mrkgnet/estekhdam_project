@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { Menu, Search, User, Camera, Trophy, MessageSquareText, LogIn, ShoppingCart } from "lucide-react";
-import { useUiStore } from "@/store/useUiStore";
+
 import { useEffect, useRef, useState } from "react";
 
 export default function Navbar() {
-  const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+ 
   const cartCount = 1; // بعداً از Zustand یا API بگیر
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -36,7 +36,7 @@ export default function Navbar() {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           <button
-            onClick={toggleSidebar}
+            
             className="w-10 h-10 flex cursor-pointer items-center justify-center rounded-xl hover:bg-gray-100 transition"
           >
             <Menu size={24} />

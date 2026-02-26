@@ -4,182 +4,196 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  Building2,
-  GraduationCap,
+  Star,
+  Video,
+  Radio,
+  Activity,
   ClipboardList,
-  Hospital,
-  Layers,
-  BriefcaseBusiness,
-  Instagram,
-  Youtube,
-  X,
+  Shirt,
+  HelpCircle,
+  Trophy,
+  Table2,
+  BarChart3,
+  CalendarDays,
+  ArrowLeftRight,
 } from "lucide-react";
-import { FaTelegram } from "react-icons/fa";
-import { useUiStore } from "@/store/useUiStore";
 
-type NavItem = {
+type Item = {
   title: string;
   href: string;
   icon: React.ElementType;
 };
 
-const navItems: NavItem[] = [
+const TOP_ITEMS: Item[] = [
   { title: "خانه", href: "/", icon: Home },
-  { title: "استخدامی بخش دولتی", href: "/jobs/recruitment-government-agencies", icon: Building2 },
-   { title: "استخدام بخش خصوصی", href: "/jobs/private", icon: BriefcaseBusiness },
-  { title: "منابع آزمون بانک ها", href: "/exam-resources", icon: GraduationCap },
-  { title: "منابع آزمون آموزش و پرورش", href: "/exam-resources1", icon: GraduationCap },
-  { title: "منابع آزمون دستگاه های اجرایی", href: "/exam-resources2", icon: ClipboardList },
-  { title: " منابع آزمون وزارت بهداشت", href: "/exam-resources3", icon: Hospital },
-  { title: "سایر دستگاه ها", href: "/exam-resources4", icon: Layers },
-  { title: "سوالات  آزمون های استخدامی", href: "/employment-questions", icon: Layers },
- 
+  { title: "برای شما", href: "/for-you", icon: Star },
+  { title: "ویدیوها", href: "/videos", icon: Video },
+  { title: "پخش زنده", href: "/live", icon: Radio },
+  { title: "نتایج زنده", href: "/live-results", icon: Activity },
+  { title: "پیش‌بینی", href: "/predictions", icon: ClipboardList },
+  { title: "فوتبال فانتزی", href: "/fantasy", icon: Shirt },
+  { title: "نظرسنجی", href: "/poll", icon: HelpCircle },
+  { title: "رقابت‌ها", href: "/competitions", icon: Trophy },
+  { title: "جدول لیگ‌ها", href: "/tables", icon: Table2 },
+  { title: "آمار و ارقام", href: "/stats", icon: BarChart3 },
+  { title: "برنامه بازی‌ها", href: "/fixtures", icon: CalendarDays },
+  { title: "نقل‌وانتقالات", href: "/transfers", icon: ArrowLeftRight },
 ];
 
-const otherPages = [
+const FOOTER_TITLE = "دیگر صفحات فوتبال ۳۶۰°";
+const FOOTER_LINKS = [
   { title: "جدیدترین‌ها", href: "/latest" },
-  { title: "پادکست", href: "/podcast" },
-  { title: "دانلود اپلیکیشن", href: "/app" },
-  { title: "درباره ما", href: "/about" },
-  { title: "تماس با ما", href: "/contact" },
   { title: "سردبیر", href: "/editor" },
   { title: "دسته‌بندی‌ها", href: "/categories" },
+  { title: "پادکست", href: "/podcast" },
+  { title: "دانلود اپلیکیشن", href: "/app" },
   { title: "قوانین و کپی‌رایت", href: "/copyright" },
   { title: "حریم خصوصی", href: "/privacy" },
+  { title: "درباره ما", href: "/about" },
+  { title: "تماس با ما", href: "/contact" },
 ];
 
-export default function SideBar() {
-  const pathname = usePathname();
-  const sidebarOpen = useUiStore((s) => s.sidebarOpen);
-  const closeSidebar = useUiStore((s) => s.closeSidebar);
-
-  const stroke = 2.8;
+function NavItemMobile({ item, active }: { item: Item; active: boolean }) {
+  const Icon = item.icon;
 
   return (
-    // این wrapper باعث میشه سایدبار همیشه یک ستون کنار main باشه
-    <div className="flex">
-      {/* ------------------- سایدبار بزرگ ------------------- */}
-      <aside
+    <Link
+      href={item.href}
+      className={[
+        "group relative flex  flex-col gap-2.5  items-center justify-center",
+        "px-5 py-3.5",
+        "text-[15px] leading-none",
+        "transition-colors duration-200 ease-out",
+        active ? "bg-gray-100" : "hover:bg-gray-50",
+      ].join(" ")}
+    >
+      {/* متن */}
+      <span
         className={[
-          "bg-white border-l overflow-hidden",
-          "transition-[width] duration-300 ease-in-out",
-          sidebarOpen ? "w-[260px]" : "w-0",
+          "transition-colors duration-200 ease-out",
+          active ? "text-blue-700 font-semibold" : "text-gray-700",
         ].join(" ")}
       >
-        <div className="w-[260px] h-full">
-          <nav className="py-3">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+        {item.title}
+      </span>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    if (window.innerWidth < 768) closeSidebar();
-                  }}
-                  className={[
-                    "flex gap-4 items-center px-5 py-4",
-                    "text-[15px] leading-none transition-colors",
-                    "border-b border-slate-100 last:border-b-0",
-                    isActive
-                      ? "bg-slate-100 text-sky-800 font-semibold"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-800",
-                  ].join(" ")}
-                >
-                  <Icon
-                    className={isActive ? "w-5 h-5 text-sky-800" : "w-5 h-5 text-slate-500"}
-                    strokeWidth={stroke}
-                  />
-                  <span>{item.title}</span>
-                </Link>
-              );
-            })}
+      {/* آیکن سمت راست */}
+      <Icon
+        size={20}
+        className={[
+          "shrink-0 transition-colors duration-200 ease-out",
+          active ? "text-blue-700" : "text-gray-500 group-hover:text-gray-700",
+        ].join(" ")}
+      />
 
-            <div className="border-t border-slate-100 mt-2 pt-4 px-5 pb-5">
-              <h3 className="text-center text-sky-800 font-semibold text-lg">
-                دیگر صفحات سایت
-              </h3>
+      {/* نوار خیلی ظریف سمت راست برای حس active مثل سایت‌ها */}
+      <span
+        className={[
+          "absolute right-0 top-0 h-full w-[3px] rounded-l",
+          "transition-opacity duration-200 ease-out",
+          active ? "bg-blue-700 opacity-100" : "opacity-0 group-hover:opacity-20 bg-gray-400",
+        ].join(" ")}
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
 
-              <div className="mt-5 grid grid-cols-2 gap-y-4 text-[15px] text-slate-600">
-                {otherPages.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="hover:text-slate-900 transition-colors"
-                    onClick={() => {
-                      if (window.innerWidth < 768) closeSidebar();
-                    }}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
+function NavItemMobileDesktop({ item, active }: { item: Item; active: boolean }) {
+  const Icon = item.icon;
 
-              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-center gap-6 text-slate-500">
-                <Link href="https://instagram.com" aria-label="Instagram" className="hover:text-slate-800 transition-colors">
-                  <Instagram className="w-6 h-6" strokeWidth={stroke} />
-                </Link>
-                <Link href="https://youtube.com" aria-label="YouTube" className="hover:text-slate-800 transition-colors">
-                  <Youtube className="w-6 h-6" strokeWidth={stroke} />
-                </Link>
-                <Link href="https://x.com" aria-label="X" className="hover:text-slate-800 transition-colors">
-                  <X className="w-6 h-6" strokeWidth={stroke} />
-                </Link>
-                <Link href="https://t.me" aria-label="Telegram" className="hover:text-slate-800 transition-colors">
-                  <FaTelegram size={23} />
-                </Link>
-              </div>
+  return (
+    <Link
+      href={item.href}
+      className={[
+        "group relative flex     items-center justify-start gap-3",
+        "px-5 py-3.5",
+        "text-[15px] leading-none",
+        "transition-colors duration-200 ease-out",
+        active ? "bg-gray-100" : "hover:bg-gray-50",
+      ].join(" ")}
+    >
+      <Icon
+        size={20}
+        className={[
+          "shrink-0 transition-colors duration-200 ease-out",
+          active ? "text-blue-700" : "text-gray-500 group-hover:text-gray-700",
+        ].join(" ")}
+      />
+      {/* متن */}
+      <span
+        className={[
+          "transition-colors duration-200 ease-out",
+          active ? "text-blue-700 font-semibold" : "text-gray-700",
+        ].join(" ")}
+      >
+        {item.title}
+      </span>
 
-              <p className="mt-6 text-center text-xs leading-6 text-slate-500">
-                تمام حقوق مادی و معنوی این سایت متعلق به
-                <span className="font-semibold text-slate-700"> استخدامی </span>
-                می‌باشد.
-              </p>
-            </div>
+      {/* آیکن سمت راست */}
+
+      {/* نوار خیلی ظریف سمت راست برای حس active مثل سایت‌ها */}
+      <span
+        className={[
+          "absolute right-0 top-0 h-full w-[3px] rounded-l",
+          "transition-opacity duration-200 ease-out",
+          active ? "bg-blue-700 opacity-100" : "opacity-0 group-hover:opacity-20 bg-gray-400",
+        ].join(" ")}
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href;
+
+  return (
+    <div className="flex">
+      {/* دکستاپ */}
+      <aside className="w-[230px] h-full bg-white border-l border-gray-200 flex flex-col">
+        {/* بخش اسکرولی بالا */}
+        <div className="flex-1 ">
+          {/* هدر خیلی ساده مثل نمونه (فقط جهت spacing) */}
+
+          <nav className="py-1">
+            {TOP_ITEMS.map((item) => (
+              <NavItemMobileDesktop key={item.href} item={item} active={isActive(item.href)} />
+            ))}
           </nav>
+        </div>
+
+        {/* فوتر پایین مثل نمونه */}
+        <div className="border-t border-gray-200 bg-white">
+          <div className="px-5 py-4">
+            <div className="text-sm font-semibold text-gray-800">{FOOTER_TITLE}</div>
+
+            <div className="mt-3 grid grid-cols-2 gap-y-2 text-[13px] text-gray-600">
+              {FOOTER_LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="hover:text-gray-900 transition-colors duration-200 ease-out"
+                >
+                  {l.title}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </aside>
 
-      {/* ------------------- سایدبار کوچک ------------------- */}
-      <aside
-        className={[
-          "bg-white border-l overflow-hidden hidden lg:block",
-          "transition-[width] duration-300 ease-in-out",
-          sidebarOpen ? "w-0" : "w-[80px]",
-        ].join(" ")}
-      >
-        <div className="w-[80px] h-full">
-          <nav className="py-3">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+      {/* موبایل */}
+      <aside className="w-[100px] hidden lg:block h-full bg-white border-l border-gray-200 flex flex-col">
+        {/* بخش اسکرولی بالا */}
+        <div className="flex-1  ">
+          {/* هدر خیلی ساده مثل نمونه (فقط جهت spacing) */}
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    if (window.innerWidth < 768) closeSidebar();
-                  }}
-                  className={[
-                    "flex flex-col gap-2 items-center px-2 py-4",
-                    "text-[11px] leading-4 transition-colors",
-                    "border-b border-slate-100 last:border-b-0",
-                    isActive
-                      ? "bg-slate-100 text-sky-800 font-semibold"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-800",
-                  ].join(" ")}
-                >
-                  <Icon
-                    className={isActive ? "w-5 h-5 text-sky-800" : "w-5 h-5 text-slate-500"}
-                    strokeWidth={stroke}
-                  />
-                  <span className="text-center leading-5">{item.title}</span>
-                </Link>
-              );
-            })}
+          <nav className="py-1">
+            {TOP_ITEMS.map((item) => (
+              <NavItemMobile key={item.href} item={item} active={isActive(item.href)} />
+            ))}
           </nav>
         </div>
       </aside>

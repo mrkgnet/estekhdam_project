@@ -9,8 +9,9 @@ export default function HomePage() {
     <div className="flex min-h-screen">
       
       {/* سایدبار فقط دسکتاپ */}
-      <div className=" hidden lg:block">
-        <SideBar />
+      <div className="">
+      <SideBar />
+      
       </div>
 
       {/* محتوای اصلی */}

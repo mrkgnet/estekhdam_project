@@ -15,7 +15,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
       <div className="min-h-screen flex flex-col">
         <div className="flex flex-1">
-          <SideBar />
+          
 
           <main className="flex-1 max-w-7xl mx-auto p-6 bg-slate-50 transition-all duration-300">{children}</main>
         </div>
