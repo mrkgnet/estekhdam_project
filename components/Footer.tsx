@@ -33,7 +33,7 @@ export default function Footer() {
       </div>
 
       {/* Top CTA */}
-      <div className="relative mx-auto container px-4 pt-10 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
         <div className="rounded-[28px] border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-3">
@@ -86,7 +86,7 @@ export default function Footer() {
       </div>
 
       {/* Main */}
-      <div className="relative mx-auto container px-4 py-10 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-4">

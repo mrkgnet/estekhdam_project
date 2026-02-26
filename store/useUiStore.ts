@@ -1,27 +1,16 @@
+// store/useUiStore.ts
 import { create } from "zustand";
 
-type SidebarMode = "full" | "mini";
-
 type UiState = {
-  sidebarMode: SidebarMode;
-  mobileOpen: boolean;
-  toggleSidebarMode: () => void;
-  toggleMobileSidebar: () => void;
-  closeMobileSidebar: () => void;
+  isSidebarOpen: boolean;
+  openSidebar: () => void;
+  closeSidebar: () => void;
+  toggleSidebar: () => void;
 };
 
 export const useUiStore = create<UiState>((set) => ({
-  sidebarMode: "full",
-  mobileOpen: false,
-
-  toggleSidebarMode: () =>
-    set((s) => ({
-      sidebarMode: s.sidebarMode === "full" ? "mini" : "full",
-    })),
-
-  toggleMobileSidebar: () =>
-    set((s) => ({ mobileOpen: !s.mobileOpen })),
-
-  closeMobileSidebar: () =>
-    set({ mobileOpen: false }),
+  isSidebarOpen: true, // پیش‌فرض دسکتاپ باز
+  openSidebar: () => set({ isSidebarOpen: true }),
+  closeSidebar: () => set({ isSidebarOpen: false }),
+  toggleSidebar: () => set((s) => ({ isSidebarOpen: !s.isSidebarOpen })),
 }));

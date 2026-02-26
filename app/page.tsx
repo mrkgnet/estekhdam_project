@@ -1,3 +1,4 @@
+// app/page.tsx
 import LastProduct from "@/components/home/LastProduct";
 import MainSlider from "@/components/home/MainSlider";
 import NewsList from "@/components/home/NewsList";
@@ -7,23 +8,15 @@ import SideBar from "@/components/Sidebar";
 export default function HomePage() {
   return (
     <div className="flex min-h-screen">
-      
-      {/* سایدبار فقط دسکتاپ */}
-      <div className="">
+      {/* سایدبار */}
       <SideBar />
-      
-      </div>
 
       {/* محتوای اصلی */}
-      <main className="flex-1 min-w-0 bg-slate-50">
+      <main className="min-w-0 flex-1 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 py-4 lg:py-6">
-          
           <div className="flex flex-col lg:flex-row gap-5">
-            
             {/* ستون اصلی */}
             <section className="flex-1 min-w-0 space-y-5">
-              
-              {/* اسلایدر */}
               <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
                 <div className="h-[180px] sm:h-[226px]">
                   <MainSlider />
@@ -36,7 +29,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* محصولات */}
               <div className="bg-white rounded-2xl border border-slate-100 p-5">
                 <LastProduct />
               </div>
@@ -45,7 +37,6 @@ export default function HomePage() {
             {/* ستون کناری (فقط دسکتاپ) */}
             <aside className="w-full lg:w-[360px] shrink-0 hidden lg:block text-[14px]">
               <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-                
                 <div className="p-5 border-b border-slate-100 font-semibold">
                   جدید ترین ها
                 </div>
@@ -57,10 +48,8 @@ export default function HomePage() {
                 <div className="p-4 space-y-4">
                   <NewsList />
                 </div>
-
               </div>
             </aside>
-
           </div>
         </div>
       </main>

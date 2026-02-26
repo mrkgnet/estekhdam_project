@@ -1,6 +1,7 @@
+// components/Navbar.tsx
 "use client";
 
-import Link from "next/link";
+import { useUiStore } from "@/store/useUiStore";
 import {
   Menu,
   Search,
@@ -9,52 +10,34 @@ import {
   LogIn,
   ShoppingCart,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useUiStore } from "@/store/useUiStore";
+import Link from "next/link";
+import { useRef, useState, useEffect } from "react";
 
 export default function Navbar() {
   const cartCount = 1;
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const toggleSidebarMode = useUiStore((s) => s.toggleSidebarMode);
-  const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
-
-  // تشخیص موبایل (lg = 1024)
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (!wrapperRef.current) return;
-      if (!wrapperRef.current.contains(e.target as Node)) setOpen(false);
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    function onDocClick(e: MouseEvent) {
+      const el = wrapperRef.current;
+      if (!el) return;
+      if (!el.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
   return (
     <header className="w-full border-b bg-white text-[14px]">
       <div className="mx-auto px-2 pl-6 h-[62px] flex items-center justify-between gap-4">
-        {/* Right Section */}
+        {/* Right */}
         <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={isMobile ? toggleMobileSidebar : toggleSidebarMode}
+            onClick={toggleSidebar}
             className="w-10 h-10 flex cursor-pointer items-center justify-center rounded-xl hover:bg-gray-100 transition"
             aria-label="Toggle sidebar"
           >
@@ -105,7 +88,7 @@ export default function Navbar() {
             )}
           </Link>
 
-          {/* حساب کاربری + دراپ‌داون */}
+          {/* Account dropdown */}
           <div className="relative" ref={wrapperRef}>
             <button
               type="button"
