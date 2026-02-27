@@ -1,7 +1,7 @@
 // components/Sidebar.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUiStore } from "@/store/useUiStore";
@@ -29,21 +29,17 @@ type Item = {
 
 const TOP_ITEMS: Item[] = [
   { title: "خانه", href: "/", icon: Home },
-  { title: " دولتی - سراسری", href: "/jobs/recruitment-government-agencies", icon: Star },
-  { title: "بخش خصوصی", href: "/videos", icon: Video },
+  { title: "استخدامی دستگاه های دولتی", href: "/jobs/recruitment-government-agencies", icon: Star },
+  { title: "استخدامی بخش خصوصی", href: "/videos", icon: Video },
   { title: "منابع استخدامی", href: "/exam-resources", icon: Radio },
   { title: "منابع استخدامی بانک ها", href: "/exam-resources1", icon: Radio },
-   { title: " استخدامی آموزش پرورش", href: "/exam-resources1", icon: Radio },
-   { title: " استخدامی  دستگاه های اجرایی", href: "/exam-resources1", icon: Radio },
+  { title: " منابع آموزش پرورش", href: "/exam-resources2", icon: Radio },
+  { title: " منابع  دستگاه های اجرایی", href: "/exam-resources3", icon: Radio },
 ];
 
-const FOOTER_TITLE = "دیگر صفحات فوتبال ۳۶۰°";
 const FOOTER_LINKS = [
-  { title: "جدیدترین‌ها", href: "/latest" },
-  { title: "سردبیر", href: "/editor" },
-  { title: "دسته‌بندی‌ها", href: "/categories" },
-  { title: "پادکست", href: "/podcast" },
-  { title: "دانلود اپلیکیشن", href: "/app" },
+  { title: "جدیدترین‌ها", href: "/latest" }, 
+  { title: "دسته‌بندی‌ها", href: "/categories" },  
   { title: "قوانین و کپی‌رایت", href: "/copyright" },
   { title: "حریم خصوصی", href: "/privacy" },
   { title: "درباره ما", href: "/about" },
@@ -59,7 +55,7 @@ function NavItemMobileDesktop({ item, active }: { item: Item; active: boolean })
       className={[
         "group relative flex items-center justify-start gap-3",
         "px-5 py-3.5",
-        "text-[15px] leading-none",
+        "text-[14px] leading-none",
         "transition-colors duration-200 ease-out",
         active ? "bg-gray-100" : "hover:bg-gray-50",
       ].join(" ")}
@@ -85,9 +81,7 @@ function NavItemMobileDesktop({ item, active }: { item: Item; active: boolean })
         className={[
           "absolute right-0 top-0 h-full w-[3px] rounded-l",
           "transition-opacity duration-200 ease-out",
-          active
-            ? "bg-blue-700 opacity-100"
-            : "opacity-0 group-hover:opacity-20 bg-gray-400",
+          active ? "bg-blue-700 opacity-100" : "opacity-0 group-hover:opacity-20 bg-gray-400",
         ].join(" ")}
         aria-hidden="true"
       />
@@ -99,6 +93,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const isSidebarOpen = useUiStore((s) => s.isSidebarOpen);
   const isActive = (href: string) => pathname === href;
+
+  const closeSidebar = useUiStore((s) => s.closeSidebar);
+
+  // 👇 این بخش جدید
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      closeSidebar();
+    }
+  }, [pathname, closeSidebar]);
 
   return (
     <div
@@ -112,28 +115,24 @@ export default function Sidebar() {
       <aside
         className={[
           "h-full bg-white border-l border-gray-200 flex flex-col",
-          "w-[230px]",
+          "w-[255px]",
           "transition-transform duration-200 ease-out",
           isSidebarOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
-        <div className="flex-1">
+        <div className="">
           <nav className="py-1">
             {TOP_ITEMS.map((item) => (
-              <NavItemMobileDesktop
-                key={item.href}
-                item={item}
-                active={isActive(item.href)}
-              />
+              <NavItemMobileDesktop key={item.href} item={item} active={isActive(item.href)} />
             ))}
           </nav>
         </div>
 
         <div className="border-t border-gray-200 bg-white">
           <div className="px-5 py-4">
-            <div className="text-sm font-semibold text-gray-800">{FOOTER_TITLE}</div>
+           
 
-            <div className="mt-3 grid grid-cols-2 gap-y-2 text-[13px] text-gray-600">
+            <div className="mt-3 grid grid-cols-2 gap-y-2 text-[14px] text-gray-600">
               {FOOTER_LINKS.map((l) => (
                 <Link
                   key={l.href}

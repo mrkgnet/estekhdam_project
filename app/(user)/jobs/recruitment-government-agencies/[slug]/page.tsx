@@ -91,8 +91,14 @@ const DATA: Item[] = [
       { title: "اعلام نتایج", date: "۱۴۰۵/۰۱/۱۰", done: false },
     ],
     faq: [
-      { q: "اگر پرداخت ناموفق باشد چه کار کنم؟", a: "مجدداً از بخش سوابق پرداخت اقدام کنید یا پس از ۲۴ ساعت بررسی نمایید." },
-      { q: "امکان ویرایش اطلاعات بعد از ثبت‌نام هست؟", a: "بسته به سامانه ثبت‌نام، معمولاً تا پایان مهلت ثبت‌نام امکان ویرایش وجود دارد." },
+      {
+        q: "اگر پرداخت ناموفق باشد چه کار کنم؟",
+        a: "مجدداً از بخش سوابق پرداخت اقدام کنید یا پس از ۲۴ ساعت بررسی نمایید.",
+      },
+      {
+        q: "امکان ویرایش اطلاعات بعد از ثبت‌نام هست؟",
+        a: "بسته به سامانه ثبت‌نام، معمولاً تا پایان مهلت ثبت‌نام امکان ویرایش وجود دارد.",
+      },
     ],
   },
   {
@@ -340,7 +346,9 @@ function Tabs({
             onClick={() => onChange(t.key)}
             className={[
               "rounded-2xl px-4 py-2 text-sm font-extrabold border transition",
-              active ? "bg-slate-900 text-white border-slate-900" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50",
+              active
+                ? "bg-slate-900 text-white border-slate-900"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50",
             ].join(" ")}
           >
             {t.label}
@@ -357,7 +365,7 @@ export default function Page() {
   const params = useParams<{ slug: string }>();
 
   const slug = useMemo(() => {
-    const raw = params?.slug ?? ""; 
+    const raw = params?.slug ?? "";
     try {
       return decodeURIComponent(raw);
     } catch {
@@ -428,9 +436,16 @@ export default function Page() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h1 className="text-lg sm:text-xl font-extrabold text-slate-900">{item.title}</h1>
 
-                      <span className={["inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ring-1", badge.cls].join(" ")}>
+                      <span
+                        className={[
+                          "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ring-1",
+                          badge.cls,
+                        ].join(" ")}
+                      >
                         <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-                          <span className={`absolute inline-flex h-full w-full rounded-full ${badge.dot} opacity-25 animate-ping`} />
+                          <span
+                            className={`absolute inline-flex h-full w-full rounded-full ${badge.dot} opacity-25 animate-ping`}
+                          />
                           <span className={`inline-flex h-2.5 w-2.5 rounded-full ${badge.dot} animate-pulse`} />
                         </span>
                         {badge.label}
@@ -466,19 +481,27 @@ export default function Page() {
                 {/* Right */}
                 <div className="flex flex-col items-start lg:items-end gap-3">
                   <CountdownTimer endAt={item.endAt} active={canRegister} />
-
                 </div>
-
-
-                
               </div>
 
               {/* quick info */}
               <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <InfoCard icon={<CalendarRange className="h-4 w-4" />} label="شروع ثبت‌نام" value={formatFaDate(item.startAt)} />
-                <InfoCard icon={<CalendarRange className="h-4 w-4" />} label="پایان ثبت‌نام" value={formatFaDate(item.endAt)} />
+                <InfoCard
+                  icon={<CalendarRange className="h-4 w-4" />}
+                  label="شروع ثبت‌نام"
+                  value={formatFaDate(item.startAt)}
+                />
+                <InfoCard
+                  icon={<CalendarRange className="h-4 w-4" />}
+                  label="پایان ثبت‌نام"
+                  value={formatFaDate(item.endAt)}
+                />
                 <InfoCard icon={<Wallet className="h-4 w-4" />} label="هزینه" value={formatToman(item.fee)} />
-                <InfoCard icon={<Info className="h-4 w-4" />} label="شناسه" value={`#${item.id.toString().padStart(3, "0")}`} />
+                <InfoCard
+                  icon={<Info className="h-4 w-4" />}
+                  label="شناسه"
+                  value={`#${item.id.toString().padStart(3, "0")}`}
+                />
               </div>
             </div>
           </div>
@@ -494,7 +517,11 @@ export default function Page() {
 
             {tab === "desc" ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<Info className="h-5 w-5" />} title="توضیحات آزمون" desc="نمای کلی و نکات مهم قبل از ثبت‌نام" />
+                <SectionTitle
+                  icon={<Info className="h-5 w-5" />}
+                  title="توضیحات آزمون"
+                  desc="نمای کلی و نکات مهم قبل از ثبت‌نام"
+                />
                 <p className="mt-4 text-sm leading-8 text-slate-700">{item.description ?? "توضیحی ثبت نشده است."}</p>
               </div>
             ) : null}
@@ -533,10 +560,17 @@ export default function Page() {
 
             {tab === "docs" ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<BookOpen className="h-5 w-5" />} title="مدارک لازم" desc="قبل از ثبت‌نام آماده کنید" />
+                <SectionTitle
+                  icon={<BookOpen className="h-5 w-5" />}
+                  title="مدارک لازم"
+                  desc="قبل از ثبت‌نام آماده کنید"
+                />
                 <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-700">
                   {(item.requiredDocs ?? ["—"]).map((x, i) => (
-                    <li key={i} className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 flex items-start gap-2">
+                    <li
+                      key={i}
+                      className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 flex items-start gap-2"
+                    >
                       <CheckCircle2 className="h-4 w-4 mt-0.5" />
                       <span className="leading-7">{x}</span>
                     </li>
@@ -547,7 +581,11 @@ export default function Page() {
 
             {tab === "resources" ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<BookOpen className="h-5 w-5" />} title="منابع پیشنهادی" desc="برای مطالعه و آمادگی بهتر" />
+                <SectionTitle
+                  icon={<BookOpen className="h-5 w-5" />}
+                  title="منابع پیشنهادی"
+                  desc="برای مطالعه و آمادگی بهتر"
+                />
                 <div className="mt-4 space-y-2">
                   {(item.resources ?? []).length ? (
                     item.resources!.map((r) => (
@@ -569,7 +607,11 @@ export default function Page() {
 
             {tab === "downloads" ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<Download className="h-5 w-5" />} title="دانلودها" desc="دفترچه‌ها و فایل‌های مرتبط" />
+                <SectionTitle
+                  icon={<Download className="h-5 w-5" />}
+                  title="دانلودها"
+                  desc="دفترچه‌ها و فایل‌های مرتبط"
+                />
                 <div className="mt-4 space-y-2">
                   {(item.downloads ?? []).length ? (
                     item.downloads!.map((d) => (
@@ -594,21 +636,39 @@ export default function Page() {
 
             {tab === "faq" ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<Info className="h-5 w-5" />} title="سوالات متداول" desc="پاسخ سریع به سوالات پرتکرار" />
-                <div className="mt-4">{item.faq?.length ? <Accordion items={item.faq} /> : <div className="text-sm text-slate-500">سوالی ثبت نشده است.</div>}</div>
+                <SectionTitle
+                  icon={<Info className="h-5 w-5" />}
+                  title="سوالات متداول"
+                  desc="پاسخ سریع به سوالات پرتکرار"
+                />
+                <div className="mt-4">
+                  {item.faq?.length ? (
+                    <Accordion items={item.faq} />
+                  ) : (
+                    <div className="text-sm text-slate-500">سوالی ثبت نشده است.</div>
+                  )}
+                </div>
               </div>
             ) : null}
 
             {item.timeline?.length ? (
               <div className="rounded-3xl border border-slate-100 bg-white p-5">
-                <SectionTitle icon={<AlarmClock className="h-5 w-5" />} title="مسیر و مراحل آزمون" desc="یک نگاه سریع به گام‌های پیش‌رو" />
+                <SectionTitle
+                  icon={<AlarmClock className="h-5 w-5" />}
+                  title="مسیر و مراحل آزمون"
+                  desc="یک نگاه سریع به گام‌های پیش‌رو"
+                />
                 <div className="mt-4 space-y-3">
                   {item.timeline.map((t, idx) => {
                     const done = !!t.done;
                     return (
                       <div key={idx} className="flex items-start gap-3">
                         <div className="mt-0.5">
-                          {done ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <Circle className="h-5 w-5 text-slate-300" />}
+                          {done ? (
+                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-slate-300" />
+                          )}
                         </div>
                         <div className="flex-1 rounded-3xl border border-slate-100 bg-slate-50 px-4 py-3">
                           <div className="flex items-center justify-between gap-3">
@@ -634,33 +694,34 @@ export default function Page() {
                     href={item.registerUrl ?? "#"}
                     className={[
                       "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                      canRegister && item.registerUrl ? "bg-red-600 text-white hover:bg-emerald-700" : "bg-slate-100 text-slate-400 pointer-events-none",
+                      canRegister && item.registerUrl
+                        ? "bg-red-600 text-white hover:bg-emerald-700"
+                        : "bg-slate-100 text-slate-400 pointer-events-none",
                     ].join(" ")}
                   >
                     <ExternalLink className="h-4 w-4" />
                     ثبت‌نام در آزمون
                   </Link>
 
-               <Link
-  href={item.resourcesUrl ?? "#"}
-  className={[
-    "inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-extrabold",
-    item.resourcesUrl
-      ? "border-slate-200 text-slate-700 hover:bg-slate-50"
-      : "border-slate-100 text-slate-300 pointer-events-none",
-  ].join(" ")}
->
-  {/* 🔥 چراغ چشمک‌زن */}
-  {item.resourcesUrl ? (
-    <span className="relative flex h-3 w-3">
-      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50 animate-ping" />
-      <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
-    </span>
-  ) : null}
-
-  <BookOpen className="h-4 w-4" />
-  مشاهده منابع
-</Link>
+                  <Link
+                    href={item.resourcesUrl ?? "#"}
+                    className={[
+                      "inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-extrabold",
+                      item.resourcesUrl
+                        ? "border-slate-200 text-slate-700 hover:bg-slate-50"
+                        : "border-slate-100 text-slate-300 pointer-events-none",
+                    ].join(" ")}
+                  >
+                    {/* 🔥 چراغ چشمک‌زن */}
+                    {item.resourcesUrl ? (
+                      <span className="relative flex h-3 w-3">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50 animate-ping" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+                      </span>
+                    ) : null}
+                    <BookOpen className="h-4 w-4" />
+                    مشاهده منابع
+                  </Link>
                 </div>
               </div>
 
@@ -671,7 +732,8 @@ export default function Page() {
                     <div>
                       <p className="text-sm font-extrabold">یادآوری</p>
                       <p className="mt-1 text-sm leading-7 opacity-90">
-                        اگر قصد ثبت‌نام دارید، بهتر است امروز اقدام کنید تا نزدیک پایان به مشکل پرداخت/ترافیک سایت نخورید.
+                        اگر قصد ثبت‌نام دارید، بهتر است امروز اقدام کنید تا نزدیک پایان به مشکل پرداخت/ترافیک سایت
+                        نخورید.
                       </p>
                     </div>
                   </div>
@@ -696,7 +758,9 @@ export default function Page() {
                 href={item.registerUrl ?? "#"}
                 className={[
                   "inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold",
-                  canRegister && item.registerUrl ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400 pointer-events-none",
+                  canRegister && item.registerUrl
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-100 text-slate-400 pointer-events-none",
                 ].join(" ")}
               >
                 <ExternalLink className="h-4 w-4" />

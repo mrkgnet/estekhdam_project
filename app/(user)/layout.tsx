@@ -7,12 +7,7 @@ import Sidebar from "@/components/Sidebar";
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: { fontFamily: "inherit", direction: "rtl" },
-        }}
-      />
+  
 
       <div className="min-h-screen flex flex-col">
         <div className="flex flex-1">

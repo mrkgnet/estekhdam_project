@@ -80,12 +80,12 @@ const toman = (n: number) => `${n.toLocaleString("fa-IR")} تومان`;
 
 export default function LatestProducts() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-5">
+    <div className="bg-white text-[14px] rounded-2xl border border-slate-100 p-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-extrabold text-slate-800"> محصولات استخدامی بانک ها</h2>
+        <h2 className="font-bold text-slate-800"> محصولات استخدامی بانک ها</h2>
 
-        <Link href="/products" className="text-sm text-green-600 hover:text-green-700 font-semibold transition">
+        <Link href="/products" className=" text-green-600 font-bold hover:text-green-700  transition">
           مشاهده همه
         </Link>
       </div>
@@ -118,16 +118,16 @@ export default function LatestProducts() {
                   {typeof p.rating === "number" && (
                     <div className="flex items-center gap-1 text-amber-500">
                       <Star className="w-4 h-4" fill="currentColor" />
-                      <span className="text-xs font-bold">{p.rating.toLocaleString("fa-IR")}</span>
+                      <span className="">{p.rating.toLocaleString("fa-IR")}</span>
                     </div>
                   )}
 
-                  <h3 className="text-sm font-semibold text-slate-800 leading-6 line-clamp-2">{p.title}</h3>
+                  <h3 className=" text-slate-800 leading-6 line-clamp-2">{p.title}</h3>
 
                   {/* Price */}
                   <div className="flex items-end justify-between">
                     <div>
-                      <div className="text-green-600 font-extrabold text-sm">{toman(p.price)}</div>
+                      <div className="text-green-700 ">{toman(p.price)}</div>
 
                       {p.oldPrice && p.oldPrice > p.price && (
                         <div className="text-xs text-slate-400 line-through mt-1">{toman(p.oldPrice)}</div>
@@ -142,7 +142,7 @@ export default function LatestProducts() {
                         e.stopPropagation();
                         // اینجا بعداً addToCart رو صدا می‌زنی
                       }}
-                      className="h-9 px-3 rounded-xl bg-green-500 text-white text-xs font-semibold
+                      className="h-9 px-3 rounded-xl bg-green-700 text-white 
                                  flex items-center gap-2 hover:bg-green-600 transition"
                     >
                       <ShoppingCart size={16} />

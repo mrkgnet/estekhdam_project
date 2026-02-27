@@ -70,19 +70,19 @@ export default function Page() {
   }, [query, categories]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-[14px]">
       <div className="mx-auto max-w-6xl px-4 py-10">
         {/* Container card مثل محصولات */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h1 className="text-lg md:text-xl font-extrabold text-slate-800">
+            <h1 className="text-sm md:text-xl font-extrabold text-slate-800">
               منابع آزمون استخدامی بانک‌ها
             </h1>
 
             <Link
               href="/exam-resources"
-              className="text-sm text-green-600 hover:text-green-700 font-semibold transition"
+              className="text-sm text-green-700 hover:text-green-700 font-semibold transition"
             >
               مشاهده همه
             </Link>
@@ -127,11 +127,11 @@ export default function Page() {
 
                 {/* Content */}
                 <div className="p-4 space-y-3">
-                  <h2 className="text-sm font-semibold text-slate-800 leading-6 line-clamp-2">
+                  <h2 className=" font-semibold text-slate-800 leading-6 line-clamp-2">
                     {c.title}
                   </h2>
 
-                  <p className="text-xs text-slate-500 leading-5 line-clamp-2">
+                  <p className=" text-slate-500 leading-5 line-clamp-2">
                     {c.description}
                   </p>
 
@@ -144,7 +144,7 @@ export default function Page() {
                     >
                       آموزش
                       {typeof c.learnCount === "number" && (
-                        <span className="mr-1 text-[11px] text-slate-400">
+                        <span className="mr-1 text-[14px] text-slate-400">
                           ({c.learnCount})
                         </span>
                       )}
@@ -152,12 +152,12 @@ export default function Page() {
 
                     <Link
                       href={c.examHref}
-                      className="h-9 rounded-xl bg-green-500 text-white text-xs font-semibold
+                      className="h-9 rounded-xl bg-green-700 text-white text-xs font-semibold
                                  flex items-center justify-center hover:bg-green-600 transition"
                     >
                       آزمون
                       {typeof c.examCount === "number" && (
-                        <span className="mr-1 text-[11px] text-white/80">
+                        <span className="mr-1 text-[14px] text-white/80">
                           ({c.examCount})
                         </span>
                       )}

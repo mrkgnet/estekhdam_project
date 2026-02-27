@@ -14,6 +14,35 @@ import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 
 export default function Navbar() {
+
+
+  const setSidebarOpen = useUiStore((s) => s.setSidebarOpen);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)"); // lg در Tailwind
+
+    // مقدار اولیه
+    setSidebarOpen(mq.matches);
+
+    // تغییر سایز
+    const onChange = (e: MediaQueryListEvent) => setSidebarOpen(e.matches);
+
+    // سازگاری مرورگرها
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else mq.addListener(onChange);
+
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else mq.removeListener(onChange);
+    };
+  }, [setSidebarOpen]);
+
+
+
+
+
+
+
   const cartCount = 1;
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -122,7 +151,7 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/dashboard"
+                href="/ddashboard"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 transition border-b border-slate-100"
                 role="menuitem"
