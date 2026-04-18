@@ -1,0 +1,126 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+// Pagination و FreeMode حذف شدند چون برای حالت زیرنویس کاربردی ندارند
+import { Autoplay } from "swiper/modules";
+
+import "swiper/css";
+
+const BANKS_DATA = [
+    { id: 1, name: "بانک ملی", logo: "/images/topSlider/بانک_ملی.png", href: "/banks/melli" },
+    { id: 2, name: "بانک ملت", logo: "/images/topSlider/بانک_ملت.png", href: "/banks/mellat" },
+    { id: 3, name: "بانک صادرات", logo: "/images/topSlider/بانک_صادرات.png", href: "/banks/saderat" },
+    { id: 4, name: "وزارت ارتباطات", logo: "/images/topSlider/وزارت_ارتباطات.png", href: "/banks/tejarat" },
+    { id: 5, name: "بانک سپه", logo: "/images/topSlider/بانک_سپه.png", href: "/banks/sepah" },
+    { id: 6, name: "آموزش و پرورش", logo: "/images/topSlider/آموزش و پرورش.jpg", href: "/banks/pasargad" },
+    { id: 7, name: "وزارت بهداشت ", logo: "/images/topSlider/meli2-bank.png", href: "/banks/saman" },
+    { id: 8, name: "بانک اقتصاد نوین", logo: "/images/topSlider/بانک_اقتصاد_نوین.png", href: "/banks/en" },
+    { id: 9, name: "بانک پارسیان", logo: "/images/topSlider/بانک_پارسیان.png", href: "/banks/parsian" },
+    { id: 10, name: "وزارت دفاع", logo: "/images/topSlider/وزارت_دفاع.png", href: "/banks/keshavarzi" },
+    { id: 11, name: "سازمان امور مالیاتی", logo: "/images/topSlider/سازمان_امور_مالیاتی.jpg", href: "/banks/maskan" },
+    { id: 12, name: "دانشگاه فرهنگیان", logo: "/images/topSlider/دانشگاه_فرهنگیان.png", href: "/banks/refah" },
+    { id: 13, name: "سازمان فنی حرفه ایی", logo: "/images/topSlider/سازمان_آموزش_فنی_حرفه_ایی.png", href: "/banks/refah" },
+    { id: 14, name: "بانک دی", logo: "/images/topSlider/بانک_دی.png", href: "/banks/refah" },
+    { id: 15, name: "بانک رفاه", logo: "/images/topSlider/بانک_رفاه.png", href: "/banks/refah" },
+    { id: 16, name: "وزارت دادگستری", logo: "/images/topSlider/وزارت_دادگستری.png", href: "/banks/refah" },
+];
+
+export default function BrandTopSlider({ title }: { title?: string }) {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <div className="relative overflow-hidden py-4">
+                {title && (
+                    <div className="flex items-center gap-2.5 mb-6 px-2">
+                        <div className="w-1.5 h-5 bg-green-500 rounded-full" aria-hidden="true"></div>
+                        <h2 className="text-lg md:text-xl font-bold text-slate-800">{title}</h2>
+                    </div>
+                )}
+
+                <div className="flex gap-4 px-2 pb-6 w-full overflow-hidden">
+                    {[...Array(10)].map((_, i) => (
+                        <div key={i} className="w-[75px] sm:w-[85px] md:w-[90px] shrink-0 flex flex-col items-center gap-3">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 animate-pulse rounded-full bg-slate-100/80 mx-auto"></div>
+                            <div className="w-14 h-2.5 animate-pulse rounded-full bg-slate-100 mx-auto mt-1"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white relative py-4 group/slider overflow-hidden rounded">
+            <style jsx>{`
+                /* ✨ این خط جادویی است که باعث می‌شود حرکت، نرم و یکنواخت (مثل زیرنویس) باشد */
+                :global(.brand-swiper .swiper-wrapper) {
+                    transition-timing-function: linear !important;
+                }
+            `}</style>
+
+            {title && (
+                <div className="flex items-center gap-2.5 mb-6 px-2">
+                    <div className="w-1.5 h-5 bg-green-500 rounded-full" aria-hidden="true"></div>
+                    <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">{title}</h2>
+                </div>
+            )}
+
+            {/* افکت محو شدگی در دو طرف اسلایدر برای زیبایی بیشتر حالت زیرنویس */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden md:block"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden md:block"></div>
+
+            <Swiper
+                modules={[Autoplay]}
+                loop={true}           // ۱. بی‌نهایت شدن حلقه
+                speed={3500}          // ۲. سرعت حرکت (هرچه بیشتر باشد، کندتر و نرم‌تر حرکت می‌کند)
+                autoplay={{
+                    delay: 0,         // ۳. توقف صفر بین اسلایدها
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: false, // ۴. برای حرکت پیوسته بهتر است با هاور موس متوقف نشود تا پرش نداشته باشد
+                }}
+                dir="rtl"
+                breakpoints={{
+                    0: { slidesPerView: 3.5, spaceBetween: 12 },
+                    480: { slidesPerView: 4.5, spaceBetween: 16 },
+                    768: { slidesPerView: 6.5, spaceBetween: 16 },
+                    1024: { slidesPerView: 9.5, spaceBetween: 24 },
+                }}
+                className="brand-swiper w-full px-2 py-4"
+            >
+                {BANKS_DATA.map((bank) => (
+                    <SwiperSlide key={bank.id} className="pt-2">
+                        <Link
+                            href={bank.href}
+                            className="group flex flex-col items-center justify-start gap-3 w-full h-full outline-none"
+                            title={bank.name}
+                        >
+                            {/* باکس لوگو */}
+                            <div className="w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] flex items-center justify-center p-3 relative rounded-full bg-white shadow-sm border border-slate-100/80 group-hover:border-green-100 group-hover:shadow-[0_8px_20px_-6px_rgba(22,163,74,0.3)] group-hover:ring-4 group-hover:ring-green-50 group-hover:-translate-y-1.5 transition-all duration-300 ease-out">
+                                <Image
+                                    src={bank.logo}
+                                    alt={`منابع آزمون استخدامی ${bank.name}`}
+                                    fill
+                                    className="object-contain p-3.5 group-hover:scale-110 transition-transform duration-300 ease-out mix-blend-multiply"
+                                    sizes="(max-width: 480px) 64px, (max-width: 768px) 76px, 84px"
+                                />
+                            </div>
+
+                            {/* متن */}
+                            <span className="text-xs md:text-sm font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
+                                {bank.name}
+                            </span>
+                        </Link>
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </div>
+    );
+}

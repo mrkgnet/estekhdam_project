@@ -18,117 +18,363 @@ enum Role {
   admin
 }
 
-enum DurationType {
-  instant
-  hours
-}
-
-type Spec {
-  label String
-  value String
-}
-
 enum OrderStatus {
   PENDING // در انتظار پرداخت
-  COMPLETED // پرداخت موفق
+  SUCCESS // پرداخت موفق / ثبت نام قطعی
   FAILED // پرداخت ناموفق
-  CANCELED // لغو شده
+}
+
+// اضافه کردن این Enum در فایل schema
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum NewsStatus {
+  OPEN
+  CARD_RECEIVED
+  RESULTS_ANNOUNCED
+  NEWS
+}
+
+// تعریف وضعیت‌های مختلف یک تیکت
+enum TicketStatus {
+  OPEN // باز (کاربر تازه ثبت کرده)
+  IN_PROGRESS // در حال بررسی
+  ANSWERED // پاسخ داده شده توسط ادمین
+  CLOSED // بسته شده
+}
+
+// تعریف اولویت‌های تیکت
+enum TicketPriority {
+  LOW // کم
+  MEDIUM // متوسط
+  HIGH // زیاد
+}
+
+enum NotificationType {
+  NEW_COMMENT
+  NEW_TICKET
+  NEW_CONTACT
+  NEW_ORDER
+}
+
+// نوع آزمون سراسری یا تالیفی 
+enum QuestionType {
+  SARASARI // سراسری
+  TALIFI // تالیفی
 }
 
 // ========= MODELS =========
 
 model User {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  phoneNumber String    @unique
-  username    String?
-  otpCode     String?
-  email       String?
-  orders      Order[]
-  otpExpires  DateTime?
-  userWallet  Int       @default(100000)
-  role        Role      @default(user)
-  isActive    Boolean   @default(true)
-  cart        Cart?
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber    String          @unique
+  username       String?
+  otpCode        String?
+  email          String?
+  otpExpires     DateTime?
+  refreshTokens  String[]        @default([])
+  // --- فیلدهای جدید برای پروفایل ---
+  firstName      String? // نام
+  lastName       String? // نام خانوادگی
+  nationalCode   String? // کد ملی (یونیک برای جلوگیری از چند اکانت با یک کد ملی)
+  avatar         String? // لینک عکس پروفایل
+  birthDate      DateTime? // تاریخ تولد
+  gender         Gender          @default(UNKNOWN) // جنسیت
+  role           Role            @default(user)
+  isActive       Boolean         @default(true)
+  // --- خط جدید اضافه شده ---
+  orders         Order[]
+  // comment
+  comments       Comment[]
+  // ticket
+  tickets        Ticket[]        @relation("UserTickets")
+  ticketMessages TicketMessage[] @relation("UserMessages")
 
-  refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  // --- خط جدید اضافه شده برای رابطه با Contact ---
+  contacts  Contact[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
-model RefreshToken {
-  id        String    @id @default(cuid())
-  tokenHash String    @unique
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  revokedAt DateTime?
+model GovernmentNews {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  slugNews     String      @unique
+  organization String
+  description  String?
+  imageUrl     String?
+  registerUrl  String?
+  price        Int?
+  maxAge       Int?
+  startAt      DateTime?
+  endAt        DateTime?
+  jobs         String[]
+  cities       String[]
+  isActive     Boolean     @default(true)
+  isMainSlider Boolean     @default(false)
+  status       NewsStatus? @default(NEWS)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // --- خطوط جدید برای ارتباط با محصولات ---
+  productIds String[]  @db.ObjectId
+  products   Product[] @relation(fields: [productIds], references: [id])
+  // ----------------------------------------
 
-  @@index([userId])
+  @@index([startAt])
+  @@index([endAt])
+}
+
+model MainSlider {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl    String // آدرس عکس (بهتر است الزامی باشد، علامت ? را برداشتم)
+  title       String? // عنوان (اختیاری)
+  description String? // توضیحات (اختیاری)
+  targetLink  String? // لینک مقصد هنگام کلیک روی اسلایدر (اختیاری)
+
+  order Int @default(0) // ترتیب نمایش اسلایدر (برای مرتب‌سازی)
+
+  isActive  Boolean  @default(true) // برای انتقال به تاریخچه کافیست این را false کنید
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id           String       @id @default(auto()) @map("_id") @db.ObjectId
-  title        String
-  slug         String       @unique
-  features     String[]
-  price        Int
-  durationType DurationType
-  duration     String
-  hours        Int?
-  description  String?
-  images       String[]
-  specs        Spec[]
-  badge        String? // مثلا "پرفروش"
-  rating       Float?
-  reviewsCount Int?
-  likesCount   Int?
-  viewsCount   Int?
-  orderItems   OrderItem[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  cartItems    CartItem[]
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  oldPrice    Int?
+  newPrice    Int?
+  description String?
+  imageUrl    String?
+  features    String[]
+  // 🟢 فقط آیدی دسته‌بندی‌ها را اینجا نگه می‌داریم
+  categoryIds String[] @db.ObjectId
+  // روابط یک‌به‌چند (بدون مشکل حافظه)
+  questions Question[]
+  comments  Comment[]
+  orders    Order[]
+  chapters  Chapter[]
+  // --- ارتباط با اخبار ---
+  newsIds        String[]         @db.ObjectId
+  governmentNews GovernmentNews[] @relation(fields: [newsIds], references: [id])
+  // ---------------------------------------
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 🟢 ایندکس برای جستجوی سریع محصولاتی که در یک دسته خاص هستند
+  @@index([categoryIds])
+}
+model Category {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  catName  String  @unique
+  catSlug  String  @unique
+  imageUrl String?
+  // --- فیلدهای مربوط به سلسله مراتب (Hierarchy) ---
+  parentId String?    @db.ObjectId
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryToCategory")
+  // -------------------------------------------
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
+  // 🟢 ایندکس برای افزایش سرعت لود زیرمنوها
+  @@index([parentId])
 }
 
-model Cart {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String     @unique // هر کاربر فقط یک سبد خرید دارد
-  user      User       @relation(fields: [userId], references: [id])
-  items     CartItem[] // لیستی از آیتم‌های داخل این سبد
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
+model Chapter {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  title String // عنوان سرفصل (مثلاً: فصل اول - ریاضیات پایه)
+  order Int? // برای مرتب‌سازی سرفصل‌ها (۱، ۲، ۳...)
 
-model CartItem {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  quantity  Int     @default(1) // تعداد محصول
+  // 👇 ارتباط با محصول (Product) 👇
   productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
-  cartId    String  @db.ObjectId
-  cart      Cart    @relation(fields: [cartId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([cartId, productId]) // جلوگیری از ثبت محصول تکراری در یک سبد (به جای آن تعدادش زیاد می‌شود)
+  // 👇 این خط اضافه شد: ارتباط سرفصل با سوالات (یک‌به‌چند) 👇
+  questions Question[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Question {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // --- فیلدهای اصلی که شما خواستید ---
+  questionText  String // صورت سوال
+  options       String[] // آرایه‌ای از گزینه‌ها (به جای ۴ فیلد مجزا، در مونگو دی‌بی آرایه بهتر است)
+  correctAnswer Int // ایندکس گزینه صحیح (مثلا 0 یعنی گزینه اول، 1 یعنی گزینه دوم و ...)
+  answerText    String? // توضیحات گزینه صحیح (چون ممکن است بعضی سوالات توضیح نخواهند، علامت ? گذاشتم تا اختیاری باشد)
+  questionType  QuestionType @default(TALIFI)
+
+  // --- فیلدهای پیشنهادی برای مدیریت بهتر ---
+  isActive Boolean @default(true) // برای فعال/غیرفعال کردن موقت سوال
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // 👇 ارتباط مستقیم با سرفصل (Chapter) اضافه شد 👇
+  chapterId String?  @db.ObjectId
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([chapterId])
+  @@index([questionType])
+}
+
+model Comment {
+  // ساختار آیدی مخصوص مانگو دی‌بی
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  textComment String // متن کامنت
+  status      String  @default("APPROVED")
+  isRead      Boolean @default(false)
+
+  // رابطه با کاربری که کامنت را گذاشته
+  userId String? @db.ObjectId // اضافه شدن ObjectId
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // رابطه با محصولی که کامنت برای آن ثبت شده
+  productId String?  @db.ObjectId // اضافه شدن ObjectId
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // =========================================
+  // --- فیلدهای جدید برای قابلیت پاسخ (Reply) ---
+  // =========================================
+  parentId String?   @db.ObjectId
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies  Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+}
+
+
+
+
+model MenuClient {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  name      String  @unique
+  slug      String  @unique
+  imageUrl  String?
+  // 🟢 فیلد جدید برای لینک سفارشی
+  customUrl String?
+  order     Int     @default(0)
+
+  // --- فیلدهای مربوط به سلسله مراتب (Hierarchy) ---
+  parentId String?      @db.ObjectId
+  parent   MenuClient?  @relation("MenuToMenu", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children MenuClient[] @relation("MenuToMenu")
+  // -------------------------------------------
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Order {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String      @db.ObjectId
-  user       User        @relation(fields: [userId], references: [id])
-  items      OrderItem[]
-  totalPrice Int
-  adminNote  String?
-  status     OrderStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // کاربری که خرید کرده
+  userId String? @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // محصولی که خریداری شده
+  productId String   @db.ObjectId
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // اطلاعات مالی تراکنش
+  pricePaid Int // مبلغی که کاربر در لحظه خرید پرداخت کرده
+  status    OrderStatus @default(PENDING) // وضعیت سفارش
+
+  // با داشتن @unique، این فیلدها به صورت خودکار ایندکس هم می‌شوند
+  refId     String? @unique // شماره پیگیری درگاه پرداخت بانکی (کد رهگیری)
+  authority String? @unique // توکن درگاه بانکی
+
+  // --- فیلدهای جدید برای کنترل دسترسی ---
+  expiresAt DateTime? // تاریخ پایان دسترسی (اگر null باشد یعنی دسترسی دائمی است)
+  isActive  Boolean   @default(true) // وضعیت فعال بودن سفارش (برای کنترل دستی توسط ادمین)
+  // ------------------------------------
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // خط @@index([authority]) از اینجا حذف شد چون به خاطر @unique خودش ایندکس دارد
+
+  // ایندکس‌ها برای سرعت بخشیدن به جستجوها
+  @@index([userId])
+  @@index([productId])
+
 }
 
-model OrderItem {
-  id                    String  @id @default(auto()) @map("_id") @db.ObjectId
-  orderId               String  @db.ObjectId
-  order                 Order   @relation(fields: [orderId], references: [id])
-  productId             String  @db.ObjectId
-  product               Product @relation(fields: [productId], references: [id])
-  quantity              Int
-  priceAtTimeOfPurchase Int // ✨ مهم: قیمت محصول در لحظه خرید را ذخیره می‌کنیم
+model Ticket {
+  // ۱. آیدی در مونگو باید به این شکل باشد
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  subject  String // عنوان تیکت
+  status   TicketStatus   @default(OPEN)
+  priority TicketPriority @default(MEDIUM)
+
+  // ۲. کلید خارجی باید حتما نوع ObjectId داشته باشد تا با آیدی User مچ شود
+  userId String? @db.ObjectId
+  user   User?   @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
+
+  messages TicketMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TicketMessage {
+  // ۱. آیدی مخصوص مونگو
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // ۲. حذف db.Text@ (در مونگو استرینگ به صورت پیش‌فرض محدودیت طول ندارد)
+  text String
+
+  // ۳. کلید خارجی تیکت از نوع ObjectId
+  ticketId String @db.ObjectId
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // ۴. کلید خارجی کاربر از نوع ObjectId
+  userId String @db.ObjectId
+  user   User   @relation("UserMessages", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  title   String
+  message String
+
+  // فیلد اختیاری: برای اینکه در پنل ادمین مشخص کنید پیام خوانده شده است یا خیر
+  isRead    Boolean  @default(false)
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id      String           @id @default(auto()) @map("_id") @db.ObjectId
+  type    NotificationType // نوع اعلان (کامنت، تیکت و ...)
+  message String // متن کوتاه برای نمایش به ادمین (مثلا: کامنت جدید از علی)
+
+  // این فیلد آیدیِ کامنت، تیکت یا سفارش مربوطه را در خود نگه می‌دارد
+  // چون ممکن است آیدی هر جدولی باشد، به آن relation ندادیم و فقط String خام است
+  referenceId String
+
+  isRead Boolean @default(false) // خوانده شده یا خیر؟
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // برای اینکه در پنل ادمین سریع‌تر بتوانیم خوانده‌نشده‌ها را پیدا کنیم
+  @@index([isRead])
 }

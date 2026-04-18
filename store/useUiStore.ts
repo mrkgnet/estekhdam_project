@@ -10,7 +10,7 @@ type UiState = {
 };
 
 export const useUiStore = create<UiState>((set) => ({
-  isSidebarOpen: true, // مقدار اولیه مهم نیست، پایین با useEffect اصلاح می‌کنیم
+  isSidebarOpen: false, // مقدار اولیه مهم نیست، پایین با useEffect اصلاح می‌کنیم
   setSidebarOpen: (open) => set({ isSidebarOpen: open }),
   openSidebar: () => set({ isSidebarOpen: true }),
   closeSidebar: () => set({ isSidebarOpen: false }),

@@ -1,11 +1,14 @@
 // app/dashboard/page.tsx
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import KpiGrid from "@/components/dashboard/KpiGrid";
-import QuickActions from "@/components/dashboard/QuickActions";
-import RecentOrders from "@/components/dashboard/RecentOrders";
-import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import MyCourses from "@/components/dashboard/MyCourses";
-import ProfileCompletion from "@/components/dashboard/ProfileCompletion";
+import DashboardHeader from "@/components/user/dashboard/header/DashboardHeader";
+
+import QuickActions from "@/components/user/dashboard/QuickActions";
+
+import ActivityFeed from "@/components/user/dashboard/ActivityFeed";
+
+import ProfileCompletion from "@/components/user/dashboard/ProfileCompletion";
+import KpiGrid from "@/components/user/dashboard/kpicard/page";
+import MyCourses from "@/components/user/dashboard/mycourse/page";
+import RecentOrders from "@/components/user/dashboard/recentorder/page";
 
 export default function DashboardPage() {
   return (
@@ -25,7 +28,7 @@ export default function DashboardPage() {
           <aside className="lg:col-span-4 space-y-5">
             <ProfileCompletion />
             <QuickActions />
-            <ActivityFeed />
+         
           </aside>
         </div>
       </div>

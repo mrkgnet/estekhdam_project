@@ -151,11 +151,13 @@
 
 .swiper-pagination-progressbar {
   height: 3px !important;
-  background: #e2e8f0 !important; /* slate-200 */
+  background: #e2e8f0 !important;
+  /* slate-200 */
 }
 
 .swiper-pagination-progressbar-fill {
-  background: #0f172a !important; /* slate-900 */
+  background: #0f172a !important;
+  /* slate-900 */
 }
 
 /* Swiper dots */
@@ -164,7 +166,8 @@
 }
 
 .swiper-pagination-bullet {
-  background: #cbd5e1 !important; /* slate-300 */
+  background: #cbd5e1 !important;
+  /* slate-300 */
   opacity: 1 !important;
   width: 7px !important;
   height: 7px !important;
@@ -172,7 +175,12 @@
 }
 
 .swiper-pagination-bullet-active {
-  background: #16a34a !important; /* green-600 */
+  background: #16a34a !important;
+  /* green-600 */
   width: 18px !important;
   border-radius: 999px !important;
+}
+
+button {
+  cursor: pointer;
 }

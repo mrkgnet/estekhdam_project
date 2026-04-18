@@ -4,16 +4,18 @@ import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
-import SideBar from "@/components/Sidebar";
+import SideBar from "@/components/user/Sidebar";
+
+
 
 
 const iransans = localFont({
   src: [
     {
-      path: "./fonts/IRANSansWeb_Medium.ttf",
+      path: "./fonts/IRANSansWeb_FaNum.ttf",
       weight: "500",
       style: "normal",
     },
@@ -40,8 +42,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} bg-slate-50 text-slate-900`}>
-        <NextTopLoader color="#ef4444" height={3} showSpinner={false} />
+      <body className={`${iransans.className} bg-white text-slate-900`} suppressHydrationWarning>
+
+
+        <NextTopLoader color="#ef4444" height={2} showSpinner={false} />
 
         <AuthProvider>
           <Toaster
@@ -53,13 +57,8 @@ export default function RootLayout({
 
           {/* صفحه */}
           <div className="min-h-screen flex flex-col">
-            <Navbar />
-
-            <div className="">
-             
-              <main className=" ">{children}</main>
-            </div>
-
+           
+            <main className="  ">{children}</main>
             <Footer />
           </div>
         </AuthProvider>

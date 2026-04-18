@@ -2,28 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { ChevronUp, Search, X } from "lucide-react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
-// ✅ قبلاً فقط type بود، الان export شد تا جاهای دیگه هم استفاده کنن
 export type StatusKey =
-  | "REGISTERING"
-  | "WAITING_CARD"
+  | "OPEN"
   | "CARD_RECEIVED"
-  | "WAITING_RESULTS"
   | "RESULTS_ANNOUNCED"
   | "NEWS";
 
-export type FiltersValue = {
-  regions: string[];
-  statuses: StatusKey[];
-};
-
 const STATUS_OPTIONS: { key: StatusKey; label: string }[] = [
-  { key: "REGISTERING", label: "ثبت نام" },
-  { key: "WAITING_CARD", label: "در انتظار دریافت کارت" },
+  { key: "OPEN", label: "ثبت نام" },
   { key: "CARD_RECEIVED", label: "دریافت کارت" },
-  { key: "WAITING_RESULTS", label: "در انتظار نتایج" },
   { key: "RESULTS_ANNOUNCED", label: "اعلام نتایج" },
-  { key: "NEWS", label: "اطلاعاتیه و خبر" },
+  { key: "NEWS", label: "اطلاعیه و خبر" },
 ];
 
 const REGIONS = [
@@ -39,17 +30,20 @@ const REGIONS = [
   "کرمان",
 ];
 
+// تابع کمکی برای اضافه یا حذف کردن یک آیتم از آرایه
 function toggleInArray<T>(arr: T[], value: T) {
   return arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value];
 }
 
-export default function FiltersSidebar({
-  value,
-  onChange,
-}: {
-  value: FiltersValue;
-  onChange: (next: FiltersValue) => void;
-}) {
+export default function FiltersSidebar() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // خواندن مقادیر فعلی از URL
+  const activeRegions = searchParams.get("regions")?.split(",").filter(Boolean) || [];
+  const activeStatuses = searchParams.get("statuses")?.split(",").filter(Boolean) || [];
+
   const [regionOpen, setRegionOpen] = useState(true);
   const [statusOpen, setStatusOpen] = useState(true);
   const [regionQuery, setRegionQuery] = useState("");
@@ -60,23 +54,39 @@ export default function FiltersSidebar({
     return REGIONS.filter((r) => r.toLowerCase().includes(q));
   }, [regionQuery]);
 
-  const clearRegions = () => onChange({ ...value, regions: [] });
-  const clearStatuses = () => onChange({ ...value, statuses: [] });
+  // منطق اصلی: آپدیت کردن URL
+  const updateUrl = (key: string, values: string[]) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (values.length > 0) {
+      params.set(key, values.join(","));
+    } else {
+      params.delete(key);
+    }
+
+    // scroll: false باعث میشه با کلیک روی فیلتر، صفحه به بالا پرش نکند
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const clearAll = () => {
+    router.push(pathname, { scroll: false });
+  };
 
   return (
-    <aside className="w-full rounded-2xl border border-slate-100 bg-white p-4">
+    <aside className="w-full rounded border border-slate-100 bg-white p-4 text-xs md:text-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-extrabold text-slate-800">فیلترها</p>
-
-        <button
-          type="button"
-          onClick={() => onChange({ regions: [], statuses: [] })}
-          className="text-xs font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1"
-        >
-          <X className="w-4 h-4" />
-          پاک کردن همه
-        </button>
+        <p className=" font-extrabold text-slate-800">فیلترها</p>
+        {(activeRegions.length > 0 || activeStatuses.length > 0) && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className=" font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1"
+          >
+            <X className="w-4 h-4" />
+            پاک کردن همه
+          </button>
+        )}
       </div>
 
       {/* Region Section */}
@@ -87,61 +97,44 @@ export default function FiltersSidebar({
           className="w-full flex items-center justify-between p-4"
         >
           <span className="font-extrabold text-slate-800">منطقه جستجو</span>
-          <ChevronUp
-            className={`w-5 h-5 text-slate-500 transition ${
-              regionOpen ? "" : "rotate-180"
-            }`}
-          />
+          <ChevronUp className={`w-5 h-5 text-slate-500 transition ${regionOpen ? "" : "rotate-180"}`} />
         </button>
 
         {regionOpen && (
           <div className="px-4 pb-4">
-            {/* Search */}
             <div className="relative mb-3">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 value={regionQuery}
                 onChange={(e) => setRegionQuery(e.target.value)}
                 placeholder="جستجو"
-                className="w-full h-11 pr-10 pl-3 rounded-xl border border-slate-200 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full h-11 pr-10 pl-3 rounded-xl border border-slate-200  focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
 
-            {/* Selected meta */}
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">انتخاب کنید</span>
-              {value.regions.length > 0 && (
+              <span className=" text-slate-500">انتخاب کنید</span>
+              {activeRegions.length > 0 && (
                 <button
                   type="button"
-                  onClick={clearRegions}
-                  className="text-xs font-semibold text-green-600 hover:text-green-700"
+                  onClick={() => updateUrl("regions", [])}
+                  className=" font-semibold text-green-600 hover:text-green-700"
                 >
                   پاک کردن
                 </button>
               )}
             </div>
 
-            {/* List */}
             <div className="max-h-56 overflow-y-auto pr-1 space-y-2">
               {filteredRegions.map((r) => {
-                const checked = value.regions.includes(r);
+                const checked = activeRegions.includes(r);
                 return (
-                  <label
-                    key={r}
-                    className="flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer"
-                  >
-                    <span className="text-sm text-slate-700">{r}</span>
-
+                  <label key={r} className="flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
+                    <span className=" text-slate-700">{r}</span>
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() =>
-                        onChange({
-                          ...value,
-                          regions: toggleInArray(value.regions, r),
-                        })
-                      }
+                      onChange={() => updateUrl("regions", toggleInArray(activeRegions, r))}
                       className="w-5 h-5 accent-green-600"
                     />
                   </label>
@@ -160,22 +153,18 @@ export default function FiltersSidebar({
           className="w-full flex items-center justify-between p-4"
         >
           <span className="font-extrabold text-slate-800">وضعیت</span>
-          <ChevronUp
-            className={`w-5 h-5 text-slate-500 transition ${
-              statusOpen ? "" : "rotate-180"
-            }`}
-          />
+          <ChevronUp className={`w-5 h-5 text-slate-500 transition ${statusOpen ? "" : "rotate-180"}`} />
         </button>
 
         {statusOpen && (
           <div className="px-4 pb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">انتخاب کنید</span>
-              {value.statuses.length > 0 && (
+              <span className=" text-slate-500">انتخاب کنید</span>
+              {activeStatuses.length > 0 && (
                 <button
                   type="button"
-                  onClick={clearStatuses}
-                  className="text-xs font-semibold text-green-600 hover:text-green-700"
+                  onClick={() => updateUrl("statuses", [])}
+                  className=" font-semibold text-green-600 hover:text-green-700"
                 >
                   پاک کردن
                 </button>
@@ -184,23 +173,14 @@ export default function FiltersSidebar({
 
             <div className="space-y-2">
               {STATUS_OPTIONS.map((s) => {
-                const checked = value.statuses.includes(s.key);
+                const checked = activeStatuses.includes(s.key);
                 return (
-                  <label
-                    key={s.key}
-                    className="flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer"
-                  >
-                    <span className="text-sm text-slate-700">{s.label}</span>
-
+                  <label key={s.key} className="flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer">
+                    <span className=" text-slate-700">{s.label}</span>
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() =>
-                        onChange({
-                          ...value,
-                          statuses: toggleInArray(value.statuses, s.key),
-                        })
-                      }
+                      onChange={() => updateUrl("statuses", toggleInArray(activeStatuses, s.key))}
                       className="w-5 h-5 accent-green-600"
                     />
                   </label>
