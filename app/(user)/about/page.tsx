@@ -1,198 +1,99 @@
-import Link from "next/link";
+import React from 'react';
 
-export default function AboutPage() {
+export default function AboutUs() {
   return (
-    <main dir="rtl" className="min-h-screen bg-white text-zinc-900">
-      {/* subtle background glow */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-40 right-[-120px] h-[420px] w-[420px] rounded-full bg-red-500/10 blur-3xl" />
-        <div className="absolute top-40 left-[-140px] h-[420px] w-[420px] rounded-full bg-fuchsia-500/10 blur-3xl" />
-        <div className="absolute bottom-[-200px] right-[30%] h-[420px] w-[420px] rounded-full bg-amber-400/10 blur-3xl" />
-      </div>
-
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-10 pb-7">
-        <div className="rounded-[28px] border border-zinc-200 bg-white p-8 shadow-sm sm:p-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs text-zinc-700">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            درباره «بازارِ هوش»
-          </div>
-
-          <h1 className="mt-6 text-3xl font-bold leading-tight sm:text-5xl">
-            اینجا{" "}
-            <span className="bg-gradient-to-l from-red-500 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
-              بازارِ هوش
-            </span>{" "}
-            است
+    <div className="min-h-screen bg-gray-50 py-16 px-4 sm:px-6 lg:px-8 font-sans" dir="rtl">
+      <div className="max-w-5xl mx-auto space-y-16">
+        
+        {/* هدر و معرفی اولیه */}
+        <header className="text-center space-y-6">
+          <h1 className="font-bold text-gray-900">
+            درباره <span className="text-blue-600">سایت ما</span>
           </h1>
-
-          <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-600">
-            جایی که ابزارهای هوشمند، فقط یک اشتراک دیجیتال نیستند…
-            <br />
-            <span className="font-semibold text-zinc-900">
-              کلیدهایی‌اند برای باز کردن درهای آینده.
-            </span>
+          <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            مرجع تخصصی و جامع منابع آزمون‌های استخدامی. ما اینجا هستیم تا مسیر موفقیت در آزمون‌های استخدامی را با ارائه بهترین منابع مطالعاتی برای شما هموارتر کنیم.
           </p>
+        </header>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <FeatureCard
-              color="red"
-              title="روشن و صریح"
-              desc="نامی ساده، مدرن و قابل‌فهم."
-            />
-            <FeatureCard
-              color="fuchsia"
-              title="اقتصادی و قابل‌اعتماد"
-              desc="گزینه‌هایی مناسب برای هر بودجه."
-            />
-            <FeatureCard
-              color="amber"
-              title="سریع و بی‌دردسر"
-              desc="دسترسی آسان به ابزارهای آینده."
-            />
-          </div>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/products"
-              className="rounded-2xl bg-red-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
-            >
-              مشاهده محصولات
-            </Link>
-            {/* <a
-              href="/contact"
-              className="rounded-2xl border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
-            >
-              تماس با ما
-            </a> */}
-          </div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="mx-auto max-w-6xl px-4 pb-16">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div className="space-y-6 text-base leading-8 text-zinc-600">
-            <p>
-              ما این نام را انتخاب کردیم چون روشن، صریح و مدرن است.
-            </p>
-
-            <p>
-              «بازارِ هوش» یعنی یک فضای واقعی برای داد و ستد ابزارهایی که زندگی،
-              درس و کارتان را متحول می‌کنند؛ یعنی جایی که واقعاً می‌توان هوشمندی
-              را خرید، تجربه کرد و وارد زندگی روزمره کرد؛ از درس و پژوهش گرفته تا
-              تولید محتوا و کار حرفه‌ای.
-            </p>
-          </div>
-
-          <div className="space-y-6 text-base leading-8 text-zinc-600">
-            <p>
-              در «بازارِ هوش»، ما آفرهای اقتصادی و مقرون‌به‌صرفه‌ای ارائه می‌کنیم؛
-              گزینه‌هایی که برای هر بودجه و هر نیاز، یک انتخاب مناسب و قابل‌اعتماد
-              دارند.
-            </p>
-
-            <p>
-              اینجا شما می‌توانید با هزینه‌ای منطقی، به ابزارهایی دسترسی پیدا کنید
-              که چند قدم شما را از بقیه جلوتر می‌برند.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Audience Section */}
-      <section className="mx-auto max-w-6xl px-4 pb-16">
-        <div className="grid gap-4 md:grid-cols-3">
-          <AudienceCard
-            color="red"
-            title="برای دانشجوها"
-            desc="ابزار درست برای درس و پروژه‌ها."
-          />
-          <AudienceCard
-            color="fuchsia"
-            title="برای پژوهشگرها"
-            desc="دسترسی سریع به امکانات حرفه‌ای."
-          />
-          <AudienceCard
-            color="amber"
-            title="برای تولیدکننده‌ها"
-            desc="چند قدم جلوتر از جهان حرکت کن."
-          />
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="rounded-[28px] border border-zinc-200 bg-gradient-to-l from-red-50 via-fuchsia-50 to-amber-50 p-10 text-center">
-          <h2 className="text-2xl font-bold">
-            خرید آسانِ تکنولوژی فردا.
-          </h2>
-          <p className="mt-3 text-zinc-600">
-            آماده‌ای چند قدم جلوتر حرکت کنی؟
+        {/* بخش ماموریت ما */}
+        <section className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100">
+          <h2 className="font-semibold text-gray-900 mb-4">ماموریت ما</h2>
+          <p className="text-gray-600 leading-relaxed">
+            ماموریت ما، برقراری عدالت آموزشی و دسترسی آسان و سریع همه کارجویان سراسر کشور به بهترین منابع مطالعاتی است. ما بر این باوریم که با تلاش مستمر و در اختیار داشتن منابع استاندارد، موفقیت در هر آزمونی دست‌یافتنی است. هدف ما بی‌نیاز کردن شما از سردرگمی میان ده‌ها منبع مختلف است.
           </p>
+        </section>
 
-          <a
-            href="/products"
-            className="mt-6 inline-block rounded-2xl bg-gradient-to-l from-red-500 via-fuchsia-500 to-amber-500 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-          >
-            شروع خرید
-          </a>
-        </div>
-      </section>
-    </main>
-  );
-}
+        {/* بخش ویژگی‌ها و خدمات (گرید) */}
+        <section className="space-y-8">
+          <h2 className="font-semibold text-gray-900 text-center">خدمات و ویژگی‌های ما</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* کارت 1 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">بانک جامع نمونه سوالات</h3>
+              <p className="text-gray-600 leading-relaxed">
+                گردآوری و طبقه‌بندی دقیق نمونه سوالات عمومی و تخصصی سال‌های گذشته به همراه پاسخنامه‌های کاملاً تشریحی.
+              </p>
+            </div>
 
-/* Components */
+            {/* کارت 2 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">جزوات هدفمند</h3>
+              <p className="text-gray-600 leading-relaxed">
+                ارائه خلاصه‌دروس و جزواتی که دقیقاً منطبق بر سرفصل‌های اعلام‌شده آزمون‌های استخدامی ارگان‌ها تهیه شده‌اند.
+              </p>
+            </div>
 
-function FeatureCard({
-  title,
-  desc,
-  color,
-}: {
-  title: string;
-  desc: string;
-  color: "red" | "fuchsia" | "amber";
-}) {
-  const border =
-    color === "red"
-      ? "hover:border-red-300"
-      : color === "fuchsia"
-      ? "hover:border-fuchsia-300"
-      : "hover:border-amber-300";
+            {/* کارت 3 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">اخبار و اطلاعیه‌ها</h3>
+              <p className="text-gray-600 leading-relaxed">
+                پوشش لحظه‌ای و دقیق اخبار ثبت‌نام، دریافت کارت، برگزاری آزمون و اعلام نتایج برای اینکه هیچ فرصتی را از دست ندهید.
+              </p>
+            </div>
 
-  return (
-    <div className={`rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition ${border}`}>
-      <div className="text-sm font-semibold">{title}</div>
-      <div className="mt-2 text-sm text-zinc-600 leading-7">{desc}</div>
-    </div>
-  );
-}
+            {/* کارت 4 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">صرفه‌جویی در زمان</h3>
+              <p className="text-gray-600 leading-relaxed">
+                ارائه پکیج‌های کامل و جامع که داوطلب را از سردرگمی میان ده‌ها منبع مختلف بی‌نیاز می‌کند و زمان مطالعه را بهینه می‌سازد.
+              </p>
+            </div>
 
-function AudienceCard({
-  title,
-  desc,
-  color,
-}: {
-  title: string;
-  desc: string;
-  color: "red" | "fuchsia" | "amber";
-}) {
-  const dot =
-    color === "red"
-      ? "bg-red-500"
-      : color === "fuchsia"
-      ? "bg-fuchsia-500"
-      : "bg-amber-500";
+          </div>
+        </section>
 
-  return (
-    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:shadow-md">
-      <div className="flex items-start gap-3">
-        <span className={`mt-2 h-2 w-2 rounded-full ${dot}`} />
-        <div>
-          <div className="font-semibold">{title}</div>
-          <div className="mt-2 text-sm text-zinc-600 leading-7">{desc}</div>
-        </div>
+        {/* بخش تماس با ما (CTA) */}
+        <section className="bg-blue-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-lg">
+          <h2 className="font-bold mb-4">همراه شما تا روز آزمون</h2>
+          <p className="text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+            ما تنها یک وب‌سایت فروش منابع نیستیم؛ بلکه پشتیبان شما از لحظه تصمیم‌گیری تا روز آزمون هستیم. برای راهنمایی بیشتر با ما در ارتباط باشید.
+          </p>
+          <button className="bg-white text-blue-600 font-semibold py-3 px-8 rounded-full hover:bg-gray-50 transition-colors duration-200 shadow-sm">
+            تماس با پشتیبانی
+          </button>
+        </section>
+
       </div>
     </div>
   );

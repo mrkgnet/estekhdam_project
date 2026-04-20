@@ -122,32 +122,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-
-/* 
-@font-face {
-  font-family: IransSans;
-  src: url("../fonts/IRANSansWeb_Medium.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-
-
-  font-family: IransSans;
-  font-size: 10pt !important ;
-  
-} */
-
-
 
 .swiper-pagination-progressbar {
   height: 3px !important;
@@ -183,4 +157,104 @@
 
 button {
   cursor: pointer;
+}
+
+
+/* ====== الگوی استاندارد برای کلاس‌های سفارشی ====== */
+.text-bread {
+  font-size: 11px;
+}
+
+.text-bodyh1 {
+  font-size: 16px;
+  font-weight: bold;
+
+}
+
+.text-bodyh {
+  font-size: 14px;
+
+}
+
+
+.text-bodyall {
+  font-size: 12px;
+}
+
+/* تبلت‌های کوچک (sm) */
+@media (min-width: 640px) {
+  .text-bread {
+    font-size: 13px;
+  }
+
+  .text-bodyall {
+    font-size: 14px;
+  }
+
+
+
+  .text-bodyh1 {
+    font-size: 18px;
+   
+  }
+
+
+  .text-bodyp {
+    font-size: 13px;
+  }
+
+  .text-bodylabel {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .text-bodyinput {
+    font-size: 13px;
+  }
+
+
+
+  .text-bodytexterea {
+    font-size: 13px;
+  }
+
+
+  .text-bodybutton {
+    font-size: 13px;
+  }
+
+  .text-bodyh {
+    font-size: 16px;
+ 
+  }
+
+  .text-bodylink {
+    font-size: 13px;
+
+  }
+
+  .text-bodycomment {
+    font-size: 13px;
+  }
+}
+
+/* تبلت‌های بزرگ و لپ‌تاپ‌های کوچک (md) */
+@media (min-width: 768px) {
+  .text-bread {
+    font-size: 13px;
+  }
+
+  .text-bodycomment {
+    font-size: 13px;
+  }
+
+}
+
+@media (min-width: 1024px) {
+  .text-bodyall {
+    font-size: 13px;
+  }
+ .text-bread {
+    font-size: 12px;
+  }
 }

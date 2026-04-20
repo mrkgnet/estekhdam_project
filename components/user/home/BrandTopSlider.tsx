@@ -37,11 +37,11 @@ export default function BrandTopSlider({ title }: { title?: string }) {
 
     if (!isMounted) {
         return (
-            <div className="relative overflow-hidden py-4">
+            <div className="relative overflow-hidden py-4  ">
                 {title && (
                     <div className="flex items-center gap-2.5 mb-6 px-2">
                         <div className="w-1.5 h-5 bg-green-500 rounded-full" aria-hidden="true"></div>
-                        <h2 className="text-lg md:text-xl font-bold text-slate-800">{title}</h2>
+                        <h2 className=" font-bold text-slate-800">{title}</h2>
                     </div>
                 )}
 
@@ -58,7 +58,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
     }
 
     return (
-        <div className="bg-white relative py-4 group/slider overflow-hidden rounded">
+        <div className="bg-white relative py-4 group/slider overflow-hidden rounded text-bodyall  ">
             <style jsx>{`
                 /* ✨ این خط جادویی است که باعث می‌شود حرکت، نرم و یکنواخت (مثل زیرنویس) باشد */
                 :global(.brand-swiper .swiper-wrapper) {
@@ -69,7 +69,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
             {title && (
                 <div className="flex items-center gap-2.5 mb-6 px-2">
                     <div className="w-1.5 h-5 bg-green-500 rounded-full" aria-hidden="true"></div>
-                    <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">{title}</h2>
+                    <h2 className=" font-bold text-slate-800 tracking-tight">{title}</h2>
                 </div>
             )}
 
@@ -114,7 +114,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
                             </div>
 
                             {/* متن */}
-                            <span className="text-xs md:text-sm font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
+                            <span className=" font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
                                 {bank.name}
                             </span>
                         </Link>

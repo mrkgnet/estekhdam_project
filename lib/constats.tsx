@@ -81,6 +81,8 @@ export const tabsDataAdminPanel = [
     url: "/adminp/support/tickets",
   },
 
+
+
   {
     id: "9",
     title: "مدیریت فرم تماس با ما ",
@@ -93,110 +95,16 @@ export const tabsDataAdminPanel = [
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/notifications",
   },
+
+    {
+    id: "12",
+    title: "مدیریت خطاهای سوال ",
+    icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
+    url: "/adminp/question-issu",
+  },
 ];
 
 
-export const tabsDataUserPanel = [
-
-  {
-    id: "2",
-    title: "جدید ترین استخدامی ها",
-    icon: Briefcase, // آیکون کاربر برای حساب‌های کاربری
-    url: "/jobnews/government",
-    subItems: [
-      {
-        id: 21,
-        title: 'استخدامی دستگاه های دولتی',
-        url: "/jobnews/government"
-      },
-    ]
-  },
-  {
-    id: "3",
-    title: "منابع استخدامی",
-    icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
-    url: "/resources",
-    subItems: [
-      {
-        id: 31,
-        title: 'منابع استخدامی بانک ها',
-        url: '/category/بانک-ها'
-      },
-      {
-        id: 32,
-        title: ' آموزش و پرورش',
-        url: '/category/وزارت-آموزش-و-پرورش'
-      },
-      {
-        id: 33,
-        title: 'وزارت بهداشت',
-        url: '/category/وزارت-بهداشت'
-      },
-
-      {
-        id: 34,
-        title: 'نفت و پتروشیمی',
-        url: '/category/وزارت-نفت-و-پتروشیمی'
-      },
-
-      {
-        id: 35,
-        title: 'نیروهای مسلح',
-        url: '/category/نیروهای-مسلح'
-      },
-      {
-        id: 36,
-        title: 'قوه قضاییه',
-        url: '/category/قوه-قضاییه'
-      },
-
-
-    ]
-  },
-
-  {
-    id: "4",
-    title: "دفترچه های استخدامی",
-    icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
-    url: "/resources",
-    subItems: [
-      {
-        id: 41,
-        title: 'دفترچه استخدامی بانک ها',
-        url: '/category/دفترچه-آزمون-بانک-ها'
-      },
-      {
-        id: 42,
-        title: ' آموزش و پرورش',
-        url: '/category/وزارت-آموزش-و-پرورش'
-      },
-      {
-        id: 43,
-        title: 'وزارت بهداشت',
-        url: '/category/وزارت-بهداشت'
-      },
-
-      {
-        id: 44,
-        title: 'نفت و پتروشیمی',
-        url: '/category/وزارت-نفت-و-پتروشیمی'
-      },
-
-      {
-        id: 45,
-        title: 'نیروهای مسلح',
-        url: '/category/نیروهای-مسلح'
-      },
-      {
-        id: 46,
-        title: 'قوه قضاییه',
-        url: '/category/قوه-قضاییه'
-      },
-
-    ]
-  },
-
-];
 
 
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen, Layers, ArrowLeft, Bookmark, FileQuestion, FileText,
-  ChevronLeft, Home // آیکون‌های جدید برای بردکرامب
+  ChevronLeft, Home
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import SearchBar from "@/components/ui/SearchBar";
@@ -71,12 +71,14 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
   }, [searchTerm, pathname, router, searchParams]);
 
   return (
-    <section className="w-full min-h-screen py-6 overflow-hidden text-xs md:text-sm" dir="rtl">
+    <section className="w-full min-h-screen py-6 overflow-hidden font-sans" dir="rtl">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="flex mb-4 text-gray-500 text-xs sm:text-sm font-medium mb-2" aria-label="Breadcrumb">
+        
+        {/* Breadcrumb - ناوبری */}
+        <nav className="flex mb-4 text-gray-500 text-bread" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
             <li className="inline-flex items-center">
-              <Link href="/" className="inline-flex items-center hover:text-emerald-600 transition-colors  border p-1 rounded-full bg-gray-100">
+              <Link href="/" className="inline-flex items-center  hover:text-emerald-600 border-gray-300 transition-colors border p-1 rounded-full bg-gray-100">
                 <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
                 خانه
               </Link>
@@ -84,7 +86,7 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
             <li>
               <div className="flex items-center">
                 <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                <Link href="/resources" className={`hover:text-emerald-600 transition-colors  border p-1 rounded-full bg-gray-100 ${!title ? 'text-gray-800' : ''}`}>
+                <Link href="/resources" className={` hover:text-emerald-600  border-gray-300 transition-colors border p-1 rounded-full bg-gray-100 ${!title ? 'text-gray-800' : ''}`}>
                   منابع آموزشی
                 </Link>
               </div>
@@ -93,20 +95,16 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
               <li aria-current="page">
                 <div className="flex items-center">
                   <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                  <span className="text-gray-800  border p-1 rounded-full bg-gray-100">{title}</span>
+                  <span className=" text-gray-800 border border-gray-300 p-1 rounded-full bg-gray-100">{title}</span>
                 </div>
               </li>
             )}
           </ol>
         </nav>
-        <div className="border rounded-xl p-4 sm:p-6 bg-white shadow-sm space-y-6">
 
-          {/* Breadcrumb / ناوبری */}
-
-
+        <div className="border border-gray-300 border-gra rounded-xl p-4 sm:p-6 bg-white shadow-sm space-y-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full p-1">
-
             {/* Title + Icon */}
             <div className="flex items-center gap-4 sm:gap-5 lg:gap-6">
               <div
@@ -131,7 +129,7 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                     </span>
                   )}
                 </h2>
-                <p className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium leading-relaxed">
+                <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed">
                   مشاهده تمامی دوره‌ها و منابع آموزشی در یک نگاه
                 </p>
               </div>
@@ -146,7 +144,6 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                 className="w-full"
               />
             </div>
-
           </div>
         </div>
 
@@ -156,22 +153,24 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
               <BookOpen className="w-10 h-10" />
             </div>
-            <p className="text-gray-500 text-lg">محصولی با این مشخصات یافت نشد.</p>
+            <p className="text-gray-500 text-base">محصولی با این مشخصات یافت نشد.</p>
           </div>
         ) : (
           <div className="relative w-full mt-6">
             <div className="w-full sm:bg-white sm:rounded sm:border sm:border-gray-100 sm:p-6 sm:shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-5 mt-4 sm:mt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-4 sm:mt-0">
                 {response.map((p, index) => {
                   const itemNumber = index + 1;
                   return (
                     <Link key={p.id} href={`/resources/course/${p.slug}`} className="block h-auto">
                       <div className="relative group/card flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
 
-                        <div className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-slate-600 rounded-full text-xs sm:text-sm font-bold shadow-md border-2 border-white">
+                        {/* شماره آیتم */}
+                        <div className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white text-slate-600 rounded-full text-xs font-bold shadow-md border-2 border-white">
                           {itemNumber}
                         </div>
 
+                        {/* بخش تصویر */}
                         <div className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t">
                           <button className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden">
                             <Bookmark className="w-4 h-4" />
@@ -187,33 +186,41 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           </div>
                         </div>
 
+                        {/* بخش اطلاعات محصول */}
                         <div className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5">
-                          <h3 className="text-gray-800 font-bold text-[12px] sm:text-slate-700 sm:font-normal sm:text-sm md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
+                          {/* عنوان محصول */}
+                          <h3 className="text-gray-800 font-bold text-sm sm:text-slate-700 sm:font-medium sm:text-base md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
                             {p.name}
                           </h3>
 
+                          {/* ویژگی‌های محصول */}
                           <div className="flex flex-col gap-1.5 mt-2">
                             <div className="flex items-center">
-                              <span className="bg-[#EEF2FF] text-[#4F46E5] text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
+                              <span className="bg-[#EEF2FF] text-[#4F46E5] text-xs px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
                                 <FileQuestion className="w-3.5 h-3.5" />
                                 سوالات دولتی و تالیفی طبقه بندی شده
                               </span>
                             </div>
                             <div className="flex items-center">
-                              <span className="text-[#121211] text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
+                              <span className="text-[#121211] text-xs px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
                                 <FileText className="w-3.5 h-3.5 text-gray-500" />
                                 دارای پاسخ تشریحی
                               </span>
                             </div>
                           </div>
 
+                          {/* بخش قیمت و دکمه */}
                           <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
-                            <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
+                            <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 text-sm font-medium items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
                               مشاهده بانک سوالات
                             </button>
-                            <div className="text-gray-600 text-xs font-medium sm:hidden">
+                            
+                            {/* قیمت در موبایل */}
+                            <div className="text-gray-600 text-sm font-medium sm:hidden">
                               {p.newPrice === 0 ? "رایگان" : toman(p.newPrice)}
                             </div>
+                            
+                            {/* لینک موبایل */}
                             <div className="text-[#3b82f6] text-xs flex items-center gap-1 sm:hidden">
                               <span>شروع یادگیری</span>
                               <ArrowLeft className="w-4 h-4" />
@@ -229,12 +236,12 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
           </div>
         )}
 
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8 flex justify-center">
             <Pagination totalPages={totalPages} currentPage={currentPage} />
           </div>
         )}
-
       </div>
     </section>
   );

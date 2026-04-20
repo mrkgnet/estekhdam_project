@@ -32,7 +32,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
   const categories = response.data;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 text-xs md:text-sm">
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 text-bodyall">
       {/* بخش هدر */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-sm md:text-lg font-bold text-slate-800 flex items-center gap-2">

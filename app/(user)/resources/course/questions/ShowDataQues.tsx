@@ -14,6 +14,8 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/modals/AuthModal";
 import CommentManagment from "@/components/comment/CommentManagmet";
+import SendPQComponent from "@/components/send-problem-question/SendPQComponent";
+import { CopyClipBoard } from "@/components/copy-clipboard/CopyClipBoard";
 
 type ChoiceKey = "A" | "B" | "C" | "D";
 
@@ -23,6 +25,7 @@ type DBQuestion = {
   options: string[];
   correctAnswer: number;
   answerText: string;
+  questionCode: string;
 };
 
 type Chapter = {
@@ -67,7 +70,7 @@ export default function ExamPage({
   // وضعیت باز و بسته بودن آکاردئون‌های فیلتر (درون منو)
   const [isChaptersOpen, setIsChaptersOpen] = useState(true);
   const [isTypeOpen, setIsTypeOpen] = useState(true);
-  
+
   // وضعیت باز و بسته بودن کل منوی فیلتر در حالت موبایل
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -160,6 +163,7 @@ export default function ExamPage({
       choices: dbQ.options.map((optText, i) => ({ key: keys[i], text: optText })),
       correct: keys[correctIndex],
       explanation: dbQ.answerText,
+      code: dbQ.questionCode,
     };
   };
 
@@ -179,12 +183,12 @@ export default function ExamPage({
 
 
   return (
-    <div className="text-[14px] md:text-[15px] min-h-screen max-w-6xl m-auto text-right pb-24 lg:pb-8" dir="rtl">
+    <div className=" min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
       {/* bread crumb  */}
-      <nav className="flex mb-2 font-medium text-[10px] sm:text-sm text-gray-500 mt-5 px-4 overflow-x-auto" aria-label="Breadcrumb">
+      <nav className="flex mb-2 font-medium text-bread text-gray-500 mt-5 px-4 overflow-x-auto" aria-label="Breadcrumb">
         <ol className="flex items-center flex-nowrap min-w-max space-x-1 space-x-reverse md:space-x-2">
           <li className="inline-flex items-center flex-shrink-0">
-            <Link href="/" className="inline-flex items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100 whitespace-nowrap">
+            <Link href="/" className="inline-flex items-center hover:text-emerald-600 border-gray-300 transition-colors border p-1 rounded-full bg-gray-100 whitespace-nowrap">
               <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
               خانه
             </Link>
@@ -194,7 +198,7 @@ export default function ExamPage({
               <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <Link
                 href="/resources"
-                className="text-gray-800 hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100 whitespace-nowrap"
+                className="hover:text-emerald-600 transition-colors border border-gray-300 p-1 rounded-full bg-gray-100 whitespace-nowrap"
               >
                 منابع آموزشی
               </Link>
@@ -205,7 +209,7 @@ export default function ExamPage({
               <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <Link
                 href={`/resources/course/${pname}`}
-                className="text-gray-800 hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100 whitespace-nowrap"
+                className="hover:text-emerald-600 transition-colors border border-gray-300 p-1 rounded-full bg-gray-100 whitespace-nowrap"
               >
                 {pname}
               </Link>
@@ -214,7 +218,7 @@ export default function ExamPage({
           <li className="flex-shrink-0">
             <div className="flex items-center">
               <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <span className="text-gray-800 border p-1 rounded-full bg-gray-100 whitespace-nowrap">
+              <span className="border p-1 rounded-full bg-gray-100 border-gray-300 whitespace-nowrap">
                 سوالات
               </span>
             </div>
@@ -235,27 +239,42 @@ export default function ExamPage({
         {/* 🟢 سایدبار با قابلیت فیلترهای چندگانه */}
         <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
 
-          {/* دکمه باز/بسته کردن فیلتر در موبایل */}
-          <button
-            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-            className="lg:hidden flex items-center justify-between w-full bg-white p-4 rounded-xl shadow-sm border border-slate-200/60"
-          >
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-600" />
-              <h3 className="font-bold text-gray-800 text-lg">فیلتر سوالات</h3>
-            </div>
-            <ChevronDown
-              className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isMobileFilterOpen ? "rotate-180" : "rotate-0"}`}
-            />
-          </button>
 
-          {/* هدر سایدبار در دسکتاپ */}
-          <div className="hidden lg:flex items-center gap-2 mb-1 px-1">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="font-bold text-gray-800 text-lg">فیلتر سوالات</h3>
+
+          <div className="lg:hidden">
+            {/* دکمه باز/بسته کردن فیلتر در موبایل */}
+            <button
+              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+              className=" flex items-center justify-between w-full bg-white p-4 rounded-xl shadow-sm border border-slate-200/60"
+            >
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <h3 className="text-bodyh">فیلتر سوالات</h3>
+              </div>
+              <ChevronDown
+                className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isMobileFilterOpen ? "rotate-180" : "rotate-0"}`}
+              />
+            </button>
+            <SendPQComponent />
           </div>
 
-          <div className={`${isMobileFilterOpen ? 'flex' : 'hidden'} lg:flex bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden flex-col`}>
+          {/* هدر سایدبار در دسکتاپ */}
+          <div className="hidden lg:flex z-20 items-center justify-between w-full mb-4 px-2 py-1 bg-gray-50/50 rounded-xl border border-gray-100/50 backdrop-blur-sm">
+            {/* سمت راست - فیلتر */}
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-white rounded-lg shadow-sm border border-gray-200/60">
+                <Filter className="w-4 h-4 text-gray-700" />
+              </div>
+              <h3 className="text-sm  bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                فیلتر سوالات
+              </h3>
+            </div>
+
+            {/* سمت چپ - دکمه گزارش مشکل */}
+            <SendPQComponent />
+          </div>
+
+          <div className={`${isMobileFilterOpen ? 'flex' : 'hidden'} lg:flex z-10 bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden flex-col`}>
 
             {/* دکمه پاک کردن کل فیلترها - اصلاح شده برای حفظ pname */}
             <Link
@@ -265,7 +284,7 @@ export default function ExamPage({
             >
               <div className="flex items-center gap-3 text-slate-700 transition-colors">
                 <List className="w-5 h-5 text-slate-500 group-hover:text-slate-800" />
-                <span className="font-bold text-sm">نمایش همه سوالات دوره</span>
+                <span className=" ">نمایش همه سوالات دوره</span>
               </div>
             </Link>
 
@@ -277,7 +296,7 @@ export default function ExamPage({
               >
                 <div className="flex items-center gap-2">
                   <PlayCircle className="w-5 h-5 text-rose-500" />
-                  <h2 className="font-bold text-slate-700 text-sm">
+                  <h2 className=" text-slate-700 ">
                     بر اساس سرفصل
                   </h2>
                 </div>
@@ -299,8 +318,8 @@ export default function ExamPage({
                       <button
                         onClick={() => handleChapterClick(null)}
                         disabled={isPending}
-                        className={`text-right p-2.5 rounded-lg text-sm transition-all
-                            ${!currentChapterId ? 'bg-rose-100 text-rose-700 font-bold' : 'text-slate-600 hover:bg-slate-100'}
+                        className={`text-right p-2.5 rounded-lg transition-all
+                            ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}
                           `}
                       >
                         همه سرفصل‌ها
@@ -313,9 +332,9 @@ export default function ExamPage({
                               key={chapter.id}
                               onClick={() => handleChapterClick(chapter.id)}
                               disabled={isPending}
-                              className={`relative flex items-center justify-between w-full text-right p-2.5 rounded-lg text-sm transition-all cursor-pointer overflow-hidden
+                              className={`relative flex items-center justify-between w-full text-right p-2.5 rounded transition-all cursor-pointer overflow-hidden
                                 ${isActive
-                                  ? 'bg-rose-100 text-rose-700 font-bold'
+                                  ? 'bg-rose-100 text-rose-700 '
                                   : 'text-slate-600 hover:bg-slate-100'
                                 }
                                 ${isPending ? 'opacity-60 cursor-not-allowed' : ''}
@@ -327,7 +346,7 @@ export default function ExamPage({
                           );
                         })
                       ) : (
-                        <div className="text-center text-slate-400 py-4 text-xs">
+                        <div className="text-center text-slate-400 py-4 ">
                           سرفصلی یافت نشد.
                         </div>
                       )}
@@ -345,7 +364,7 @@ export default function ExamPage({
               >
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-5 h-5 text-blue-500" />
-                  <h2 className="font-bold text-slate-700 text-sm">
+                  <h2 className=" text-slate-700 ">
                     بر اساس نوع سوال
                   </h2>
                 </div>
@@ -368,8 +387,8 @@ export default function ExamPage({
                       <button
                         onClick={() => handleTypeClick(null)}
                         disabled={isPending}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all text-sm
-                            ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all 
+                            ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
                           `}
                       >
                         همه نوع سوالات
@@ -378,8 +397,8 @@ export default function ExamPage({
                       <button
                         onClick={() => handleTypeClick("SARASARI")}
                         disabled={isPending}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all text-sm
-                            ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all 
+                            ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
                           `}
                       >
                         <div className="flex items-center gap-2">
@@ -392,8 +411,8 @@ export default function ExamPage({
                       <button
                         onClick={() => handleTypeClick("TALIFI")}
                         disabled={isPending}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all text-sm
-                            ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all 
+                            ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
                           `}
                       >
                         <div className="flex items-center gap-2">
@@ -419,13 +438,13 @@ export default function ExamPage({
                 <GraduationCap className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h1 className="font-extrabold text-slate-800 text-base sm:text-lg">شبیه‌ساز آزمون</h1>
+                <h1 className="">شبیه‌ساز آزمون</h1>
                 {totalCount > 0 ? (
-                  <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-                    سوال <span className="font-bold text-slate-700">{currentStep}</span> از <span className="font-bold text-slate-700">{totalCount}</span>
+                  <p className="text-slate-500  mt-0.5">
+                    سوال <span className=" text-slate-700">{currentStep}</span> از <span className=" text-slate-700">{totalCount}</span>
                   </p>
                 ) : (
-                  <p className="text-red-500 text-xs sm:text-sm mt-0.5 font-bold">
+                  <p className="text-red-500  mt-0.5 ">
                     سوالی با این فیلترها یافت نشد!
                   </p>
                 )}
@@ -447,7 +466,7 @@ export default function ExamPage({
                   pathLength="100"
                 />
               </svg>
-              <span className="absolute text-xs sm:text-sm font-bold text-slate-700">{progressPercentage}%</span>
+              <span className="absolute   text-slate-700">{progressPercentage}%</span>
             </div>
           </header>
 
@@ -467,9 +486,18 @@ export default function ExamPage({
                   exit={{ opacity: 0, y: -10 }}
                   className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 sm:p-8"
                 >
-                  <h2 className="text-slate-800 text-base sm:text-lg font-bold leading-relaxed mb-8">
-                    {q.text}
-                  </h2>
+
+                  {/* بخش مربوط به عنوان سوال و نمایش کد سوال اضافه شده است */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+                    <h2 className="text-slate-800 leading-relaxed flex-1">
+                      {q.text}
+                    </h2>
+
+                    {q.code && (
+                      <CopyClipBoard className="text-xs" text={q.code} label="شناسه سوال:" />
+
+                    )}
+                  </div>
 
                   <div className="space-y-3.5">
                     {q.choices.map((ch) => {
@@ -489,13 +517,13 @@ export default function ExamPage({
                             `}
                         >
                           <div className="flex items-center gap-4">
-                            <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold shrink-0 transition-colors
+                            <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center  shrink-0 transition-colors
                                 ${isUserChoice || (showResult && isRight) ? 'bg-white shadow-sm border border-slate-100' : 'bg-slate-100 text-slate-500'}
                                 ${showResult && isRight ? 'text-green-600' : isUserChoice ? 'text-red-600' : ''}
                             `}>
                               {persianLetterMap[ch.key]}
                             </span>
-                            <span className={`text-sm sm:text-base ${isUserChoice || isRight ? 'text-slate-900 font-medium' : 'text-slate-700'}`}>
+                            <span className={` ${isUserChoice || isRight ? 'text-slate-900 ' : 'text-slate-700'}`}>
                               {ch.text}
                             </span>
                           </div>
@@ -513,8 +541,8 @@ export default function ExamPage({
                         animate={{ height: "auto", opacity: 1 }}
                         className="mt-8 pt-6 border-t border-slate-100 overflow-hidden"
                       >
-                        <div className="p-5 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded-2xl border border-blue-100/60">
-                          <div className="flex items-center gap-2 mb-3 text-blue-800 font-bold">
+                        <div className="p-5 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded border border-blue-100/60">
+                          <div className="flex items-center gap-2 mb-3 text-blue-800 ">
                             <Lightbulb className="w-5 h-5 text-blue-600" />
                             <span>پاسخ تشریحی</span>
                           </div>
@@ -530,8 +558,8 @@ export default function ExamPage({
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-10 flex flex-col items-center justify-center text-center">
                 <Filter className="w-16 h-16 text-slate-200 mb-4" />
-                <h3 className="text-slate-600 font-bold text-lg mb-2">سوالی یافت نشد!</h3>
-                <p className="text-slate-500 text-sm">با فیلترهای انتخاب شده هیچ سوالی برای نمایش وجود ندارد.</p>
+                <h3 className="text-slate-600   mb-2">سوالی یافت نشد!</h3>
+                <p className="text-slate-500 ">با فیلترهای انتخاب شده هیچ سوالی برای نمایش وجود ندارد.</p>
               </div>
             )}
 

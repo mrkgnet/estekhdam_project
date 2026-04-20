@@ -47,7 +47,7 @@ export default function ShowDataTabProCat({ mainCategory }: { mainCategory: Cate
     if (!activeTab) return null;
 
     return (
-        <div className="w-full mx-auto text-xs md:text-sm" dir="rtl">
+        <div className="w-full mx-auto text-bodyall " dir="rtl">
             <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8 p-4 md:p-5 rounded-l-2xl rounded-r-md bg-gradient-to-l from-orange-100/70 via-orange-50/30 to-transparent border-r-4 border-orange-500 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-white/40 to-transparent pointer-events-none"></div>
                 <div className="relative flex items-center gap-3 md:gap-4 z-10">
@@ -55,7 +55,7 @@ export default function ShowDataTabProCat({ mainCategory }: { mainCategory: Cate
                         <Flame className="w-6 h-6 drop-shadow-sm" />
                     </div>
                     <div className="flex flex-col space-y-1">
-                        <h2 className="text-gray-900 font-black text-lg md:text-xl tracking-tight">
+                        <h2 className="text-gray-900 font-black text-base md:text-lg tracking-tight">
                             <span className="text-red-500 px-1"> 
 
                                  {mainCategory.catName}

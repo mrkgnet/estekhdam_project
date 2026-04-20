@@ -162,7 +162,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
       <aside
         onMouseLeave={handleMouseLeaveDesktop}
         onMouseEnter={() => handleInteraction(null, 0)}
-        className={`fixed right-0 z-50 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
+        className={`fixed right-0 text-bodyall   z-50 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
           transition-all duration-50
           ${isScrolled ? "top-14 h-[calc(100vh-3.5rem)]" : "top-32 h-[calc(100vh-8rem)]"}
           ${isOpen ? "translate-x-0" : "translate-x-full"} 
@@ -183,7 +183,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
         <div className="flex-1 flex overflow-hidden relative">
           <nav className="w-1/3 md:w-full flex-shrink-0 border-l border-gray-100 md:border-none p-2 md:p-4 space-y-1 overflow-y-auto bg-gray-50 md:bg-white z-20">
             {dynamicMenuTree.length === 0 ? (
-               <p className="text-xs text-gray-400 text-center mt-5">منویی یافت نشد.</p>
+               <p className=" text-gray-400 text-center mt-5">منویی یافت نشد.</p>
             ) : (
                 dynamicMenuTree.map((tab) => {
                 const isActive = pathname === tab.url || pathname.startsWith(`${tab.url}/`);
@@ -194,10 +194,10 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                     key={tab.id}
                     onMouseEnter={() => handleInteraction(tab.id, 1)}
                     onClick={() => handleInteraction(tab.id, 1, true)}
-                    className="relative cursor-pointer"
+                    className="relative cursor-pointer font-bold"
                     >
                     <div
-                        className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b text-xs md:text-sm font-medium
+                        className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
                                 ${isActive ? "md:bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
                                 `}
                     >
@@ -205,7 +205,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                         <div className={`p-1.5 rounded-lg ${isActive || isSelected ? "text-blue-600 md:bg-blue-600 md:text-white" : "text-gray-400"}`}>
                             {tab.icon && <tab.icon className="h-6 w-6 md:h-5 md:w-5" />}
                         </div>
-                        <span className="text-center">{tab.title}</span>
+                        <span className="text-center ">{tab.title}</span>
                         </div>
                         {tab.subItems && tab.subItems.length > 0 && (
                         <ChevronLeft className={`hidden md:block h-4 w-4 ${isSelected ? "text-blue-500" : "text-gray-400"}`} />
@@ -220,7 +220,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
           <div className="w-2/3 md:hidden flex flex-col overflow-y-auto bg-white p-3">
             {hasLevel2 && activeTab && (
               <>
-                <Link href={activeTab.url} onClick={close} className="text-sm text-blue-600 mb-4 flex items-center gap-1">
+                <Link href={activeTab.url} onClick={close} className=" text-blue-600 mb-4 flex items-center gap-1">
                   {activeTab.title}
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
@@ -232,7 +232,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                     return (
                       <div key={sub.id} className="bg-gray-50 rounded-xl p-3">
                         <div className="flex justify-between items-center">
-                          <Link href={sub.url} onClick={close} className="text-gray-800 text-sm flex-1">
+                          <Link href={sub.url} onClick={close} className="text-gray-800  flex-1">
                             {sub.title}
                           </Link>
                           {hasLvl3 && (
@@ -248,7 +248,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                         {isSubOpen && hasLvl3 && (
                           <div className="space-y-2 mt-3 border-t border-gray-200 pt-3">
                             {sub.subItems.map((lvl3: any) => (
-                              <Link key={lvl3.id} href={lvl3.url} onClick={close} className="block text-xs text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100">
+                              <Link key={lvl3.id} href={lvl3.url} onClick={close} className="block  text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100">
                                 {lvl3.title}
                               </Link>
                             ))}
@@ -272,7 +272,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
               `}
             >
               <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <p className="text-base text-gray-800 flex items-center gap-2">
+                <p className=" text-gray-800 flex items-center gap-2">
                   {activeTab.icon && <activeTab.icon className="w-5 h-5 text-blue-600" />}
                   {activeTab.title}
                 </p>
@@ -286,7 +286,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                       key={sub.id}
                       href={sub.url}
                       onMouseEnter={() => handleInteraction(sub.id, 2)}
-                      className={`px-4 py-3 text-sm rounded-xl flex items-center justify-between
+                      className={`px-4 py-3  rounded-xl flex items-center justify-between
                         ${isSubActive ? "bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
                         ${isSubHovered && !isSubActive ? "bg-blue-50/50 text-blue-700" : ""}
                       `}
@@ -315,7 +315,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
               </div>
               <div className="flex-1 p-4 space-y-1">
                 {activeSubTab.subItems.map((lvl3: any) => (
-                  <Link key={lvl3.id} href={lvl3.url} className="block px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl">
+                  <Link key={lvl3.id} href={lvl3.url} className="block px-4 py-3  text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl">
                     {lvl3.title}
                   </Link>
                 ))}

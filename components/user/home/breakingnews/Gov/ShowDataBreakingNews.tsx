@@ -76,7 +76,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
 
   return (
     // استایل باکس اصلی هماهنگ با صفحه اصلی (rounded-2xl)
-    <div className="w-full text-xs md:text-sm  rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
+    <div className="w-full text-bodyall   rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
 
       {/* header */}
       <div className="mb-5 md:mb-6 flex flex-col gap-4 border-b border-slate-100 pb-4 md:pb-5 md:flex-row md:items-center md:justify-between">
@@ -131,7 +131,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                 <div className="flex flex-col gap-2 min-w-0">
                   {/* flex-wrap برای جلوگیری از بیرون زدن بج در صورت طولانی بودن متن در موبایل */}
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h3 className="line-clamp-2  text-slate-800 group-hover:text-sky-700 transition-colors">
+                    <h3 className="line-clamp-2 text-bodyh  text-slate-800 group-hover:text-sky-700 transition-colors">
                       {it.title}
                     </h3>
                     <StatusBadge status={it.status || "NEWS"} />
@@ -143,7 +143,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                     </p>
                   )}
 
-                  <div className="flex items-center gap-2 md:gap-3 text-[12px] text-slate-400">
+                  <div className="flex items-center gap-2 md:gap-3 text-xs text-slate-400">
                     <span className="flex gap-1.5 items-center">
                       <CalendarDays className="h-3.5 w-3.5" />
                       <span>تاریخ ثبت خبر:</span>
@@ -173,10 +173,10 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
           <div className="rounded-full bg-slate-100 p-4 mb-4">
             <SearchX className="h-8 w-8 text-slate-400" />
           </div>
-          <h4 className="text-sm  text-slate-700">
+          <h4 className="   text-slate-700">
             آگهی استخدامی یافت نشد
           </h4>
-          <p className="mt-2 max-w-xs text-xs text-slate-500 leading-relaxed">
+          <p className="mt-2 max-w-xs   text-slate-500 leading-relaxed">
             در حال حاضر آگهی فعالی برای این دسته‌بندی وجود ندارد. لطفاً دسته‌بندی دیگر را بررسی کنید.
           </p>
         </div>

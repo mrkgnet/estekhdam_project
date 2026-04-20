@@ -74,19 +74,25 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
   // 🟢 اصلاح ۱: برای جلوگیری از رندر مجدد useMemo، به جای آرایه، استرینگ را می‌گیریم
   const regionsQuery = searchParams.get("regions") || "";
-
+  const statusesQuery = searchParams.get("statuses") || "";
   const filtered = useMemo(() => {
-    // تبدیل استرینگ به آرایه درون خود useMemo انجام می‌شود
     const activeRegions = regionsQuery.split(",").filter(Boolean);
+    const activeStatuses = statusesQuery.split(",").filter(Boolean);
 
     return news.filter((x) => {
-      const okRegion = activeRegions.length === 0
-        ? true
-        : x.cities?.some((c: string) => activeRegions.includes(c));
+      const okRegion =
+        activeRegions.length === 0
+          ? true
+          : x.cities?.some((c: string) => activeRegions.includes(c));
 
-      return okRegion;
+      const okStatus =
+        activeStatuses.length === 0
+          ? true
+          : activeStatuses.includes(x.status || "NEWS");
+
+      return okRegion && okStatus;
     });
-  }, [news, regionsQuery]); // اینجا فقط به استرینگ وابسته هستیم نه یک آرایه جدید در هر رندر
+  }, [news, regionsQuery, statusesQuery]); // اینجا فقط به استرینگ وابسته هستیم نه یک آرایه جدید در هر رندر
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
 
@@ -133,29 +139,33 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
   return (
     <div className="text-xs md:text-sm max-w-7xl mx-auto">
+      <nav className="flex  text-gray-500 text-xs sm:text-sm font-medium px-4 mt-4" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
+          <li className="inline-flex items-center">
+            <Link href="/" className="inline-flex px-2 items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100">
+              <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
+              خانه
+            </Link>
+          </li>
+          <li>
+            <div className="flex items-center">
+              <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
+              <span className="text-gray-800 border px-2 p-1 rounded-full bg-gray-100">اخبار استخدامی دولتی</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
       <div className="grid grid-cols-12 gap-4 p-4 md:p-7 ">
+
         <div className="col-span-12 lg:col-span-3">
           <FiltersSidebar />
         </div>
 
+
+        {/* سمت چپ  */}
         <div className="col-span-12 lg:col-span-9">
 
-          <nav className="flex mb-4 text-gray-500 text-xs sm:text-sm font-medium mb-2" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
-              <li className="inline-flex items-center">
-                <Link href="/" className="inline-flex px-2 items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100">
-                  <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-                  خانه
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                  <span className="text-gray-800 border px-2 p-1 rounded-full bg-gray-100">اخبار استخدامی دولتی</span>
-                </div>
-              </li>
-            </ol>
-          </nav>
+
 
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 mb-5 rounded shadow-sm">

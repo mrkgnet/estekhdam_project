@@ -76,7 +76,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center text-slate-500 gap-3" dir="rtl">
         <ShoppingCart className="w-12 h-12 text-slate-300" />
-        <p className="font-bold text-lg text-slate-700">محصول مورد نظر یافت نشد!</p>
+        <p className="font-bold  text-slate-700">محصول مورد نظر یافت نشد!</p>
         <button onClick={() => router.back()} className="text-green-600 font-bold mt-2 hover:underline">بازگشت به صفحه قبل</button>
       </div>
     );
@@ -106,7 +106,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
           >
             <ChevronRight className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-black text-slate-800">تایید و پرداخت</h1>
+          <h1 className=" font-black text-slate-800">تایید و پرداخت</h1>
         </header>
 
         <div className="bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-6 mb-6">
@@ -115,11 +115,11 @@ export default function ShowDataCart({ productData, productId }: Props) {
               <ShoppingCart className="w-8 h-8 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800 leading-relaxed mb-2">
+              <h2 className=" font-bold text-slate-800 leading-relaxed mb-2">
                 {productData.name}
               </h2>
               {productData.description && (
-                <p className="text-sm text-slate-500 leading-6">
+                <p className=" text-slate-500 leading-6">
                   {productData.description}
                 </p>
               )}
@@ -128,22 +128,22 @@ export default function ShowDataCart({ productData, productId }: Props) {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between text-slate-600">
-              <span className="text-sm font-semibold">مبلغ کل:</span>
+              <span className=" font-semibold">مبلغ کل:</span>
               <span className="font-bold">{productData.oldPrice.toLocaleString()} تومان</span>
             </div>
 
             {/* نمایش تخفیف اگر وجود داشته باشد */}
             {discountAmount > 0 && (
               <div className="flex items-center justify-between text-red-500">
-                <span className="text-sm font-semibold">تخفیف:</span>
+                <span className=" font-semibold">تخفیف:</span>
                 <span className="font-bold">{discountAmount.toLocaleString()} تومان</span>
               </div>
             )}
 
             <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
-              <span className="text-base font-black text-slate-800">مبلغ قابل پرداخت:</span>
-              <span className="text-xl font-black text-slate-900">
-                {productData.newPrice.toLocaleString()} <span className="text-sm text-slate-500 font-bold">تومان</span>
+              <span className=" font-black text-slate-800">مبلغ قابل پرداخت:</span>
+              <span className=" font-black text-slate-900">
+                {productData.newPrice.toLocaleString()} <span className=" text-slate-500 font-bold">تومان</span>
               </span>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
 
         <div className="flex items-center justify-center gap-2 mb-8 text-slate-400">
           <ShieldCheck className="w-5 h-5" />
-          <span className="text-xs font-bold">پرداخت امن از طریق درگاه‌های معتبر بانکی</span>
+          <span className=" font-bold">پرداخت امن از طریق درگاه‌های معتبر بانکی</span>
         </div>
 
         {/* 👇 فقط یک دکمه قرار می‌دهیم و متن آن را داینامیک می‌کنیم */}

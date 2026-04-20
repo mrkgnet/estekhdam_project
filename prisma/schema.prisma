@@ -58,6 +58,7 @@ enum NotificationType {
   NEW_TICKET
   NEW_CONTACT
   NEW_ORDER
+  NEW_QPROBLEM
 }
 
 // نوع آزمون سراسری یا تالیفی 
@@ -143,43 +144,45 @@ model MainSlider {
 }
 
 model Product {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  slug        String   @unique
-  oldPrice    Int?
-  newPrice    Int?
-  description String?
-  imageUrl    String?
-  features    String[]
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  slug           String           @unique
+  oldPrice       Int?
+  newPrice       Int?
+  description    String?
+  imageUrl       String?
+  features       String[]
   // 🟢 فقط آیدی دسته‌بندی‌ها را اینجا نگه می‌داریم
-  categoryIds String[] @db.ObjectId
+  categoryIds    String[]         @db.ObjectId
   // روابط یک‌به‌چند (بدون مشکل حافظه)
-  questions Question[]
-  comments  Comment[]
-  orders    Order[]
-  chapters  Chapter[]
+  questions      Question[]
+  comments       Comment[]
+  orders         Order[]
+  chapters       Chapter[]
   // --- ارتباط با اخبار ---
   newsIds        String[]         @db.ObjectId
   governmentNews GovernmentNews[] @relation(fields: [newsIds], references: [id])
   // ---------------------------------------
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
   // 🟢 ایندکس برای جستجوی سریع محصولاتی که در یک دسته خاص هستند
   @@index([categoryIds])
 }
+
 model Category {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  catName  String  @unique
-  catSlug  String  @unique
-  imageUrl String?
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  catName   String     @unique
+  catSlug   String     @unique
+  imageUrl  String?
   // --- فیلدهای مربوط به سلسله مراتب (Hierarchy) ---
-  parentId String?    @db.ObjectId
-  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children Category[] @relation("CategoryToCategory")
+  parentId  String?    @db.ObjectId
+  parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  Category[] @relation("CategoryToCategory")
   // -------------------------------------------
-  createdAt DateTime? @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime?  @default(now())
+  updatedAt DateTime   @updatedAt
+
   // 🟢 ایندکس برای افزایش سرعت لود زیرمنوها
   @@index([parentId])
 }
@@ -209,23 +212,37 @@ model Question {
   correctAnswer Int // ایندکس گزینه صحیح (مثلا 0 یعنی گزینه اول، 1 یعنی گزینه دوم و ...)
   answerText    String? // توضیحات گزینه صحیح (چون ممکن است بعضی سوالات توضیح نخواهند، علامت ? گذاشتم تا اختیاری باشد)
   questionType  QuestionType @default(TALIFI)
-
+  questionCode  String?
   // --- فیلدهای پیشنهادی برای مدیریت بهتر ---
-  isActive Boolean @default(true) // برای فعال/غیرفعال کردن موقت سوال
-
-  productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
+  isActive      Boolean      @default(true) // برای فعال/غیرفعال کردن موقت سوال
+  productId     String       @db.ObjectId
+  product       Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   // 👇 ارتباط مستقیم با سرفصل (Chapter) اضافه شد 👇
-  chapterId String?  @db.ObjectId
-  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId     String?      @db.ObjectId
+  chapter       Chapter?     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // 👇 ارتباط با مشکلات سوال
+  issues    QuestionIssue[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@index([productId])
   @@index([chapterId])
   @@index([questionType])
+}
+
+model QuestionIssue {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  questionId  String   @db.ObjectId
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  description String
+  isRead      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questionId])
 }
 
 model Comment {
@@ -256,9 +273,6 @@ model Comment {
   @@index([productId])
   @@index([status])
 }
-
-
-
 
 model MenuClient {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
@@ -310,7 +324,6 @@ model Order {
   // ایندکس‌ها برای سرعت بخشیدن به جستجوها
   @@index([userId])
   @@index([productId])
-
 }
 
 model Ticket {

@@ -15,7 +15,8 @@ import SideBar from "@/components/user/Sidebar";
 const iransans = localFont({
   src: [
     {
-      path: "./fonts/IRANSansWeb_FaNum.ttf",
+      // path: "./fonts/IRANSansWeb_FaNum.ttf",
+       path: "./fonts/IRANSansWeb_Medium_FaNum.ttf",
       weight: "500",
       style: "normal",
     },

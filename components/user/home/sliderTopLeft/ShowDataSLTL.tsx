@@ -66,7 +66,7 @@ export default function ShowDataSLTL({
       `}</style>
 
       {/* حذف min-h-[300px] و اضافه شدن h-full */}
-      <div className="relative group h-full pt-2">
+      <div className="relative group h-full pt-2 text-bodyall">
         <div className="custom-swiper-progress"></div>
 
         <Swiper
@@ -95,7 +95,7 @@ export default function ShowDataSLTL({
         >
           {products.map((p) => (
             <SwiperSlide key={p.id} className="w-full h-auto">
-              <Link href={`/resources/course/${p.id}`} className="block h-full text-xs md:text-sm">
+              <Link href={`/resources/course/${p.id}`} className="block h-full ">
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                   
                   {/* تغییرات مهم اینجا اعمال شد: کاهش ارتفاع عکس و اضافه شدن flex-shrink-0 */}
@@ -115,13 +115,7 @@ export default function ShowDataSLTL({
                   <div className="flex flex-col flex-1 p-3 md:p-4 z-10 justify-between">
                     <h3 className="text-slate-700 md:leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
                       {p.name}
-                    </h3>
-
-
-
-
-
-                    
+                    </h3>                    
                     <div className="mt-auto pt-3">
                       <button className="w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 flex items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
                         مشاهده بانک سوالات

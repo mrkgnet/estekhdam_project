@@ -13,7 +13,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
   const tabs = [
     { id: "description", label: "درباره آزمون", icon: BookOpen },
     { id: "features", label: "ویژگی‌ها", icon: Star },
-    { id: "rules", label: "قوانین و راهنما", icon: AlertCircle },
+
   ];
 
   const defaultRules = [
@@ -28,7 +28,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
   if (isLoading || !product) {
     return (
       <div>
-        <div className="bg-white rounded-3xl sm:rounded shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
+        <div className="bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
           {/* هدر تب‌ها (اسکلتون) */}
           <div className="flex overflow-x-auto border-b border-slate-100 bg-slate-50/50 p-2 gap-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {[1, 2, 3].map((i) => (
@@ -60,7 +60,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
   // ================= حالت نمایش محتوای اصلی =================
   return (
     <div>
-      <div className="bg-white rounded-3xl sm:rounded shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
+      <div className="bg-white text-bodyall sm:rounded overflow-hidden min-h-[400px]">
 
         {/* هدر تب‌ها */}
         <div role="tablist" className="flex overflow-x-auto border-b border-slate-100 bg-slate-50/50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -148,25 +148,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
                 </div>
               )}
 
-              {activeTab === "rules" && (
-                <div className="space-y-5 sm:space-y-6">
-                  <div className="bg-amber-50 border border-amber-200/60 p-5 rounded-2xl flex items-start gap-4 shadow-sm">
-                    <AlertCircle className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500 shrink-0 mt-1" />
-                    <p className="text-amber-900 leading-relaxed">
-                      کاربر گرامی، لطفاً پیش از شروع آزمون، قوانین و راهنمای زیر را با دقت مطالعه فرمایید تا در حین برگزاری با مشکلی مواجه نشوید.
-                    </p>
-                  </div>
 
-                  <ul className="space-y-4 bg-slate-50 p-5 sm:p-6 rounded-2xl border border-slate-100">
-                    {defaultRules.map((rule, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-400 shrink-0 mt-2 shadow-sm shadow-green-200" />
-                        <span className="text-slate-700 leading-relaxed">{rule}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </motion.div>
           </AnimatePresence>
         </div>
