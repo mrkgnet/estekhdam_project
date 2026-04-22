@@ -19,6 +19,7 @@ import Link from "next/link";
 import CommentManagment from "@/components/comment/CommentManagmet";
 import CountdownTimer from "@/components/CountdownTimer";
 import RecomendedProduct from "@/components/user/RecomendedProduct";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 // ---------------- Types & Helpers ----------------
 
@@ -27,7 +28,7 @@ export type NewsStatus = 'OPEN' | 'CARD_RECEIVED' | 'RESULTS_ANNOUNCED' | 'NEWS'
 type News = {
   id: string;
   title: string;
-  status: NewsStatus; // 🟢 1. فیلد وضعیت به تایپ اضافه شد
+  status: NewsStatus;
   slugNews: string;
   organization?: string;
   description?: string;
@@ -42,22 +43,17 @@ type News = {
   products?: ProductType[];
 };
 
-// 🟢 1. اضافه کردن تایپ محصول برای جلوگیری از خطای تایپ اسکریپت
 export type ProductType = {
   id: string;
-  name: string; // اگر در دیتابیس title است، اینجا هم title بنویسید
+  name: string; 
   slug: string;
   oldPrice?: number;
-  newPrice: number; // اگر در دیتابیس price است، اینجا price بنویسید
+  newPrice: number; 
   imageUrl?: string | null;
 };
 
-
-
-
 type RegState = "NOT_STARTED" | "OPEN" | "CLOSING_SOON" | "CLOSED";
 
-// 🟢 2. کامپوننت مدرن StatusBadge به این فایل اضافه شد
 const StatusBadge = ({ status }: { status: NewsStatus }) => {
   const config = {
     OPEN: {
@@ -99,7 +95,6 @@ const StatusBadge = ({ status }: { status: NewsStatus }) => {
   );
 };
 
-
 function useHasMounted() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -138,7 +133,7 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
         {icon}
         {label}
       </div>
-      <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+      <p className="mt-2 font-medium text-slate-900">{value}</p>
     </div>
   );
 }
@@ -147,7 +142,6 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
 
 export default function ShowData({ initialNews }: { initialNews: News }) {
   const item = initialNews;
-  console.log(item)
   const mounted = useHasMounted();
   const [tab, setTab] = useState("desc");
   const router = useRouter();
@@ -155,40 +149,23 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
   const regState = mounted ? getRegState(item.startAt, item.endAt) : "NOT_STARTED";
   const canRegister = regState === "OPEN" || regState === "CLOSING_SOON";
 
+  const breadcrumbItems = [
+    {
+      label: 'اخبار استخدامی دولتی',
+      href: '/jobnews/government',
+    },
+    {
+      label: item.title, 
+      href: `/jobnews/government/${item.slugNews}`, 
+    },
+  ];
+
   return (
-    <div className="mx-auto max-w-7xl  py-6 pb-24 lg:pb-0">
-      <div className="">
-        {/* بازگشت */}
-        <div className="">
-                <nav className="flex mb-4 text-gray-500 text-xs sm:text-sm font-medium" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
-              <li className="inline-flex items-center">
-                <Link href="/" className="inline-flex items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100">
-                  <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-                  خانه
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                  <Link
-                    href="/jobnews/government"  // مسیر صحیح صفحه لیست اخبار استخدامی دولتی
-                    className="text-gray-800 hover:text-emerald-600 transition-colors border p-1 px-2 rounded-full bg-gray-100"
-                  >
-                    اخبار استخدامی دولتی
-                  </Link>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                  <span className="text-gray-800 border p-1 rounded-full bg-gray-100 px-2">
-                    {item.title}
-                  </span>
-                </div>
-              </li>
-            </ol>
-          </nav>
+    // 🟢 اصلاح ۱: اضافه شدن w-full
+    <div className="w-full mx-auto max-w-6xl px-4 md:px-6 lg:px-8 overflow-x-hidden">
+      <div>
+        <div className="mt-4">
+          <Breadcrumb items={breadcrumbItems} />
         </div>
 
         <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
@@ -200,15 +177,14 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
                 )}
               </div>
               <div className="flex flex-col gap-2.5">
-                {/* 🟢 3. کامپوننت وضعیت در کنار عنوان اصلی استفاده شد */}
                 <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-xl font-extrabold text-slate-800">
+                  <h1 className="font-extrabold text-slate-800">
                     {item.title}
                   </h1>
                   <StatusBadge status={item.status || 'NEWS'} />
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+                <div className="flex flex-wrap gap-4 text-slate-600">
                   {item.organization && (
                     <span className="flex items-center gap-1.5 font-medium"><ShieldCheck className="w-4 h-4 text-emerald-600" />{item.organization}</span>
                   )}
@@ -240,23 +216,28 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
 
         <div className="grid grid-cols-12 gap-5 mt-6">
           <div className="col-span-12 lg:col-span-8 space-y-4">
-            <div className="bg-white border border-slate-200 rounded-3xl p-3 flex gap-2">
-              <button onClick={() => setTab("desc")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${tab === "desc" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>توضیحات</button>
-              <button onClick={() => setTab("jobs")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${tab === "jobs" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>رشته‌های شغلی</button>
+            {/* 🟢 اصلاح ۲: اضافه شدن flex-wrap و sm:flex-nowrap */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-3 flex flex-wrap sm:flex-nowrap gap-2">
+              <button onClick={() => setTab("desc")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "desc" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>توضیحات</button>
+              <button onClick={() => setTab("jobs")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "jobs" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>رشته‌های شغلی</button>
             </div>
+            
             {tab === "desc" && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
                 <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><Info className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">توضیحات آزمون</h2></div>
-                <div className="text-sm leading-8 text-slate-700 prose prose-sm max-w-none">{item.description || "توضیحی ثبت نشده است"}</div>
+                {/* 🟢 اصلاح ۳: اضافه شدن overflow-x-auto و break-words */}
+                <div className="leading-8 text-slate-700 prose prose-sm max-w-none overflow-x-auto break-words">{item.description || "توضیحی ثبت نشده است"}</div>
               </div>
             )}
+            
             {tab === "jobs" && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
                 <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><BookOpen className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">مشاغل مورد نیاز</h2></div>
-                <div className="flex flex-wrap gap-2">{item.jobs.map((job) => (<span key={job} className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-sm font-medium text-slate-700">{job}</span>))}</div>
+                <div className="flex flex-wrap gap-2">{item.jobs.map((job) => (<span key={job} className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-medium text-slate-700">{job}</span>))}</div>
               </div>
             )}
           </div>
+          
           <div className="col-span-12 lg:col-span-4">
             <div className="sticky top-5 space-y-4">
               <div className="bg-white border border-slate-200 rounded-3xl p-4">
@@ -271,34 +252,27 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
               {item.maxAge && (
                 <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
                   <div className="flex items-center gap-2.5 text-amber-800 font-bold"><AlarmClock className="w-5 h-5" />محدودیت سنی</div>
-                  <p className="mt-2 text-sm text-amber-900">حداکثر سن مجاز برای ثبت‌نام <span className="font-black">{item.maxAge}</span> سال می‌باشد.</p>
+                  <p className="mt-2 text-amber-900">حداکثر سن مجاز برای ثبت‌نام <span className="font-black">{item.maxAge}</span> سال می‌باشد.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {item.products && item.products.length > 0 && (
-          <section className="mt-8">
-            <RecomendedProduct
-              title="منابع مطالعاتی مرتبط"
-              products={item.products}
-              slug={item.slugNews}
-            />
-          </section>
-        )}
+        <div className="w-full overflow-hidden"> 
+          {item.products && item.products.length > 0 && (
+            <section className="mt-8">
+              <RecomendedProduct
+                title="منابع مطالعاتی مرتبط"
+                products={item.products}
+                slug={item.slugNews}
+              />
+            </section>
+          )}
+        </div>
 
-
-
-
+        <CommentManagment productId={item.id} />
       </div>
-
-      {/* <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/80 backdrop-blur-sm border-t shadow-t-lg lg:hidden">
-        <Link href={item.registerUrl ? item.registerUrl.toString() : "#"} target="_blank" rel="noopener noreferrer" className={`w-full block text-white py-3 rounded-xl text-center font-bold transition-colors ${canRegister && item.registerUrl ? 'bg-emerald-600' : 'bg-gray-400 cursor-not-allowed'}`}>ثبت نام در آزمون</Link>
-      </div> */}
-
-
-      <CommentManagment productId={item.id} />
     </div>
   );
 }

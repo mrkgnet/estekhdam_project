@@ -58,7 +58,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
     }
 
     return (
-        <div className="bg-white relative py-4 group/slider overflow-hidden rounded text-bodyall  ">
+        <div className="bg-white  relative py-4 group/slider overflow-hidden rounded   ">
             <style jsx>{`
                 /* ✨ این خط جادویی است که باعث می‌شود حرکت، نرم و یکنواخت (مثل زیرنویس) باشد */
                 :global(.brand-swiper .swiper-wrapper) {

@@ -32,24 +32,24 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
   const categories = response.data;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 text-bodyall">
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 ">
       {/* بخش هدر */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-sm md:text-lg font-bold text-slate-800 flex items-center gap-2">
-          
-            <Grid size={14} />
-              دسته‌بندی‌ها 
+      <div className="flex items-center justify-between mb-8 bg-gradient-to-l from-orange-200 via-orange-100 to-white px-3 py-2 rounded-md">
+        <h2 className="text-14 sm:text-16 md:text-16 flex items-center gap-2">
+          <Grid size={14} />
+          دسته‌بندی‌ها
         </h2>
         <Link
           href="/categories"
-          className="  text-slate-500 flex items-center text-sm hover:text-blue-600 transition-colors  gap-1"
+          className="text-14 sm:text-16 md:text-16 text-slate-600 flex items-center hover:text-blue-600 transition-colors gap-1"
         >
-          <span>همه</span> 
-          <span className="text-sm leading-none mb-1">
-            <ArrowLeft size={12}/>
+          <span>همه</span>
+          <span className="leading-none mb-1">
+            <ArrowLeft size={14} />
           </span>
         </Link>
       </div>
+
 
       {/* بخش گرید */}
       <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6 md:gap-8">
@@ -64,18 +64,18 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
               <div className="relative w-full h-full">
                 <Image
                   // اگر عکسی در دیتابیس نبود، یک عکس پیش‌فرض نشان می‌دهد
-                  src={category.imageUrl || "/images/default-category.png"} 
+                  src={category.imageUrl || "/images/default-category.png"}
                   alt={category.catName}
                   fill
                   className="object-contain"
-                  style={{ mixBlendMode: 'multiply' }} 
+                  style={{ mixBlendMode: 'multiply' }}
                   sizes="(max-width: 768px) 50vw, 15vw" // بهینه‌سازی لود عکس‌ها
                 />
               </div>
             </div>
 
             {/* عنوان دسته‌بندی */}
-            <span className="   text-slate-700 group-hover:text-blue-600 transition-colors">
+            <span className=" group-hover:text-blue-600 transition-colors">
               {category.catName} {/* استفاده از فیلد نام از دیتابیس */}
             </span>
           </Link>

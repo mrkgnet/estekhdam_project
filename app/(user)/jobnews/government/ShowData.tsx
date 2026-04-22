@@ -11,6 +11,7 @@ import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import SafeImage from "@/components/ui/SafeImage";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 // ---------------- Types ----------------
 type ShowDataProps = {
@@ -53,14 +54,14 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
 
 function InfoChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl text-xs md:text-sm bg-slate-50/80 hover:bg-slate-100 transition-colors duration-300 px-3 py-2 border border-slate-100/50">
+    <div className="rounded-2xl   bg-slate-50/80 hover:bg-slate-100 transition-colors duration-300 px-3 py-2 border border-slate-100/50">
       <div className="flex items-center gap-2  text-slate-500">
         <span className="inline-flex h-6 w-6 items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-700 shadow-sm">
           {icon}
         </span>
         <span>{label}</span>
       </div>
-      <p className="mt-1 text-sm text-slate-900 font-medium">{value}</p>
+      <p className="mt-1  text-slate-900 font-medium">{value}</p>
     </div>
   );
 }
@@ -130,32 +131,32 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
           <CalendarRange className="h-8 w-8 text-slate-400" />
         </div>
         <p className="text-slate-600 font-medium">{initialNews.message || "اطلاعاتی یافت نشد"}</p>
-        <button onClick={() => router.push(pathname)} className="mt-4 text-emerald-600 hover:text-emerald-700 text-sm ">
+        <button onClick={() => router.push(pathname)} className="mt-4 text-emerald-600 hover:text-emerald-700  ">
           پاک کردن فیلترها و بازگشت
         </button>
       </div>
     )
   }
 
+  // آرایه‌ای از مسیرها برای Breadcrumb
+  const breadcrumbItems = [
+    {
+      label: 'اخبار استخدامی دولتی',
+      href: '/jobnews/government',
+    },
+    // {
+    //   label: item.title, // عنوان صفحه فعلی (آخرین آیتم)
+    //   href: `/jobnews/government/${item.slug}`, // آدرس صفحه فعلی
+    // },
+  ];
+
   return (
-    <div className="text-xs md:text-sm max-w-7xl mx-auto">
-      <nav className="flex  text-gray-500 text-xs sm:text-sm font-medium px-4 mt-4" aria-label="Breadcrumb">
-        <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
-          <li className="inline-flex items-center">
-            <Link href="/" className="inline-flex px-2 items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100">
-              <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-              خانه
-            </Link>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-              <span className="text-gray-800 border px-2 p-1 rounded-full bg-gray-100">اخبار استخدامی دولتی</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
-      <div className="grid grid-cols-12 gap-4 p-4 md:p-7 ">
+    <div className=" max-w-7xl mx-auto">
+      <div className="px-4 mt-5">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+      
+      <div className="grid grid-cols-12 gap-4 p-4 md:p-2 ">
 
         <div className="col-span-12 lg:col-span-3">
           <FiltersSidebar />
@@ -181,9 +182,9 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
             {/* بخش تعداد نتایج (در موبایل میره دوم) */}
             <div className="w-full md:w-auto text-right order-1 md:order-1">
-              <p className="text-slate-600 text-sm md:text-base flex items-center gap-1.5">
+              <p className="text-slate-600   flex items-center gap-1.5">
                 تعداد نتایج:
-                <span className="text-emerald-600 font-black text-lg">
+                <span className="text-emerald-600 font-black ">
                   {filtered.length.toLocaleString("fa-IR")}
                 </span>
                 آگهی
@@ -210,14 +211,14 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                         <BrandLogo src={x.imageUrl} alt={x.organization ?? x.title} />
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="font-extrabold text-slate-900 text-base leading-tight group-hover:text-emerald-700 transition-colors">
+                            <h2 className="font-bold  text-base leading-tight group-hover:text-emerald-700 transition-colors">
                               {x.title}
                             </h2>
                             <StatusBadge status={x.status || 'NEWS'} />
                           </div>
 
                           <p className="text-slate-500 flex flex-wrap items-center gap-2 mt-1">
-                            {x.organization && <span className=" text-slate-700">{x.organization}</span>}
+                            {x.organization && <span className=" ">{x.organization}</span>}
                             {x.organization && <span className="text-slate-300">•</span>}
 
                             <span className="inline-flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
@@ -268,7 +269,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                 <div className="mx-auto w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
                   <MapPin className="h-8 w-8 text-slate-300" />
                 </div>
-                <p className="text-slate-500 font-medium text-sm">آگهی استخدامی با این فیلترها یافت نشد.</p>
+                <p className="text-slate-500 font-medium ">آگهی استخدامی با این فیلترها یافت نشد.</p>
               </div>
             )}
 

@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen, Layers, ArrowLeft, Bookmark, FileQuestion, FileText,
-  ChevronLeft, Home
+  ChevronLeft, Home,
+  ShoppingBasketIcon
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 type ProductType = {
   id: string | number;
@@ -70,37 +72,21 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, pathname, router, searchParams]);
 
+
+  const breadcrumbItems = [
+    {
+      label: 'منابع آموزشی',
+      href: '/resources',
+    }
+  ];
+
   return (
     <section className="w-full min-h-screen py-6 overflow-hidden font-sans" dir="rtl">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Breadcrumb - ناوبری */}
-        <nav className="flex mb-4 text-gray-500 text-bread" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
-            <li className="inline-flex items-center">
-              <Link href="/" className="inline-flex items-center  hover:text-emerald-600 border-gray-300 transition-colors border p-1 rounded-full bg-gray-100">
-                <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-                خانه
-              </Link>
-            </li>
-            <li>
-              <div className="flex items-center">
-                <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                <Link href="/resources" className={` hover:text-emerald-600  border-gray-300 transition-colors border p-1 rounded-full bg-gray-100 ${!title ? 'text-gray-800' : ''}`}>
-                  منابع آموزشی
-                </Link>
-              </div>
-            </li>
-            {title && (
-              <li aria-current="page">
-                <div className="flex items-center">
-                  <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                  <span className=" text-gray-800 border border-gray-300 p-1 rounded-full bg-gray-100">{title}</span>
-                </div>
-              </li>
-            )}
-          </ol>
-        </nav>
+
+        <div className="">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
 
         <div className="border border-gray-300 border-gra rounded-xl p-4 sm:p-6 bg-white shadow-sm space-y-6">
           {/* Header */}
@@ -121,15 +107,15 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
               </div>
 
               <div className="flex flex-col gap-0.5 sm:gap-1">
-                <h2 className="flex flex-wrap items-baseline gap-x-2 text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-gray-900">
+                <h2 className="flex flex-wrap items-baseline gap-x-2 font-extrabold tracking-tight text-gray-900">
                   <span>جدیدترین منابع </span>
                   {title && (
-                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-red-50 to-rose-50 px-2.5 py-0.5 text-base sm:text-lg font-bold text-red-600 ring-1 ring-inset ring-red-200/60">
+                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-red-50 to-rose-50 px-2.5 py-0.5 font-bold text-red-600 ring-1 ring-inset ring-red-200/60">
                       {title}
                     </span>
                   )}
                 </h2>
-                <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed">
+                <p className="text-gray-500 font-medium leading-relaxed">
                   مشاهده تمامی دوره‌ها و منابع آموزشی در یک نگاه
                 </p>
               </div>
@@ -161,8 +147,11 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-4 sm:mt-0">
                 {response.map((p, index) => {
                   const itemNumber = index + 1;
+                  const productLink = `/resources/course/${p.slug}`;
+
                   return (
-                    <Link key={p.id} href={`/resources/course/${p.slug}`} className="block h-auto">
+                    // تگ Link والد حذف و به div تبدیل شد
+                    <div key={p.id} className="block h-auto">
                       <div className="relative group/card flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
 
                         {/* شماره آیتم */}
@@ -170,9 +159,15 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           {itemNumber}
                         </div>
 
-                        {/* بخش تصویر */}
-                        <div className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t">
-                          <button className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden">
+                        {/* بخش تصویر (با تگ Link مجزا پوشانده شد) */}
+                        <Link 
+                           href={productLink} 
+                           className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
+                        >
+                          <button 
+                             className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden"
+                             onClick={(e) => e.preventDefault()} // برای جلوگیری از هدایت هنگام کلیک روی بوکمارک
+                          >
                             <Bookmark className="w-4 h-4" />
                           </button>
                           <div className="relative w-full h-full">
@@ -184,25 +179,43 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                               sizes="(max-width: 640px) 130px, 200px"
                             />
                           </div>
+                        </Link>
+
+                        {/* لینک مستقل دکمه سبد خرید */}
+                        <div className="px-3 md:px-4 hidden sm:block">
+                          <Link
+                            href="/cart"
+                            aria-label="رفتن به سبد خرید"
+                            className="group flex items-center gap-3 py-2"
+                          >
+                            <span className="h-px flex-1 bg-slate-200" />
+                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-700 transition shrink-0">
+                              <ShoppingBasketIcon className="w-4 h-4" />
+                            </span>
+                            <span className="h-px flex-1 bg-slate-200" />
+                          </Link>
                         </div>
 
-                        {/* بخش اطلاعات محصول */}
-                        <div className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5">
+                        {/* بخش اطلاعات محصول (با تگ Link مجزا پوشانده شد) */}
+                        <Link 
+                           href={productLink}
+                           className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
+                        >
                           {/* عنوان محصول */}
-                          <h3 className="text-gray-800 font-bold text-sm sm:text-slate-700 sm:font-medium sm:text-base md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
+                          <h3 className="text-gray-800 md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
                             {p.name}
                           </h3>
 
                           {/* ویژگی‌های محصول */}
                           <div className="flex flex-col gap-1.5 mt-2">
                             <div className="flex items-center">
-                              <span className="bg-[#EEF2FF] text-[#4F46E5] text-xs px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
+                              <span className="bg-[#EEF2FF] text-10 text-[#4F46E5]  px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
                                 <FileQuestion className="w-3.5 h-3.5" />
                                 سوالات دولتی و تالیفی طبقه بندی شده
                               </span>
                             </div>
                             <div className="flex items-center">
-                              <span className="text-[#121211] text-xs px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
+                              <span className="text-[#121211] text-10  px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
                                 <FileText className="w-3.5 h-3.5 text-gray-500" />
                                 دارای پاسخ تشریحی
                               </span>
@@ -211,24 +224,24 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
 
                           {/* بخش قیمت و دکمه */}
                           <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
-                            <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 text-sm font-medium items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
+                            <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 font-medium items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
                               مشاهده بانک سوالات
                             </button>
-                            
+
                             {/* قیمت در موبایل */}
-                            <div className="text-gray-600 text-sm font-medium sm:hidden">
+                            <div className="text-gray-600 font-medium sm:hidden">
                               {p.newPrice === 0 ? "رایگان" : toman(p.newPrice)}
                             </div>
-                            
+
                             {/* لینک موبایل */}
                             <div className="text-[#3b82f6] text-xs flex items-center gap-1 sm:hidden">
                               <span>شروع یادگیری</span>
                               <ArrowLeft className="w-4 h-4" />
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>

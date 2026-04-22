@@ -90,7 +90,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="relative text-bodyall z-50 w-full border-b border-gray-300   bg-white font-sans transition-all duration-300">
+      <header className="relative  z-50 w-full border-b border-gray-300   bg-white font-sans transition-all duration-300">
         <div className="mx-auto px-2 pl-6 h-[72px] flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
@@ -258,7 +258,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                 aria-expanded={open}
               >
                 <User size={18} />
-                <span className="hidden sm:inline text-xs sm:text-sm">حساب کاربری</span>
+                <span className="hidden sm:inline text-xs ">حساب کاربری</span>
               </button>
 
               <div
@@ -272,7 +272,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                 role="menu"
               >
                 {isLoading ? (
-                  <div className="flex justify-center py-3 text-gray-400 text-sm">
+                  <div className="flex justify-center py-3 text-gray-400 ">
                     در حال بررسی...
                   </div>
                 ) : !isLoggedIn ? (
@@ -284,7 +284,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                     className="w-full flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 transition border-b border-slate-100"
                     role="menuitem"
                   >
-                    <span className="text-xs sm:text-sm">ورود/ثبت‌نام</span>
+                    <span className="">ورود/ثبت‌نام</span>
                     <LogIn size={18} className="text-slate-500" />
                   </button>
                 ) : (
@@ -295,7 +295,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                       className="flex items-center justify-between px-4 py-3 text-green-600 bg-green-50 hover:bg-green-100 transition border-b border-red-100"
                       role="menuitem"
                     >
-                      <span className="text-sm">ورود به پنل </span>
+                      <span className="">ورود به پنل </span>
                       <User size={18} className="text-green-600" />
                     </Link>
                     <hr />
@@ -307,7 +307,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                       className="w-full flex items-center justify-between px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 transition"
                       role="menuitem"
                     >
-                      <span className="text-xs sm:text-sm">خروج از حساب</span>
+                      <span className="">خروج از حساب</span>
                       <LogOut size={18} className="text-red-600" />
                     </button>
                   </div>

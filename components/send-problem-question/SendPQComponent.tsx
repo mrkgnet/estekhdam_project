@@ -17,7 +17,7 @@ export default function SendPQComponent() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-amber-600 bg-white/60 hover:bg-amber-50/60 rounded-lg transition-all duration-200 shadow-sm border border-gray-200/50 hover:border-amber-200/80"
+        className="group flex items-center gap-1.5 px-3 py-1.5 text-10 font-medium text-gray-500 hover:text-amber-600 bg-white/60 hover:bg-amber-50/60 rounded-lg transition-all duration-200 shadow-sm border border-gray-200/50 hover:border-amber-200/80"
       >
         <span>گزارش وجود مشکل در سوال</span>
         <svg
@@ -39,11 +39,11 @@ export default function SendPQComponent() {
       {open && (
         <div className="fixed inset-0 z-20 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 "
             onClick={() => setOpen(false)}
           />
 
-          <div className="relative z-40 w-[98%] shadow max-w-md rounded-2xl bg-white p-5 shadow-xl top-32 border border-gray-300" dir="rtl">
+          <div className="relative z-40 w-[98%] shadow max-w-md rounded-2xl bg-white p-5 shadow-xl top-20 md:top-0 border border-gray-300" dir="rtl">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-gray-800">گزارش مشکل در سوال </h3>
               <button
@@ -59,7 +59,7 @@ export default function SendPQComponent() {
               <div>
                 <label htmlFor="questionId" className="block text-xs font-medium text-gray-700 mb-1">
                   شناسه سوال
-                  <span className='text-[10px] mx-1'>(جلوی هر سوال نوشته شده )</span>
+                  *
                 </label>
                 <input
                   id="questionId"
@@ -75,7 +75,7 @@ export default function SendPQComponent() {
 
               <div>
                 <label htmlFor="description" className="block text-xs font-medium text-gray-700 mb-1">
-                  توضیحات
+                  توضیحات*
                 </label>
                 <textarea
                   id="description"

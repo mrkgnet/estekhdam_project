@@ -43,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} bg-white text-slate-900`} suppressHydrationWarning>
+      <body className={`${iransans.className} bg-white text-slate-600 text-12 sm:text-12 md:text-13 `} suppressHydrationWarning>
 
 
         <NextTopLoader color="#ef4444" height={2} showSpinner={false} />

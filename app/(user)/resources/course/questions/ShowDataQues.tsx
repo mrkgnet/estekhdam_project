@@ -16,6 +16,7 @@ import AuthModal from "@/components/modals/AuthModal";
 import CommentManagment from "@/components/comment/CommentManagmet";
 import SendPQComponent from "@/components/send-problem-question/SendPQComponent";
 import { CopyClipBoard } from "@/components/copy-clipboard/CopyClipBoard";
+import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
 type ChoiceKey = "A" | "B" | "C" | "D";
 
@@ -182,51 +183,31 @@ export default function ExamPage({
   };
 
 
+  const breadcrumbItems = [
+
+
+    {
+      label: pname,
+      href: `/resources/course/${pname}`,
+    },
+
+    {
+      label: 'سوالات',
+      href: ``,
+    },
+
+  ];
+
+
+
   return (
     <div className=" min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
       {/* bread crumb  */}
-      <nav className="flex mb-2 font-medium text-bread text-gray-500 mt-5 px-4 overflow-x-auto" aria-label="Breadcrumb">
-        <ol className="flex items-center flex-nowrap min-w-max space-x-1 space-x-reverse md:space-x-2">
-          <li className="inline-flex items-center flex-shrink-0">
-            <Link href="/" className="inline-flex items-center hover:text-emerald-600 border-gray-300 transition-colors border p-1 rounded-full bg-gray-100 whitespace-nowrap">
-              <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-              خانه
-            </Link>
-          </li>
-          <li className="flex-shrink-0">
-            <div className="flex items-center">
-              <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <Link
-                href="/resources"
-                className="hover:text-emerald-600 transition-colors border border-gray-300 p-1 rounded-full bg-gray-100 whitespace-nowrap"
-              >
-                منابع آموزشی
-              </Link>
-            </div>
-          </li>
-          <li className="flex-shrink-0">
-            <div className="flex items-center">
-              <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <Link
-                href={`/resources/course/${pname}`}
-                className="hover:text-emerald-600 transition-colors border border-gray-300 p-1 rounded-full bg-gray-100 whitespace-nowrap"
-              >
-                {pname}
-              </Link>
-            </div>
-          </li>
-          <li className="flex-shrink-0">
-            <div className="flex items-center">
-              <ChevronLeft className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <span className="border p-1 rounded-full bg-gray-100 border-gray-300 whitespace-nowrap">
-                سوالات
-              </span>
-            </div>
-          </li>
-        </ol>
-      </nav>
 
-      <hr />
+
+      <div className="mt-4">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
 
       <AnimatePresence>
         {isAuthModalOpen && (
@@ -238,7 +219,13 @@ export default function ExamPage({
 
         {/* 🟢 سایدبار با قابلیت فیلترهای چندگانه */}
         <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
+          <div className="flex text-10 gap-2">
+            <SendPQComponent />
+            {q.code && (
+              <CopyClipBoard className="text-10" text={q.code} label="شناسه سوال:" />
 
+            )}
+          </div>
 
 
           <div className="lg:hidden">
@@ -249,20 +236,21 @@ export default function ExamPage({
             >
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-gray-600" />
-                <h3 className="text-bodyh">فیلتر سوالات</h3>
+                <h3 className="font-semibold">فیلتر سوالات</h3>
               </div>
               <ChevronDown
                 className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isMobileFilterOpen ? "rotate-180" : "rotate-0"}`}
               />
             </button>
-            <SendPQComponent />
+
           </div>
 
+
           {/* هدر سایدبار در دسکتاپ */}
-          <div className="hidden lg:flex z-20 items-center justify-between w-full mb-4 px-2 py-1 bg-gray-50/50 rounded-xl border border-gray-100/50 backdrop-blur-sm">
+          <div className="hidden lg:flex z-20 items-center justify-between w-full  px-2 py-1 bg-gray-50/50 rounded border border-gray-100/50 backdrop-blur-sm">
             {/* سمت راست - فیلتر */}
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-white rounded-lg shadow-sm border border-gray-200/60">
+              <div className="p-1.5 bg-white rounded shadow-sm border border-gray-200/60">
                 <Filter className="w-4 h-4 text-gray-700" />
               </div>
               <h3 className="text-sm  bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
@@ -271,7 +259,7 @@ export default function ExamPage({
             </div>
 
             {/* سمت چپ - دکمه گزارش مشکل */}
-            <SendPQComponent />
+
           </div>
 
           <div className={`${isMobileFilterOpen ? 'flex' : 'hidden'} lg:flex z-10 bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden flex-col`}>
@@ -318,7 +306,7 @@ export default function ExamPage({
                       <button
                         onClick={() => handleChapterClick(null)}
                         disabled={isPending}
-                        className={`text-right p-2.5 rounded-lg transition-all
+                        className={`text-right p-2.5 rounded transition-all
                             ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}
                           `}
                       >
@@ -432,7 +420,7 @@ export default function ExamPage({
         </aside>
 
         <main className="w-full flex-1 flex flex-col min-w-0 pb-10">
-          <header className="flex items-center justify-between bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/60 mb-5">
+          <header className="flex items-center justify-between bg-white p-4 sm:p-5 rounded shadow-sm border border-slate-200/60 mb-5">
             <div className="flex items-center gap-4">
               <div className="bg-green-100 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl shrink-0">
                 <GraduationCap className="w-6 h-6 text-green-600" />
@@ -472,7 +460,7 @@ export default function ExamPage({
 
           <div className="relative z-10">
             {isPending && (
-              <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-2xl border border-white/50">
+              <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded border border-white/50">
                 <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
               </div>
             )}
@@ -493,10 +481,7 @@ export default function ExamPage({
                       {q.text}
                     </h2>
 
-                    {q.code && (
-                      <CopyClipBoard className="text-xs" text={q.code} label="شناسه سوال:" />
 
-                    )}
                   </div>
 
                   <div className="space-y-3.5">
@@ -569,7 +554,7 @@ export default function ExamPage({
                   <button
                     disabled={currentStep === 1 || isPending}
                     onClick={() => handleNavigation(currentStep - 1)}
-                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-12 sm:h-14 rounded-xl text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-10 sm:h-12 rounded text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
                   >
                     <ChevronRight className="w-5 h-5" />
                     سوال قبلی
@@ -578,7 +563,7 @@ export default function ExamPage({
                   <button
                     disabled={currentStep === totalCount || isPending}
                     onClick={() => handleNavigation(currentStep + 1)}
-                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-12 sm:h-14 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-base"
+                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-10 sm:h-12 rounded bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-base"
                   >
                     سوال بعدی
                     <ChevronLeft className="w-5 h-5" />

@@ -39,7 +39,7 @@ export default function ShowDataSLTL({
 
   return (
     // اضافه شدن h-full برای پر کردن ارتفاع والد
-    <div className="w-full mx-auto text-xs md:text-sm relative px-2 h-full" dir="rtl">
+    <div className="w-full mx-auto   relative px-2 h-full" dir="rtl">
       
       <style jsx global>{`
         .custom-swiper-progress {
@@ -66,7 +66,7 @@ export default function ShowDataSLTL({
       `}</style>
 
       {/* حذف min-h-[300px] و اضافه شدن h-full */}
-      <div className="relative group h-full pt-2 text-bodyall">
+      <div className="relative group h-full pt-2 ">
         <div className="custom-swiper-progress"></div>
 
         <Swiper

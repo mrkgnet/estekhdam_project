@@ -68,7 +68,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
       status: news.status,
       timeAgo: new Date(news.createdAt).toLocaleDateString("fa-IR"),
       image: news.imageUrl || "/images/placeholder.png",
-      href: `/jobnews/government/${news.id}`,
+      href: `/jobnews/government/${news.slugNews}`,
     }));
   }, [govNews]);
 
@@ -76,14 +76,14 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
 
   return (
     // استایل باکس اصلی هماهنگ با صفحه اصلی (rounded-2xl)
-    <div className="w-full text-bodyall   rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
+    <div className="w-full    rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
 
       {/* header */}
       <div className="mb-5 md:mb-6 flex flex-col gap-4 border-b border-slate-100 pb-4 md:pb-5 md:flex-row md:items-center md:justify-between">
 
         <div className="flex items-center gap-3">
           <div className="h-6 md:h-7 w-1.5 rounded-full bg-sky-500"></div>
-          <h2 className=" font-bold  text-slate-800 text-base">
+          <h2 className="   text-slate-600 text-base">
             جدیدترین اخبار استخدامی
           </h2>
         </div>
@@ -101,7 +101,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                 className={`flex w-1/2 md:w-auto items-center justify-center gap-2 rounded-lg px-4 py-2  font-medium transition-all ${
                   active
                     ? "bg-white text-sky-600 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+                    : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -131,7 +131,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                 <div className="flex flex-col gap-2 min-w-0">
                   {/* flex-wrap برای جلوگیری از بیرون زدن بج در صورت طولانی بودن متن در موبایل */}
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h3 className="line-clamp-2 text-bodyh  text-slate-800 group-hover:text-sky-700 transition-colors">
+                    <h3 className=" font-semibold  text-slate-600 group-hover:text-sky-700 transition-colors">
                       {it.title}
                     </h3>
                     <StatusBadge status={it.status || "NEWS"} />
