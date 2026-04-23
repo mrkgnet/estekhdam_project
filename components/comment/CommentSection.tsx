@@ -56,7 +56,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                 formRef.current?.reset();
             }
 
-            toast.success(state.message || "دیدگاه شما ثبت شد");
+            // toast.success(state.message || "دیدگاه شما ثبت شد");
             setShowMessage(true);
             setTimeout(() => setShowMessage(false), 5000);
 
@@ -76,16 +76,16 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
     };
 
     return (
-        <div className=" w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 bg-white/50 backdrop-blur-xl  shadow-sm border border-gray-100/80 my-10" dir="rtl">
+        <div className=" w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 bg-white/50 backdrop-blur-xl  shadow-sm border border-slate-100/80 my-10" dir="rtl">
 
-            <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-5">
+            <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-5">
                 <div className="flex items-center gap-3">
                     <div className="bg-indigo-50 p-3 rounded text-indigo-600 shadow-inner">
                         <MessageSquare size={24} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h2 className="text-base  text-gray-800 tracking-tight">دیدگاه کاربران</h2>
-                        <p className=" text-gray-500 mt-1">نظرات و تجربیات خود را به اشتراک بگذارید</p>
+                        <h2 className="text-base  text-slate-800 tracking-tight">دیدگاه کاربران</h2>
+                        <p className=" text-slate-500 mt-1">نظرات و تجربیات خود را به اشتراک بگذارید</p>
                     </div>
                 </div>
             </div>
@@ -110,7 +110,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                 </AnimatePresence>
 
                 <div className="flex gap-4 relative">
-                    <div className="hidden sm:flex flex-shrink-0 w-12 h-12 bg-indigo-100 rounded items-center justify-center text-indigo-600 border border-white shadow-sm">
+                    <div className="hidden sm:flex flex-shrink-0 w-10 h-10 bg-indigo-100 rounded items-center justify-center text-indigo-600 border border-white shadow-sm">
                         <User size={22} />
                     </div>
 
@@ -120,13 +120,13 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                             onChange={(e) => setNewComment(e.target.value)}
                             name="newComment"
                             placeholder="دیدگاه خود را اینجا بنویسید (نیاز به لاگین نیست)..."
-                            className="w-full min-h-[130px] p-5 bg-white border border-gray-200 rounded focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-gray-700"
+                            className="w-full min-h-[130px] p-5 bg-white border border-slate-200 rounded focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-slate-700"
                             disabled={isPending}
                         />
                         <button
                             type="submit"
                             disabled={!newComment.trim() || isPending}
-                            className="absolute bottom-4 left-4 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 text-white px-6 py-2 rounded-xl text-sm font-bold transition-all"
+                            className="absolute bottom-4 left-4 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white px-6 py-2 rounded-xl  transition-all"
                         >
                             {isPending && !replyingTo ? "در حال ارسال..." : "ارسال دیدگاه"}
                         </button>
@@ -136,7 +136,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
 
             {/* لیست کامنت‌ها */}
             <div className="space-y-6">
-                <h3 className=" text-gray-700 mb-6">
+                <h3 className=" text-slate-700 mb-6">
                     نظرات منتشر شده ({commentsList.length})
                 </h3>
 
@@ -147,18 +147,18 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                         : comment.user?.username || "کاربر سایت";
 
                     return (
-                    <div key={comment.id} className="bg-white border border-gray-100 rounded p-4 sm:p-6 shadow-sm">
+                    <div key={comment.id} className="bg-white border border-slate-100 rounded p-4 sm:p-6 shadow-sm">
                         
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-500">
+                                <div className="w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-slate-500">
                                     <User size={20} />
                                 </div>
                                 <div>
-                                    <div className=" text-gray-800 ">
+                                    <div className=" text-slate-600  ">
                                         {commenterName}
                                     </div>
-                                    <div className=" text-gray-400 flex items-center gap-1 mt-1">
+                                    <div className=" text-slate-400 flex items-center gap-1 mt-1">
                                         <Calendar size={12} />
                                         {new Date(comment.createdAt).toLocaleDateString("fa-IR")}
                                     </div>
@@ -173,7 +173,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                             </button>
                         </div>
                         
-                        <p className="text-gray-600  leading-relaxed mb-4">
+                        <p className="text-slate-600  leading-relaxed mb-4">
                             {comment.textComment}
                         </p>
 
@@ -184,7 +184,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                                 <AnimatePresence>
                                     {replyingTo?.id === comment.id && (
                                         <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                                            <form action={formNewCommentAction} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                            <form action={formNewCommentAction} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                                 <input type="hidden" name="productId" value={productId} />
                                                 <input type="hidden" name="parentId" value={comment.id} />
                                                 <textarea
@@ -193,10 +193,10 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                                                     onChange={(e) => setReplyText(e.target.value)}
                                                     name="newComment"
                                                     placeholder={`در پاسخ به ${replyingTo.name}...`}
-                                                    className="w-full min-h-[80px] p-3 bg-white border border-gray-200 rounded  outline-none focus:border-indigo-400"
+                                                    className="w-full min-h-[80px] p-3 bg-white border border-slate-200 rounded  outline-none focus:border-indigo-400"
                                                 />
                                                 <div className="flex justify-end gap-2 mt-2">
-                                                    <button type="button" onClick={() => setReplyingTo(null)} className=" text-gray-500 px-3 py-1">انصراف</button>
+                                                    <button type="button" onClick={() => setReplyingTo(null)} className=" text-slate-500 px-3 py-1">انصراف</button>
                                                     <button type="submit" disabled={isPending} className=" bg-indigo-600 text-white px-4 py-1.5 rounded-lg">
                                                         {isPending ? "..." : "ارسال پاسخ"}
                                                     </button>
@@ -213,16 +213,16 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                                         : reply.user?.username || "کاربر مهمان";
 
                                     return (
-                                    <div key={reply.id} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative">
+                                    <div key={reply.id} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 relative">
                                         <div className="flex items-center gap-2 mb-2">
                                             <div className="w-7 h-7 bg-purple-50 rounded flex items-center justify-center text-purple-500">
                                                 <User size={14} />
                                             </div>
-                                            <div className=" text-gray-700">
+                                            <div className=" text-slate-700">
                                                 {replyName}
                                             </div>
                                         </div>
-                                        <p className="text-gray-600  leading-relaxed">
+                                        <p className="text-slate-600  leading-relaxed">
                                             {reply.textComment}
                                         </p>
                                     </div>

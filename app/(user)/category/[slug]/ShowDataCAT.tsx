@@ -4,7 +4,6 @@ import { ROUTES } from '@/lib/constats';
 import Link from 'next/link';
 import Image from 'next/image';
 import React from 'react';
-import { ChevronLeft, Home } from 'lucide-react';
 
 // توابع کمکی
 const toman = (n: number) => `${n?.toLocaleString("fa-IR")} تومان`;
@@ -56,7 +55,7 @@ export default function ShowDataCat({ response }: ShowDataProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <h2 className="">دسته‌بندی مورد نظر یافت نشد.</h2>
-                    <Link href="/" className="mt-6 px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl  hover:bg-slate-200 transition-colors">
+                    <Link href="/" className="mt-6 px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors">
                         بازگشت به خانه
                     </Link>
                 </div>
@@ -68,99 +67,10 @@ export default function ShowDataCat({ response }: ShowDataProps) {
     const products = category.products;
 
     return (
-        <div className=" text-xs md:text-sm mx-auto p-4  max-w-7xl" dir="rtl">
-
-            {/* مسیر راهنما (Breadcrumb) */}
-            <nav className="flex font-medium  sm:text-sm text-gray-500 text-xs mb-4" aria-label="Breadcrumb">
-                <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
-                    <li className="inline-flex items-center">
-                        <Link href="/" className="inline-flex items-center hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100">
-                            <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
-                            خانه
-                        </Link>
-                    </li>
-                    <li>
-                        <div className="flex items-center">
-                            <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                            <Link
-                                href="/category"
-                                className="text-gray-800 hover:text-emerald-600 transition-colors border p-1 rounded-full bg-gray-100"
-                            >
-                                دسته بندی ها
-                            </Link>
-                        </div>
-                    </li>
-
-                    <li>
-                        <div className="flex items-center">
-                            <ChevronLeft className="w-4 h-4 text-gray-400 mx-1" />
-                            {/* 🟢 لینک زیر اصلاح شد تا کاربر را به صفحه اصلی خود دوره برگرداند */}
-                            <span
-                                className="text-gray-800  border p-1 rounded-full bg-gray-100"
-                            >
-                                {category.catName}
-                            </span>
-                        </div>
-                    </li>
-
-                </ol>
-            </nav>
-
-
-
-            {/* هدر دسته‌بندی - طراحی فلت و مینیمال */}
-            {/* هدر دسته‌بندی - طراحی فلت و مینیمال استاندارد */}
-            <div className="bg-slate-50/70 px-4 border border-slate-100 rounded-3xl p-4 md:p-4 mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-blue-100 transition-colors duration-300">
-
-                {/* بخش سمت راست: آیکون، عنوان و توضیحات */}
-                <div className="flex items-start gap-4 md:gap-5">
-                    {/* آیکون تزئینی دسته‌بندی */}
-                    <div className="hidden sm:flex shrink-0 p-3.5 bg-white rounded-2xl border border-slate-100 shadow-sm text-blue-500">
-                        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-
-                    <div>
-                        <h1 className="text-base md:text-2xl font-bold text-slate-800 mb-2.5 tracking-tight flex items-center gap-2">
-                            دوره‌های استخدامی
-                            <span className="text-blue-600 font-extrabold relative">
-                                {category.catName}
-                                {/* خط زیرین تزئینی ملایم */}
-                                <span className="absolute -bottom-1 left-0 w-full h-1 bg-blue-100/80 rounded-full"></span>
-                            </span>
-                        </h1>
-                        <p className="text-slate-500  text-xs sm:text-sm leading-relaxed max-w-2xl">
-                            لیست تمامی منابع، آموزش‌ها و آزمون‌های مرتبط با این دسته‌بندی را در اینجا مشاهده و انتخاب کنید.
-                        </p>
-                    </div>
-                </div>
-
-                {/* بخش سمت چپ: نمایش تعداد دوره‌ها */}
-                <div className="flex items-center gap-3 bg-white px-5 py-3.5 rounded-2xl border border-slate-100 shadow-sm whitespace-nowrap self-start md:self-auto w-full md:w-auto">
-                    <div className="bg-blue-50 text-blue-500 p-2 rounded-xl">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                    </div>
-                    <div className="flex flex-col text-slate-600 font-bold text-sm sm:text-base">
-                        <div className="flex items-baseline gap-1">
-                            <span className=" font-black text-slate-800 leading-none">
-                                {products.length || 0}
-                            </span>
-                        </div>
-                        <span className="text-[11px] md:text-xs font-medium text-slate-400 mt-0.5">
-                            محصول آموزشی
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
-
+        <div className="text-xs md:text-sm mx-auto p-4 max-w-7xl" dir="rtl">
             {/* لیست محصولات */}
             {products.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-16  border border-slate-300 rounded text-slate-500">
+                <div className="flex flex-col items-center justify-center p-16 border border-slate-300 rounded text-slate-500">
                     <svg className="w-12 h-12 mb-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
@@ -172,10 +82,7 @@ export default function ShowDataCat({ response }: ShowDataProps) {
                         const isFree = product.newPrice === 0;
 
                         return (
-
-
                             <Link key={product.id} href={`/resources/course/${product.slug}`}>
-
                                 <div className="relative flex shadow flex-row bg-white rounded-xl border border-slate-300 hover:border-slate-400 hover:bg-blue-50/40 transition-colors p-3 sm:p-4 gap-3 sm:gap-6 mt-4">
 
                                     {/* --- دایره ایندکس گذاری --- */}
@@ -199,12 +106,10 @@ export default function ShowDataCat({ response }: ShowDataProps) {
 
                                         {/* بخش بالا: عنوان و ویژگی‌ها */}
                                         <div>
-                                            {/* عنوان محصول: سایز فونت در موبایل کوچکتر (text-sm) */}
                                             <h3 className="text-slate-600 font-bold text-xs sm:text-sm leading-relaxed mb-2 sm:mb-4 line-clamp-2 hover:text-blue-600 transition-colors">
                                                 {product.name}
                                             </h3>
 
-                                            {/* لیست ویژگی‌ها */}
                                             <ul className="flex flex-col gap-1.5 sm:gap-2.5 mb-3 sm:mb-5 text-slate-600 text-xs sm:text-sm">
                                                 <li className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-600 truncate">
                                                     <div className="bg-emerald-50 text-emerald-500 p-1 rounded-full shrink-0">
@@ -255,13 +160,10 @@ export default function ShowDataCat({ response }: ShowDataProps) {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                                 </svg>
                                             </button>
-
                                         </div>
                                     </div>
-
                                 </div>
                             </Link>
-
                         );
                     })}
                 </div>

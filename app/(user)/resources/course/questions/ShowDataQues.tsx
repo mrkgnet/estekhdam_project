@@ -476,7 +476,7 @@ export default function ExamPage({
                 >
 
                   {/* بخش مربوط به عنوان سوال و نمایش کد سوال اضافه شده است */}
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+                  <div className="flex text-13 md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
                     <h2 className="text-slate-800 leading-relaxed flex-1">
                       {q.text}
                     </h2>

@@ -12,7 +12,7 @@ type Props = {
 
 export default async function FetchDataUser({ currentPage, searchQuery, categoryQuery, limit }: Props) {
   const response = await fetchAllProductDataAction(currentPage, limit, searchQuery, categoryQuery);
-  console.log(response)
+
 
   if (!response?.success || !response?.data) {
     return (

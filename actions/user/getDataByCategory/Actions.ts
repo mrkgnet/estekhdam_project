@@ -1,9 +1,13 @@
 "use server" 
 import { db } from "@/lib/db";
 
-export async function fetchDataByCategory(slug: string) {
+export async function fetchDataByCategory(
+  slug: string, 
+  query: string = "", 
+  page: number = 1, 
+  limit: number = 10
+) {
   try {
-    // ۱. ابتدا فقط خود دسته‌بندی را پیدا می‌کنیم
     const category = await db.category.findUnique({
       where: { 
         catSlug: slug 
@@ -14,26 +18,50 @@ export async function fetchDataByCategory(slug: string) {
       return { success: false, data: null };
     }
 
-    // ۲. حالا محصولاتی را می‌گیریم که آیدی این دسته در آرایه categoryIds آن‌ها وجود دارد
-    const products = await db.product.findMany({
-      where: {
-        categoryIds: {
-          has: category.id // 🟢 استفاده از has برای جستجو در آرایه
-        }
-      },
-      // در صورت نیاز به مرتب‌سازی محصولات (مثلا جدیدترین‌ها):
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    // محاسبه تعداد آیتم‌هایی که باید رد شوند (برای صفحه‌بندی)
+    const skip = (page - 1) * limit;
 
-    // ۳. داده‌ها را ترکیب می‌کنیم تا ساختاری که فرانت‌اند انتظار دارد (category.products) حفظ شود
+    // ایجاد شرط جستجو
+    const whereClause: any = {
+      categoryIds: {
+        has: category.id
+      }
+    };
+
+    // اصلاح نام فیلد جستجو از title به name
+    if (query) {
+      whereClause.name = {
+        contains: query,
+        mode: "insensitive" // برای جستجوی بدون حساسیت به حروف بزرگ و کوچک
+      };
+    }
+
+    // گرفتن محصولات و تعداد کل آن‌ها به صورت همزمان
+    const [products, totalCount] = await Promise.all([
+      db.product.findMany({
+        where: whereClause,
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: skip,
+        take: limit,
+      }),
+      db.product.count({
+        where: whereClause
+      })
+    ]);
+
     const resultData = {
       ...category,
       products: products
     };
 
-    return { success: true, data: resultData };
+    // totalPages برای استفاده در کامپوننت Pagination در صورت نیاز برگشت داده می‌شود
+    return { 
+      success: true, 
+      data: resultData,
+      totalPages: Math.ceil(totalCount / limit) 
+    };
     
   } catch (error) {
     console.error("Error fetching category products:", error);

@@ -16,6 +16,7 @@ datasource db {
 enum Role {
   user
   admin
+  employee
 }
 
 enum OrderStatus {

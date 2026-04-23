@@ -2,7 +2,8 @@ import React from 'react'
 import ShowDataProdcut from './ShowDataProduct'
 
 import { getDataCategory } from '@/actions/category/Actions'
-import { getDataEditProduct } from '@/actions/admin/products/government/editproduct/Actions'
+import { getDataEditProduct } from '@/actions/admin/products/government/fetchProduct/Actions'
+
 
 
 export default async function FetchDataEditProduct({ id }: { id: string }) {

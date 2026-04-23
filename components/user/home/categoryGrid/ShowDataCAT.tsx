@@ -40,7 +40,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
           دسته‌بندی‌ها
         </h2>
         <Link
-          href="/categories"
+          href="/resources"
           className="text-14 sm:text-16 md:text-16 text-slate-600 flex items-center hover:text-blue-600 transition-colors gap-1"
         >
           <span>همه</span>

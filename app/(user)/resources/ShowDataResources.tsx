@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, startTransition } from "react";
+import React from "react";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen, Layers, ArrowLeft, Bookmark, FileQuestion, FileText,
-  ChevronLeft, Home,
   ShoppingBasketIcon
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
-import SearchBar from "@/components/ui/SearchBar";
 import Pagination from "@/components/ui/Pagination";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 
@@ -26,7 +23,7 @@ interface ShowDataResourcesProps {
   response: ProductType[];
   totalPages: number;
   currentPage: number;
-  title: string
+  title: string;
 }
 
 const toman = (n: number) => {
@@ -34,104 +31,16 @@ const toman = (n: number) => {
   return `${n?.toLocaleString("fa-IR")} تومان`;
 };
 
-const calculateDiscount = (oldPrice: number, newPrice: number) => {
-  if (!oldPrice || oldPrice <= newPrice) return 0;
-  return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
-};
-
 export default function ShowDataResources({ response, totalPages, currentPage, title }: ShowDataResourcesProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const currentQuery = searchParams.get("query") || "";
-  const [searchTerm, setSearchTerm] = useState(currentQuery);
-  console.log(response)
-
-  useEffect(() => {
-    const currentUrlQuery = searchParams.get("query") || "";
-    if (searchTerm === currentUrlQuery) return;
-
-    const delayDebounceFn = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      params.set("page", "1");
-
-      if (searchTerm) {
-        params.set("query", searchTerm);
-      } else {
-        params.delete("query");
-      }
-
-      startTransition(() => {
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-      });
-
-    }, 800);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, pathname, router, searchParams]);
-
-
-  const breadcrumbItems = [
-    {
-      label: 'منابع آموزشی',
-      href: '/resources',
-    }
-  ];
+ 
 
   return (
-    <section className="w-full min-h-screen py-6 overflow-hidden font-sans" dir="rtl">
+    <section className="w-full min-h-screen overflow-hidden font-sans" dir="rtl">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="">
-          <Breadcrumb items={breadcrumbItems} />
-        </div>
+     
 
-        <div className="border border-gray-300 border-gra rounded-xl p-4 sm:p-6 bg-white shadow-sm space-y-6">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full p-1">
-            {/* Title + Icon */}
-            <div className="flex items-center gap-4 sm:gap-5 lg:gap-6">
-              <div
-                className="relative flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-50 to-white shadow-sm ring-1 ring-emerald-200/50 transition-all duration-300 hover:shadow-md hover:ring-emerald-300/70 group"
-                role="presentation"
-                aria-hidden="true"
-              >
-                <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-emerald-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out" />
-                <Layers
-                  className="relative h-6 w-6 sm:h-7 sm:w-7 text-emerald-600 transition-transform duration-300 group-hover:scale-110"
-                  strokeWidth={1.8}
-                  aria-label="آیکون منابع"
-                />
-              </div>
-
-              <div className="flex flex-col gap-0.5 sm:gap-1">
-                <h2 className="flex flex-wrap items-baseline gap-x-2 font-extrabold tracking-tight text-gray-900">
-                  <span>جدیدترین منابع </span>
-                  {title && (
-                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-red-50 to-rose-50 px-2.5 py-0.5 font-bold text-red-600 ring-1 ring-inset ring-red-200/60">
-                      {title}
-                    </span>
-                  )}
-                </h2>
-                <p className="text-gray-500 font-medium leading-relaxed">
-                  مشاهده تمامی دوره‌ها و منابع آموزشی در یک نگاه
-                </p>
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="w-full md:w-[350px] lg:w-[420px] shrink-0">
-              <SearchBar
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="جستجوی نام محصول، دوره و..."
-                className="w-full"
-              />
-            </div>
-          </div>
-        </div>
+      
 
         {/* بررسی خالی بودن داده‌ها */}
         {!response || response.length === 0 ? (
@@ -150,7 +59,6 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                   const productLink = `/resources/course/${p.slug}`;
 
                   return (
-                    // تگ Link والد حذف و به div تبدیل شد
                     <div key={p.id} className="block h-auto">
                       <div className="relative group/card flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
 
@@ -159,14 +67,14 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           {itemNumber}
                         </div>
 
-                        {/* بخش تصویر (با تگ Link مجزا پوشانده شد) */}
-                        <Link 
-                           href={productLink} 
-                           className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
+                        {/* بخش تصویر */}
+                        <Link
+                          href={productLink}
+                          className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
                         >
-                          <button 
-                             className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden"
-                             onClick={(e) => e.preventDefault()} // برای جلوگیری از هدایت هنگام کلیک روی بوکمارک
+                          <button
+                            className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden"
+                            onClick={(e) => e.preventDefault()}
                           >
                             <Bookmark className="w-4 h-4" />
                           </button>
@@ -181,7 +89,7 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           </div>
                         </Link>
 
-                        {/* لینک مستقل دکمه سبد خرید */}
+                        {/* لینک سبد خرید */}
                         <div className="px-3 md:px-4 hidden sm:block">
                           <Link
                             href="/cart"
@@ -196,17 +104,15 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           </Link>
                         </div>
 
-                        {/* بخش اطلاعات محصول (با تگ Link مجزا پوشانده شد) */}
-                        <Link 
-                           href={productLink}
-                           className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
+                        {/* اطلاعات محصول */}
+                        <Link
+                          href={productLink}
+                          className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
                         >
-                          {/* عنوان محصول */}
                           <h3 className="text-gray-800 md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
                             {p.name}
                           </h3>
 
-                          {/* ویژگی‌های محصول */}
                           <div className="flex flex-col gap-1.5 mt-2">
                             <div className="flex items-center">
                               <span className="bg-[#EEF2FF] text-10 text-[#4F46E5]  px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
@@ -222,18 +128,15 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                             </div>
                           </div>
 
-                          {/* بخش قیمت و دکمه */}
                           <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
                             <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 font-medium items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
                               مشاهده بانک سوالات
                             </button>
 
-                            {/* قیمت در موبایل */}
                             <div className="text-gray-600 font-medium sm:hidden">
                               {p.newPrice === 0 ? "رایگان" : toman(p.newPrice)}
                             </div>
 
-                            {/* لینک موبایل */}
                             <div className="text-[#3b82f6] text-xs flex items-center gap-1 sm:hidden">
                               <span>شروع یادگیری</span>
                               <ArrowLeft className="w-4 h-4" />

@@ -22,7 +22,8 @@ interface Product {
     newPrice: number;
     oldPrice?: number | null;
     imageUrl?: string | null;
-    categories?: Category[];
+    categoryIds?: string[]; // 🟢 این خط اضافه شد (آرایه آیدی‌ها که از دیتابیس می‌آید)
+    categories?: Category[]; // این را نگه دارید مشکلی ندارد
     features?: string[]
 }
 
@@ -41,7 +42,15 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
     const [state, formAction, isPending] = useActionState(editDataProductAction, initialState);
 
     // استیت‌ها
-    const [selectedCategories, setSelectedCategories] = useState<Category[]>(() => productData?.categories || []);
+    // 🟢 مقداردهی اولیه اصلاح شد: پیدا کردن آبجکت دسته‌بندی‌ها از روی آیدی آن‌ها
+    const [selectedCategories, setSelectedCategories] = useState<Category[]>(() => {
+        if (productData?.categoryIds && productData.categoryIds.length > 0) {
+            // آیدی‌ها را با لیست کل دسته‌بندی‌ها مقایسه کرده و آبجکت‌های کامل را برمی‌گرداند
+            return allCategories.filter((cat) => productData.categoryIds!.includes(cat.id));
+        }
+        return [];
+    });
+
     const [features, setFeatures] = useState<string[]>(() => productData?.features || []);
     const [featureInput, setFeatureInput] = useState("");
     const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
@@ -130,7 +139,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm font-medium"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all shadow-sm font-medium"
                 >
                     <span>بازگشت</span>
                     <ArrowLeft className="w-4 h-4" />
@@ -151,9 +160,9 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                     <input key={`feat-${index}`} type="hidden" name="features" value={feature} />
                 ))}
 
-                <section className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+                <section className="bg-white p-6 md:p-8 rounded shadow-sm border border-gray-100 space-y-6">
                     <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded">
                             <Type className="w-5 h-5" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">اطلاعات اصلی و تصویر</h2>
@@ -169,7 +178,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                                 name="name"
                                 value={productName}
                                 required
-                                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                         <div className="space-y-2">
@@ -183,7 +192,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                                 name="slug"
                                 value={productSlug}
                                 required
-                                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left font-mono text-sm"
+                                className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left font-mono text-sm"
                                 dir="ltr"
                             />
                         </div>
@@ -194,20 +203,20 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 <DollarSign className="w-4 h-4 text-gray-400" /> قیمت قبل (تومان)
                             </label>
-                            <input type="number" name="oldPrice" defaultValue={productData.oldPrice || ""} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="number" name="oldPrice" defaultValue={productData.oldPrice || ""} className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 <DollarSign className="w-4 h-4 text-green-500" /> قیمت جدید فروش (تومان) <span className="text-red-500">*</span>
                             </label>
-                            <input type="number" name="newPrice" defaultValue={productData.newPrice} required className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-green-500" />
+                            <input type="number" name="newPrice" defaultValue={productData.newPrice} required className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-green-500" />
                         </div>
                     </div>
 
                     {/* آپلود عکس */}
                     <div className="space-y-3 pt-4 border-t border-gray-100">
                         <label className="text-sm font-semibold text-gray-700">تصویر محصول <span className="text-red-500">*</span></label>
-                        <div className="relative border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50/50 rounded-2xl transition-all overflow-hidden group">
+                        <div className="relative border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50/50 rounded transition-all overflow-hidden group">
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -219,7 +228,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                             />
                             {!previewImage ? (
                                 <div className="flex flex-col items-center justify-center py-10 text-center">
-                                    <div className="w-14 h-14 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-500 group-hover:text-blue-500 transition-colors">
+                                    <div className="w-14 h-14 bg-white shadow-sm border border-gray-100 rounded flex items-center justify-center mb-4 text-gray-500 group-hover:text-blue-500 transition-colors">
                                         <UploadCloud className="w-6 h-6" />
                                     </div>
                                     <p className="text-sm font-medium text-gray-700">برای انتخاب عکس کلیک کنید یا عکس را اینجا رها کنید</p>
@@ -230,7 +239,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                                     <button
                                         type="button"
                                         onClick={clearImage}
-                                        className="absolute top-4 right-4 z-20 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded-xl shadow-sm backdrop-blur-sm transition-all"
+                                        className="absolute top-4 right-4 z-20 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded shadow-sm backdrop-blur-sm transition-all"
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
@@ -242,15 +251,15 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
 
                 {/* 2. دسته‌بندی و ویژگی‌ها */}
                 <div className="grid md:grid-cols-2 gap-6">
-                    <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
+                    <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-5">
                         <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded">
                                 <LayoutList className="w-5 h-5" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-800">دسته‌بندی‌های محصول</h2>
                         </div>
                         <div className="space-y-4">
-                            <select defaultValue="" onChange={handleSelectCategory} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
+                            <select defaultValue="" onChange={handleSelectCategory} className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
                                 <option value="" disabled>جستجو و انتخاب دسته‌بندی...</option>
                                 {allCategories.map((cat) => (
                                     <option key={cat.id} value={cat.id}>{cat.catName}</option>
@@ -258,7 +267,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                             </select>
                             <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
                                 {selectedCategories.map((cat, index) => (
-                                    <span key={index} className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg text-sm">
+                                    <span key={index} className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded text-sm">
                                         {cat.catName}
                                         <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 bg-white rounded-full p-0.5">
                                             <X className="w-3 h-3" />
@@ -269,9 +278,9 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                         </div>
                     </section>
 
-                    <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
+                    <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-5">
                         <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded">
                                 <ListChecks className="w-5 h-5" />
                             </div>
                             <h2 className="text-lg font-bold text-gray-800">ویژگی‌ها و امکانات</h2>
@@ -283,18 +292,18 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                                     value={featureInput}
                                     onChange={(e) => setFeatureInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    className="flex-1 px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                                    className="flex-1 px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                                     placeholder="مثال: دارای پاسخنامه تشریحی"
                                 />
-                                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded-xl hover:bg-emerald-200 transition-colors font-medium">
+                                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded hover:bg-emerald-200 transition-colors font-medium">
                                     افزودن
                                 </button>
                             </div>
                             <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
                                 {features.map((f, index) => (
-                                    <div key={index} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-sm">
+                                    <div key={index} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded text-sm">
                                         <span>{f}</span>
-                                        <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded-full p-0.5">
+                                        <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded p-0.5">
                                             <X className="w-3 h-3" />
                                         </button>
                                     </div>
@@ -308,12 +317,12 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
 
                 {/* 4. استفاده از کامپوننت ادیتور در بخش توضیحات */}
         {/* 🔴 3. بخش textarea قدیمی حذف شد و کامپوننت ادیتور اصلاح شد */}
-                <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+                <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-4">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                         <Tag className="w-4 h-4 text-blue-500" /> توضیحات محصول
                     </label>
                     
-                    <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                    <div className="border border-gray-200 rounded overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
                         {/* 🔴 فقط از value و onChange استفاده کنید */}
                         <RichTextEditor 
                             value={description}
@@ -332,10 +341,10 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                 {/* نوار دکمه شناور */}
                 <div className=" left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50">
                     <div className="w-full max-w-5xl flex justify-end gap-4 px-4 sm:px-6 lg:px-8">
-                        <button type="button" onClick={() => router.back()} className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors">
+                        <button type="button" onClick={() => router.back()} className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium transition-colors">
                             انصراف
                         </button>
-                        <button type="submit" disabled={isPending} className="flex items-center cursor-pointer justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20">
+                        <button type="submit" disabled={isPending} className="flex items-center cursor-pointer justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20">
                             {isPending ? "در حال ذخیره..." : "ثبت تغییرات"}
                         </button>
                     </div>
