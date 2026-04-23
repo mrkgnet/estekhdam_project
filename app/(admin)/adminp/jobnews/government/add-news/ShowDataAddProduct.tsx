@@ -10,7 +10,15 @@ import {
 } from "lucide-react";
 import { createNewsGovermentAction } from "@/actions/admin/jobnews/government/addnews/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
-import { AnimatePresence, motion } from "framer-motion"; // motion اضافه شد
+import { AnimatePresence, motion } from "framer-motion";
+
+// ✅ Persian Date Picker
+import DatePicker from "react-multi-date-picker";
+import TimePicker from "react-multi-date-picker/plugins/time_picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import DateObject from "react-date-object";
+import RichTextEditor from "@/components/editor/RichTextEditor";
 
 // وضعیت‌های قابل انتخاب
 const STATUS_OPTIONS = [
@@ -27,11 +35,11 @@ interface ProductType {
 }
 
 interface Props {
-    getDataProduct: ProductType[]; // پراپ دریافت شد
+    getDataProduct: ProductType[];
 }
 
 export default function CreateNews({ getDataProduct = [] }: Props) {
-    
+
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,11 +49,18 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     const [jobInput, setJobInput] = useState("");
     const [cities, setCities] = useState<string[]>([]);
     const [cityInput, setCityInput] = useState("");
+    
+    // استیت توضیحات برای RichTextEditor
+    const [description, setDescription] = useState("");
 
     // --- استیت‌های جدید برای محصولات ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     // ------------------------------------
+
+    // ✅ تاریخ‌های فارسی
+    const [startAt, setStartAt] = useState<DateObject | null>(null);
+    const [endAt, setEndAt] = useState<DateObject | null>(null);
 
     useEffect(() => {
         if (!state) return;
@@ -57,8 +72,11 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
             setCityInput("");
             setTitle("");
             setSlugNews("");
+            setDescription(""); // خالی کردن ادیتور
             setPreviewImage(null);
-            setSelectedProductIds([]); // ریست کردن محصولات بعد از ثبت موفق
+            setSelectedProductIds([]);
+            setStartAt(null);
+            setEndAt(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
             // router.push("/adminp/jobnews/government");
         } else {
@@ -90,10 +108,10 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
 
     // --- تابع انتخاب/حذف محصول از لیست ---
     const toggleProductSelection = (productId: string) => {
-        setSelectedProductIds(prev => 
-            prev.includes(productId) 
-            ? prev.filter(id => id !== productId) 
-            : [...prev, productId]
+        setSelectedProductIds(prev =>
+            prev.includes(productId)
+                ? prev.filter(id => id !== productId)
+                : [...prev, productId]
         );
     };
 
@@ -114,7 +132,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-
     // slug generator 
     const [title, setTitle] = useState("");
     const [slugNews, setSlugNews] = useState("");
@@ -125,7 +142,7 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative text-xs md:text-sm">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative text-xs md:text-sm">
             {/* هدر صفحه */}
             <div className="flex flex-wrap items-center justify-between mt-6 mb-8 gap-4">
                 <div>
@@ -144,9 +161,24 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
             <form action={formAction} className="space-y-6">
                 <input type="hidden" name="jobs" value={JSON.stringify(jobs)} />
                 <input type="hidden" name="cities" value={JSON.stringify(cities)} />
-                
+
                 {/* --- اینپوت مخفی برای ارسال محصولات به اکشن سرور --- */}
                 <input type="hidden" name="productIds" value={JSON.stringify(selectedProductIds)} />
+
+                {/* ارسال محتوای RichTextEditor به سرور */}
+                <input type="hidden" name="description" value={description} />
+
+                {/* ✅ تاریخ‌ها به صورت ISO ارسال می‌شوند */}
+                <input
+                    type="hidden"
+                    name="startAt"
+                    value={startAt ? startAt.toDate().toISOString() : ""}
+                />
+                <input
+                    type="hidden"
+                    name="endAt"
+                    value={endAt ? endAt.toDate().toISOString() : ""}
+                />
 
                 {state?.success === false && (
                     <div className="p-4 bg-red-50 text-red-700 rounded-xl border border-red-100 flex items-center gap-2">
@@ -186,12 +218,15 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                         </div>
                     </div>
 
+                    {/* بخش ادیتور متن */}
                     <div className="space-y-3">
                         <label className="text-slate-700">توضیحات تکمیلی</label>
-                        <textarea name="description" rows={4} placeholder="توضیحات مربوط به آزمون را اینجا بنویسید..." className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-y placeholder:text-slate-400" />
-                   
-                   
-                   
+                        <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                            <RichTextEditor
+                                value={description}
+                                onChange={setDescription}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-3 pt-4">
@@ -225,11 +260,29 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                         <div className="space-y-5">
                             <div className="space-y-2">
                                 <label className="text-slate-700">تاریخ شروع</label>
-                                <input type="datetime-local" name="startAt" className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600" />
+                                <DatePicker
+                                    value={startAt}
+                                    onChange={(val) => setStartAt(val as DateObject | null)}
+                                    calendar={persian}
+                                    locale={persian_fa}
+                                    format="YYYY/MM/DD HH:mm"
+                                    plugins={[<TimePicker position="bottom" />]}
+                                    inputClass="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600"
+                                    containerClassName="w-full"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-slate-700">تاریخ پایان</label>
-                                <input type="datetime-local" name="endAt" className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600" />
+                                <DatePicker
+                                    value={endAt}
+                                    onChange={(val) => setEndAt(val as DateObject | null)}
+                                    calendar={persian}
+                                    locale={persian_fa}
+                                    format="YYYY/MM/DD HH:mm"
+                                    plugins={[<TimePicker position="bottom" />]}
+                                    inputClass="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600"
+                                    containerClassName="w-full"
+                                />
                             </div>
 
                             {/* --- دکمه باز کردن مودال انتخاب محصول --- */}
@@ -271,11 +324,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* 3. تگ‌ها (شغل‌ها و شهرها) - بخش کدهای شما بدون تغییر */}
-                <div className="grid md:grid-cols-2 gap-6">
-                    {/* کدهای شغل‌ها و شهرها که قبلا نوشته بودید اینجا قرار می‌گیرد... */}
                 </div>
 
                 <div className="sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 sm:p-5 flex justify-end z-40 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.05)] -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mt-12">

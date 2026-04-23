@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
-import crypto from "crypto"; // 👈 ۱. اضافه کردن ماژول داخلی crypto برای هش کردن
+import crypto from "crypto";
 
 export async function createNewsGovermentAction(prevState: any, formData: FormData) {
   try {
@@ -17,7 +17,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     if (!currentUser || currentUser.role !== "admin") {
       return {
         success: false,
-        message: "دسترسی غیرمجاز. فقط ادمین می‌تواند کاربر اضافه کند.",
+        message: "دسترسی غیرمجاز. فقط ادمین می‌تواند آگهی اضافه کند.",
       };
     }
 
@@ -31,13 +31,13 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
 
-      // 👈 ۲. ساخت هش بر اساس محتوای فایل (نه اسم آن)
+      // ساخت هش بر اساس محتوای فایل
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
 
       // استخراج پسوند فایل (مثلا .jpg یا .png)
       const extension = path.extname(imageFile.name) || ".jpg";
 
-      // اسم فایل حالا ترکیبی از هش محتوا و پسوند آن است
+      // اسم فایل ترکیبی از هش محتوا و پسوند آن است
       const filename = `${hash}${extension}`;
 
       const uploadDir = path.join(process.cwd(), "public", "images", "jobnews", "government");
@@ -46,16 +46,16 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
       // اطمینان از وجود پوشه
       await fs.mkdir(uploadDir, { recursive: true });
 
-      // 👈 ۳. بررسی اینکه آیا عکسی با این محتوا از قبل در سرور وجود دارد؟
+      // بررسی اینکه آیا عکسی با این محتوا از قبل در سرور وجود دارد؟
       let fileExists = false;
       try {
-        await fs.access(savePath); // اگر فایل وجود نداشته باشد، خطا می‌دهد و به catch می‌رود
+        await fs.access(savePath);
         fileExists = true;
       } catch (error) {
         fileExists = false;
       }
 
-      // 👈 ۴. فقط در صورتی فایل را در هارد می‌نویسیم که از قبل وجود نداشته باشد
+      // فقط در صورتی فایل را در هارد می‌نویسیم که از قبل وجود نداشته باشد
       if (!fileExists) {
         await fs.writeFile(savePath, buffer);
         console.log("عکس جدید بود و در سرور ذخیره شد.");
@@ -63,16 +63,15 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         console.log("این عکس از قبل در سرور وجود داشت. از همان استفاده شد.");
       }
 
-      // در هر دو حالت (چه فایل جدید نوشته شده باشد چه از قبل باشد)، مسیر را به دیتابیس می‌دهیم
       finalImageUrl = `/images/jobnews/government/${filename}`;
     }
 
+    // 3. استخراج داده‌های متنی
     const {
       title = "",
       slugNews: rawSlugNews = "",
       registerUrl = "",
       organization = "",
-      imageUrl = "",
       description = "",
       startAt = "",
       endAt = "",
@@ -83,13 +82,11 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     } = rawData as Record<string, string>;
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
+    
+    // پارس کردن آرایه‌ها (با fallback امن)
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
-
-// ۱. اضافه کردن این خط برای استخراج آیدی محصولات
     const productIds = JSON.parse((formData.get("productIds") as string) || "[]");
-
-
 
     const price = priceStr ? parseInt(priceStr) : 0;
     const maxAge = maxAgeStr ? parseInt(maxAgeStr) : 0;
@@ -98,6 +95,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     const validStatuses = ["OPEN", "CARD_RECEIVED", "RESULTS_ANNOUNCED", "NEWS"];
     const finalStatus = validStatuses.includes(status) ? (status as NewsStatus) : "NEWS";
 
+    // 4. بررسی تکراری بودن اسلاگ
     const checkSlug = await db.governmentNews.findFirst({
       where: { slugNews },
     });
@@ -109,18 +107,14 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
       };
     }
 
- 
-
+    // 5. ذخیره در دیتابیس
     await db.governmentNews.create({
       data: {
         title,
         slugNews,
         registerUrl,
         organization,
-
-        // مسیر عکسی که یا تازه آپلود شده یا از عکس تکراریِ موجود استفاده کرده است
         imageUrl: finalImageUrl,
-
         description,
         startAt: startAt ? new Date(startAt) : null,
         endAt: endAt ? new Date(endAt) : null,
@@ -130,7 +124,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         status: finalStatus,
         jobs,
         cities,
-        productIds: productIds,
+        productIds, // ارسال مستقیم آرایه به Prisma
       },
     });
 

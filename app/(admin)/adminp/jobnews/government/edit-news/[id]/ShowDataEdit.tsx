@@ -9,7 +9,18 @@ import {
 } from "lucide-react";
 import { updateDataEditGov } from "@/actions/admin/jobnews/government/editnews/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
-import { motion, AnimatePresence } from "framer-motion"; // اضافه شد
+import { motion, AnimatePresence } from "framer-motion";
+
+import dynamic from "next/dynamic";
+import DateObject from "react-date-object";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import TimePicker from "react-multi-date-picker/plugins/time_picker";
+import RichTextEditor from "@/components/editor/RichTextEditor";
+
+const DatePicker = dynamic(() => import("react-multi-date-picker"), {
+  ssr: false,
+});
 
 // وضعیت‌های قابل انتخاب
 const STATUS_OPTIONS = [
@@ -19,15 +30,12 @@ const STATUS_OPTIONS = [
   { key: "NEWS", label: "اطلاعیه و خبر" },
 ];
 
-// تابع کمکی برای تبدیل تاریخ
-const formatDateForInput = (dateString?: string | null) => {
-  if (!dateString) return "";
+// تبدیل DateObject به ISO برای ارسال به سرور
+const toISO = (d?: DateObject | null) => {
+  if (!d) return "";
   try {
-    const date = new Date(dateString);
-    const offset = date.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16);
-    return localISOTime;
-  } catch (error) {
+    return d.toDate().toISOString();
+  } catch {
     return "";
   }
 };
@@ -45,6 +53,9 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
 
   const [cities, setCities] = useState<string[]>(product.cities || []);
   const [cityInput, setCityInput] = useState("");
+
+  // استیت توضیحات برای RichTextEditor
+  const [description, setDescription] = useState(product.description||"");
 
   // ================= State های مربوط به مودال محصولات =================
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -117,8 +128,28 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
     setSlugNews(generatePersianSlug(val));
   };
 
+  // ====================== تاریخ‌ها با تقویم شمسی ======================
+  const [startAt, setStartAt] = useState<DateObject | null>(() => {
+    if (!product.startAt) return null;
+    return new DateObject({
+      date: new Date(product.startAt),
+      calendar: persian,
+      locale: persian_fa,
+    });
+  });
+
+  const [endAt, setEndAt] = useState<DateObject | null>(() => {
+    if (!product.endAt) return null;
+    return new DateObject({
+      date: new Date(product.endAt),
+      calendar: persian,
+      locale: persian_fa,
+    });
+  });
+  // ====================================================================
+
   return (
-    <div className="w-full  mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative text-xs sm:text-sm">
+    <div className="w-full max-w-6xl  mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative text-xs sm:text-sm">
       {/* هدر صفحه */}
       <div className="flex flex-wrap items-center justify-between mt-6 mb-8 gap-4">
         <div>
@@ -138,11 +169,16 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
         <input type="hidden" name="id" value={product.id || ""} />
         <input type="hidden" name="jobs" value={JSON.stringify(jobs)} />
         <input type="hidden" name="cities" value={JSON.stringify(cities)} />
-        
+        {/* ارسال محتوای RichTextEditor به سرور */}
+        <input type="hidden" name="description" value={description} />
         {/* ارسال آیدی محصولات انتخاب شده به سرور - روش استاندارد چند اینپوت هم‌نام */}
         {selectedProductIds.map((id) => (
           <input key={id} type="hidden" name="productIds" value={id} />
         ))}
+
+        {/* تاریخ‌ها به ISO برای سرور */}
+        <input type="hidden" name="startAt" value={toISO(startAt)} />
+        <input type="hidden" name="endAt" value={toISO(endAt)} />
 
         {state?.success === false && (
           <div className="p-4 bg-red-50 text-red-700 rounded-xl  border border-red-100 flex items-center gap-2">
@@ -153,8 +189,7 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
 
         {/* 1. اطلاعات اصلی */}
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-6">
-            {/* ... (کدهای بخش اطلاعات اصلی بدون تغییر) ... */}
-            <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
               <Info className="w-5 h-5" />
             </div>
@@ -184,8 +219,15 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
           </div>
 
           <div className="space-y-2">
-            <label className="  text-slate-700">توضیحات تکمیلی</label>
-            <textarea name="description" defaultValue={product.description} rows={4} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y" />
+          
+            <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+              <RichTextEditor
+                value={description}
+                onChange={setDescription}
+               
+              />
+            </div>
+
           </div>
 
           <div className="space-y-3 pt-4">
@@ -212,8 +254,7 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
 
         {/* 2. زمانبندی و شرایط */}
         <div className="grid md:grid-cols-2 gap-6">
-            {/* ... (کدهای زمانبندی و شرایط بدون تغییر) ... */}
-             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-6">
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-6">
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
               <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
                 <Calendar className="w-5 h-5" />
@@ -223,11 +264,29 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
             <div className="space-y-5">
               <div className="space-y-2">
                 <label className="  text-slate-700">تاریخ شروع</label>
-                <input type="datetime-local" name="startAt" defaultValue={formatDateForInput(product.startAt)} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600" />
+                <DatePicker
+                  value={startAt}
+                  onChange={setStartAt}
+                  calendar={persian}
+                  locale={persian_fa}
+                  format="YYYY/MM/DD HH:mm"
+                  plugins={[<TimePicker position="bottom" />]}
+                  inputClass="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600"
+                  containerClassName="w-full"
+                />
               </div>
               <div className="space-y-2">
                 <label className="  text-slate-700">تاریخ پایان</label>
-                <input type="datetime-local" name="endAt" defaultValue={formatDateForInput(product.endAt)} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600" />
+                <DatePicker
+                  value={endAt}
+                  onChange={setEndAt}
+                  calendar={persian}
+                  locale={persian_fa}
+                  format="YYYY/MM/DD HH:mm"
+                  plugins={[<TimePicker position="bottom" />]}
+                  inputClass="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-slate-600"
+                  containerClassName="w-full"
+                />
               </div>
             </div>
           </div>
@@ -271,8 +330,7 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
 
         {/* 3. تگ‌ها (شغل‌ها و شهرها) */}
         <div className="grid md:grid-cols-2 gap-6">
-             {/* ... (کدهای شغل و شهر بدون تغییر) ... */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-4">
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-4">
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
               <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
                 <Briefcase className="w-5 h-5" />
@@ -386,7 +444,7 @@ export default function EditShowJobNewsGov({ getDataGov, getDataProduct }: { get
                           checked={selectedProductIds.includes(prod.id)}
                           onChange={() => toggleProductSelection(prod.id)}
                         />
-                        <span className="text-gray-700 ">{prod.name || prod.title}</span> {/* بستگی به نام فیلد در دیتابیس شما دارد */}
+                        <span className="text-gray-700 ">{prod.name || prod.title}</span>
                       </label>
                     ))}
                   </div>

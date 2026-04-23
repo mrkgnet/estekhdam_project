@@ -128,7 +128,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                 <BrandLogo src={it.image} alt={it.title} />
 
-                <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex flex-col gap-4 min-w-0">
                   {/* flex-wrap برای جلوگیری از بیرون زدن بج در صورت طولانی بودن متن در موبایل */}
                   <div className="flex flex-wrap gap-2 items-center">
                     <h3 className=" font-semibold  text-slate-600 group-hover:text-sky-700 transition-colors">
@@ -137,13 +137,8 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                     <StatusBadge status={it.status || "NEWS"} />
                   </div>
 
-                  {it.description && (
-                    <p className="line-clamp-1  text-slate-500">
-                      {it.description}
-                    </p>
-                  )}
 
-                  <div className="flex items-center gap-2 md:gap-3 text-xs text-slate-400">
+                  <div className="flex items-center gap-2 md:gap-3 text-10 sm:text-11 text-slate-400">
                     <span className="flex gap-1.5 items-center">
                       <CalendarDays className="h-3.5 w-3.5" />
                       <span>تاریخ ثبت خبر:</span>

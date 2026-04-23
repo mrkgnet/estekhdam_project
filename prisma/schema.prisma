@@ -121,10 +121,9 @@ model GovernmentNews {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  // --- خطوط جدید برای ارتباط با محصولات ---
+  // رابطه چندبه‌چند با محصول
   productIds String[]  @db.ObjectId
-  products   Product[] @relation(fields: [productIds], references: [id])
-  // ----------------------------------------
+  products   Product[] @relation("ProductNews", fields: [productIds], references: [id])
 
   @@index([startAt])
   @@index([endAt])
@@ -153,22 +152,21 @@ model Product {
   description    String?
   imageUrl       String?
   features       String[]
-  // 🟢 فقط آیدی دسته‌بندی‌ها را اینجا نگه می‌داریم
   categoryIds    String[]         @db.ObjectId
-  // روابط یک‌به‌چند (بدون مشکل حافظه)
   questions      Question[]
   comments       Comment[]
   orders         Order[]
   chapters       Chapter[]
-  // --- ارتباط با اخبار ---
+
+  // رابطه چندبه‌چند با خبر
   newsIds        String[]         @db.ObjectId
-  governmentNews GovernmentNews[] @relation(fields: [newsIds], references: [id])
-  // ---------------------------------------
+  governmentNews GovernmentNews[] @relation("ProductNews", fields: [newsIds], references: [id])
+
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  // 🟢 ایندکس برای جستجوی سریع محصولاتی که در یک دسته خاص هستند
   @@index([categoryIds])
+  @@index([newsIds])
 }
 
 model Category {

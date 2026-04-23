@@ -45,10 +45,10 @@ type News = {
 
 export type ProductType = {
   id: string;
-  name: string; 
+  name: string;
   slug: string;
   oldPrice?: number;
-  newPrice: number; 
+  newPrice: number;
   imageUrl?: string | null;
 };
 
@@ -155,8 +155,8 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
       href: '/jobnews/government',
     },
     {
-      label: item.title, 
-      href: `/jobnews/government/${item.slugNews}`, 
+      label: item.title,
+      href: `/jobnews/government/${item.slugNews}`,
     },
   ];
 
@@ -221,15 +221,31 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
               <button onClick={() => setTab("desc")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "desc" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>توضیحات</button>
               <button onClick={() => setTab("jobs")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "jobs" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>رشته‌های شغلی</button>
             </div>
-            
+
             {tab === "desc" && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
                 <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><Info className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">توضیحات آزمون</h2></div>
                 {/* 🟢 اصلاح ۳: اضافه شدن overflow-x-auto و break-words */}
-                <div className="leading-8 text-slate-700 prose prose-sm max-w-none overflow-x-auto break-words">{item.description || "توضیحی ثبت نشده است"}</div>
+                <div className="leading-8 text-slate-700 prose prose-sm max-w-none overflow-x-auto break-words">
+
+
+
+                  {item?.description ? (
+                    <div
+                      className="prose max-w-none prose-slate"
+                      dangerouslySetInnerHTML={{ __html: item.description }}
+                    />
+                  ) : (
+                    <span className="text-slate-400 italic">
+                      توضیحاتی برای این آزمون ثبت نشده است.
+                    </span>
+                  )}
+
+
+                </div>
               </div>
             )}
-            
+
             {tab === "jobs" && (
               <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
                 <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><BookOpen className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">مشاغل مورد نیاز</h2></div>
@@ -237,7 +253,7 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
               </div>
             )}
           </div>
-          
+
           <div className="col-span-12 lg:col-span-4">
             <div className="sticky top-5 space-y-4">
               <div className="bg-white border border-slate-200 rounded-3xl p-4">
@@ -259,7 +275,7 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
           </div>
         </div>
 
-        <div className="w-full overflow-hidden"> 
+        <div className="w-full overflow-hidden">
           {item.products && item.products.length > 0 && (
             <section className="mt-8">
               <RecomendedProduct
