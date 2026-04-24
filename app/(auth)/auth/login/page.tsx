@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Smartphone, Lock, ArrowRight, CheckCircle, RefreshCcw, Loader2, ChevronRight, Mail } from "lucide-react";
+import { Smartphone, Lock, ArrowRight, CheckCircle, Loader2, ChevronRight, Mail } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-const AuthPage = () => {
+// ۱. کامپوننت داخلی که شامل فرم و useSearchParams است
+const AuthForm = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -110,15 +111,13 @@ const AuthPage = () => {
   };
 
   return (
-    <div className=" flex items-center justify-center bg-gray-50 relative ">
-    
-
+    <div className="flex items-center justify-center bg-gray-50 relative min-h-screen">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-[350px] p-4">
         <div className="bg-white rounded-3xl shadow-lg p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <span />
-            <Link href="/" className=" text-gray-500 flex items-center gap-1">
+            <Link href="/" className="text-gray-500 flex items-center gap-1">
               <ChevronRight className="w-4 h-4" />
               بازگشت به خانه
             </Link>
@@ -145,9 +144,9 @@ const AuthPage = () => {
               >
                 {/* شماره موبایل */}
                 <div className="space-y-1">
-                  <label className="block   text-gray-700">شماره موبایل</label>
+                  <label className="block text-gray-700">شماره موبایل</label>
                   <div className="relative">
-                    <Smartphone className="absolute  right-3 top-3.5 w-5 h-5 text-gray-400" />
+                    <Smartphone className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
                     <input
                       ref={phoneInputRef}
                       type="tel"
@@ -162,7 +161,7 @@ const AuthPage = () => {
 
                 {/* ایمیل */}
                 <div className="space-y-1">
-                  <label className="block   text-gray-700">ایمیل (اجباری)</label>
+                  <label className="block text-gray-700">ایمیل (اجباری)</label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
                     <input
@@ -170,7 +169,7 @@ const AuthPage = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="example@gmail.com"
-                      className="w-full pr-10 py-3  px-2.5 border rounded-xl outline-none"
+                      className="w-full pr-10 py-3 px-2.5 border rounded-xl outline-none"
                       dir="ltr"
                     />
                   </div>
@@ -196,11 +195,11 @@ const AuthPage = () => {
                   onChange={(e) => setCode(e.target.value)}
                   maxLength={5}
                   placeholder="- - - - -"
-                  className="w-full text-center  tracking-widest border rounded-xl py-3"
+                  className="w-full text-center tracking-widest border rounded-xl py-3"
                   dir="ltr"
                 />
 
-                <div className="flex justify-between ">
+                <div className="flex justify-between">
                   <button onClick={reSendOtp} disabled={timer > 0} className="text-blue-600">
                     {timer > 0 ? formatTime(timer) : "ارسال مجدد"}
                   </button>
@@ -231,4 +230,16 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+
+// ۲. صفحه اصلی که کامپوننت فرم را درون Suspense رندر می‌کند
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="animate-spin w-8 h-8 text-[#fa7342]" />
+      </div>
+    }>
+      <AuthForm />
+    </Suspense>
+  );
+}

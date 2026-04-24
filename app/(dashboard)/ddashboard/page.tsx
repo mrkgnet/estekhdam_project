@@ -2,8 +2,7 @@
 import DashboardHeader from "@/components/user/dashboard/header/DashboardHeader";
 
 import QuickActions from "@/components/user/dashboard/QuickActions";
-
-import ActivityFeed from "@/components/user/dashboard/ActivityFeed";
+;
 
 import ProfileCompletion from "@/components/user/dashboard/ProfileCompletion";
 import KpiGrid from "@/components/user/dashboard/kpicard/page";
@@ -12,7 +11,7 @@ import RecentOrders from "@/components/user/dashboard/recentorder/page";
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen ">
       <DashboardHeader />
 
       <div className="max-w-7xl mx-auto px-4 py-5 lg:py-7">

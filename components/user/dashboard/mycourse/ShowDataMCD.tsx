@@ -12,7 +12,6 @@ interface ShowDataMCDProps {
 export default function ShowDataMCD({ response }: ShowDataMCDProps) {
   // استخراج دوره‌ها از ریسپانس
   const courses = response?.success && response?.data ? response.data : [];
-
   return (
     <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
       <div className="p-5 flex items-center justify-between border-b border-slate-100">
@@ -46,7 +45,7 @@ export default function ShowDataMCD({ response }: ShowDataMCDProps) {
 
                 <Link
                   // هدایت به صفحه دوره بر اساس آیدی محصول
-                  href={`/resources/course/${order.productId}`}
+                  href={`/resources/course/${order.product?.slug}`}
                   className="shrink-0 h-10 px-3 rounded-2xl bg-blue-900 text-white  text-sm
                              hover:bg-blue-800 transition inline-flex items-center gap-2"
                 >

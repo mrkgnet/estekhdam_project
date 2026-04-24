@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, LogOut, X, ChevronLeft } from "lucide-react";
-import { tabsDataUserPanel } from "@/lib/constats";
+// import { tabsDataUserPanel } from "@/lib/constats";
 import { useSidebarStore } from "@/store/sideBarStoreAdmin";
 
 export default function Sidebar() {
