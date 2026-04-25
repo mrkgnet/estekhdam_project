@@ -85,6 +85,8 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen  py-5 px-4 sm:px-6">
+
+            <p className='bg-yellow-200 block'>version -1</p>
             <AuthModal
                 isOpen={isAuthModalOpen}
                 onClose={() => setIsAuthModalOpen(false)}
@@ -116,7 +118,7 @@ export default function ContactPage() {
 
 
 
-                
+
                 {/* Grid Layout: فرم و راه‌های ارتباطی */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8  text-slate-600 text-12 sm:text-12 md:text-13">
 
