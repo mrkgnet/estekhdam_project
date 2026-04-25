@@ -6,7 +6,7 @@ import { useState } from "react";
 
 
  const provinceCenters = [
-  "کل کشور",
+  
   "تهران",
   "اراک",
   "اردبیل",

@@ -10,6 +10,7 @@ import { addContactAction } from '@/actions/user/contact/add/Actions';
 import { useAuth } from '@/context/AuthContext';
 import AuthModal from '@/components/modals/AuthModal';
 
+
 const initialState = {
     success: false,
     message: '',
@@ -109,6 +110,13 @@ export default function ContactPage() {
                         </li>
                     </ol>
                 </nav>
+
+
+
+
+
+
+                
                 {/* Grid Layout: فرم و راه‌های ارتباطی */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8  text-slate-600 text-12 sm:text-12 md:text-13">
 
