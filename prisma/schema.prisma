@@ -71,13 +71,14 @@ enum QuestionType {
 // ========= MODELS =========
 
 model User {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
-  phoneNumber    String          @unique
-  username       String?
-  otpCode        String?
-  email          String?
-  otpExpires     DateTime?
-  refreshTokens  String[]        @default([])
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber   String         @unique
+  username      String?
+  otpCode       String?
+  email         String?
+  otpExpires    DateTime?
+  refreshTokens RefreshToken[]
+
   // --- فیلدهای جدید برای پروفایل ---
   firstName      String? // نام
   lastName       String? // نام خانوادگی
@@ -99,6 +100,16 @@ model User {
   contacts  Contact[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  tokenHash String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model GovernmentNews {
@@ -144,26 +155,26 @@ model MainSlider {
 }
 
 model Product {
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  slug           String           @unique
-  oldPrice       Int?
-  newPrice       Int?
-  description    String?
-  imageUrl       String?
-  features       String[]
-  categoryIds    String[]         @db.ObjectId
-  questions      Question[]
-  comments       Comment[]
-  orders         Order[]
-  chapters       Chapter[]
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String     @unique
+  oldPrice    Int?
+  newPrice    Int?
+  description String?
+  imageUrl    String?
+  features    String[]
+  categoryIds String[]   @db.ObjectId
+  questions   Question[]
+  comments    Comment[]
+  orders      Order[]
+  chapters    Chapter[]
 
   // رابطه چندبه‌چند با خبر
   newsIds        String[]         @db.ObjectId
   governmentNews GovernmentNews[] @relation("ProductNews", fields: [newsIds], references: [id])
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([categoryIds])
   @@index([newsIds])

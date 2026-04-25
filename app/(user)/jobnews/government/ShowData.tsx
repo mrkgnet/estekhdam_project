@@ -138,23 +138,11 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
     )
   }
 
-  // آرایه‌ای از مسیرها برای Breadcrumb
-  const breadcrumbItems = [
-    {
-      label: 'اخبار استخدامی دولتی',
-      href: '/jobnews/government',
-    },
-    // {
-    //   label: item.title, // عنوان صفحه فعلی (آخرین آیتم)
-    //   href: `/jobnews/government/${item.slug}`, // آدرس صفحه فعلی
-    // },
-  ];
+
 
   return (
-    <div className=" max-w-7xl mx-auto">
-      <div className="px-4 mt-5">
-        <Breadcrumb items={breadcrumbItems} />
-      </div>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6  mt-4">
+    
       
       <div className="grid grid-cols-12 gap-4 p-4 md:p-2 ">
 
@@ -171,14 +159,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 mb-5 rounded shadow-sm">
 
-            {/* بخش جستجو (در موبایل میاد اول) */}
-            <div className="w-full md:w-80 lg:w-[400px] order-2 md:order-2">
-              <SearchBar
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="جستجو در عنوان و سازمان..."
-              />
-            </div>
+          
 
             {/* بخش تعداد نتایج (در موبایل میره دوم) */}
             <div className="w-full md:w-auto text-right order-1 md:order-1">

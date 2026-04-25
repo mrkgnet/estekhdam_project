@@ -1,44 +1,41 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef, useState } from "react";
-import axios from "axios";
-
-import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Smartphone, Lock, ArrowRight, CheckCircle, Loader2, ChevronRight, Mail } from "lucide-react";
-
-import { useAuth } from "@/context/AuthContext";
-import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-// ۱. کامپوننت داخلی که شامل فرم و useSearchParams است
-const AuthForm = () => {
+const OTP_LENGTH = 5;
+
+type Step = 0 | 1 | 2;
+
+export default function ProLoginStepper() {
+  const [step, setStep] = useState<Step>(0);
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<"phone" | "verify" | "done">("phone");
+  const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const phoneInputRef = useRef<HTMLInputElement>(null);
-  const codeInputRef = useRef<HTMLInputElement>(null);
-
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextRaw = searchParams.get("next") || "/";
-  const next = nextRaw.startsWith("/") ? nextRaw : "/";
 
-  const { checkAuth } = useAuth();
+  const isPhoneValid = phone.startsWith("09") && phone.length === 11;
+  const isStep1Valid = isPhoneValid;
 
-  // فوکوس خودکار
   useEffect(() => {
-    setTimeout(() => {
-      if (step === "phone") phoneInputRef.current?.focus();
-      if (step === "verify") codeInputRef.current?.focus();
-    }, 150);
+    if (step === 0) {
+      setTimeout(() => phoneRef.current?.focus(), 10);
+    }
+
+    if (step === 1) {
+      const t = setTimeout(() => {
+        otpRef.current?.focus();
+        otpRef.current?.select();
+      }, 10);
+      return () => clearTimeout(t);
+    }
   }, [step]);
 
-  // تایمر OTP
   useEffect(() => {
     if (timer <= 0) return;
     const interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -46,200 +43,221 @@ const AuthForm = () => {
   }, [timer]);
 
   const formatTime = (t: number) =>
-    `${Math.floor(t / 60)
+    `${Math.floor(t / 60).toString().padStart(2, "0")}:${(t % 60)
       .toString()
-      .padStart(2, "0")}:${(t % 60).toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
 
-  // ارسال OTP
-  const sendOtp = async () => {
-    if (!phone) return toast.error("شماره موبایل را وارد کنید");
-    if (phone.length !== 11 || !phone.startsWith("09")) return toast.error("شماره موبایل معتبر نیست");
-    if (!email) return toast.error("ایمیل را وارد کنید");
-    if (!email.includes("@")) return toast.error("ایمیل معتبر نیست");
-
-    setIsLoading(true);
+  const handleSendOTP = async () => {
+    if (!isStep1Valid) return;
+    setLoading(true);
     try {
-      const res = await axios.post("/api/auth/sendOTP", { phone, email });
-      if (res.data.status === "success") {
-        setStep("verify");
-        setTimer(120);
-        toast.success("کد تأیید ارسال شد");
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "خطا در ارسال کد");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ارسال مجدد
-  const reSendOtp = async () => {
-    if (timer > 0) return;
-    setIsLoading(true);
-    try {
-      await axios.post("/api/auth/sendOTP", { phone, email });
+      await fetch("/api/auth/sendOTP", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      setStep(1);
       setTimer(120);
-      toast.success("کد مجدداً ارسال شد");
-    } catch {
-      toast.error("خطا در ارسال مجدد");
+      setOtp("");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // تایید OTP
-  const verifyOtp = async () => {
-    if (!code) return toast.error("کد را وارد کنید");
+  const handleVerifyOTP = async () => {
+    if (otp.length < OTP_LENGTH) return;
 
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const res = await axios.post("/api/auth/verifyOTP", { phone, code });
-      if (res.data.status === "success") {
-        setStep("done");
-        await checkAuth();
-        toast.success("ورود موفق");
-        setTimeout(() => {
-          router.push(next);
-          router.refresh();
-        }, 700);
+      const response = await fetch("/api/auth/verifyOTP", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data?.error || "خطا در تأیید کد");
+        return;
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "کد اشتباه است");
+
+      toast.success("ورود موفقیت آمیز بود");
+      setStep(2);
+
+      setTimeout(() => router.push("/"), 500);
+    } catch (err) {
+      toast.error("خطای ارتباط با سرور");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
+
+  const steps = [
+    { title: "ورود اطلاعات", desc: "شماره موبایل" },
+    { title: "تأیید کد", desc: "کد پیامک‌شده" },
+    { title: "ورود موفق", desc: "تکمیل فرآیند" },
+  ];
 
   return (
-    <div className="flex items-center justify-center bg-gray-50 relative min-h-screen">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-[350px] p-4">
-        <div className="bg-white rounded-3xl shadow-lg p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <span />
-            <Link href="/" className="text-gray-500 flex items-center gap-1">
-              <ChevronRight className="w-4 h-4" />
-              بازگشت به خانه
-            </Link>
-          </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-[#f6f7f9] px-4">
+      <div className="w-full max-w-[440px]">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-7">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 mx-auto bg-[#fa7342] rounded-2xl flex items-center justify-center mb-3">
-              <Lock className="text-white" />
-            </div>
-            <h2 className="font-bold text-base">
-              {step === "phone" ? "ورود / ثبت‌نام" : step === "verify" ? "تأیید کد" : "خوش آمدید"}
-            </h2>
+            <h1 className="text-lg font-bold text-gray-800">ورود حرفه‌ای</h1>
+            <p className="text-xs text-gray-500 mt-1">سریع، امن و استاندارد</p>
           </div>
 
-          <AnimatePresence mode="wait">
-            {/* STEP 1 */}
-            {step === "phone" && (
-              <motion.div
-                key="phone"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-5"
-              >
-                {/* شماره موبایل */}
-                <div className="space-y-1">
-                  <label className="block text-gray-700">شماره موبایل</label>
-                  <div className="relative">
-                    <Smartphone className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
-                    <input
-                      ref={phoneInputRef}
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="09123456789"
-                      className="w-full pr-10 py-3 px-2.5 border rounded-xl outline-none"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
+          <div className="mb-7">
+            <div className="flex justify-center">
+              <div className="flex items-center justify-between w-full max-w-[360px] mx-auto">
+                {steps.map((s, i) => {
+                  const isLast = i === steps.length - 1;
+                  const isActive = i === step;
+                  const isDone = i < step;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center ${
+                        isLast ? "flex-[0.5]" : "flex-1"
+                      }`}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                            ${
+                              isDone
+                                ? "bg-green-500 text-white"
+                                : isActive
+                                ? "bg-[#fa7342] text-white"
+                                : "bg-gray-200 text-gray-500"
+                            }`}
+                        >
+                          {i + 1}
+                        </div>
+                        <div className="hidden sm:block text-center">
+                          <div
+                            className={`text-xs font-semibold ${
+                              isActive ? "text-[#fa7342]" : "text-gray-600"
+                            }`}
+                          >
+                            {s.title}
+                          </div>
+                        </div>
+                      </div>
+                      {i < steps.length - 1 && (
+                        <div
+                          className={`h-[2px] flex-1 mx-3 ${
+                            isDone ? "bg-green-500" : "bg-gray-200"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-                {/* ایمیل */}
-                <div className="space-y-1">
-                  <label className="block text-gray-700">ایمیل (اجباری)</label>
-                  <div className="relative">
-                    <Mail className="absolute right-3 top-3.5 w-5 h-5 text-gray-400" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="example@gmail.com"
-                      className="w-full pr-10 py-3 px-2.5 border rounded-xl outline-none"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={sendOtp}
-                  disabled={isLoading}
-                  className="w-full py-2.5 bg-[#fa7342] cursor-pointer text-white rounded-xl flex justify-center gap-2"
-                >
-                  {isLoading ? <Loader2 className="animate-spin" /> : "ارسال کد"}
-                  <ArrowRight />
-                </button>
-              </motion.div>
-            )}
-
-            {/* STEP 2 */}
-            {step === "verify" && (
-              <motion.div key="verify" className="space-y-4">
+          {/* STEP 1 */}
+          {step === 0 && (
+            <div className="space-y-4">
+              <div className="mt-4">
+                <label className="block text-sm text-gray-700 mb-1">
+                  شماره موبایل
+                </label>
                 <input
-                  ref={codeInputRef}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  maxLength={5}
-                  placeholder="- - - - -"
-                  className="w-full text-center tracking-widest border rounded-xl py-3"
+                  ref={phoneRef}
+                  type="tel"
+                  inputMode="numeric"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.trim())}
+                  placeholder="09123456789"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#fa7342]/30 text-left"
                   dir="ltr"
                 />
+                {!isPhoneValid && phone.length > 0 && (
+                  <p className="text-[11px] text-red-500 mt-1">
+                    شماره معتبر نیست
+                  </p>
+                )}
+              </div>
 
-                <div className="flex justify-between">
-                  <button onClick={reSendOtp} disabled={timer > 0} className="text-blue-600">
-                    {timer > 0 ? formatTime(timer) : "ارسال مجدد"}
-                  </button>
-                  <button onClick={() => setStep("phone")}>ویرایش شماره</button>
-                </div>
+              <button
+                onClick={handleSendOTP}
+                disabled={!isStep1Valid || loading}
+                className="w-full py-3 rounded-xl bg-[#fa7342] text-white font-semibold disabled:opacity-60"
+              >
+                {loading ? "در حال ارسال..." : "ارسال کد تأیید"}
+              </button>
+            </div>
+          )}
 
+          {/* STEP 2 */}
+          {step === 1 && (
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">
+                  کد تأیید
+                </label>
+                <input
+                  ref={otpRef}
+                  value={otp}
+                  onChange={(e) =>
+                    setOtp(
+                      e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH)
+                    )
+                  }
+                  maxLength={OTP_LENGTH}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  className="w-full h-12 text-center text-lg border rounded-xl focus:ring-2 focus:ring-[#fa7342]/30"
+                  dir="ltr"
+                  placeholder="-----"
+                />
+              </div>
+
+              <div className="flex justify-between text-sm">
                 <button
-                  onClick={verifyOtp}
-                  disabled={isLoading}
-                  className="w-full py-3 flex justify-center items-center bg-[#fa7342] cursor-pointer text-white rounded-xl"
+                  disabled={timer > 0}
+                  onClick={() => {
+                    if (timer > 0) return;
+                    setTimer(120);
+                    setOtp("");
+                    otpRef.current?.focus();
+                  }}
+                  className="text-blue-600 disabled:text-gray-400"
                 >
-                  {isLoading ? <Loader2 className="animate-spin" /> : "تأیید"}
+                  {timer > 0 ? formatTime(timer) : "ارسال مجدد"}
                 </button>
-              </motion.div>
-            )}
+                <button onClick={() => setStep(0)} className="text-gray-500">
+                  ویرایش اطلاعات
+                </button>
+              </div>
 
-            {/* STEP 3 */}
-            {step === "done" && (
-              <motion.div key="done" className="text-center space-y-4">
-                <CheckCircle className="mx-auto text-green-600 w-12 h-12" />
-                <p>در حال انتقال...</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              <button
+                onClick={handleVerifyOTP}
+                disabled={loading || otp.length < OTP_LENGTH}
+                className="w-full py-3 rounded-xl bg-[#fa7342] text-white font-semibold disabled:opacity-60"
+              >
+                {loading ? "در حال بررسی..." : "تأیید و ورود"}
+              </button>
+            </div>
+          )}
+
+          {/* STEP 3 */}
+          {step === 2 && (
+            <div className="text-center space-y-3">
+              <div className="w-14 h-14 mx-auto rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl">
+                ✓
+              </div>
+              <p className="text-gray-700 font-semibold">
+               (در حال انتقال به صفحه اصلی) ورود با موفقیت انجام شد
+              </p>
+            </div>
+          )}
         </div>
-      </motion.div>
-    </div>
-  );
-};
-
-
-// ۲. صفحه اصلی که کامپوننت فرم را درون Suspense رندر می‌کند
-export default function AuthPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="animate-spin w-8 h-8 text-[#fa7342]" />
       </div>
-    }>
-      <AuthForm />
-    </Suspense>
+    </div>
   );
 }

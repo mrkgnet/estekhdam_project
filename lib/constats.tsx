@@ -8,9 +8,16 @@ import { LuUser, LuShoppingCart, LuRefreshCcw, LuWallet } from "react-icons/lu";
 export const tabsDataAdminPanel = [
   {
     id: "1",
-    title: "مدیریت کاربران",
+    title: " کاربران",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
-    url: "/adminp/users",
+    url: "/",
+    subItems: [
+      {
+        id: 21,
+        title: "مشاهده اطلاعات کاربران",
+        url: "/adminp/users",
+      },
+    ]
   },
   {
     id: "2",
@@ -44,63 +51,126 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "4",
-    title: "مدیریت سفارشات ",
+    title: " سفارشات ",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
-    url: "/adminp/order",
+    url: "/",
+    subItems: [
+      {
+        id: 41,
+        title: " سفارشات کاربران",
+        url: "/adminp/order",
+      },
+    ]
   },
   {
     id: "11",
-    title: "مدیریت منوها ",
+    title: " منوها ",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
-    url: "/adminp/manage-menu",
-    
+    url: "/",
+    subItems: [
+      {
+        id: 111,
+        title: " منوهای کاربران",
+        url: "/adminp/manage-menu",
+      },
+    ]
+
   },
   {
     id: "5",
-    title: "مدیریت اسلایدر اصلی ",
+    title: "مدیریت اسلایدر  ",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/mainslider",
+    subItems: [
+      {
+        id: 51,
+        title: "مدیریت  اسلایدر اصلی",
+        url: "/adminp/manage-menu",
+      },
+    ]
   },
   {
     id: "6",
-    title: "مدیریت دسته ها ",
+    title: " دسته ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/categories",
+    subItems: [
+      {
+        id: 61,
+        title: "مدیریت دسته ها کاربران",
+        url: "/adminp/categories",
+      },
+    ]
   },
 
   {
     id: "7",
-    title: "مدیریت کامنت ها ",
+    title: " کامنت ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/comments",
+    subItems: [
+      {
+        id: 71,
+        title: " کامنت های کاربران",
+        url: "/adminp/comments",
+      },
+    ]
   },
   {
     id: "8",
-    title: "مدیریت تیکت ها ",
+    title: " تیکت ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/support/tickets",
+    subItems: [
+      {
+        id:81,
+        title: " تیکت های کاربران",
+        url: "/adminp/support/tickets",
+      },
+    ]
   },
 
 
 
   {
     id: "9",
-    title: "مدیریت فرم تماس با ما ",
+    title: " فرم تماس با ما ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/contact",
+    subItems: [
+      {
+        id: 91,
+        title: "مدیریت فرم تماس با ما ",
+        url: "/adminp/contact",
+      },
+    ]
   },
   {
     id: "10",
-    title: "مدیریت نوتیفیکشن ها ",
+    title: " پیغام ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/notifications",
+    subItems: [
+      {
+        id: 101,
+        title: "مدیریت پیغام ها ",
+        url: "/adminp/notifications",
+      },
+    ]
   },
 
-    {
+  {
     id: "12",
-    title: "مدیریت خطاهای سوال ",
+    title: "اشکاالات سوال ها",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/question-issu",
+    subItems: [
+      {
+        id: 121,
+        title: "مدیریت اشکالات سوال ها",
+        url: "/adminp/question-issu",
+      },
+    ]
   },
 ];
 

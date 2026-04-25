@@ -2,19 +2,17 @@ import { db } from "@/lib/db";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import crypto from "crypto"; // اضافه کردن ماژول crypto
 
-// 🟢 تغییر به POST چون در AuthContext درخواست axios.post می‌زنید
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    // 1️⃣ دریافت رفرش توکن (نه اکسس توکن)
     const refreshTokenCookie = cookieStore.get("refreshToken");
 
     if (!refreshTokenCookie) {
       return NextResponse.json({ error: "Refresh token missing" }, { status: 401 });
     }
 
-    // 2️⃣ اعتبارسنجی رفرش توکن (دقت کنید سکرت مربوط به رفرش توکن باشد)
     const refreshSecret = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET || "fallback_secret");
     const { payload } = await jwtVerify(refreshTokenCookie.value, refreshSecret);
 
@@ -23,7 +21,7 @@ export async function POST() {
       return NextResponse.json({ error: "Invalid payload" }, { status: 401 });
     }
 
-    // 3️⃣ یافتن کاربر برای اطمینان از وجود او و گرفتن اطلاعات جدید
+    // بررسی وجود کاربر
     const user = await db.user.findUnique({
       where: { id: userId },
     });
@@ -32,12 +30,31 @@ export async function POST() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 🟢 (اختیاری) اگر رفرش توکن‌ها را در دیتابیس ذخیره کرده‌اید، می‌توانید چک کنید که آیا این توکن در دیتابیس هست یا قبلا باطل شده
-    if (!user.refreshTokens.includes(refreshTokenCookie.value)) {
-       return NextResponse.json({ error: "Refresh token revoked" }, { status: 401 });
+    // 🟢 هش کردن توکن دریافتی از کوکی برای مقایسه با دیتابیس
+    const incomingTokenHash = crypto
+      .createHash("sha256")
+      .update(refreshTokenCookie.value)
+      .digest("hex");
+
+    // 🟢 چک کردن اینکه آیا این رفرش توکن در دیتابیس وجود دارد و منقضی نشده باشد
+    const tokenInDb = await db.refreshToken.findFirst({
+      where: {
+        userId: user.id,
+        tokenHash: incomingTokenHash,
+      },
+    });
+
+    if (!tokenInDb) {
+      return NextResponse.json({ error: "Refresh token revoked or not found" }, { status: 401 });
     }
 
-    // 4️⃣ ساخت اکسس توکنِ جدید
+    if (tokenInDb.expiresAt.getTime() < Date.now()) {
+      // پاک کردن توکن منقضی شده از دیتابیس (اختیاری)
+      await db.refreshToken.delete({ where: { id: tokenInDb.id } });
+      return NextResponse.json({ error: "Refresh token expired in DB" }, { status: 401 });
+    }
+
+    // ساخت اکسس توکنِ جدید
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_secret");
     const newAccessToken = await new SignJWT({
       userId: user.id,
@@ -49,7 +66,6 @@ export async function POST() {
       .setExpirationTime("15m") // اکسس توکن جدید برای 15 دقیقه
       .sign(secret);
 
-    // 5️⃣ ست کردن کوکیِ جدید و ارسال رسپانس
     const response = NextResponse.json({ status: "success", message: "Token refreshed successfully" });
 
     response.cookies.set("accessToken", newAccessToken, {
