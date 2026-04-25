@@ -86,7 +86,7 @@ export default function ContactPage() {
     return (
         <div className="min-h-screen  py-5 px-4 sm:px-6">
 
-            <p className='bg-yellow-200 block'>version -1</p>
+            
             <AuthModal
                 isOpen={isAuthModalOpen}
                 onClose={() => setIsAuthModalOpen(false)}
