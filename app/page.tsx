@@ -1,21 +1,17 @@
-import SideBar from "@/components/user/Sidebar";
+
 // import Header from "@/components/Header"; 
 import FetchDataMainSlider from "../components/user/home/mainslider/FetchDataMainSlider";
 import BreakingNewsComponent from "@/components/user/home/breakingnews/Gov/page";
-import LatestProductComponent from "@/components/user/home/productAndCategories/page";
 import BrandTopSlider from "@/components/user/home/BrandTopSlider";
 // import BankProductComponent from "@/components/user/home/TopicResource/page"; // این مورد استفاده نشده بود
-import TopicProductComponent from "@/components/user/home/TopicResource/page";
 import SliderTopLeftComponent from "@/components/user/home/sliderTopLeft/page";
 import HeroSearch from "@/components/HeroSearch";
 import CategoryGrid from "@/components/user/home/categoryGrid/CategoryGrid";
-import ProductAndCategories from "@/components/user/home/productAndCategories/page";
 
 import NavbarUser from "@/components/navbar/Navbar";
 import HeaderTopComponnet from "@/components/header/HeaderTopComponnet";
-import { ChevronLeft, Flame } from "lucide-react";
-import Link from "next/link";
-import { employmentNotebooksTabs, publicEmploymentTabs } from "@/lib/constats";
+
+
 import TabProductCat from "@/components/tabProductCat/TabProductCat";
 import SideBarUserComponent from "@/components/user/sidebar-user/SideBarUserComponent";
 

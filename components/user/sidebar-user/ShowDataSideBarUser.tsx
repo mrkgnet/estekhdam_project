@@ -3,8 +3,9 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, X, ChevronLeft, ListCollapse } from "lucide-react"; 
+import { LayoutDashboard, X, ChevronLeft, ListCollapse, Search } from "lucide-react";
 import { useSidebarStore } from "@/store/sideBarStoreAdmin";
+import SearchInput from "@/components/ui/SearchInput";
 
 interface ShowDataSideBarUserProps {
   response: {
@@ -18,6 +19,7 @@ interface ShowDataSideBarUserProps {
 export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserProps) {
   const pathname = usePathname();
   const { isOpen, close } = useSidebarStore();
+  const [search, setSearch] = useState("");
 
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [activeSubTabId, setActiveSubTabId] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
     if (!response || !response.success || !response.data) return [];
 
     const menus = response.data;
-    
+
     const menuMap: Record<string, any> = {};
     const tree: any[] = [];
 
@@ -38,9 +40,8 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
       menuMap[menu.id] = {
         id: menu.id,
         title: menu.name,
-        // 🟢 بررسی url سفارشی، در غیر این صورت استفاده از آدرس پیش‌فرض با اسلاگ
         url: menu.customUrl ? menu.customUrl : `/category/${menu.slug}`,
-        icon: ListCollapse, 
+        icon: ListCollapse,
         imageUrl: menu.imageUrl,
         subItems: [],
         parentId: menu.parentId,
@@ -98,6 +99,11 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
     };
   }, [isOpen, activeTabId, dynamicMenuTree]);
 
+  // ریست کردن سرچ وقتی تب اصلی عوض می‌شود
+  useEffect(() => {
+    setSearch("");
+  }, [activeTabId]);
+
   const handleInteraction = (tabId: string | null, level: number, isClick: boolean = false) => {
     if (!isClick && typeof window !== "undefined" && window.innerWidth < 768) {
       return;
@@ -147,6 +153,11 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
   const activeSubTab = activeTab?.subItems?.find((s: any) => s.id === activeSubTabId);
   const hasLevel3 = activeSubTab?.subItems && activeSubTab.subItems.length > 0;
 
+  // فیلتر کردن منوهای سطح دوم بر اساس سرچ
+  const filteredLevel2Items = activeTab?.subItems?.filter((sub: any) =>
+    sub.title.toLowerCase().includes(search.toLowerCase())
+  ) || [];
+
   return (
     <>
       {isOpen && (
@@ -162,7 +173,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
       <aside
         onMouseLeave={handleMouseLeaveDesktop}
         onMouseEnter={() => handleInteraction(null, 0)}
-        className={`fixed right-0   z-50 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
+        className={`fixed right-0 z-50 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
           transition-all duration-50
           ${isScrolled ? "top-14 h-[calc(100vh-3.5rem)]" : "top-32 h-[calc(100vh-8rem)]"}
           ${isOpen ? "translate-x-0" : "translate-x-full"} 
@@ -183,37 +194,37 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
         <div className="flex-1 flex overflow-hidden relative">
           <nav className="w-1/3 md:w-full flex-shrink-0 border-l border-gray-100 md:border-none p-2 md:p-4 space-y-1 overflow-y-auto bg-gray-50 md:bg-white z-20">
             {dynamicMenuTree.length === 0 ? (
-               <p className=" text-gray-400 text-center mt-5">منویی یافت نشد.</p>
+              <p className=" text-gray-400 text-center mt-5">منویی یافت نشد.</p>
             ) : (
-                dynamicMenuTree.map((tab) => {
+              dynamicMenuTree.map((tab) => {
                 const isActive = pathname === tab.url || pathname.startsWith(`${tab.url}/`);
                 const isSelected = activeTabId === tab.id;
 
                 return (
-                    <div
+                  <div
                     key={tab.id}
                     onMouseEnter={() => handleInteraction(tab.id, 1)}
                     onClick={() => handleInteraction(tab.id, 1, true)}
                     className="relative cursor-pointer font-bold"
-                    >
+                  >
                     <div
-                        className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
+                      className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
                                 ${isActive ? "md:bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
                                 `}
                     >
-                        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 relative z-10">
+                      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 relative z-10">
                         <div className={`p-1.5 rounded-lg ${isActive || isSelected ? "text-blue-600 md:bg-blue-600 md:text-white" : "text-gray-400"}`}>
-                            {tab.icon && <tab.icon className="h-6 w-6 md:h-5 md:w-5" />}
+                          {tab.icon && <tab.icon className="h-6 w-6 md:h-5 md:w-5" />}
                         </div>
                         <span className="text-center ">{tab.title}</span>
-                        </div>
-                        {tab.subItems && tab.subItems.length > 0 && (
+                      </div>
+                      {tab.subItems && tab.subItems.length > 0 && (
                         <ChevronLeft className={`hidden md:block h-4 w-4 ${isSelected ? "text-blue-500" : "text-gray-400"}`} />
-                        )}
+                      )}
                     </div>
-                    </div>
+                  </div>
                 );
-                })
+              })
             )}
           </nav>
 
@@ -222,42 +233,67 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
               <>
                 <Link href={activeTab.url} onClick={close} className=" text-blue-600 mb-4 flex items-center gap-1">
                   {activeTab.title}
+
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
-                <div className="space-y-4">
-                  {activeTab.subItems.map((sub: any) => {
-                    const isSubOpen = activeSubTabId === sub.id;
-                    const hasLvl3 = sub.subItems && sub.subItems.length > 0;
 
-                    return (
-                      <div key={sub.id} className="bg-gray-50 rounded-xl p-3">
-                        <div className="flex justify-between items-center">
-                          <Link href={sub.url} onClick={close} className="text-gray-800  flex-1">
-                            {sub.title}
-                          </Link>
-                          {hasLvl3 && (
-                            <button
-                              onClick={() => setActiveSubTabId(isSubOpen ? null : sub.id)}
-                              className="p-1 hover:bg-gray-200 rounded-md"
-                            >
-                              <ChevronLeft className={`w-4 h-4 text-gray-500 transition-transform duration-100 ${isSubOpen ? "-rotate-90" : ""}`} />
-                            </button>
+                <div className="relative">
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="جستجو در این دسته‌..."
+                    className="w-full h-9 rounded-xl mb-2 border border-gray-200 bg-white px-10 text-11 text-gray-700
+               placeholder:text-gray-400 outline-none transition
+               focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+
+
+                <div className="space-y-4">
+                  {filteredLevel2Items.length === 0 ? (
+                    <p className="text-gray-400 text-sm text-center mt-5">موردی یافت نشد.</p>
+                  ) : (
+                    filteredLevel2Items.map((sub: any) => {
+                      const isSubOpen = activeSubTabId === sub.id;
+                      const hasLvl3 = sub.subItems && sub.subItems.length > 0;
+
+                      return (
+                        <div key={sub.id} className="bg-gray-50 rounded-xl p-3">
+                          {/* ... بقیه کدهای داخل map بدون تغییر ... */}
+                          <div className="flex justify-between items-center">
+                            <Link href={sub.url} onClick={close} className="text-gray-800 flex-1">
+                              {sub.title}
+                            </Link>
+                            {hasLvl3 && (
+                              <button
+                                onClick={() => setActiveSubTabId(isSubOpen ? null : sub.id)}
+                                className="p-1 hover:bg-gray-200 rounded-md"
+                              >
+                                <ChevronLeft className={`w-4 h-4 text-gray-500 transition-transform duration-100 ${isSubOpen ? "-rotate-90" : ""}`} />
+                              </button>
+                            )}
+                          </div>
+
+                          {isSubOpen && hasLvl3 && (
+                            <div className="space-y-2 mt-3 border-t border-gray-200 pt-3">
+                              {sub.subItems.map((lvl3: any) => (
+                                <Link key={lvl3.id} href={lvl3.url} onClick={close} className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100">
+                                  {lvl3.title}
+                                </Link>
+                              ))}
+                            </div>
                           )}
                         </div>
-
-                        {isSubOpen && hasLvl3 && (
-                          <div className="space-y-2 mt-3 border-t border-gray-200 pt-3">
-                            {sub.subItems.map((lvl3: any) => (
-                              <Link key={lvl3.id} href={lvl3.url} onClick={close} className="block  text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100">
-                                {lvl3.title}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
+
+
+
+
               </>
             )}
           </div>
@@ -271,34 +307,56 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                 ${isScrolled ? "top-0 h-[calc(100vh-3.5rem)]" : "top-0 h-[calc(100vh-8rem)]"}
               `}
             >
-              <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <p className=" text-gray-800 flex items-center gap-2">
+
+              <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col gap-3">
+                <span className="font-bold text-gray-800 flex items-center gap-2">
                   {activeTab.icon && <activeTab.icon className="w-5 h-5 text-blue-600" />}
                   {activeTab.title}
-                </p>
+                </span>
+
+                {/* 🟢 قرار دادن کامپوننت SearchInput */}
+                {/* 🔍 سرچ ساده و خوش‌ظاهر */}
+                <div className="relative">
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="جستجو در این دسته‌..."
+                    className="w-full h-10 rounded-xl border border-gray-200 bg-white px-10 text-11 text-gray-700
+               placeholder:text-gray-400 outline-none transition
+               focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+
               </div>
+
               <div className="flex-1 p-4 space-y-1 overflow-y-auto">
-                {activeTab.subItems.map((sub: any) => {
-                  const isSubActive = pathname === sub.url;
-                  const isSubHovered = activeSubTabId === sub.id;
-                  return (
-                    <Link
-                      key={sub.id}
-                      href={sub.url}
-                      onMouseEnter={() => handleInteraction(sub.id, 2)}
-                      className={`px-4 py-3  rounded-xl flex items-center justify-between
-                        ${isSubActive ? "bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
-                        ${isSubHovered && !isSubActive ? "bg-blue-50/50 text-blue-700" : ""}
-                      `}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-1.5 h-1.5 rounded-full ${isSubActive || isSubHovered ? "bg-blue-600" : "bg-gray-300"}`} />
-                        {sub.title}
-                      </div>
-                      {sub.subItems && sub.subItems.length > 0 && <ChevronLeft className="h-3.5 w-3.5" />}
-                    </Link>
-                  );
-                })}
+                {filteredLevel2Items.length === 0 ? (
+                  <p className="text-gray-400 text-sm text-center mt-5">موردی یافت نشد.</p>
+                ) : (
+                  filteredLevel2Items.map((sub: any) => {
+                    const isSubActive = pathname === sub.url;
+                    const isSubHovered = activeSubTabId === sub.id;
+                    return (
+                      <Link
+                        key={sub.id}
+                        href={sub.url}
+                        onMouseEnter={() => handleInteraction(sub.id, 2)}
+                        className={`px-4 py-3 rounded-xl flex items-center justify-between
+                          ${isSubActive ? "bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
+                          ${isSubHovered && !isSubActive ? "bg-blue-50/50 text-blue-700" : ""}
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-1.5 h-1.5 rounded-full ${isSubActive || isSubHovered ? "bg-blue-600" : "bg-gray-300"}`} />
+                          {sub.title}
+                        </div>
+                        {sub.subItems && sub.subItems.length > 0 && <ChevronLeft className="h-3.5 w-3.5" />}
+                      </Link>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
@@ -313,9 +371,9 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
               <div className="p-6 border-b border-gray-100 bg-gray-50/50 text-gray-800">
                 {activeSubTab.title}
               </div>
-              <div className="flex-1 p-4 space-y-1">
+              <div className="flex-1 p-4 space-y-1 overflow-y-auto">
                 {activeSubTab.subItems.map((lvl3: any) => (
-                  <Link key={lvl3.id} href={lvl3.url} className="block px-4 py-3  text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl">
+                  <Link key={lvl3.id} href={lvl3.url} className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl">
                     {lvl3.title}
                   </Link>
                 ))}

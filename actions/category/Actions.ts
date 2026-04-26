@@ -10,7 +10,7 @@ export async function getDataCategory() {
     // ۲. دریافت داده‌ها از دیتابیس
     const categories = await db.category.findMany({
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
 

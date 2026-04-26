@@ -291,7 +291,7 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">تصویر</label>
                                 <div className="relative border-2 border-dashed border-gray-200 hover:border-blue-400 bg-gray-50 rounded-xl transition-all overflow-hidden group">
-                                    <input ref={addFileInputRef} type="file" required={!addPreviewImage} name="imageFile" accept="image/*" onChange={(e) => handleImageChange(e, setAddPreviewImage)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                    <input ref={addFileInputRef} type="file"  name="imageFile" accept="image/*" onChange={(e) => handleImageChange(e, setAddPreviewImage)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                                     {!addPreviewImage ? (
                                         <div className="py-6 flex flex-col items-center justify-center text-gray-400">
                                             <UploadCloud size={28} className="mb-2 group-hover:text-blue-500" />
