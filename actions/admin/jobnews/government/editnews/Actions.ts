@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
-import crypto from "crypto"; // 👈 ماژول هش کردن اضافه شد
+import crypto from "crypto"; 
 
 export async function updateDataEditGov(prevState: any, formData: FormData) {
   try {
@@ -23,26 +23,17 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
     const imageFile = formData.get("imageFile") as File;
     let finalImageUrl = null;
 
-    // 👈 تغییرات اصلی در این بخش برای هش کردن فایل
     if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      
-      // ساخت هش بر اساس محتوای فایل
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
-      
-      // استخراج پسوند فایل (مثلا .jpg یا .png)
       const extension = path.extname(imageFile.name) || ".jpg";
-      
-      // اسم فایل حالا ترکیبی از هش و پسوند است
       const filename = `${hash}${extension}`;
       
-      const uploadDir = path.join(process.cwd(), "public", "images", "jobnews","government");
+      const uploadDir = path.join(process.cwd(), "public", "images", "jobnews", "government");
       const savePath = path.join(uploadDir, filename);
       
-      // ساخت پوشه در صورت عدم وجود
       await fs.mkdir(uploadDir, { recursive: true });
 
-      // بررسی اینکه آیا عکسی با این محتوا از قبل در سرور وجود دارد؟
       let fileExists = false;
       try {
         await fs.access(savePath);
@@ -51,15 +42,9 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
         fileExists = false;
       }
 
-      // فقط در صورتی فایل را روی سرور می‌نویسیم که از قبل وجود نداشته باشد
       if (!fileExists) {
         await fs.writeFile(savePath, buffer);
-        console.log("عکس جدید بود و در سرور ذخیره شد.");
-      } else {
-        console.log("این عکس از قبل در سرور وجود داشت. از همان استفاده شد.");
       }
-
-      // آدرس نهایی برای ذخیره در دیتابیس
       finalImageUrl = `/images/jobnews/government/${filename}`;
     }
 
@@ -71,7 +56,7 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       slugNews: rawSlugNews = "",
       registerUrl = "",
       organization = "",
-      imageUrl = "", // این مقدار همان لینک متنی (عکس قبلی) است
+      imageUrl = "", 
       description = "",
       startAt = "",
       endAt = "",
@@ -86,8 +71,11 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
     }
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
+    
+    // در PostgreSQL این آرایه‌ها به صورت native پشتیبانی می‌شوند (String[])
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
+    
     const price = priceStr ? parseInt(priceStr) : 0;
     const maxAge = maxAgeStr ? parseInt(maxAgeStr) : 0;
     const isSlider = isMainSlider === "true";
@@ -103,12 +91,10 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       return { success: false, message: "نام اسلاگ تکراری است." };
     }
 
+    // دریافت آیدی محصولات
+    const productIds = formData.getAll("productIds") as string[];
 
-
-    // ۱. اضافه کردن این خط برای استخراج آیدی محصولات
-const productIds = formData.getAll("productIds") as string[];
-
-    // به‌روزرسانی در دیتابیس
+    // به‌روزرسانی در دیتابیس PostgreSQL
     await db.governmentNews.update({
       where: { id: id },
       data: {
@@ -116,11 +102,7 @@ const productIds = formData.getAll("productIds") as string[];
         slugNews,
         registerUrl,
         organization,
-        
-        // 👈 منطق هوشمندانه شما: اگر عکس جدیدی آپلود شد (یا تکراری کشف شد)، آدرس آن قرار می‌گیرد
-        // در غیر این صورت مقدار فیلد متنی (عکس قبلی) حفظ می‌شود
         imageUrl: finalImageUrl ? finalImageUrl : imageUrl, 
-        
         description,
         startAt: startAt ? new Date(startAt) : null,
         endAt: endAt ? new Date(endAt) : null,
@@ -130,7 +112,11 @@ const productIds = formData.getAll("productIds") as string[];
         status: finalStatus,
         jobs, 
         cities,
-        productIds: productIds,
+        // 🚨 تغییر مهم برای PostgreSQL 🚨
+        // به جای پاس دادن مستقیم آرایه، از سینتکس set استفاده می‌کنیم
+        products: {
+          set: productIds.map((pid) => ({ id: pid })),
+        },
       }
     });
 
@@ -139,7 +125,7 @@ const productIds = formData.getAll("productIds") as string[];
 
     return { success: true, message: "آگهی استخدام با موفقیت ویرایش شد." };
   } catch (error) {
-    console.error("خطا در ثبت آگهی:", error);
+    console.error("خطا در ویرایش آگهی:", error);
     return { success: false, message: "خطایی در ویرایش اطلاعات رخ داد." };
   }
 }

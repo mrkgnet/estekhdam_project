@@ -28,10 +28,11 @@ const STATUS_OPTIONS = [
     { key: "NEWS", label: "اطلاعیه و خبر" },
 ];
 
-// تعریف تایپ برای محصولات دریافتی (اگر تایپ دقیق‌تری دارید جایگزین کنید)
+// تعریف تایپ برای محصولات دریافتی
 interface ProductType {
     id: string;
-    name: string;
+    name?: string;
+    title?: string;
 }
 
 interface Props {
@@ -163,7 +164,9 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                 <input type="hidden" name="cities" value={JSON.stringify(cities)} />
 
                 {/* --- اینپوت مخفی برای ارسال محصولات به اکشن سرور --- */}
-                <input type="hidden" name="productIds" value={JSON.stringify(selectedProductIds)} />
+                {selectedProductIds.map((id) => (
+                    <input key={id} type="hidden" name="productIds" value={id} />
+                ))}
 
                 {/* ارسال محتوای RichTextEditor به سرور */}
                 <input type="hidden" name="description" value={description} />
@@ -326,6 +329,51 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                     </div>
                 </div>
 
+                {/* 3. تگ‌ها (شغل‌ها و شهرها) - اضافه شده در اینجا */}
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-4">
+                        <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                <Briefcase className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-slate-800">شغل‌های مورد نیاز</h2>
+                        </div>
+                        <div className="flex gap-2">
+                            <input value={jobInput} onChange={(e) => setJobInput(e.target.value)} onKeyDown={(e) => handleKeyDown(e, addJob)} placeholder="مثلا: آموزگار ابتدایی (Enter)" className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none" />
+                            <button type="button" onClick={addJob} className="bg-purple-100 text-purple-700 p-3 rounded-xl hover:bg-purple-200 shrink-0"><Plus className="w-5 h-5" /></button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-2 min-h-[40px] items-start">
+                            {jobs.length === 0 && <span className="text-slate-400 py-1">موردی اضافه نشده است</span>}
+                            {jobs.map((job, i) => (
+                                <span key={i} className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-2 group">
+                                    {job} <button type="button" onClick={() => setJobs(jobs.filter((_, idx) => idx !== i))} className="text-slate-400 hover:text-red-500 p-0.5"><X className="w-3 h-3" /></button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-4">
+                        <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+                            <div className="p-2 bg-rose-50 text-rose-600 rounded-lg">
+                                <MapPin className="w-5 h-5" />
+                            </div>
+                            <h2 className="text-slate-800">شهرهای محل خدمت</h2>
+                        </div>
+                        <div className="flex gap-2">
+                            <input value={cityInput} onChange={(e) => setCityInput(e.target.value)} onKeyDown={(e) => handleKeyDown(e, addCity)} placeholder="مثلا: تهران (Enter)" className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-rose-500 outline-none" />
+                            <button type="button" onClick={addCity} className="bg-rose-100 text-rose-700 p-3 rounded-xl hover:bg-rose-200 shrink-0"><Plus className="w-5 h-5" /></button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-2 min-h-[40px] items-start">
+                            {cities.length === 0 && <span className="text-slate-400 py-1">موردی اضافه نشده است</span>}
+                            {cities.map((city, i) => (
+                                <span key={i} className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-2 group">
+                                    {city} <button type="button" onClick={() => setCities(cities.filter((_, idx) => idx !== i))} className="text-slate-400 hover:text-red-500 p-0.5"><X className="w-3 h-3" /></button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
                 <div className="sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 sm:p-5 flex justify-end z-40 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.05)] -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mt-12">
                     <button type="submit" disabled={isPending} className="flex items-center justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 disabled:opacity-70 disabled:cursor-not-allowed">
                         {isPending ? (
@@ -363,7 +411,7 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                                                     checked={selectedProductIds.includes(product.id)}
                                                     onChange={() => toggleProductSelection(product.id)}
                                                 />
-                                                <span className="text-gray-700 font-medium">{product.name}</span>
+                                                <span className="text-gray-700 font-medium">{product.name || product.title}</span>
                                             </label>
                                         ))}
                                     </div>

@@ -108,6 +108,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     }
 
     // 5. ذخیره در دیتابیس
+      // 5. ذخیره در دیتابیس
     await db.governmentNews.create({
       data: {
         title,
@@ -122,11 +123,19 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         maxAge,
         isMainSlider: isSlider,
         status: finalStatus,
-        jobs,
-        cities,
-        productIds, // ارسال مستقیم آرایه به Prisma
+        jobs,     // چون در پستگرس آرایه رشته‌ای (String[]) پشتیبانی می‌شود این مورد مشکلی ندارد
+        cities,   // این هم مشکلی ندارد
+        
+        // ❌ خطای شما اینجاست: در پستگرس نمی‌توانید آرایه آی‌دی‌ها را مستقیم بفرستید
+        // productIds, 
+        
+        // ✅ روش درست برای پستگرس (ایجاد رابطه چند به چند):
+        products: {
+           connect: productIds.map((id: string) => ({ id: id }))
+        }
       },
     });
+
 
     revalidatePath("/adminp/jobnews/government/add-news");
     revalidatePath("/adminp/jobnews/government");
