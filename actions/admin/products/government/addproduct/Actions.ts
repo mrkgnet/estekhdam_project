@@ -40,7 +40,7 @@ export default async function addProductAction(prevState: any, formData: FormDat
       if (!fileExists) {
         await fs.writeFile(savePath, buffer);
       }
-      
+
       finalImageUrl = `/images/products/${filename}`;
     }
 
@@ -79,26 +79,24 @@ export default async function addProductAction(prevState: any, formData: FormDat
           slug,
           oldPrice,
           newPrice,
-          // 🔴 باگ اینجا بود: باید finalImageUrl را پاس بدهید، نه imageUrl فرم را
-          imageUrl: finalImageUrl || "", 
+          imageUrl: finalImageUrl || "",
           description,
           features: features,
-          categoryIds: categoryIdsFromForm,
+
+          // 🟢 روش صحیح و استاندارد ثبت رابطه چند به چند در پستگرس
+          categories: {
+            connect: categoryIdsFromForm.map((catId) => ({ id: catId })),
+          },
         },
       });
 
-      if (categoryIdsFromForm.length > 0) {
-        await tx.category.updateMany({
-          where: { id: { in: categoryIdsFromForm } },
-          data: { productIds: { push: newProduct.id } },
-        });
-      }
+      // 🔴 تمام حلقه for...of مربوط به آپدیت دسته بندی (tx.category.update)
+      // را به طور کامل پاک کنید، چون پریزما با دستور connect بالا خودش همه کارها را انجام داد.
     });
 
     revalidatePath("/adminp/products/government/addproduct");
 
     return { success: true, message: `محصول "${name}" با موفقیت اضافه شد.` };
-
   } catch (error) {
     console.error("Error creating product:", error);
     return { success: false, message: "خطایی در سرور رخ داد." };

@@ -35,7 +35,7 @@ export async function addAdminReply(commentId: string, replyText: string) {
         parentId: commentId,
         productId: parentComment.productId, // ارث‌بری آیدی محصول از کامنت والد
         status: "APPROVED", // پاسخ ادمین نیاز به تایید ندارد
-        // userId: adminUserId, // اگر آیدی ادمین را دارید اینجا پاس دهید
+        userId: currentUser.userId, // اگر آیدی ادمین را دارید اینجا پاس دهید
       },
     });
 

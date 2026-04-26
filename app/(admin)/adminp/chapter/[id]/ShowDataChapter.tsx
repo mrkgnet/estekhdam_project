@@ -66,7 +66,7 @@ export default function ShowDataChapter({ productId, chapters }: Props) {
   };
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
+    <div className="p-4  min-h-screen max-w-6xl mx-auto">
 
 
 

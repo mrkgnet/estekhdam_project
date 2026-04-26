@@ -19,3 +19,21 @@ export async function markCommentAsRead(id: string) {
     return { success: false, error: "خطا در بروزرسانی وضعیت" };
   }
 }
+
+
+
+
+export async function markAllCommentsAsRead() {
+    try {
+        // تغییر وضعیت تمام کامنت‌های خوانده نشده به خوانده شده
+        await db.comment.updateMany({
+            where: { isRead: false },
+            data: { isRead: true }
+        });
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Error marking all as read:", error);
+        return { success: false, message: "خطا در سرور" };
+    }
+}

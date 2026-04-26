@@ -12,53 +12,39 @@ export async function fetchDataProduct(page: number = 1, limit: number = 10, sea
 
     const skip = (page - 1) * limit;
 
-    // 🟢 ۱. اگر سرچی وجود دارد، اول آیدی دسته‌بندی‌هایی که نامشان مطابقت دارد را پیدا می‌کنیم
-    let matchedCategoryIds: string[] = [];
-    if (searchQuery) {
-      const matchedCategories = await db.category.findMany({
-        where: { catName: { contains: searchQuery } },
-        select: { id: true }
-      });
-      matchedCategoryIds = matchedCategories.map(c => c.id);
-    }
-
-    // 🟢 ۲. ساخت شرط جستجو بر اساس ساختار جدید
+    // 🟢 ۱. ساخت شرط جستجو بر اساس روابط پستگرس
     const whereClause = searchQuery
       ? {
           OR: [
-            { name: { contains: searchQuery } }, 
-            // اگر در بین categoryIds محصول، آیدیِ دسته‌بندیِ سرچ شده وجود داشت:
-            { categoryIds: { hasSome: matchedCategoryIds } }, 
+            // جستجو در نام محصول
+            { name: { contains: searchQuery, mode: "insensitive" } }, 
+            // جستجو در نام دسته‌بندی‌های متصل به این محصول
+            { 
+              categories: { 
+                some: { catName: { contains: searchQuery, mode: "insensitive" } } 
+              } 
+            }, 
           ],
         }
       : {};
 
-    // 🟢 ۳. واکشی اطلاعات از دیتابیس (بدون include)
-    const [totalCount, rawProducts] = await db.$transaction([
+    // 🟢 ۲. واکشی اطلاعات و دسته‌بندی‌ها به صورت همزمان
+    const [totalCount, products] = await db.$transaction([
       db.product.count({ where: whereClause }),
       db.product.findMany({
         where: whereClause,
         skip: skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        // جادوی پریزما برای دیتابیس‌های رابطه‌ای: 
+        // به جای واکشی دستی، دسته‌بندی‌های هر محصول را خودکار Join و ضمیمه می‌کند
+        include: {
+          categories: {
+            select: { id: true, catName: true, catSlug: true }
+          }
+        }
       }),
     ]);
-
-    // 🟢 ۴. پیدا کردن اطلاعات دسته‌بندی‌ها برای نمایش در جدول
-    // گرفتن تمام آیدی دسته‌بندی‌هایی که محصولات این صفحه دارند (بدون تکرار)
-    const allUsedCategoryIds = Array.from(new Set(rawProducts.flatMap(p => p.categoryIds)));
-    
-    // گرفتن اطلاعات این دسته‌بندی‌ها با یک کوئری سبک
-    const relatedCategories = await db.category.findMany({
-      where: { id: { in: allUsedCategoryIds } },
-      select: { id: true, catName: true, catSlug: true }
-    });
-
-    // 🟢 ۵. ترکیب دسته‌بندی‌ها با محصولات (برای ارسال به کلاینت با فرمت دلخواه شما)
-    const products = rawProducts.map(product => ({
-      ...product,
-      categories: relatedCategories.filter(cat => product.categoryIds.includes(cat.id))
-    }));
 
     const totalPages = Math.ceil(totalCount / limit);
 

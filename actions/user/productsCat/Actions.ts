@@ -20,20 +20,22 @@ export async function fetchAllProductDataAction(
       const decodedCategory = decodeURIComponent(categoryQuery);
 
       // ۲. پیدا کردن دسته مورد نظر به همراه فرزندانش
-      // اگر از catName در URL استفاده می‌کنید، catSlug را به catName تغییر دهید
       const category = await db.category.findFirst({
         where: { catSlug: decodedCategory },
         include: { children: true },
       });
 
-
       if (category) {
         // ۳. گرفتن آیدی خود دسته + آیدی تمام زیردسته‌هایش
         const allCategoryIds = [category.id, ...category.children.map((child) => child.id)];
 
-        // ۴. جستجوی محصولاتی که حداقل یکی از این آیدی‌ها را دارند
-        whereClause.categoryIds = {
-          hasSome: allCategoryIds,
+        // ۴. جستجوی محصولاتی که حداقل یکی از این آیدی‌ها را دارند (سینتکس صحیح PostgreSQL)
+        whereClause.categories = {
+          some: {
+            id: {
+              in: allCategoryIds
+            }
+          }
         };
       } else {
         // اگر دسته اصلا پیدا نشد، کوئری را طوری تنظیم کن که چیزی برنگرداند

@@ -69,17 +69,20 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
     const oldPrice = oldPriceStr ? parseInt(oldPriceStr, 10) : 0;
     const slug = rawSlug.trim().replace(/\s+/g, "-").toLowerCase();
 
-    await db.product.update({
+  await db.product.update({
       where: { id: id },
       data: {
         name,
         slug,
         newPrice,
         oldPrice,
-        imageUrl: finalImageUrl, // 🔴 ذخیره آدرس نهایی (چه قبلی، چه جدید)
+        imageUrl: finalImageUrl,
         description,
         features: features,
-       categoryIds: categoryIds,
+        // 🔴 تغییر مهم برای پستگرس: استفاده از set به جای categoryIds
+        categories: {
+          set: categoryIds.map((catId) => ({ id: catId })),
+        },
       },
     });
 

@@ -18,25 +18,24 @@ export async function fetchDataByCategory(
       return { success: false, data: null };
     }
 
-    // محاسبه تعداد آیتم‌هایی که باید رد شوند (برای صفحه‌بندی)
     const skip = (page - 1) * limit;
 
-    // ایجاد شرط جستجو
+    // ایجاد شرط جستجو برای رابطه چند به چند متناسب با Prisma و PostgreSQL
     const whereClause: any = {
-      categoryIds: {
-        has: category.id
+      categories: {
+        some: {
+          id: category.id
+        }
       }
     };
 
-    // اصلاح نام فیلد جستجو از title به name
     if (query) {
       whereClause.name = {
         contains: query,
-        mode: "insensitive" // برای جستجوی بدون حساسیت به حروف بزرگ و کوچک
+        mode: "insensitive" 
       };
     }
 
-    // گرفتن محصولات و تعداد کل آن‌ها به صورت همزمان
     const [products, totalCount] = await Promise.all([
       db.product.findMany({
         where: whereClause,
@@ -56,10 +55,10 @@ export async function fetchDataByCategory(
       products: products
     };
 
-    // totalPages برای استفاده در کامپوننت Pagination در صورت نیاز برگشت داده می‌شود
     return { 
       success: true, 
-      data: resultData,
+      // حل مشکل سریالایز شدن Date
+      data: JSON.parse(JSON.stringify(resultData)),
       totalPages: Math.ceil(totalCount / limit) 
     };
     

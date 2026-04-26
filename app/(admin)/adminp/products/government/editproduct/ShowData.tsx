@@ -74,7 +74,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
 
     if (!products || products.length === 0) {
         return (
-            <div className="flex flex-col items-center text-xs md:text-sm justify-center py-20 bg-white border border-dashed border-slate-300 rounded-2xl shadow-sm">
+            <div className="flex flex-col  max-w-5xl mx-auto  items-center text-xs md:text-sm justify-center py-20 bg-white border border-dashed border-slate-300 rounded-2xl shadow-sm">
                 <div className="bg-slate-50 p-6 rounded mb-4">
                     <Inbox className="w-12 h-12 text-slate-400" />
                 </div>
@@ -96,7 +96,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
     }
 
     return (
-        <div className="space-y-6 text-xs md:text-sm">
+        <div className="space-y-6 text-xs md:text-sm  max-w-7xl mx-auto ">
             {/* هدر یکپارچه و مدرن */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded shadow-sm border border-slate-200">
                 <div className="flex items-center gap-4">
