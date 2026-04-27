@@ -203,7 +203,7 @@ model Question {
   questionType  QuestionType @default(TALIFI)
   questionCode  String?
   isActive      Boolean      @default(true)
-  
+
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -211,6 +211,7 @@ model Question {
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   issues    QuestionIssue[]
+  comments  Comment[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
@@ -249,12 +250,10 @@ model Comment {
   governmentNews   GovernmentNews? @relation(fields: [governmentNewsId], references: [id])
   // ===========================================
 
- // ===== کدهای جدید برای ارتباط با سوالات =====
+  // ===== کدهای جدید برای ارتباط با سوالات =====
   questionId String?
   question   Question? @relation(fields: [questionId], references: [id])
   // ===========================================
-
-
 
   parentId String?
   parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
