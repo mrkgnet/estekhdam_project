@@ -5,13 +5,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, CheckCircle2, MessageSquare, Send, User, Reply, X } from "lucide-react";
 import { addNewCommentUser } from "@/actions/comment/user/add/Actions";
 import toast from "react-hot-toast";
+import { usePathname } from "next/navigation"; // اضافه شد
 
 interface Props {
-  productId: string;
+  targetId: string;
+  targetType: string;
   initialComments: any[];
 }
 
-export default function CommentSectionUI({ productId, initialComments }: Props) {
+export default function CommentSectionUI({ targetId, targetType, initialComments }: Props) {
+  const pathname = usePathname(); // گرفتن آدرس فعلی صفحه
 
   const [newComment, setNewComment] = useState("");
   const [replyText, setReplyText] = useState("");
@@ -32,7 +35,6 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
       const isReply = state.isReply;
       const createdComment = state.data;
 
-      // همان کامنت برگشتی از سرور را بدون تغییر اضافه می‌کنیم (داده‌های user و role در آن هست)
       const commentToAdd = {
         ...createdComment,
         replies: [],
@@ -75,27 +77,22 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
     }
   };
 
-  // تابع کمکی برای گرفتن نام و نوع کاربر
   const getUserInfo = (comment: any) => {
-    // اگر userId وجود نداشته باشد => مهمان
     if (!comment.userId) {
       return { name: "مهمان", type: "GUEST" };
     }
-    // اگر کاربر وجود دارد و نقشش ADMIN است
     if (comment.user?.role === "admin") {
       const name = comment.user.firstName
         ? `${comment.user.firstName} ${comment.user.lastName || ""}`
         : comment.user.username || "ادمین";
       return { name, type: "admin" };
     }
-    // در غیر این صورت کاربر عادی
     const name = comment.user?.firstName
       ? `${comment.user.firstName} ${comment.user.lastName || ""}`
       : comment.user?.username || "کاربر سایت";
     return { name, type: "USER" };
   };
 
-  // رنگ و متن badge بر اساس نوع
   const Badge = ({ type }: { type: string }) => {
     switch (type) {
       case "admin":
@@ -103,12 +100,12 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
       case "user":
         return <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">کاربر</span>;
       default:
-        // return <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">مهمان</span>;
+        return null;
     }
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 bg-white/50 backdrop-blur-xl shadow-sm border border-slate-100/80 my-10" dir="rtl">
+    <div className="w-full max-w-7xl border border-gray-300 mx-auto p-4 sm:p-6 lg:p-8 bg-white/50 backdrop-blur-xl shadow-sm  my-5" dir="rtl">
       <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-5">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-50 p-3 rounded text-indigo-600 shadow-inner">
@@ -121,9 +118,11 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
         </div>
       </div>
 
-      {/* فرم اصلی */}
       <form ref={formRef} action={formNewCommentAction} className="mb-10">
-        <input type="hidden" name="productId" value={productId} />
+        {/* فیلدهای مخفی کاملا عمومی شده‌اند */}
+        <input type="hidden" name="targetId" value={targetId} />
+        <input type="hidden" name="targetType" value={targetType} />
+        <input type="hidden" name="pathname" value={pathname} />
 
         <AnimatePresence>
           {showMessage && (
@@ -164,7 +163,6 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
         </div>
       </form>
 
-      {/* لیست کامنت‌ها */}
       <div className="space-y-6">
         <h3 className="text-slate-700 mb-6">نظرات منتشر شده ({commentsList.length})</h3>
 
@@ -198,7 +196,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                 </button>
               </div>
 
-              <p className="text-slate-600 leading-relaxed mb-4">{comment.textComment}</p>
+              <p className="text-slate-600 leading-relaxed mb-4 break-words whitespace-pre-wrap">{comment.textComment}</p>
 
               {(comment.replies?.length > 0 || replyingTo?.id === comment.id) && (
                 <div className="mt-4 mr-2 sm:mr-8 pr-4 border-r-2 border-indigo-50 space-y-4">
@@ -206,7 +204,10 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                     {replyingTo?.id === comment.id && (
                       <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                         <form action={formNewCommentAction} className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                          <input type="hidden" name="productId" value={productId} />
+                          {/* اصلاح فرم ریپلای */}
+                          <input type="hidden" name="targetId" value={targetId} />
+                          <input type="hidden" name="targetType" value={targetType} />
+                          <input type="hidden" name="pathname" value={pathname} />
                           <input type="hidden" name="parentId" value={comment.id} />
                           <textarea
                             autoFocus
@@ -237,7 +238,6 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                     )}
                   </AnimatePresence>
 
-                  {/* لیست پاسخ‌ها */}
                   {comment.replies?.map((reply: any) => {
                     const { name: replyName, type: replyType } = getUserInfo(reply);
                     return (
@@ -251,7 +251,7 @@ export default function CommentSectionUI({ productId, initialComments }: Props) 
                             <Badge type={replyType} />
                           </div>
                         </div>
-                        <p className="text-slate-600 leading-relaxed">{reply.textComment}</p>
+                        <p className="text-slate-600 leading-relaxed mb-4 break-words whitespace-pre-wrap">{reply.textComment}</p>
                       </div>
                     );
                   })}

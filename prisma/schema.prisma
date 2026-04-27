@@ -70,23 +70,23 @@ model User {
   otpExpires    DateTime?
   refreshTokens RefreshToken[]
 
-  firstName      String?
-  lastName       String?
-  nationalCode   String?
-  avatar         String?
-  birthDate      DateTime?
-  gender         Gender          @default(UNKNOWN)
-  role           Role            @default(user)
-  isActive       Boolean         @default(true)
-  
+  firstName    String?
+  lastName     String?
+  nationalCode String?
+  avatar       String?
+  birthDate    DateTime?
+  gender       Gender    @default(UNKNOWN)
+  role         Role      @default(user)
+  isActive     Boolean   @default(true)
+
   orders         Order[]
   comments       Comment[]
   tickets        Ticket[]        @relation("UserTickets")
   ticketMessages TicketMessage[] @relation("UserMessages")
   contacts       Contact[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RefreshToken {
@@ -116,46 +116,46 @@ model GovernmentNews {
   isActive     Boolean     @default(true)
   isMainSlider Boolean     @default(false)
   status       NewsStatus? @default(NEWS)
-  
+  comments     Comment[]
   // رابطه چندبه‌چند استاندارد پستگرس (بدون نیاز به فیلد productIds)
-  products   Product[] @relation("ProductNews")
+  products     Product[]   @relation("ProductNews")
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([startAt])
   @@index([endAt])
 }
 
 model MainSlider {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   imageUrl    String
   title       String?
   description String?
   targetLink  String?
-  order       Int     @default(0)
-  isActive    Boolean @default(true)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Product {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  slug        String     @unique
+  slug        String   @unique
   oldPrice    Int?
   newPrice    Int?
   description String?
   imageUrl    String?
   features    String[]
-  
+
   // رابطه چند به چند با دسته‌بندی
-  categories  Category[] @relation("ProductCategories")
-  
-  questions   Question[]
-  comments    Comment[]
-  orders      Order[]
-  chapters    Chapter[]
+  categories Category[] @relation("ProductCategories")
+
+  questions Question[]
+  comments  Comment[]
+  orders    Order[]
+  chapters  Chapter[]
 
   // رابطه چندبه‌چند با خبر
   governmentNews GovernmentNews[] @relation("ProductNews")
@@ -165,29 +165,29 @@ model Product {
 }
 
 model Category {
-  id        String     @id @default(uuid())
-  catName   String     @unique
-  catSlug   String     @unique
-  imageUrl  String?
-  
-  parentId  String?
-  parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children  Category[] @relation("CategoryToCategory")
-  
-  products  Product[]  @relation("ProductCategories") // رابطه با محصول
+  id       String  @id @default(uuid())
+  catName  String  @unique
+  catSlug  String  @unique
+  imageUrl String?
 
-  createdAt DateTime?  @default(now())
-  updatedAt DateTime   @updatedAt
+  parentId String?
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryToCategory")
+
+  products Product[] @relation("ProductCategories") // رابطه با محصول
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([parentId])
 }
 
 model Chapter {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   title     String
   order     Int?
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   questions Question[]
 
   createdAt DateTime @default(now())
@@ -204,15 +204,15 @@ model Question {
   questionCode  String?
   isActive      Boolean      @default(true)
   
-  productId     String
-  product       Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  chapterId     String?
-  chapter       Chapter?     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  issues        QuestionIssue[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  issues    QuestionIssue[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@index([productId])
   @@index([chapterId])
@@ -233,105 +233,117 @@ model QuestionIssue {
 }
 
 model Comment {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   textComment String
-  status      String   @default("APPROVED")
-  isRead      Boolean  @default(false)
-
+  status      String  @default("APPROVED")
+  isRead      Boolean @default(false)
+  section     String?
   userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
+  user        User?   @relation(fields: [userId], references: [id])
 
-  productId   String?
-  product     Product? @relation(fields: [productId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
 
-  parentId    String?
-  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies     Comment[] @relation("CommentReplies")
+  // ===== کدهای جدید برای ارتباط با اخبار =====
+  governmentNewsId String?
+  governmentNews   GovernmentNews? @relation(fields: [governmentNewsId], references: [id])
+  // ===========================================
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+ // ===== کدهای جدید برای ارتباط با سوالات =====
+  questionId String?
+  question   Question? @relation(fields: [questionId], references: [id])
+  // ===========================================
+
+
+
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies  Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([productId])
   @@index([status])
 }
 
 model MenuClient {
-  id        String       @id @default(uuid())
-  name      String       @unique
-  slug      String       @unique
+  id        String  @id @default(uuid())
+  name      String  @unique
+  slug      String  @unique
   imageUrl  String?
   customUrl String?
-  order     Int          @default(0)
+  order     Int     @default(0)
 
-  parentId  String?
-  parent    MenuClient?  @relation("MenuToMenu", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children  MenuClient[] @relation("MenuToMenu")
+  parentId String?
+  parent   MenuClient?  @relation("MenuToMenu", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children MenuClient[] @relation("MenuToMenu")
 
   createdAt DateTime? @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  userId      String?
-  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  productId   String
-  product     Product?    @relation(fields: [productId], references: [id])
+  productId String
+  product   Product? @relation(fields: [productId], references: [id])
 
-  pricePaid   Int
-  status      OrderStatus @default(PENDING)
+  pricePaid Int
+  status    OrderStatus @default(PENDING)
 
-  refId       String?     @unique
-  authority   String?     @unique
+  refId     String? @unique
+  authority String? @unique
 
-  expiresAt   DateTime?
-  isActive    Boolean     @default(true)
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([productId])
 }
 
 model Ticket {
-  id        String         @id @default(uuid())
-  subject   String
-  status    TicketStatus   @default(OPEN)
-  priority  TicketPriority @default(MEDIUM)
+  id       String         @id @default(uuid())
+  subject  String
+  status   TicketStatus   @default(OPEN)
+  priority TicketPriority @default(MEDIUM)
 
-  userId    String?
-  user      User?          @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?   @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
 
-  messages  TicketMessage[]
+  messages TicketMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model TicketMessage {
-  id        String   @id @default(uuid())
-  text      String
+  id   String @id @default(uuid())
+  text String
 
-  ticketId  String
-  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
-  userId    String
-  user      User     @relation("UserMessages", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("UserMessages", fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
 
 model Contact {
-  id        String   @id @default(uuid())
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  
+  id      String  @id @default(uuid())
+  title   String
+  message String
+  isRead  Boolean @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
   createdAt DateTime @default(now())
 }
 
@@ -342,8 +354,8 @@ model Notification {
   referenceId String
   isRead      Boolean          @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isRead])
 }

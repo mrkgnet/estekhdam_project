@@ -8,8 +8,6 @@ import { markAllCommentsAsRead, markCommentAsRead } from '@/actions/comment/admi
 import DeleteButton from '@/components/ui/DeleteButton';
 import { deleteAdminComment } from '@/actions/comment/admin/delete/Actions';
 import SearchBar from '@/components/ui/SearchBar';
-// کامپوننت Pagination خود را اینجا ایمپورت کنید
-// import Pagination from '@/components/Pagination';
 
 interface ShowDataProps {
     initialComments: any[];
@@ -31,7 +29,6 @@ export default function ShowData({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    // خواندن استیت‌های اولیه از URL
     const [searchTerm, setSearchTerm] = useState(searchParams.get("query")?.toString() || "");
     const [showOnlyUnread, setShowOnlyUnread] = useState(searchParams.get("unread") === "true");
 
@@ -40,33 +37,29 @@ export default function ShowData({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({})
     const [isMarkingAll, setIsMarkingAll] = useState(false);
-    
-    // افکت Debounce برای ارسال استیت‌ها به URL
+
     useEffect(() => {
         const timer = setTimeout(() => {
             const params = new URLSearchParams(searchParams.toString());
             let changed = false;
 
-            // بررسی تغییر در جستجو
             if (searchTerm !== (searchParams.get("query") || "")) {
                 if (searchTerm) params.set("query", searchTerm);
                 else params.delete("query");
                 changed = true;
             }
 
-            // بررسی تغییر در فیلتر خوانده نشده
             if (showOnlyUnread !== (searchParams.get("unread") === "true")) {
                 if (showOnlyUnread) params.set("unread", "true");
                 else params.delete("unread");
                 changed = true;
             }
 
-            // اگر تغییری داشتیم، صفحه را به 1 برگردان و URL را آپدیت کن
             if (changed) {
                 params.set("page", "1");
                 router.replace(`${pathname}?${params.toString()}`);
             }
-        }, 500); // تاخیر 500 میلی‌ثانیه‌ای
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [searchTerm, showOnlyUnread, pathname, router, searchParams]);
@@ -90,11 +83,11 @@ export default function ShowData({
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'APPROVED':
-                return <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">تأیید شده</span>;
+                return <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold whitespace-nowrap">تأیید شده</span>;
             case 'REJECTED':
-                return <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-semibold">رد شده</span>;
+                return <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-semibold whitespace-nowrap">رد شده</span>;
             default:
-                return <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">در انتظار</span>;
+                return <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold whitespace-nowrap">در انتظار</span>;
         }
     };
 
@@ -107,7 +100,7 @@ export default function ShowData({
                 toast.success("پاسخ با موفقیت ثبت شد.")
                 setReplyingToId(null);
                 setReplyText("");
-                router.refresh(); // رفرش دیتای سرور بعد از عملیات موفق
+                router.refresh(); 
             }
         } catch (error) {
             toast.error("خطا در ثبت پاسخ");
@@ -120,7 +113,7 @@ export default function ShowData({
         try {
             const res = await markCommentAsRead(id);
             if (res.success) {
-                router.refresh(); // آپدیت صفحه بعد از تغییر وضعیت
+                router.refresh(); 
             } else {
                 toast.error("خطا در انجام عملیات!");
             }
@@ -135,7 +128,7 @@ export default function ShowData({
             const res = await markAllCommentsAsRead();
             if (res.success) {
                 toast.success("همه پیام‌ها خوانده شدند.");
-                router.refresh(); // برای دریافت دیتای جدید از سرور
+                router.refresh(); 
             } else {
                 toast.error("خطا در انجام عملیات!");
             }
@@ -146,7 +139,6 @@ export default function ShowData({
         }
     };
 
-    // اگر دیتایی یافت نشد
     if (!initialComments || initialComments.length === 0) {
         return (
             <div className="p-6">
@@ -169,10 +161,24 @@ export default function ShowData({
         )
     }
 
+    const getSectionDetails = (comment: any) => {
+        const section = comment.section || (comment.product ? 'product' : comment.governmentNews ? 'governmentNews' : comment.question ? 'question' : 'unknown');
+
+        switch (section) {
+            case 'product':
+                return { label: 'محصول', title: comment.product?.name || 'بدون نام' };
+            case 'governmentNews':
+                return { label: 'خبر استخدامی', title: comment.governmentNews?.title || 'بدون عنوان' };
+            case 'question':
+                return { label: 'سوال', title: comment.question?.questionText ? `${comment.question.questionText.substring(0, 30)}...` : 'بدون متن' };
+            default:
+                return { label: 'بخش نامشخص', title: '---' };
+        }
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex gap-3 items-center">
-                {/* دکمه خواندن همه پیام‌ها همراه با انیمیشن لودینگ */}
                 <button
                     onClick={handleMarkAllAsRead}
                     disabled={isMarkingAll}
@@ -214,32 +220,31 @@ export default function ShowData({
                 </div>
             </div>
 
-
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-4">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-right border-collapse">
+                    {/* اضافه شدن table-fixed و عرض‌های استاندارد */}
+                    <table className="w-full text-right border-collapse table-fixed min-w-[800px]">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm">
-                                <th className="p-4 font-semibold w-1/4">ردیف / کاربر</th>
-                                <th className="p-4 font-semibold w-2/4">متن دیدگاه / محصول</th>
-                                <th className="p-4 font-semibold text-center">وضعیت</th>
-                                <th className="p-4 font-semibold text-center">عملیات</th>
+                                <th className="p-4 font-semibold w-[15%]">ردیف / کاربر</th>
+                                <th className="p-4 font-semibold w-[25%]">بخش کامنت</th>
+                                <th className="p-4 font-semibold w-[40%]">متن دیدگاه</th>
+                                <th className="p-4 font-semibold w-[10%] text-center">وضعیت</th>
+                                <th className="p-4 font-semibold w-[10%] text-center">عملیات</th>
                             </tr>
                         </thead>
 
                         <tbody className="divide-y divide-slate-100">
-
                             {initialComments.map((comment, index) => {
-                                // محاسبه ردیف
                                 const rowIndex = ((currentPage - 1) * limit) + index + 1;
 
                                 return (
                                     <React.Fragment key={comment.id}>
                                         <tr className="hover:bg-slate-50 transition-colors group">
-                                            <td className="p-4 align-top">
+                                            <td className="p-4 align-top break-words">
                                                 <div className="flex flex-col gap-1">
                                                     <span className="text-xs text-slate-400 mb-1">ردیف: {rowIndex}</span>
-                                                    <span className="font-medium text-slate-700">
+                                                    <span className="font-medium text-slate-700 break-words">
                                                         {comment.user?.phoneNumber || comment.user?.email || "کاربر ناشناس"}
                                                     </span>
 
@@ -252,23 +257,34 @@ export default function ShowData({
                                                 </div>
                                             </td>
 
+                                            <td className="p-4 align-top break-words">
+                                                <div className="flex flex-col gap-2">
+                                                    {(() => {
+                                                        const details = getSectionDetails(comment);
+                                                        return (
+                                                            <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-md whitespace-normal break-words">
+                                                                <span className="font-bold border-l border-blue-200 pl-1 ml-1 whitespace-nowrap">{details.label}</span>
+                                                                <span className="break-words text-right">{details.title}</span>
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </td>
+
                                             <td className="p-4 align-top">
                                                 <div className="flex flex-col gap-2">
-                                                    <p className="text-slate-700 text-sm leading-relaxed">{comment.textComment}</p>
-                                                    {comment.product?.name && (
-                                                        <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-md">
-                                                            {comment.product.name}
-                                                        </span>
-                                                    )}
+                                                    {/* اضافه شدن break-words و whitespace-pre-wrap برای جلوگیری از بیرون زدن متن‌های طولانی */}
+                                                    <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap break-words">{comment.textComment}</p>
+
                                                     {comment._count?.replies > 0 && (
                                                         <span className="text-xs text-slate-500">(دارای {comment._count.replies} پاسخ)</span>
                                                     )}
                                                 </div>
                                             </td>
 
-                                            <td className="p-4 align-middle text-center">{getStatusBadge(comment.status)}</td>
+                                            <td className="p-4 text-center align-top">{getStatusBadge(comment.status)}</td>
 
-                                            <td className="p-4 align-middle text-center">
+                                            <td className="p-4 align-top text-center">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <button onClick={() => setReplyingToId(replyingToId === comment.id ? null : comment.id)} className={`p-2 rounded-lg transition-colors cursor-pointer ${replyingToId === comment.id ? 'bg-blue-600 text-white shadow-md' : 'text-blue-600 hover:bg-blue-50'}`}>
                                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
@@ -280,10 +296,10 @@ export default function ShowData({
                                             </td>
                                         </tr>
 
-                                        {/* بخش پاسخ‌ها (آکاردئون) */}
                                         {comment.replies && comment.replies.length > 0 && (
                                             <tr className="bg-slate-50/30 border-b border-slate-100">
-                                                <td colSpan={4} className="p-0">
+                                                {/* اصلاح colSpan از ۴ به ۵ */}
+                                                <td colSpan={5} className="p-0">
                                                     <div className="mr-10 border-r-2 border-blue-200">
                                                         <button onClick={() => toggleAccordion(comment.id)} className="w-full flex items-center justify-between py-3 px-6 text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors cursor-pointer">
                                                             <div className="flex items-center gap-2">
@@ -297,7 +313,7 @@ export default function ShowData({
                                                         <div className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col gap-3 px-6 ${expandedComments[comment.id] ? 'max-h-[1500px] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}>
                                                             {comment.replies.map((reply: any) => (
                                                                 <div key={reply.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start justify-between">
-                                                                    <div className="flex flex-col gap-2">
+                                                                    <div className="flex flex-col gap-2 w-full">
                                                                         <div className="flex items-center gap-2">
                                                                             <span className="text-sm font-semibold text-blue-700">{reply.user?.phoneNumber || reply.user?.email || "ادمین"}</span>
                                                                             {!reply.isRead && (
@@ -305,9 +321,10 @@ export default function ShowData({
                                                                             )}
                                                                             <span className="text-xs text-slate-400">{formatDate(reply.createdAt)}</span>
                                                                         </div>
-                                                                        <p className="text-sm text-slate-600 leading-relaxed">{reply.textComment}</p>
+                                                                        {/* افزودن خاصیت شکستن متن در ریپلای‌ها */}
+                                                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{reply.textComment}</p>
                                                                     </div>
-                                                                    <DeleteButton id={reply.id} action={deleteAdminComment} itemName="این پاسخ" className="p-1.5 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                                                    <DeleteButton id={reply.id} action={deleteAdminComment} itemName="این پاسخ" className="p-1.5 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0">
                                                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                                                     </DeleteButton>
                                                                 </div>
@@ -318,10 +335,10 @@ export default function ShowData({
                                             </tr>
                                         )}
 
-                                        {/* بخش باز شدن ریپلای جدید */}
                                         {replyingToId === comment.id && (
                                             <tr>
-                                                <td colSpan={4} className="p-0 border-t border-slate-100 overflow-hidden">
+                                                {/* اصلاح colSpan از ۴ به ۵ */}
+                                                <td colSpan={5} className="p-0 border-t border-slate-100 overflow-hidden">
                                                     <div className="bg-slate-50/80 p-4 flex flex-col gap-3">
                                                         <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} className="w-full p-3 border border-slate-200 rounded-lg text-sm" autoFocus></textarea>
                                                         <div className="flex justify-end gap-2">
@@ -339,10 +356,8 @@ export default function ShowData({
                     </table>
                 </div>
 
-                {/* محل قرارگیری کامپوننت صفحه‌بندی */}
                 {totalPages > 1 && (
                     <div className="p-4 border-t border-slate-200 flex justify-center">
-                        {/* کامپوننت شما: <Pagination totalPages={totalPages} currentPage={currentPage} /> */}
                         <div className="text-sm text-slate-500">صفحه {currentPage} از {totalPages}</div>
                     </div>
                 )}

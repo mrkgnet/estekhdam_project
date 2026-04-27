@@ -6,67 +6,65 @@ import { revalidatePath } from "next/cache";
 export async function addNewCommentUser(prevState: any, formData: FormData) {
   try {
     const text = formData.get("newComment") as string;
-    const productId = formData.get("productId") as string;
+    const targetId = formData.get("targetId") as string;
+    const targetType = formData.get("targetType") as string; // مثلا "product", "governmentNews", "blog"
     const parentId = formData.get("parentId") as string | null;
+    const pathname = formData.get("pathname") as string; // گرفتن مسیر صفحه برای رفرش داینامیک
+    console.log(targetId , " ----------" , targetType, '--------' , pathname)
 
     if (!text || text.length < 2) {
       return { error: "متن کامنت خیلی کوتاه است." };
     }
 
-    // بررسی کاربر لاگین شده (بدون ایجاد خطا برای کاربران مهمان)
     let userId = null;
-    let userName = "کاربر مهمان";
-
     try {
       const userToken = await infoCurentUser();
       if (userToken && userToken.userId) {
         userId = userToken.userId;
-        // در صورت نیاز نام کاربر را هم دریافت کنید
       }
     } catch (e) {
-      // کاربر لاگین نیست، مشکلی نیست عبور میکنیم
+      // کاربر لاگین نیست
     }
 
+    // تولید نام فیلد دیتابیس به صورت داینامیک (مثلا productId یا blogId)
+    const fieldName = `${targetType}Id`;
+
+    const commentData: any = {
+      textComment: text,
+      userId: userId,
+      parentId: parentId ? parentId : null,
+      status: "APPROVED",
+      section:targetType,
+      [fieldName]: targetId, // تخصیص داینامیک آیدی به فیلد مربوطه در دیتابیس
+    };
+
     const newComment = await db.comment.create({
-      data: {
-        textComment: text,
-        productId: productId,
-        userId: userId, // اگر لاگین نباشد null ثبت میشود
-        parentId: parentId ? parentId : null,
-        status: "APPROVED", // اگر نیاز دارید کامنت‌ها در لحظه تایید شوند این خط را فعال کنید
-      },
-      // دریافت اطلاعات کامنت ثبت شده برای نمایش لحظه‌ای در کلاینت
+      data: commentData,
       include: {
         user: { select: { email: true } },
       },
     });
 
-    // --- اصلاحیه: فقط اگر کامنت پاسخ بود، والد را آپدیت کن ---
     if (parentId) {
       await db.comment.update({
         where: { id: parentId },
         data: { updatedAt: new Date() }, 
       });
     }
-    // --------------------------------------------------------
 
-
-
-   // 👈 ۲. ثبت نوتیفیکیشن با استفاده از متغیرهای صحیح
     await db.notification.create({
       data: {
-        // نکته: اگر در Prisma Enum شما مقدار TICKET است، اینجا را TICKET بنویسید
         type: "NEW_COMMENT", 
-        message: `شما یک پیام جدید در بخش (کامنت) دارید `, // استفاده از subject به جای title
-        referenceId: newComment.id, // گرفتن آیدی از تیکتی که در بالا ساخته شد
+        message: `شما یک پیام جدید در بخش کامنت‌های (${targetType}) دارید`,
+        referenceId: newComment.id,
         isRead: false
       }
     });
 
-
-
-
-    revalidatePath(`/resources/course/${productId}`);
+    // رفرش کردن مسیر به صورت کاملا داینامیک
+    if (pathname) {
+      revalidatePath(pathname);
+    }
 
     return {
       success: true,

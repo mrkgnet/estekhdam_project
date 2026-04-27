@@ -4,18 +4,19 @@ import React, { useEffect, useState } from 'react'
 import CommentSectionUI from './CommentSection'
 
 interface Props {
-  productId: string;
+  targetId: string;
+  targetType: string; // به صورت string باز گذاشته شد تا هر مقداری (blog, product, news و ...) را بگیرد
 }
 
-export default function CommentManagment({ productId }: Props) {
-
+export default function CommentManagment({ targetId, targetType }: Props) {
   const [comments, setComments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await getApprovedComments(productId);
+        const response = await getApprovedComments(targetId, targetType);
+       
         if (response && response.success) {
           setComments(response.data);
         } else {
@@ -29,7 +30,7 @@ export default function CommentManagment({ productId }: Props) {
     };
 
     fetchComments();
-  }, [productId]);
+  }, [targetId, targetType]);
 
  if (isLoading) {
     return (
@@ -38,9 +39,10 @@ export default function CommentManagment({ productId }: Props) {
       </div>
     );
   }
+
   return (
     <div>
-       <CommentSectionUI productId={productId} initialComments={comments} />
+       <CommentSectionUI targetId={targetId} targetType={targetType} initialComments={comments} />
     </div>
   )
 }

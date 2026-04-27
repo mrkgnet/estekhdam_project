@@ -2,11 +2,14 @@
 
 import { db } from "@/lib/db";
 
-export async function getApprovedComments(productId: string) {
+export async function getApprovedComments(targetId: string, targetType: string) {
   try {
+    // تبدیل targetType به نام فیلد در دیتابیس (مثلا product -> productId)
+    const fieldName = `${targetType}Id`; 
+
     const comments = await db.comment.findMany({
       where: {
-        productId: productId,
+        [fieldName]: targetId,
         status: "APPROVED", // موقتا کامنت کنید تا مطمئن شویم دیتابیس خالی نیست
         parentId: null,
       },
@@ -14,8 +17,8 @@ export async function getApprovedComments(productId: string) {
         user: {
           select: {
             role: true,
-            phoneNumber: true, // <--- اضافه شد
-            email: true, // <--- اضافه شد
+            phoneNumber: true,
+            email: true,
           },
         },
         replies: {
@@ -23,8 +26,8 @@ export async function getApprovedComments(productId: string) {
             user: {
               select: {
                 role: true,
-                phoneNumber: true, // <--- اضافه شد
-                email: true, // <--- اضافه شد
+                phoneNumber: true,
+                email: true,
               },
             },
           },
@@ -32,9 +35,9 @@ export async function getApprovedComments(productId: string) {
       },
       orderBy: { createdAt: "desc" },
     });
-    console.log(comments);
+  
     return { success: true, data: comments };
   } catch (error: any) {
-    return { success: false, data: [], error: error.message }; // پیغام خطا را به کلاینت بفرستید
+    return { success: false, data: [], error: error.message };
   }
 }

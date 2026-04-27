@@ -142,6 +142,7 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
 
 export default function ShowData({ initialNews }: { initialNews: News }) {
   const item = initialNews;
+
   const mounted = useHasMounted();
   const [tab, setTab] = useState("desc");
   const router = useRouter();
@@ -287,7 +288,9 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
           )}
         </div>
 
-        <CommentManagment productId={item.id} />
+       
+        <CommentManagment targetId={item.id} targetType="governmentNews" />
+
       </div>
     </div>
   );

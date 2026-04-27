@@ -1,5 +1,5 @@
 // actions/getAdminComments.ts
-"use server"
+"use server";
 
 import { db } from "@/lib/db";
 
@@ -36,7 +36,7 @@ export async function getAdminComments({
       whereCondition.OR = [
         ...(whereCondition.OR || []), // اگر از قبل کوئری سرچ بود نگه دار
         { isRead: false },
-        { replies: { some: { isRead: false } } }
+        { replies: { some: { isRead: false } } },
       ];
     }
 
@@ -53,13 +53,15 @@ export async function getAdminComments({
         // 🔴 دیتای مورد نیاز UI را ضمیمه کنید
         user: { select: { phoneNumber: true, email: true } },
         product: { select: { name: true } },
+        governmentNews: true, // <--- این باید اضافه شود
+        question: true,
         _count: { select: { replies: true } },
         replies: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { createdAt: "asc" },
           include: {
-             user: { select: { phoneNumber: true, email: true } }
-          }
-        }, 
+            user: { select: { phoneNumber: true, email: true } },
+          },
+        },
       },
     });
 

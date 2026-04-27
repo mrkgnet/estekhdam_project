@@ -172,7 +172,9 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
 
             {/* بخش نظرات */}
             <div className="bg-white rounded shadow-sm border border-slate-200/60 p-4 sm:p-6 md:p-8">
-              <CommentManagment productId={product.id} />
+            
+
+               <CommentManagment targetId={product.id} targetType="product" />
             </div>
           </div>
 
