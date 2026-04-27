@@ -42,7 +42,7 @@ export default function ShowDataROD({ response }: ShowDataRODProps) {
         </div>
 
         <Link
-          href="/dashboard/orders"
+          href="/ddashboard"
           className="text-sm font-bold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1"
         >
           مشاهده همه <ChevronLeft size={16} />

@@ -205,15 +205,15 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                     key={tab.id}
                     onMouseEnter={() => handleInteraction(tab.id, 1)}
                     onClick={() => handleInteraction(tab.id, 1, true)}
-                    className="relative cursor-pointer font-bold"
+                    className="relative cursor-pointer font-bold "
                   >
                     <div
-                      className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
-                                ${isActive ? "md:bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
+                      className={`relative  flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
+                                ${isActive || isSelected ? "md:bg-blue-50 text-blue-700 border-2 md:border-1 " : "text-gray-600 hover:bg-blue-50/50"}
                                 `}
                     >
                       <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 relative z-10">
-                        <div className={`p-1.5 rounded-lg ${isActive || isSelected ? "text-blue-600 md:bg-blue-600 md:text-white" : "text-gray-400"}`}>
+                        <div className={`p-1.5 rounded-lg ${isActive || isSelected ? "text-blue-600  md:bg-blue-600 md:text-white" : "text-gray-400"}`}>
                           {tab.icon && <tab.icon className="h-6 w-6 md:h-5 md:w-5" />}
                         </div>
                         <span className="text-center ">{tab.title}</span>

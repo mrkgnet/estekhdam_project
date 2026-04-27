@@ -1,95 +1,158 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useActionState } from "react";
 import { replyTicketUserAction } from "@/actions/user/dashboard/support/reply/Actions";
-import { Send } from "lucide-react";
+import { Send, CircleCheck, AlertCircle } from "lucide-react";
+
+const MAX_LENGTH = 2000;
+const MAX_TEXTAREA_HEIGHT = 180;
 
 export default function ReplyTicketForm({ ticketId }: { ticketId: string }) {
   const [state, formAction, isPending] = useActionState(replyTicketUserAction, {
     success: false,
     message: "",
+    timestamp: 0,
   });
 
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // ریست کردن فرم و ارتفاع textarea در صورت موفقیت‌آمیز بودن ارسال
+  const [message, setMessage] = useState("");
+
+  // آیا امکان ارسال وجود دارد؟
+  const canSubmit = useMemo(() => {
+    return message.trim().length > 0 && message.trim().length <= MAX_LENGTH && !isPending;
+  }, [message, isPending]);
+
+  // ریست فرم بعد از ارسال موفق
   useEffect(() => {
     if (state.success) {
+      setMessage("");
       formRef.current?.reset();
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto'; // برگرداندن ارتفاع به حالت اولیه
+        textareaRef.current.style.height = "auto";
       }
     }
-  }, [state.timestamp, state.success]);
+  }, [state.success, state.timestamp]);
 
-  // تغییر ارتفاع خودکار با توجه به محتوا (حداکثر 150 پیکسل)
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = e.target;
-    target.style.height = 'auto';
-    target.style.height = `${Math.min(target.scrollHeight, 150)}px`;
+  // auto-resize textarea
+  const resizeTextarea = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
   };
 
-  // ارسال فرم با کلید Enter (بدون Shift)
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+    resizeTextarea(e.target);
+  };
+
+  // Enter => submit | Shift+Enter => new line
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      // جلوگیری از ارسال فرم خالی یا در حال پردازش
-      if (textareaRef.current?.value.trim() && !isPending) {
-        formRef.current?.requestSubmit();
-      }
+      if (canSubmit) formRef.current?.requestSubmit();
     }
   };
 
   return (
-    <div className="p-3 sm:p-4 bg-slate-50/50 border-t border-slate-100 mt-auto">
-      <form ref={formRef} action={formAction} className="flex flex-col gap-2">
-        {/* فیلد مخفی برای ارسال آیدی تیکت */}
+    <div className="mt-auto border-t border-slate-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 p-3 sm:p-4">
+      <form ref={formRef} action={formAction} className="space-y-2.5" noValidate>
         <input type="hidden" name="ticketId" value={ticketId} />
-        
-        {/* کادر یکپارچه پیام */}
-        <div className="relative flex items-end bg-white rounded-2xl border border-slate-200 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 shadow-sm transition-all duration-200 overflow-hidden">
-          
+
+        <label htmlFor="reply-message" className="sr-only">
+          پیام پاسخ
+        </label>
+
+        <div
+          className="
+            relative flex items-end overflow-hidden rounded-2xl border bg-white shadow-sm
+            transition-all duration-200
+            border-slate-200
+            focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10
+          "
+        >
           <textarea
+            id="reply-message"
             ref={textareaRef}
             name="message"
-            rows={1}
-            placeholder="پیام خود را بنویسید..."
+            value={message}
+            rows={2}
+            maxLength={MAX_LENGTH}
             required
             disabled={isPending}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
-            className="w-full min-h-[56px] py-4 pr-4 pl-14 bg-transparent outline-none resize-none custom-scrollbar transition-opacity disabled:opacity-50 text-sm sm:text-base leading-relaxed text-slate-700 placeholder:text-slate-400"
+            placeholder="پاسخ خود را بنویسید..."
+            aria-invalid={Boolean(state.message && !state.success)}
+            aria-describedby="reply-hint reply-feedback"
+            className="
+              w-full min-h-[56px] max-h-[180px] resize-none bg-transparent
+              py-4 pr-4 pl-16 text-sm sm:text-[15px] leading-7 text-slate-700 placeholder:text-slate-400
+              outline-none disabled:cursor-not-allowed disabled:opacity-60 custom-scrollbar
+            "
           />
-          
-          {/* دکمه ارسال (در سمت چپ کادر قرار گرفت) */}
+
           <button
             type="submit"
-            disabled={isPending || !state} // غیرفعال شدن موقت هنگام لودینگ
-            className="absolute left-2 bottom-2 p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 hover:shadow-md hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center shrink-0"
+            disabled={!canSubmit}
             title="ارسال پیام"
+            aria-label="ارسال پیام"
+            className="
+              absolute bottom-2 left-2 inline-flex items-center justify-center gap-1.5
+              rounded-xl px-3 py-2.5 text-sm font-bold text-white
+              transition-all duration-200
+              bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md
+              disabled:bg-slate-300 disabled:text-slate-100 disabled:shadow-none disabled:translate-y-0
+            "
           >
             {isPending ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <>
+                <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <span className="hidden sm:inline">در حال ارسال</span>
+              </>
             ) : (
-              <Send className="w-5 h-5 rtl:-scale-x-100" />
+              <>
+                <Send className="h-4 w-4 rtl:-scale-x-100" />
+                <span className="hidden sm:inline">ارسال</span>
+              </>
             )}
           </button>
-
         </div>
 
-        {/* بخش راهنما و نمایش خطا */}
-        <div className="flex items-center justify-between px-2 mt-1">
-          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline-block">
-            ارسال با کلید <kbd className="bg-slate-200/60 border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-sans mx-1">Enter</kbd> خط جدید <kbd className="bg-slate-200/60 border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-sans mx-1">Shift + Enter</kbd>
-          </span>
-          
-          {/* نمایش پیام خطا */}
+        <div className="flex items-center justify-between gap-3 px-1">
+          <p id="reply-hint" className="hidden sm:block text-[11px] text-slate-500 font-medium">
+            ارسال سریع با{" "}
+            <kbd className="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[10px]">Enter</kbd>
+            {" "}و خط جدید با{" "}
+            <kbd className="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[10px]">Shift + Enter</kbd>
+          </p>
+
+          <div className="mr-auto flex items-center gap-2">
+            <span
+              className={`text-[11px] font-bold ${
+                message.length > MAX_LENGTH * 0.9 ? "text-amber-600" : "text-slate-400"
+              }`}
+            >
+              {message.length}/{MAX_LENGTH}
+            </span>
+          </div>
+        </div>
+
+        <div id="reply-feedback" aria-live="polite">
           {state.message && !state.success && (
-            <p className="text-red-500 text-xs sm:text-sm font-bold animate-pulse mr-auto">
+            <div className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-rose-700">
+              <AlertCircle className="h-4 w-4" />
               {state.message}
-            </p>
+            </div>
+          )}
+
+          {state.success && (
+            <div className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-emerald-700">
+              <CircleCheck className="h-4 w-4" />
+              پیام شما با موفقیت ارسال شد.
+            </div>
           )}
         </div>
       </form>

@@ -11,31 +11,15 @@ export async function POST() {
     const refreshTokenCookie = cookieStore.get("refreshToken");
     const tokenValue = refreshTokenCookie?.value;
 
-    // ۱. پاک کردن رفرش توکن از دیتابیس (باطل کردن سشن در بک‌اند)
+    // ۱. پاک کردن رفرش توکن از دیتابیس
     if (tokenValue) {
-      // الف: پیدا کردن کاربری که این توکن را در آرایه توکن‌هایش دارد
-      const user = await db.user.findFirst({
+      // چون رفرش توکن‌ها الان یک جدول مجزا هستند، 
+      // باید آن را مستقیماً از جدول RefreshToken حذف کنیم
+      await db.refreshToken.deleteMany({
         where: {
-          refreshTokens: {
-            has: tokenValue, // در Prisma برای جستجو داخل آرایه از has استفاده می‌شود
-          },
+          tokenHash: tokenValue, // فرض بر این است که tokenValue در فیلد tokenHash ذخیره شده است
         },
       });
-
-      if (user) {
-        // ب: فیلتر کردن (حذف) توکن فعلی از لیست توکن‌های کاربر
-        const updatedTokens = user.refreshTokens.filter(
-          (token) => token !== tokenValue
-        );
-
-        // ج: آپدیت کردن دیتابیس با لیست جدید توکن‌ها
-        await db.user.update({
-          where: { id: user.id },
-          data: { 
-            refreshTokens: updatedTokens 
-          },
-        });
-      }
     }
 
     // ۲. پاک کردن هر دو کوکی از مرورگر کاربر

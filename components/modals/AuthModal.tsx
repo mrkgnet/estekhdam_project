@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Smartphone, Lock, ArrowRight, CheckCircle, Loader2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 const OTP_LENGTH = 5;
 
@@ -40,21 +41,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     }
   }, [isOpen]);
 
-  // مدیریت فوکوس اتوماتیک بدون تداخل انیمیشن
+  // فوکوس اتوماتیک
   useEffect(() => {
     if (!isOpen) return;
-    
     if (step === 0) {
-      const t = setTimeout(() => phoneRef.current?.focus(), 50);
+      const t = setTimeout(() => phoneRef.current?.focus(), 80);
       return () => clearTimeout(t);
     }
-    
     if (step === 1) {
-      const t = setTimeout(() => {
-        if (otpRef.current) {
-          otpRef.current.focus();
-        }
-      }, 50);
+      const t = setTimeout(() => otpRef.current?.focus(), 80);
       return () => clearTimeout(t);
     }
   }, [step, isOpen]);
@@ -134,10 +129,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       });
       setTimer(120);
       setOtp("");
-      
-      // فوکوس مجدد روی اینپوت کد پس از ارسال دوباره
       setTimeout(() => otpRef.current?.focus(), 50);
-      
       toast.success("کد مجدداً ارسال شد");
     } catch {
       toast.error("خطا در ارسال مجدد");
@@ -146,163 +138,173 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="w-full max-w-[360px]">
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 relative">
-          <button
-            onClick={onClose}
-            className="absolute -top-4 right-3 p-2 bg-white border border-slate-200 text-slate-500 rounded-full hover:bg-slate-50 transition"
-            aria-label="close"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <motion.div
+            className="w-full max-w-[360px]"
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ type: "tween", stiffness: 220, damping: 22 }}
           >
-            <X className="w-5 h-5" />
-          </button>
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 relative">
+              <button
+                onClick={onClose}
+                className="absolute -top-4 right-3 p-2 bg-white border border-slate-200 text-slate-500 rounded-full hover:bg-slate-50 transition"
+                aria-label="close"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-          {/* Stepper */}
-          <div className="w-full max-w-[290px] mx-auto mb-6">
-            <div className="flex items-center justify-center gap-2">
-              {steps.map((label, i) => {
-                const isActive = step === i;
-                const isDone = step > i;
-                return (
-                  <React.Fragment key={label}>
-                    <div className="flex flex-col items-center gap-2">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all
-                          ${
-                            isDone
-                              ? "bg-emerald-500 border-emerald-500 text-white"
-                              : isActive
-                              ? "bg-slate-900 border-slate-900 text-white"
-                              : "bg-white border-slate-200 text-slate-400"
-                          }`}
-                      >
-                        {isDone ? "✓" : i + 1}
-                      </div>
-                      <span
-                        className={`text-[11px] ${
-                          isActive ? "text-slate-900 font-bold" : "text-slate-500"
-                        }`}
-                      >
-                        {label}
-                      </span>
-                    </div>
+              {/* Stepper */}
+              <div className="w-full max-w-[370px] mx-auto mb-6">
+                <div className="flex items-center justify-center gap-2">
+                  {steps.map((label, i) => {
+                    const isActive = step === i;
+                    const isDone = step > i;
+                    return (
+                      <React.Fragment key={label}>
+                        <div className="flex flex-col items-center gap-2">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all
+                              ${
+                                isDone
+                                  ? "bg-emerald-500 border-emerald-500 text-white"
+                                  : isActive
+                                  ? "bg-slate-900 border-slate-900 text-white"
+                                  : "bg-white border-slate-200 text-slate-400"
+                              }`}
+                          >
+                            {isDone ? "✓" : i + 1}
+                          </div>
+                          <span
+                            className={`text-[11px] ${
+                              isActive ? "text-slate-900 font-bold" : "text-slate-500"
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        </div>
 
-                    {i < steps.length - 1 && (
-                      <div
-                        className={`h-[2px] flex-1 -mt-3 ${
-                          step > i ? "bg-emerald-400" : "bg-slate-200"
-                        }`}
+                        {i < steps.length - 1 && (
+                          <div
+                            className={`h-[2px] flex-1 -mt-3 ${
+                              step > i ? "bg-emerald-400" : "bg-slate-200"
+                            }`}
+                          />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 mx-auto bg-slate-900 rounded-2xl flex items-center justify-center mb-3">
+                  <Lock className="text-white" />
+                </div>
+                <h2 className="font-bold text-base text-slate-900">
+                  {step === 0 ? "ورود / ثبت‌نام" : step === 1 ? "تأیید کد" : "خوش آمدید"}
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">ورود سریع و امن با شماره موبایل</p>
+              </div>
+
+              {step === 0 && (
+                <div className="space-y-5">
+                  <div className="space-y-1">
+                    <label className="block text-slate-700 text-sm">شماره موبایل</label>
+                    <div className="relative">
+                      <Smartphone className="absolute right-3 top-3.5 w-5 h-5 text-slate-400" />
+                      <input
+                        ref={phoneRef}
+                        type="tel"
+                        inputMode="numeric"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.trim())}
+                        placeholder="09123456789"
+                        className="w-full pr-10 py-3 px-2.5 border text-[15px] border-slate-200 rounded-xl outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                        dir="ltr"
                       />
+                    </div>
+                    {!isPhoneValid && phone.length > 0 && (
+                      <p className="text-[11px] text-rose-500 mt-1">شماره معتبر نیست</p>
                     )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
+                  </div>
 
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 mx-auto bg-slate-900 rounded-2xl flex items-center justify-center mb-3">
-              <Lock className="text-white" />
-            </div>
-            <h2 className="font-bold text-base text-slate-900">
-              {step === 0 ? "ورود / ثبت‌نام" : step === 1 ? "تأیید کد" : "خوش آمدید"}
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">ورود سریع و امن با شماره موبایل</p>
-          </div>
+                  <button
+                    onClick={handleSendOTP}
+                    disabled={!isPhoneValid || loading}
+                    className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 transition-colors cursor-pointer text-white rounded-xl flex justify-center gap-2 disabled:opacity-60"
+                  >
+                    {loading ? <Loader2 className="animate-spin" /> : "ارسال کد"}
+                    <ArrowRight />
+                  </button>
+                </div>
+              )}
 
-          {step === 0 && (
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <label className="block text-slate-700 text-sm">شماره موبایل</label>
-                <div className="relative">
-                  <Smartphone className="absolute right-3 top-3.5 w-5 h-5 text-slate-400" />
+              {step === 1 && (
+                <div className="space-y-4">
                   <input
-                    ref={phoneRef}
+                    ref={otpRef}
                     type="tel"
                     inputMode="numeric"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.trim())}
-                    placeholder="09123456789"
-                    className="w-full pr-10 py-3 px-2.5 border border-slate-200 rounded-xl outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))
+                    }
+                    maxLength={OTP_LENGTH}
+                    placeholder="- - - - -"
+                    className="w-full text-center tracking-widest text-[15px] border border-slate-200 rounded-xl py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                     dir="ltr"
+                    autoComplete="one-time-code"
                   />
+
+                  <div className="flex justify-between text-sm text-slate-600">
+                    <button
+                      onClick={handleResend}
+                      disabled={timer > 0}
+                      className={timer > 0 ? "text-slate-400" : "text-slate-900 font-bold"}
+                    >
+                      {timer > 0 ? formatTime(timer) : "ارسال مجدد"}
+                    </button>
+                    <button onClick={() => setStep(0)} className="hover:text-slate-900">
+                      ویرایش شماره
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={handleVerifyOTP}
+                    disabled={loading || otp.length < OTP_LENGTH}
+                    className="w-full py-3 flex justify-center items-center bg-slate-900 hover:bg-slate-800 cursor-pointer text-white rounded-xl transition-colors disabled:opacity-60"
+                  >
+                    {loading ? <Loader2 className="animate-spin" /> : "تأیید"}
+                  </button>
                 </div>
-                {!isPhoneValid && phone.length > 0 && (
-                  <p className="text-[11px] text-rose-500 mt-1">شماره معتبر نیست</p>
-                )}
-              </div>
+              )}
 
-              <button
-                onClick={handleSendOTP}
-                disabled={!isPhoneValid || loading}
-                className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 transition-colors cursor-pointer text-white rounded-xl flex justify-center gap-2 disabled:opacity-60"
-              >
-                {loading ? <Loader2 className="animate-spin" /> : "ارسال کد"}
-                <ArrowRight />
-              </button>
+              {step === 2 && (
+                <div className="text-center space-y-4 py-4">
+                  <CheckCircle className="mx-auto text-emerald-500 w-16 h-16" />
+                  <p className="font-bold text-slate-700">ورود با موفقیت انجام شد</p>
+                </div>
+              )}
             </div>
-          )}
-
-          {step === 1 && (
-            <div className="space-y-4">
-              <input
-                ref={otpRef}
-                type="tel"
-                inputMode="numeric"
-                value={otp}
-                onChange={(e) =>
-                  setOtp(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))
-                }
-                maxLength={OTP_LENGTH}
-                placeholder="- - - - -"
-                className="w-full text-center tracking-widest border border-slate-200 rounded-xl py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                dir="ltr"
-                autoComplete="one-time-code"
-              />
-
-              <div className="flex justify-between text-sm text-slate-600">
-                <button
-                  onClick={handleResend}
-                  disabled={timer > 0}
-                  className={timer > 0 ? "text-slate-400" : "text-slate-900 font-bold"}
-                >
-                  {timer > 0 ? formatTime(timer) : "ارسال مجدد"}
-                </button>
-                <button onClick={() => setStep(0)} className="hover:text-slate-900">
-                  ویرایش شماره
-                </button>
-              </div>
-
-              <button
-                onClick={handleVerifyOTP}
-                disabled={loading || otp.length < OTP_LENGTH}
-                className="w-full py-3 flex justify-center items-center bg-slate-900 hover:bg-slate-800 cursor-pointer text-white rounded-xl transition-colors disabled:opacity-60"
-              >
-                {loading ? <Loader2 className="animate-spin" /> : "تأیید"}
-              </button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="text-center space-y-4 py-4">
-              <CheckCircle className="mx-auto text-emerald-500 w-16 h-16" />
-              <p className="font-bold text-slate-700">
-                 ورود با موفقیت انجام شد
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

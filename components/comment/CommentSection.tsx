@@ -149,7 +149,7 @@ export default function CommentSectionUI({ targetId, targetType, initialComments
               onChange={(e) => setNewComment(e.target.value)}
               name="newComment"
               placeholder="دیدگاه خود را اینجا بنویسید (نیاز به لاگین نیست)..."
-              className="w-full min-h-[130px] p-5 bg-white border border-slate-200 rounded focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-slate-700"
+              className="w-full min-h-[130px] p-5 bg-white border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-slate-700"
               disabled={isPending}
             />
             <button
@@ -170,7 +170,7 @@ export default function CommentSectionUI({ targetId, targetType, initialComments
           const { name: commenterName, type: commenterType } = getUserInfo(comment);
 
           return (
-            <div key={comment.id} className="bg-white border border-slate-100 rounded p-4 sm:p-6 shadow-sm">
+            <div key={comment.id} className="bg-white border border-slate-200 rounded p-4 sm:p-6 shadow">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-slate-500">

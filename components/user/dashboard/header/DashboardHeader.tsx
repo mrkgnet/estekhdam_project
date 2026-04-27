@@ -1,66 +1,71 @@
 // components/dashboard/DashboardHeader.tsx
 "use client";
 
-import { Bell, Sparkles, Headset } from "lucide-react"; // آیکون Headset اضافه شد
+import { Bell, Sparkles, Headset, User } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 
 export default function DashboardHeader() {
-  // نمونه داده (بعداً از API می‌گیری)
   const user = useMemo(
-    () => ({ name: "کاربر عزیز",  notifications: 0 }),
+    () => ({ name: "کاربر عزیز", notifications: 0 }), // نمونه عدد
     []
   );
 
+  // حروف اول نام برای آواتار (اختیاری)
+  const userInitial = user.name.charAt(0);
+
   return (
-    <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-      <div className="max-w-7xl mx-auto px-4 h-[72px] flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 rounded-2xl border-b border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 md:h-[72px] flex items-center justify-between gap-4">
         
-        {/* بخش راست: اطلاعات کاربر */}
+        {/* بخش راست: لوگو + خوش‌آمدگویی */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-sm">
-            <Sparkles size={18} />
+          <div className="relative group">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 blur-md opacity-40 group-hover:opacity-60 transition duration-300"></div>
+            <div className="relative w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md">
+              <Sparkles size={18} className="drop-shadow-sm" />
+            </div>
           </div>
 
           <div className="leading-tight">
-            <div className="text-sm text-slate-500">داشبورد</div>
-            <div className="font-extrabold text-slate-900">
-              سلام، {user.name} 👋
-            </div>
+            <span className=" font-medium text-slate-400 tracking-wide">داشبورد</span>
+            <h2 className=" font-bold text-slate-800 flex items-center gap-1">
+              سلام، {user.name}
+              <span className="inline-block text-lg">👋</span>
+            </h2>
           </div>
         </div>
 
-        {/* بخش چپ: اکشن‌ها */}
+        {/* بخش چپ: دکمه‌ها */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* دکمه پشتیبانی */}
+          {/* دکمه پشتیبانی با استایل جدید */}
           <Link
-            href="ddashboard/support/tickets" // مسیر صفحه لیست تیکت‌ها را اینجا قرار دهید
-            className="flex items-center gap-2 h-11 px-3 sm:px-4 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border border-blue-100/50 transition-all duration-200"
-            aria-label="support"
+            href="/ddashboard/support/tickets"
+            className="group relative flex items-center gap-2 h-10 md:h-11 px-3 md:px-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 hover:from-blue-100 hover:to-indigo-100 hover:text-blue-700 border border-blue-200/50 transition-all duration-300 hover:shadow-md active:scale-95"
+            aria-label="پشتیبانی"
           >
-            <Headset size={18} />
-            {/* متن دکمه در موبایل مخفی و در دسکتاپ نمایش داده می‌شود */}
-            <span className="hidden sm:inline font-bold text-sm">
-              پشتیبانی
-            </span>
+            <Headset size={18} className="transition-transform group-hover:scale-110" />
+            <span className="hidden sm:inline text-sm font-semibold">پشتیبانی</span>
           </Link>
 
-          {/* دکمه اعلان‌ها */}
+          {/* دکمه اعلان‌ها با نشانگر پالسی */}
           <button
-            className="relative w-11 h-11 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200
-                       flex items-center justify-center"
-            aria-label="notifications"
+            className="relative w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow active:scale-95"
+            aria-label="اعلان‌ها"
           >
-            <Bell size={18} className="text-slate-600" />
+            <Bell size={18} className="text-slate-500 group-hover:text-slate-700" />
+            
             {user.notifications > 0 && (
-              <span className="absolute -top-1 -left-1 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] font-extrabold
-                               flex items-center justify-center shadow">
-                {user.notifications}
-              </span>
+              <>
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white text-[11px] font-bold flex items-center justify-center shadow-md">
+                  {user.notifications > 9 ? '9+' : user.notifications}
+                </span>
+                {/* افکت پالس برای جلب توجه */}
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-400 animate-ping opacity-60"></span>
+              </>
             )}
           </button>
-         
         </div>
       </div>
     </header>

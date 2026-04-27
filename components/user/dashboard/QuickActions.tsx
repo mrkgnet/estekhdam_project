@@ -3,8 +3,8 @@ import Link from "next/link";
 import { BookOpen, CreditCard, FileText, Headphones } from "lucide-react";
 
 const actions = [
-  { title: "شروع آزمون جدید", desc: "از بین آزمون‌ها انتخاب کن", href: "/resources", icon: FileText },
-  { title: "مطالعه درس‌ها", desc: "رفتن به درس‌ها و دوره‌ها", href: "/resources", icon: BookOpen },
+  { title: "صفحه بانک سوالات", desc: "از بین بانک سوالات انتخاب کن", href: "/resources?category=بانک-سوالات", icon: FileText },
+  { title: " صفحه دفترچه‌های آزمون‌ها", desc: "از بین دفترچه های آزمون انتخاب کن", href: "/resources?category=دفترچه-های-استخدامی", icon: BookOpen },
   { title: "پشتیبانی", desc: "سوال داری؟ پیام بده", href: "/ddashboard/support/tickets", icon: Headphones },
 ];
 

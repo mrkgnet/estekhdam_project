@@ -154,10 +154,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                 
                 <CountdownTimer endAt={it.endAt} active />
                 
-                <div className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5  font-medium text-slate-600 transition-all group-hover:bg-sky-50 group-hover:text-sky-600">
-                  مشاهده
-                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
-                </div>
+            
 
               </div>
             </Link>

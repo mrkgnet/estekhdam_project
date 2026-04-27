@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, PlayCircle } from "lucide-react";
+import { BookA, BookAIcon, BookCopyIcon, ChevronLeft, PlayCircle } from "lucide-react";
 
 // تعریف تایپ برای پراپ‌های ورودی
 interface ShowDataMCDProps {
@@ -15,8 +15,9 @@ export default function ShowDataMCD({ response }: ShowDataMCDProps) {
   return (
     <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
       <div className="p-5 flex items-center justify-between border-b border-slate-100">
-        <div>
-          <div className=" text-slate-900">دوره‌ها و آزمون‌های من</div>
+        <div className="flex gap-2 justify-center items-center">
+          <BookCopyIcon size={18}/>
+          <div className=" text-slate-600 font-bold text-15 sm:text-16">دوره‌های من</div>
         </div>
       </div>
 
@@ -31,7 +32,7 @@ export default function ShowDataMCD({ response }: ShowDataMCDProps) {
           </div>
         ) : (
           courses.map((order) => (
-            <div key={order.id} className="rounded-2xl border border-slate-100 p-4 hover:bg-slate-50 transition">
+            <div key={order.id} className="rounded-2xl border border-slate-300 p-4 hover:bg-slate-50 transition border-r-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   {/* فرض شده که نام فیلد در مدل Product شما name است (اگر title است آن را تغییر دهید) */}

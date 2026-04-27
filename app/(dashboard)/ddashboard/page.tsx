@@ -14,7 +14,7 @@ export default function DashboardPage() {
     <div className="min-h-screen ">
       <DashboardHeader />
 
-      <div className="max-w-7xl mx-auto px-4 py-5 lg:py-7">
+      <div className="max-w-7xl mx-auto  py-5 lg:py-7">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Main */}
           <div className="lg:col-span-8 space-y-5">

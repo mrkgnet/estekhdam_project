@@ -1,7 +1,7 @@
 import React from 'react'
 import { Award, ShoppingBag, Timer, TrendingUp } from "lucide-react";
 // مسیر ایمپورت تابع بالا را بر اساس پوشه‌بندی خود تنظیم کنید
-import { fetchDataKPIC } from '@/actions/kpi-action'; 
+
 
 function KpiCard({
   title,
@@ -18,13 +18,16 @@ function KpiCard({
     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm text-slate-500">{title}</div>
-          <div className="mt-1 text-2xl  ">{value}</div>
-          {hint && <div className="mt-2 text-[13px] text-slate-500">{hint}</div>}
+          <div className="text-15 font-bold sm:text-16 text-slate-500">{title}</div>
+          <div className="mt-1 text-2xl text-center  ">
+            
+            <span className='border-b-2 text-blue-600'>{value}</span>
+            </div>
+          {hint && <div className="mt-2 text-13 text-slate-500">{hint}</div>}
         </div>
 
-        <div className="w-11 h-9 rounded-2xl bg-slate-900 text-white flex items-center justify-center">
-          <Icon size={18} />
+        <div className="w-11 h-9 rounded-2xl bg-blue-900 text-white flex items-center justify-center">
+          <Icon size={14} />
         </div>
       </div>
 
@@ -45,7 +48,7 @@ export default async function ShowDataKPIC({kpiData} :any) {
   const count = kpiData.success && kpiData.data ? kpiData.data.activeCourses : 0;
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
       <KpiCard
         title="دوره‌های فعال"
         value={count.toString()} // 👈 قرار دادن متغیر دینامیک

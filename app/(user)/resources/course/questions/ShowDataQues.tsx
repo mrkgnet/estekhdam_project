@@ -696,7 +696,7 @@ export default function ExamPage({
             </div>
           </div>
 
-          <div ref={commentsRef} className="bg-white rounded shadow-sm border border-slate-200/60 p-2  mt-6 mb-16 lg:mb-0">
+          <div ref={commentsRef} className="">
             {dbQuestion?.id && (
               <CommentManagment targetId={dbQuestion.id} targetType="question" />
             )}
