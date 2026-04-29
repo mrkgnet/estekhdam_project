@@ -5,7 +5,7 @@ import HeaderTop from './HeaderTop'
 
 export default async function FetchDataCatNav() {
     const response = await getDataCategory()
-    const resultCat = response?.data || []
+    const resultCat = response?.data?.slice(0,5) || []
   return (
    
       <HeaderTop response = {resultCat} />

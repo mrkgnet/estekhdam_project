@@ -141,26 +141,14 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6  mt-4">
-    
-      
+    <div className="w-full max-w-7xl mx-auto  sm:px-6  mt-4">
       <div className="grid grid-cols-12 gap-4 p-4 md:p-2 ">
-
         <div className="col-span-12 lg:col-span-3">
           <FiltersSidebar />
         </div>
-
-
         {/* سمت چپ  */}
         <div className="col-span-12 lg:col-span-9">
-
-
-
-
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 mb-5 rounded shadow-sm">
-
-          
-
             {/* بخش تعداد نتایج (در موبایل میره دوم) */}
             <div className="w-full md:w-auto text-right order-1 md:order-1">
               <p className="text-slate-600   flex items-center gap-1.5">
@@ -180,7 +168,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
               return (
 
 
-                <div key={x.id} className="group rounded border border-slate-200 bg-white p-5 hover:shadow-xl hover:border-emerald-100 transition-all duration-500">
+                <div key={x.id} className="group rounded-xl border border-slate-200 bg-white p-5 hover:shadow-xl hover:border-emerald-100 transition-all duration-500">
                   <Link
                     href={`/jobnews/government/${x.slugNews}`}
 
@@ -234,7 +222,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
                     <div className="mt-5 flex justify-end">
 
-                      <button className="inline-flex items-center justify-center gap-2 rounded px-6 py-3  bg-emerald-600 hover:bg-emerald-500 shadow-md hover:shadow-lg shadow-emerald-600/20 text-white transition-all duration-300 w-full sm:w-auto transform hover:-translate-y-0.5">
+                      <button className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3  bg-emerald-600 hover:bg-emerald-500 shadow-md hover:shadow-lg shadow-emerald-600/20 text-white transition-all duration-300 w-full sm:w-auto transform hover:-translate-y-0.5">
                         <ExternalLink className="h-4 w-4" />
                         مشاهده جزئیات و ثبت‌نام
                       </button>

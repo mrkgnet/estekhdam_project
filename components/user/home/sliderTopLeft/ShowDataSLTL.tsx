@@ -138,7 +138,7 @@ export default function ShowDataSLTL({
           modules={[Navigation, Autoplay, Pagination]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
           autoplay={{
-            delay: 4000000,
+            delay: 4000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -159,7 +159,7 @@ export default function ShowDataSLTL({
         >
           {products.map((p) => (
             <SwiperSlide key={p.id} className="w-full h-auto">
-              <Link href={`/resources/course/${p.id}`} className="block h-full">
+              <Link href={`/resources/course/${p.slug}`} className="block h-full">
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                   <div className="relative w-full h-[130px] md:h-[150px] xl:h-[170px] flex-shrink-0 flex items-center justify-center p-4 md:p-5 overflow-hidden">
                     <div className="relative w-full h-full transform transition-transform duration-500 ease-out drop-shadow-xl">
@@ -169,6 +169,7 @@ export default function ShowDataSLTL({
                         fill
                         className="object-contain mix-blend-multiply md:p-0"
                         sizes="(max-width: 768px) 170px, 400px"
+                        
                       />
                     </div>
                   </div>

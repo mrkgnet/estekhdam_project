@@ -31,12 +31,12 @@ export default function NavbarUser() {
         <div className="flex items-center gap-1 border-l border-gray-200 pl-2 sm:pl-4">
           <Link href={'/'} className="flex items-center gap-2 px-3 py-2  font-medium text-gray-600 transition-colors duration-200 rounded-xl hover:bg-gray-100 hover:text-gray-900">
             <Home className="w-4 h-4" />
-            <span className="hidden sm:inline-block">خانه</span>
+            <span className=" sm:inline-block">خانه</span>
           </Link>
 
           <Link href={'/contact'} className="flex items-center gap-2 px-3 py-2  font-medium text-gray-600 transition-colors duration-200 rounded-xl hover:bg-gray-100 hover:text-gray-900">
             <HeadphonesIcon className="w-4 h-4" />
-            <span className="hidden sm:inline-block">تماس باما</span>
+            <span className=" sm:inline-block">تماس باما</span>
           </Link>
         </div>
 

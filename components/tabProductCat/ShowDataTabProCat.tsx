@@ -362,7 +362,7 @@ export default function ShowDataTabProCat({
                             fill
                             className="object-contain"
                             sizes="(max-width: 480px) 220px, (max-width: 768px) 320px, 200px"
-                            priority={index < 2}
+                        
                             loading={index < 2 ? "eager" : "lazy"}
                           />
                         </div>

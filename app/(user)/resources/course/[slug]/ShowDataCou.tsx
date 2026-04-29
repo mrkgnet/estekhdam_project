@@ -100,6 +100,7 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
                   alt={product.name}
                   fill
                   className="object-contain p-8  transition duration-500"
+                  priority
                 />
               </div>
 

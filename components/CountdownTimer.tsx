@@ -38,7 +38,7 @@ function pad2(n: number) {
 
 function TimeBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-[56px] rounded-xl px-2 py-1.5 text-center">
+    <div className="min-w-[45px] rounded-xl px-2 py-1.5 text-center">
       <div className="text-sm font-extrabold tabular-nums">{value}</div>
       <div className="text-[10px] opacity-80">{label}</div>
     </div>
