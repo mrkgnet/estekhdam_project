@@ -35,14 +35,12 @@ export async function addMainSliderAction(prevState: any, formData: FormData) {
     }
 
     // ۳. مدیریت آپلود عکس با سیستم هشینگ
-    let finalImageUrl = "";
-
     const buffer = Buffer.from(await imageFile.arrayBuffer());
     const hash = crypto.createHash("sha256").update(buffer).digest("hex");
     const extension = path.extname(imageFile.name) || ".jpg";
     const filename = `${hash}${extension}`;
 
-    // مسیر ذخیره‌سازی (بهتر است پوشه مجزا برای اسلایدرها داشته باشید)
+    // مسیر ذخیره‌سازی پوشه mainSlider
     const uploadDir = path.join(process.cwd(), "public", "images", "mainSlider");
     const savePath = path.join(uploadDir, filename);
 
@@ -62,7 +60,7 @@ export async function addMainSliderAction(prevState: any, formData: FormData) {
       await fs.writeFile(savePath, buffer);
     }
 
-    finalImageUrl = `/images/mainSlider/${filename}`;
+    const finalImageUrl = `/images/mainSlider/${filename}`;
 
     // ۴. ذخیره در دیتابیس
     await db.mainSlider.create({
@@ -76,7 +74,7 @@ export async function addMainSliderAction(prevState: any, formData: FormData) {
 
     // ۵. به‌روزرسانی کش صفحاتی که اسلایدر در آن‌ها نمایش داده می‌شود
     revalidatePath("/"); // صفحه اصلی سایت
-    revalidatePath("/adminp/mainslider/history"); // صفحه تاریخچه
+    revalidatePath("/admin/mainslider"); // مسیر صفحه مدیریت اسلایدر خود را در صورت نیاز اصلاح کنید
 
     return {
       success: true,

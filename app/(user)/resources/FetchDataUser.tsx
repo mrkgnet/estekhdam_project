@@ -1,18 +1,16 @@
 import React from 'react'
-
 import ShowDataResources from './ShowDataResources'
 import { fetchAllProductDataAction } from '@/actions/user/productsCat/Actions';
 
 type Props = {
   currentPage: number;
   searchQuery: string;
-  categoryQuery: string; // <--- اضافه شد
+  categoryQuery: string; 
   limit: number;
 }
 
 export default async function FetchDataUser({ currentPage, searchQuery, categoryQuery, limit }: Props) {
   const response = await fetchAllProductDataAction(currentPage, limit, searchQuery, categoryQuery);
-
 
   if (!response?.success || !response?.data) {
     return (
@@ -26,9 +24,10 @@ export default async function FetchDataUser({ currentPage, searchQuery, category
     <div>
       <ShowDataResources
         response={response.data}
+        totalCount={response.totalCount} // <--- این بخش اصلاح شد
         totalPages={response.totalPages || 1}
         currentPage={currentPage}
-        title ={categoryQuery}
+        title={categoryQuery}
       />
     </div>
   )

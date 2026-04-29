@@ -90,8 +90,8 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="relative  z-50 w-full border-b border-gray-300   bg-white font-sans transition-all duration-300">
-        <div className="mx-auto px-2 pl-6 h-[72px] flex items-center justify-between gap-4">
+      <header className="relative   z-50 w-full border-b border-gray-300   bg-white font-sans transition-all duration-300">
+        <div className="mx-auto  pl-6 h-[72px] px-6  flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
           <div className="flex items-center">
@@ -129,7 +129,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-                className={`w-full h-13 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${
+                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${
                   isSearchOpen 
                     ? "bg-white border-gray-500" 
                     : "border-gray-200 focus:bg-white hover:border-gray-300"
@@ -162,7 +162,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                           key={cat?.id || index}
                           href={`/category/${cat?.catSlug || ''}`}
                           onClick={closeSearch}
-                          className="rounded-full border border-gray-200 px-4 py-2  text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
+                          className="rounded-full text-11 lg:text-12 border border-gray-200 px-4 py-2  text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
                         >
                           {cat?.catName || "بدون نام"}
                         </Link>
@@ -235,18 +235,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
             </button>
 
             {/* سبد خرید */}
-            <Link
-              href="/cart"
-              className="relative flex items-center justify-center w-9 h-9 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
-              aria-label="Cart"
-            >
-              <ShoppingCart size={20} strokeWidth={2.5} />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full bg-green-300 text-xs font-bold">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+          
 
             {/* منوی کاربری */}
             <div className="relative z-10" ref={wrapperRef}>

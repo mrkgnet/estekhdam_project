@@ -27,19 +27,19 @@ export default function PageHeader({
       {/* Header Card */}
       <div className="relative overflow-hidden rounded-2xl border border-gray-200/70 bg-white/80 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
         {/* Accent line */}
-        <div className="h-1 w-full bg-gradient-to-r from-emerald-400 via-emerald-200 to-transparent" />
+        <div className="h-1 w-full bg-gradient-to-r from-red-400 via-red-200 to-transparent" />
 
         <div className="p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Title + Icon */}
           <div className="flex items-center gap-4 sm:gap-5">
-            <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-50 to-white shadow-sm ring-1 ring-emerald-200/60">
+            <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-red-50 to-white shadow-sm ring-1 ring-red-200/60">
               {icon || (
                 <Layers
-                  className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-600"
+                  className="h-6 w-6 sm:h-7 sm:w-7 text-red-600"
                   strokeWidth={1.8}
                 />
               )}
-              <div className="absolute inset-0 rounded-xl sm:rounded-2xl ring-1 ring-emerald-500/10 pointer-events-none" />
+              <div className="absolute inset-0 rounded-xl sm:rounded-2xl ring-1 ring-red-500/10 pointer-events-none" />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -65,7 +65,7 @@ export default function PageHeader({
         </div>
 
         {/* subtle background highlight */}
-        <div className="absolute -top-10 -left-10 h-28 w-28 rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
+        <div className="absolute -top-10 -left-10 h-28 w-28 rounded-full bg-red-100/40 blur-3xl pointer-events-none" />
       </div>
     </header>
   );

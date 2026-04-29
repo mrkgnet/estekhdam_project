@@ -1,6 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Grid } from "lucide-react";
+import { CategoryGridSkeleton } from "@/components/ui/SkeletonLoding/CategoryGridSkeleton";
 
 // تعریف تایپ دیتابیس شما (نام فیلدها را با Prisma Schema خود چک کنید)
 type CategoryType = {
@@ -19,7 +23,23 @@ interface ShowDataCATProps {
   };
 }
 
+
+
+/* ---------------- Main Component ---------------- */
+
 export default function ShowDataCAT({ response }: ShowDataCATProps) {
+  // ✅ mount state
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const showSkeleton = !mounted;
+
+  if (showSkeleton) {
+    return <CategoryGridSkeleton />;
+  }
+
   // مدیریت حالت خطا یا نبود داده
   if (!response?.success || !response?.data || response.data.length === 0) {
     return (
@@ -35,7 +55,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
     <div className="w-full max-w-7xl mx-auto px-4 py-8 ">
       {/* بخش هدر */}
       <div className="flex items-center justify-between mb-8 bg-gradient-to-l from-orange-200 via-orange-100 to-white px-3 py-2 rounded-md">
-        <h2 className="text-14 sm:text-16 md:text-16 flex items-center gap-2">
+        <h2 className="text-14 sm:text-16 md:text-16 flex text-slate-600 items-center gap-2">
           <Grid size={14} />
           دسته‌بندی‌ها
         </h2>
@@ -50,7 +70,6 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
         </Link>
       </div>
 
-
       {/* بخش گرید */}
       <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6 md:gap-8">
         {categories.map((category) => (
@@ -63,20 +82,22 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
             <div className="w-20  aspect-square bg-slate-100 rounded-3xl flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">
               <div className="relative w-full h-full">
                 <Image
-                  // اگر عکسی در دیتابیس نبود، یک عکس پیش‌فرض نشان می‌دهد
                   src={category.imageUrl || "/images/default-category.png"}
                   alt={category.catName}
                   fill
                   className="object-contain"
-                  style={{ mixBlendMode: 'multiply' }}
-                  sizes="(max-width: 768px) 50vw, 15vw" // بهینه‌سازی لود عکس‌ها
+                  style={{ mixBlendMode: "multiply" }}
+                  sizes="(max-width: 768px) 50vw, 15vw"
+                  priority
+                  placeholder="blur"
+                  blurDataURL={category.imageUrl || "/images/default-category.png"}
                 />
               </div>
             </div>
 
             {/* عنوان دسته‌بندی */}
             <span className=" group-hover:text-blue-600 transition-colors">
-              {category.catName} {/* استفاده از فیلد نام از دیتابیس */}
+              {category.catName}
             </span>
           </Link>
         ))}

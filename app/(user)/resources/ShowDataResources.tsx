@@ -1,14 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
-  BookOpen, Layers, ArrowLeft, Bookmark, FileQuestion, FileText,
-  ShoppingBasketIcon
+  BookOpen,
+  ArrowLeft,
+  Bookmark,
+  FileQuestion,
+  FileText,
+  ShoppingBasketIcon,
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import Pagination from "@/components/ui/Pagination";
-import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import { GridSkeleton } from "@/components/ui/SkeletonLoding/GridSkeleton";
 
 type ProductType = {
   id: string | number;
@@ -21,9 +26,11 @@ type ProductType = {
 
 interface ShowDataResourcesProps {
   response: ProductType[];
+  totalCount: number;
   totalPages: number;
   currentPage: number;
   title: string;
+  isLoading?: boolean;
 }
 
 const toman = (n: number) => {
@@ -31,19 +38,68 @@ const toman = (n: number) => {
   return `${n?.toLocaleString("fa-IR")} تومان`;
 };
 
-export default function ShowDataResources({ response, totalPages, currentPage, title }: ShowDataResourcesProps) {
- 
+export default function ShowDataResources({
+  response,
+  totalCount,
+  totalPages,
+  currentPage,
+  title,
+  isLoading = false,
+}: ShowDataResourcesProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  const searchParams = useSearchParams(); 
+  const currentCategory = searchParams.get("category"); 
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const showSkeleton = !mounted || isLoading;
 
   return (
-    <section className="w-full min-h-screen overflow-hidden font-sans" dir="rtl">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-     
-
+    <section className="w-full min-h-screen overflow-hidden font-sans " dir="rtl">
       
+      {/* هدر فیلترها و نمایش تعداد کل */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mt-6 mb-2 gap-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link 
+            href="?category=بانک-سوالات" 
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              currentCategory === 'بانک-سوالات' 
+                ? 'bg-red-500 text-white shadow-md' 
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            بانک سوالات
+          </Link>
+          <Link 
+            href="?category=دفترچه-های-استخدامی" 
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              currentCategory === 'دفترچه-های-استخدامی' 
+                ? 'bg-red-500 text-white shadow-md' 
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            دفترچه‌های استخدامی
+          </Link>
+          {currentCategory && (
+            <Link href="?" className="px-3 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+              نمایش همه
+            </Link>
+          )}
+        </div>
 
-        {/* بررسی خالی بودن داده‌ها */}
-        {!response || response.length === 0 ? (
+        <div className="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
+          تعداد کل محصولات:
+          <span className="font-bold text-lg">{totalCount}</span>
+        </div>
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {showSkeleton ? (
+          <GridSkeleton />
+        ) : !response || response.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 bg-gray-50/50 min-h-[50vh] rounded-3xl border border-dashed border-gray-200 mt-6">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
               <BookOpen className="w-10 h-10" />
@@ -51,7 +107,7 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
             <p className="text-gray-500 text-base">محصولی با این مشخصات یافت نشد.</p>
           </div>
         ) : (
-          <div className="relative w-full mt-6">
+          <div className="relative w-full mt-6 ">
             <div className="w-full sm:bg-white sm:rounded sm:border sm:border-gray-100 sm:p-6 sm:shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-4 sm:mt-0">
                 {response.map((p, index) => {
@@ -61,13 +117,10 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                   return (
                     <div key={p.id} className="block h-auto">
                       <div className="relative group/card flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
-
-                        {/* شماره آیتم */}
                         <div className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white text-slate-600 rounded-full text-xs font-bold shadow-md border-2 border-white">
                           {itemNumber}
                         </div>
 
-                        {/* بخش تصویر */}
                         <Link
                           href={productLink}
                           className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
@@ -89,7 +142,6 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           </div>
                         </Link>
 
-                        {/* لینک سبد خرید */}
                         <div className="px-3 md:px-4 hidden sm:block">
                           <Link
                             href="/cart"
@@ -104,12 +156,14 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
                           </Link>
                         </div>
 
-                        {/* اطلاعات محصول */}
                         <Link
                           href={productLink}
                           className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
                         >
-                          <h3 className="text-gray-800 md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300" title={p.name}>
+                          <h3
+                            className="text-gray-800 md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300"
+                            title={p.name}
+                          >
                             {p.name}
                           </h3>
 
@@ -152,8 +206,7 @@ export default function ShowDataResources({ response, totalPages, currentPage, t
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {!showSkeleton && totalPages > 1 && (
           <div className="mt-8 flex justify-center">
             <Pagination totalPages={totalPages} currentPage={currentPage} />
           </div>

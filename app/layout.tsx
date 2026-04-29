@@ -44,14 +44,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} bg-white text-slate-600 text-13 sm:text-14 md:text-15 `} suppressHydrationWarning>
+      <body className={`${iransans.className} bg-slate-50  text-13 sm:text-13 md:text-13 `} suppressHydrationWarning>
 
        
           <NextTopLoader color="#ef4444" height={2} showSpinner={false} />
 
           <AuthProvider>
             <Toaster
-              position="top-center"
+              position="top-left"
               toastOptions={{
                 style: { fontFamily: "inherit", direction: "rtl" },
               }}

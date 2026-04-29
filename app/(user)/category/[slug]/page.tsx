@@ -25,7 +25,7 @@ export default async function page({
 
   // تنظیمات بردکرامب و هدر
   const breadcrumbItems = [
-    { label: "دسته بندی ها", href:  `` }, // مسیر پایه محصولات (در صورت نیاز تغییر دهید)
+    { label: "منابع آموزش", href:  `/resources` }, // مسیر پایه محصولات (در صورت نیاز تغییر دهید)
     { label: decodedSlug, href: `` }
   ];
 

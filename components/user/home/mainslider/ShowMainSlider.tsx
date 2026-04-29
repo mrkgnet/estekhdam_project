@@ -55,7 +55,7 @@ export default function ShowMainSlider({ sliders }: ShowMainSliderProps) {
   }
 
   return (
-    <div className="contents">
+    <div className="contents ">
       <div className="w-full h-full flex flex-col relative group  rounded shadow-xl shadow-blue-900/5 border border-white/80 bg-gradient-to-br from-slate-50 to-blue-50/40">
 
         <style jsx global>{`
@@ -138,7 +138,7 @@ export default function ShowMainSlider({ sliders }: ShowMainSliderProps) {
           loop={true}
           dir="rtl"
           autoplay={{
-            delay: 500000000, // 🟢 اصلاح شد از 5000000 به 5000 (۵ ثانیه)
+            delay: 5000, // 🟢 اصلاح شد از 5000000 به 5000 (۵ ثانیه)
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}

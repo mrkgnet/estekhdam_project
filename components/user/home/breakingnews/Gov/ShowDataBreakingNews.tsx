@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { CalendarDays, SearchX, Briefcase, Landmark, ArrowLeft } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { CalendarDays, SearchX, Briefcase, Landmark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import CountdownTimer from "@/components/CountdownTimer";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { BreakingNewsListSkeleton } from "@/components/ui/SkeletonLoding/BreakingNewsCardSkeleton";
 
 type GovNewsDB = {
   id: string;
@@ -20,6 +21,7 @@ type GovNewsDB = {
 
 interface ShowDataBreakingNewsProps {
   govNews: GovNewsDB[];
+  isLoading?: boolean;
 }
 
 type CategoryItem = {
@@ -34,7 +36,6 @@ const categoryItems: CategoryItem[] = [
 ];
 
 function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
-  // بررسی اینکه آیا عکس وجود دارد و فرمت آدرس آن معتبر است (با http یا / شروع می‌شود)
   const isValidSrc = src && (src.startsWith("http") || src.startsWith("/"));
 
   return (
@@ -48,7 +49,7 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
           className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center  text-slate-400">
+        <div className="flex h-full w-full items-center justify-center text-slate-400 text-xs">
           بدون لوگو
         </div>
       )}
@@ -56,8 +57,23 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
   );
 }
 
-export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsProps) {
+/* ---------------- Skeleton Parts ---------------- */
+
+
+
+/* ---------------- Main Component ---------------- */
+
+export default function ShowDataBreakingNews({
+  govNews,
+  isLoading = false,
+}: ShowDataBreakingNewsProps) {
   const [activeCategoryId, setActiveCategoryId] = useState<"gov" | "private">("gov");
+
+  // ✅ mount state
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const formattedGovNews = useMemo(() => {
     return govNews.map((news) => ({
@@ -74,21 +90,17 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
 
   const filteredNews = activeCategoryId === "gov" ? formattedGovNews : [];
 
-  return (
-    // استایل باکس اصلی هماهنگ با صفحه اصلی (rounded-2xl)
-    <div className="w-full    rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
+  const showSkeleton = !mounted || isLoading;
 
+  return (
+    <div className="w-full rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
       {/* header */}
       <div className="mb-5 md:mb-6 flex flex-col gap-4 border-b border-slate-100 pb-4 md:pb-5 md:flex-row md:items-center md:justify-between">
-
         <div className="flex items-center gap-3">
           <div className="h-6 md:h-7 w-1.5 rounded-full bg-sky-500"></div>
-          <h2 className="   text-slate-600 text-base">
-            جدیدترین اخبار استخدامی
-          </h2>
+          <h2 className="text-slate-600 text-base font-bold">جدیدترین اخبار استخدامی</h2>
         </div>
 
-        {/* در موبایل تب‌ها کل عرض را می‌گیرند تا لمسشان راحت باشد */}
         <div className="flex w-full md:w-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
           {categoryItems.map((item) => {
             const Icon = item.icon;
@@ -98,7 +110,7 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
               <button
                 key={item.id}
                 onClick={() => setActiveCategoryId(item.id)}
-                className={`flex w-1/2 md:w-auto items-center justify-center gap-2 rounded-lg px-4 py-2  font-medium transition-all ${
+                className={`flex w-1/2 md:w-auto items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-all ${
                   active
                     ? "bg-white text-sky-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
@@ -112,31 +124,27 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
         </div>
       </div>
 
-      {/* list */}
-      {filteredNews.length > 0 ? (
-        // اسکرول بار نرم‌تر با فاصله مناسب
+      {/* content */}
+      {showSkeleton ? (
+        <BreakingNewsListSkeleton />
+      ) : filteredNews.length > 0 ? (
         <div className="flex max-h-[400px] flex-col gap-3 md:gap-4 overflow-y-auto pr-1 md:pr-2">
           {filteredNews.map((it) => (
             <Link
               key={it.id}
               href={it.href}
-              // تغییر اصلی اینجاست: در موبایل flex-col و در دسکتاپ flex-row
               className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
             >
-
-              {/* بخش سمت راست: عکس و مشخصات */}
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                 <BrandLogo src={it.image} alt={it.title} />
 
                 <div className="flex flex-col gap-4 min-w-0">
-                  {/* flex-wrap برای جلوگیری از بیرون زدن بج در صورت طولانی بودن متن در موبایل */}
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h3 className=" font-semibold  text-slate-600 group-hover:text-sky-700 transition-colors">
+                    <h3 className="font-semibold text-slate-600 group-hover:text-sky-700 transition-colors">
                       {it.title}
                     </h3>
                     <StatusBadge status={it.status || "NEWS"} />
                   </div>
-
 
                   <div className="flex items-center gap-2 md:gap-3 text-10 sm:text-11 text-slate-400">
                     <span className="flex gap-1.5 items-center">
@@ -148,14 +156,8 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
                 </div>
               </div>
 
-              {/* بخش سمت چپ (در موبایل می‌رود پایین): تایمر و دکمه */}
-              {/* در موبایل یک خط جداکننده (border-t) بالا سرش می‌اندازیم تا مرتب شود */}
               <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 sm:border-0 w-full sm:w-auto">
-                
                 <CountdownTimer endAt={it.endAt} active />
-                
-            
-
               </div>
             </Link>
           ))}
@@ -165,10 +167,8 @@ export default function ShowDataBreakingNews({ govNews }: ShowDataBreakingNewsPr
           <div className="rounded-full bg-slate-100 p-4 mb-4">
             <SearchX className="h-8 w-8 text-slate-400" />
           </div>
-          <h4 className="   text-slate-700">
-            آگهی استخدامی یافت نشد
-          </h4>
-          <p className="mt-2 max-w-xs   text-slate-500 leading-relaxed">
+          <h4 className="text-slate-700">آگهی استخدامی یافت نشد</h4>
+          <p className="mt-2 max-w-xs text-slate-500 leading-relaxed">
             در حال حاضر آگهی فعالی برای این دسته‌بندی وجود ندارد. لطفاً دسته‌بندی دیگر را بررسی کنید.
           </p>
         </div>

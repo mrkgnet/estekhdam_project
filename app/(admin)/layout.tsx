@@ -14,7 +14,7 @@ export default function AdminLayout({
 }>) {
   return (
     // کل صفحه به صورت یک ستون با حداقل ارتفاع کل صفحه
-    <div className="flex flex-col  bg-white">
+    <div className="flex flex-col  bg-slate-100">
       
       {/* ردیف بالا: نوبار */}
       <NavbarAdmin />

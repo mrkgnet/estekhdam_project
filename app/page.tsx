@@ -39,13 +39,13 @@ export default function HomePage() {
             <section className="w-full">
               <HeroSearch />
             </section>
-            <section className="w-full grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
+            <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
               <div className="lg:col-span-4">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-full">
                   <FetchDataMainSlider />
                 </div>
               </div>
-              <div className="lg:col-span-1 min-w-0  overflow-hidden h-full">
+              <div className="lg:col-span-2 min-w-0  overflow-hidden h-full">
                 <SliderTopLeftComponent />
               </div>
             </section>

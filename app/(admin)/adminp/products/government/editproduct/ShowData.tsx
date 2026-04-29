@@ -111,8 +111,8 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
 
                     <div className="flex items-center gap-3">
                         <div className="w-1.5 h-7 bg-blue-600 rounded"></div>
-                        <h1 className="text-xl  text-slate-800">
-                            مدیریت اخبار استخدامی دولتی
+                        <h1 className="text-xl font-semibold text-slate-800">
+                            مدیریت محصوالات استخدامی دولتی
                         </h1>
                     </div>
                 </div>
@@ -134,7 +134,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
             </div>
 
             {/* بدنه جدول با قابلیت اسکرول در موبایل */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full  text-right text-slate-600">
                         <thead className=" text-slate-500 bg-slate-50 border-b border-slate-200">

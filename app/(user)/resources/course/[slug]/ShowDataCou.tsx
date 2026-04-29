@@ -12,7 +12,10 @@ import {
   ShoppingBasket,
   ChevronRight,
   Home,
-  ChevronLeft
+  ChevronLeft,
+  ShieldCheck,
+  RefreshCcw,
+  CheckCircle2
 } from "lucide-react";
 import { ROUTES } from "@/lib/constats";
 import CommentManagment from "@/components/comment/CommentManagmet";
@@ -54,15 +57,15 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
   }
 
 
-    const breadcrumbItems = [
-   
-     {
+  const breadcrumbItems = [
+
+    {
       label: 'منابع آموزشی',
       href: '/resources',
     },
     {
-      label: product.name, 
-      href: `/resources/course/${product.name}`, 
+      label: product.name,
+      href: `/resources/course/${product.name}`,
     },
   ];
 
@@ -70,7 +73,7 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
     <div className="min-h-screen font-sans bg-slate-50/50 pb-[100px] lg:pb-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-5">
 
-     
+
 
         <div className="">
           <Breadcrumb items={breadcrumbItems} />
@@ -79,92 +82,135 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
           {/* ==================== ستون سمت راست ==================== */}
-          <div className="lg:col-span-3 w-full lg:sticky lg:top-24 space-y-6">
-            <div className="bg-white rounded p-4 sm:p-6 border border-slate-200/60 overflow-hidden relative ">
-              <div className="absolute top-0 right-0 w-full h-32 bg-gradient-to-br from-green-50 via-white to-white opacity-60 -z-10" />
 
-              {/* عکس محصول */}
-              <div className="relative w-full aspect-video sm:aspect-square lg:aspect-[4/3] bg-white mb-5 overflow-hidden flex items-center justify-center group">
+          <div className="lg:col-span-4 w-full">
+            <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+              {/* IMAGE */}
+              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center group">
+
+                {product.oldPrice && (
+                  <span className="absolute top-4 right-4 bg-rose-500 text-white text-xs px-3 py-1 rounded-full shadow">
+                    تخفیف
+                  </span>
+                )}
+
                 <Image
                   src={product.imageUrl && product.imageUrl !== "#" ? product.imageUrl : "/images/products/bookExample.jpg"}
-                  alt={`تصویر ${product.name}`}
+                  alt={product.name}
                   fill
-                  className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 1024px) 100vw, 300px"
-                  priority
+                  className="object-contain p-8  transition duration-500"
                 />
               </div>
 
-              <h1 className="mb-4 text-15 font-semibold">
-                {product.name}
-              </h1>
+              <div className="p-6 space-y-6">
 
-              {/* دسته‌بندی‌ها */}
-              {product.categories && product.categories.length > 0 && (
-                <div className="flex text-11 flex-wrap gap-2 mb-6 ">
-                  {product.categories.map((cat: any, idx: number) => (
-                    <span key={idx} className="bg-slate-50 text-slate-600 px-3 py-1 rounded-lg border border-slate-200/60">
-                      {cat.catName}
-                    </span>
-                  ))}
-                </div>
-              )}
+                {/* TITLE */}
+                <div className="space-y-2">
+                  <h1 className="text-lg font-semibold text-slate-800 leading-7">
+                    {product.name}
+                  </h1>
 
-              {/* اطلاعات کلیدی */}
-              <div className="space-y-3 mb-6 sm:mb-8 bg-slate-50/80 p-4 sm:p-5 rounded-xl border border-slate-100 ">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200/60 border-dashed">
-                  <div className="flex items-center gap-2 text-slate-600 font-medium">
-                    <FileText className="w-4 h-4 text-green-600" />
-                    <span>تعداد سوالات:</span>
-                  </div>
-                  <span className="text-slate-800 bg-white px-2.5 py-1 rounded-md border border-slate-100 shadow-sm">
-                    {product._count?.questions || 0} سوال
-                  </span>
+                  {product.categories?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {product.categories.map((cat, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
+                        >
+                          {cat.catName}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200/60 border-dashed">
-                  <div className="flex items-center gap-2 text-slate-600 font-medium">
-                    <Clock className="w-4 h-4 text-green-600" />
-                    <span>نوع پرسش:</span>
+                {/* QUICK STATS */}
+                <div className="grid grid-cols-3 gap-3">
+
+                  <div className="bg-slate-50 rounded-lg p-3 text-center">
+                    <FileText className="w-4 h-4 text-green-600 mx-auto mb-1" />
+                    <div className="text-sm font-semibold text-slate-800">
+                      {product._count?.questions || 0}
+                    </div>
+                    <div className="text-xs text-slate-500">سوال</div>
                   </div>
-                  <span className="text-slate-800">چهار گزینه‌ای</span>
+
+                  <div className="bg-slate-50 rounded-lg p-3 text-center">
+                    <Clock className="w-4 h-4 text-green-600 mx-auto mb-1" />
+                    <div className="text-xs text-slate-700">چهار گزینه‌ای</div>
+                    <div className="text-xs text-slate-500">نوع</div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-lg p-3 text-center">
+                    <Text className="w-4 h-4 text-green-600 mx-auto mb-1" />
+                    <div className="text-xs text-slate-700">تشریحی</div>
+                    <div className="text-xs text-slate-500">پاسخ</div>
+                  </div>
+
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-600 font-medium">
-                    <Text className="w-4 h-4 text-green-600" />
-                    <span>نوع پاسخ:</span>
+                {/* PRICE */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+
+                  <div className="text-sm text-slate-500">
+                    قیمت محصول
                   </div>
-                  <span className="text-slate-800">تشریحی</span>
+
+                  <PriceDisplay
+                    oldPrice={product.oldPrice}
+                    newPrice={product.newPrice}
+                  />
                 </div>
-              </div>
 
-              {/* دکمه‌ها در دسکتاپ */}
-              <div className="hidden lg:flex flex-col space-y-3">
-                <Link
-                  href={`/resources/course/questions?pid=${product.id}&pname=${product.slug}`}
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:scale-[0.98] group shadow-md shadow-green-600/20 font-medium"
-                >
-                  <PlayCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span>ثبت نام و شروع آزمون</span>
-                </Link>
+                {/* CTA */}
+                <div className="space-y-3">
 
-                <Link
-                  href={`/cart/${product.id}`}
-                  className="w-full h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center justify-between px-5 transition-all hover:-translate-y-0.5 active:scale-[0.98] group shadow-md shadow-rose-600/20"
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    <ShoppingBasket className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <span>خرید محصول</span>
+
+
+                  <Link
+                    href={`/resources/course/questions?pid=${product.id}&pname=${product.slug}`}
+                    className="w-full h-12 border-2 border-slate-200 hover:bg-slate-50 rounded-xl flex items-center justify-center gap-2 transition bg-slate-100"
+                  >
+                    <PlayCircle className="w-5 h-5 text-green-600" />
+                    مشاهده رایگان بانک سوالات
+                  </Link>
+
+                  <Link
+                    href={`/cart/${product.id}`}
+                    className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 font-medium transition active:scale-[0.98]"
+                  >
+                    <ShoppingBasket className="w-5 h-5" />
+                    خرید محصول
+                  </Link>
+                </div>
+
+                {/* TRUST SECTION */}
+                <div className="border-t border-slate-100 pt-4 space-y-3 text-sm text-slate-600">
+
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    دسترسی فوری بعد از خرید
                   </div>
-                  <PriceDisplay oldPrice={product.oldPrice} newPrice={product.newPrice} />
-                </Link>
+
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-green-600" />
+                    پرداخت امن
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <RefreshCcw className="w-4 h-4 text-green-600" />
+                    بروزرسانی رایگان سوالات
+                  </div>
+
+                </div>
+
               </div>
             </div>
           </div>
 
           {/* ==================== ستون سمت چپ ==================== */}
-          <div className="lg:col-span-9 w-full flex flex-col gap-6 lg:gap-8">
+          <div className="lg:col-span-8 w-full flex flex-col gap-6 lg:gap-8">
             {/* تب‌های توضیحات */}
             <div className="bg-white rounded shadow-sm border border-slate-200/60 p-1">
               <TabSectionCR product={product} isLoading={false} />
@@ -172,40 +218,15 @@ export default function ExamDetailsPage({ fetchDataR }: any) {
 
             {/* بخش نظرات */}
             <div className="">
-            
 
-               <CommentManagment targetId={product.id} targetType="product" />
+
+              <CommentManagment targetId={product.id} targetType="product" />
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* ==================== نوار دکمه‌های چسبان موبایل ==================== */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-3 sm:px-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] z-50 flex gap-3 pb-safe">
-        <Link
-          href={`/cart/${product.id}`}
-          className="flex-1 h-[52px] bg-rose-50/80 hover:bg-rose-100 text-rose-600 border border-rose-200/80 rounded-xl flex flex-col items-center justify-center transition-colors active:scale-95 px-2"
-        >
-          <span className="font-medium flex items-center gap-1 opacity-90 mb-0.5">
-            <ShoppingBasket className="w-3.5 h-3.5" /> خرید
-          </span>
-          {product.newPrice ? (
-            <span className="font-bold tracking-tight">
-              {product.newPrice.toLocaleString()} <span className="font-normal">تومان</span>
-            </span>
-          ) : (
-            <span className="font-bold">رایگان</span>
-          )}
-        </Link>
-        <Link
-             href={`/resources/course/questions?pid=${product.id}&pname=${product.slug}`}
-          className="flex-[1.5] h-[52px] bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 shadow-lg shadow-green-600/25 transition-transform active:scale-95"
-        >
-          <PlayCircle className="w-5 h-5" />
-          شروع آزمون
-        </Link>
-      </div>
 
     </div>
   );

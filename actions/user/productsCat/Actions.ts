@@ -55,9 +55,9 @@ export async function fetchAllProductDataAction(
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    return { success: true, data: result, totalPages };
+    return { success: true, data: result, totalPages,totalCount  };
   } catch (error) {
     console.error(error);
-    return { success: false, data: [], totalPages: 0 };
+    return { success: false, data: [], totalPages: 0 , totalCount :0};
   }
 }

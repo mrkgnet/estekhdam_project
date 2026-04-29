@@ -12,6 +12,7 @@ export async function getDataCategory() {
       orderBy: {
         createdAt: "asc",
       },
+     
     });
 
     if(!categories){

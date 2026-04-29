@@ -303,7 +303,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
           {hasLevel2 && activeTab && (
             <div
               onMouseEnter={() => handleInteraction(null, 0)}
-              className={`fixed right-[280px] w-[260px] bg-white shadow-2xl z-[15] flex flex-col border-r border-gray-100 mt-0 transition-all duration-50
+              className={`fixed right-[280px] w-[290px] bg-white shadow-2xl z-[15] flex flex-col border-r border-gray-100 mt-0 transition-all duration-50
                 ${isScrolled ? "top-0 h-[calc(100vh-3.5rem)]" : "top-0 h-[calc(100vh-8rem)]"}
               `}
             >

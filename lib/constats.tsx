@@ -85,7 +85,7 @@ export const tabsDataAdminPanel = [
       {
         id: 51,
         title: "مدیریت  اسلایدر اصلی",
-        url: "/adminp/manage-menu",
+        url: "/adminp/mainslider",
       },
     ]
   },
@@ -161,7 +161,7 @@ export const tabsDataAdminPanel = [
 
   {
     id: "12",
-    title: "اشکاالات سوال ها",
+    title: "اشکالات سوال ها",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/question-issu",
     subItems: [
