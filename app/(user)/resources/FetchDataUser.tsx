@@ -23,10 +23,13 @@ export default async function FetchDataUser({ currentPage, searchQuery, category
   return (
     <div>
       <ShowDataResources
-        response={response.data}
-        totalCount={response.totalCount} // <--- این بخش اصلاح شد
-        totalPages={response.totalPages || 1}
+        initialProducts={response.data}
+        initialTotalCount={response.totalCount}
+        initialTotalPages={response.totalPages || 1}
         currentPage={currentPage}
+        searchQuery={searchQuery}
+        categoryQuery={categoryQuery}
+        limit={limit}
         title={categoryQuery}
       />
     </div>

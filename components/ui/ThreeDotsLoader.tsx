@@ -3,7 +3,7 @@ import React from "react";
 
 export const ThreeDotsLoader = () => {
   return (
-    <div className="flex justify-center items-center py-20 gap-2 w-full">
+    <div className="flex flex-col justify-center items-center py-20 gap-3 w-full">
       <style>{`
         @keyframes smoothBounce {
           0%, 100% { 
@@ -20,9 +20,13 @@ export const ThreeDotsLoader = () => {
         }
       `}</style>
 
-      <div className="w-4 h-4 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '0ms' }}></div>
-      <div className="w-4 h-4 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '200ms' }}></div>
-      <div className="w-4 h-4 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '400ms' }}></div>
+      <div className="text-sm text-slate-600 my-3 font-bold">در حال دریافت اطلاعات</div>
+
+      <div className="flex items-center gap-2">
+        <div className="w-3 h-3 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '0ms' }}></div>
+        <div className="w-3 h-3 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '200ms' }}></div>
+        <div className="w-3 h-3 bg-red-500 rounded-full dot-smooth" style={{ animationDelay: '400ms' }}></div>
+      </div>
     </div>
   );
 };

@@ -10,12 +10,16 @@ interface Props {
 }
 
 export default async function FetchDataByCat({ slug, searchQuery, currentPage, limit }: Props) {
-    
-    // ارسال اطلاعات سرچ و صفحه به اکشن دیتابیس
+    // واکشی داده‌ها در سمت سرور
     const response = await fetchDataByCategory(slug, searchQuery, currentPage, limit);
-   
 
     return (
-        <ShowDataCat response={response} />
+        <ShowDataCat 
+            initialResponse={response} 
+            slug={slug}
+            searchQuery={searchQuery}
+            currentPage={currentPage}
+            limit={limit}
+        />
     )
 }

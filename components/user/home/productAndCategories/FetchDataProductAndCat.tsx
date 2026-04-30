@@ -1,7 +1,7 @@
 import React from 'react';
-import CourseTabSlider from './ShowDataLatestProduct';
+import CourseTabSlider from './CourseTabSlider'; // نام فایل کلاینت ایمپورت شده اصلاح شد
 import { fetchProductsByCategoriesAction } from '@/actions/user/home/productAndCategories/fetch/Actions';
-import { TabType } from './page'; // ایمپورت تایپ TabType از فایلی که در بالا ساختیم
+import { TabType } from './page';
 
 interface FetchDataProps {
   title: string;
@@ -10,7 +10,7 @@ interface FetchDataProps {
 }
 
 export default async function FetchDataProductAndCat({ title, tabs=[], defaultTab }: FetchDataProps) {
-  // از defaultTab برای واکشی اولیه استفاده می‌کنیم (بجای کلمه هاردکد شده "all")
+  // از defaultTab برای واکشی اولیه استفاده می‌کنیم
   const result = await fetchProductsByCategoriesAction(defaultTab);
 
   if (!result.success) {
@@ -18,7 +18,6 @@ export default async function FetchDataProductAndCat({ title, tabs=[], defaultTa
   }
 
   const { products } = result.data;
-
 
   return (
     <div className="w-full">

@@ -2,11 +2,13 @@ import { fetchDataResource } from '@/actions/user/resources/course/fetchData/Act
 import React from 'react'
 import ExamDetailsPage from './ShowDataCou'
 
-export default async  function FetchDataCou({slugValue} :{slugValue:string}) {
-  const fetchDataR = await fetchDataResource(slugValue)
+export default async function FetchDataCou({ slugValue }: { slugValue: string }) {
+  // واکشی داده‌ها در سرور
+  const fetchDataR = await fetchDataResource(slugValue);
+  
   return (
     <div>
-      <ExamDetailsPage  fetchDataR = {fetchDataR}  />
+      <ExamDetailsPage initialResponse={fetchDataR} slugValue={slugValue} />
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
+import Providers from "@/components/react-query/Providers";
 
 
 
@@ -46,7 +47,7 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body className={`${iransans.className} bg-slate-50  text-13 sm:text-13 md:text-13 `} suppressHydrationWarning>
 
-       
+        <Providers>
           <NextTopLoader color="#ef4444" height={2} showSpinner={false} />
 
           <AuthProvider>
@@ -64,7 +65,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </AuthProvider>
-   
+        </Providers>
 
 
       </body>

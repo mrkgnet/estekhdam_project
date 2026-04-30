@@ -4,9 +4,11 @@ import { useState, useMemo, useEffect } from "react";
 import { CalendarDays, SearchX, Briefcase, Landmark } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 import CountdownTimer from "@/components/CountdownTimer";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { BreakingNewsListSkeleton } from "@/components/ui/SkeletonLoding/BreakingNewsCardSkeleton";
+import { fetchBreakingNewsAction } from "@/actions/user/breakingnews/Gov/fetch/Actions";
 
 type GovNewsDB = {
   id: string;
@@ -20,8 +22,7 @@ type GovNewsDB = {
 };
 
 interface ShowDataBreakingNewsProps {
-  govNews: GovNewsDB[];
-  isLoading?: boolean;
+  initialNews: any; // داده‌های اولیه از سمت سرور
 }
 
 type CategoryItem = {
@@ -57,23 +58,26 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
   );
 }
 
-/* ---------------- Skeleton Parts ---------------- */
-
-
-
 /* ---------------- Main Component ---------------- */
 
-export default function ShowDataBreakingNews({
-  govNews,
-  isLoading = false,
-}: ShowDataBreakingNewsProps) {
+export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNewsProps) {
   const [activeCategoryId, setActiveCategoryId] = useState<"gov" | "private">("gov");
-
-  // ✅ mount state
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // واکشی و مدیریت کش با ریکت کوئری
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["breaking-news"], // کلید کوئری
+    queryFn: () => fetchBreakingNewsAction(),
+    initialData: initialNews,
+    staleTime: 1000 * 60 * 15, // کش خبرها برای ۱۵ دقیقه معتبر است
+  });
+
+  // استخراج آرایه دیتا از پاسخ
+  const govNews: GovNewsDB[] = response?.data || [];
 
   const formattedGovNews = useMemo(() => {
     return govNews.map((news) => ({
@@ -88,8 +92,10 @@ export default function ShowDataBreakingNews({
     }));
   }, [govNews]);
 
+  // فیلتر اخبار بر اساس تب انتخاب شده
   const filteredNews = activeCategoryId === "gov" ? formattedGovNews : [];
 
+  // نمایش اسکلتون لودینگ تا زمان بارگذاری کامل یا گرفتن دیتا
   const showSkeleton = !mounted || isLoading;
 
   return (

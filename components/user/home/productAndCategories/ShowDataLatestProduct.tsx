@@ -9,8 +9,9 @@ import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import SafeImage from "@/components/ui/SafeImage";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { fetchProductsByCategoriesAction } from "@/actions/user/home/productAndCategories/fetch/Actions";
-import { TabType } from "./page"; // مسیر این ایمپورت باید به فایل اولی اشاره کند
+import { TabType } from "./page";
 
 interface ProductType {
   id: string;
@@ -30,31 +31,26 @@ interface Props {
 }
 
 export default function CourseTabSlider({ title, tabs=[], defaultTab, products: initialProducts }: Props) {
-
-
-
-  // ✅ اصلاح شد: مقدار اولیه تب به جای "all" باید defaultTab باشد
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const [currentProducts, setCurrentProducts] = useState<ProductType[]>(initialProducts);
 
   const [prevBtn, setPrevBtn] = useState<HTMLButtonElement | null>(null);
   const [nextBtn, setNextBtn] = useState<HTMLButtonElement | null>(null);
 
-  const handleTabChange = async (tabSlug: string) => {
+  // استفاده از ریکت کوئری برای مدیریت دیتا و کش تب‌ها
+  const { data: currentProducts = [], isFetching } = useQuery({
+    queryKey: ["products-by-category", activeTab],
+    queryFn: async () => {
+      const result = await fetchProductsByCategoriesAction(activeTab);
+      return result.success ? result.data.products : [];
+    },
+    // دیتای اولیه فقط برای تب پیش‌فرض تنظیم می‌شود تا بقیه تب‌ها خودشان واکشی شوند
+    initialData: activeTab === defaultTab ? initialProducts : undefined,
+    staleTime: 1000 * 60 * 5, // کش داده‌های هر تب برای ۵ دقیقه
+  });
+
+  const handleTabChange = (tabSlug: string) => {
     if (tabSlug === activeTab) return;
-
-    setActiveTab(tabSlug);
-    setIsLoading(true);
-
-    const result = await fetchProductsByCategoriesAction(tabSlug);
-    
-    if (result.success) {
-      setCurrentProducts(result.data.products);
-    }
-
-    setIsLoading(false);
+    setActiveTab(tabSlug); // با تغییر تب، useQuery به طور خودکار داده‌های جدید را می‌گیرد
   };
 
   return (
@@ -115,14 +111,15 @@ export default function CourseTabSlider({ title, tabs=[], defaultTab, products: 
 
       {/* بخش محتوا */}
       <div className="relative group rounded-md overflow-hidden p-1 min-h-[320px]">
-        {isLoading && (
+        {/* از isFetching بجای isLoading استیت خودمان استفاده میکنیم */}
+        {isFetching && (
           <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center w-full h-full bg-white/60 backdrop-blur-[2px] gap-3 text-slate-600 transition-all duration-300 rounded-lg">
             <Loader2 className="w-10 h-10 animate-spin text-[#2b5c9e]" />
             <span className="text-sm font-medium">در حال دریافت اطلاعات...</span>
           </div>
         )}
 
-        <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+        <div className={`transition-opacity duration-300 ${isFetching ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
           <Swiper
             key={activeTab}
             modules={[Navigation]}
@@ -184,7 +181,7 @@ export default function CourseTabSlider({ title, tabs=[], defaultTab, products: 
               </SwiperSlide>
             ))}
 
-            {currentProducts.length === 0 && !isLoading && (
+            {currentProducts.length === 0 && !isFetching && (
               <div className="w-full text-center py-10 text-slate-500 ">
                 موردی در این دسته‌بندی یافت نشد.
               </div>

@@ -22,14 +22,33 @@ import { useRef, useState, useEffect } from "react";
 import AuthModal from "../modals/AuthModal";
 import { getDataSearchMany } from "@/actions/search/Actions";
 import { useSidebarStore } from "@/store/sideBarStoreAdmin";
+import { useQuery } from "@tanstack/react-query";
+import { getDataCategory } from "@/actions/category/Actions";
 
 interface NavbarProps {
   response?: any[];
 }
 
-export default function HeaderTop({ response = [] }: NavbarProps) {
+export default function HeaderTop({ initialCategories }: NavbarProps) {
   const router = useRouter();
   const { isLoggedIn, isLoading, logOut } = useAuth();
+
+  // پیاده‌سازی ریکت کوئری
+  // پیاده‌سازی ریکت کوئری
+  const { data: categoryResponse } = useQuery({
+    queryKey: ['categories-navbar'], 
+    queryFn: () => getDataCategory(),
+    initialData: initialCategories, // حالا این متغیر به درستی مقداردهی می‌شود
+    staleTime: 1000 * 60 * 60 * 24, // 💡 پیشنهاد: این خط را اضافه کنید تا دیتا ۲۴ ساعت کش شود و سرعت به حداکثر برسد
+  });
+
+  // ۵ تای اول را برای جستجوهای محبوب جدا می‌کنیم
+  const popularCategories = categoryResponse?.data?.slice(0, 5) || [];
+
+
+
+
+
 
   const [open, setOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -107,19 +126,17 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
           {/* Center Search */}
           <div
             ref={searchContainerRef}
-            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${
-              isMobileSearchOpen
+            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${isMobileSearchOpen
                 ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
                 : "hidden"
-            }`}
+              }`}
           >
             <div className="relative w-full max-w-[650px]">
               {isSearching ? (
                 <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin" />
               ) : (
-                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
-                  isSearchOpen ? "text-green-600" : "text-gray-400"
-                }`} />
+                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${isSearchOpen ? "text-green-600" : "text-gray-400"
+                  }`} />
               )}
 
               <input
@@ -129,24 +146,22 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${
-                  isSearchOpen 
-                    ? "bg-white border-gray-500" 
+                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${isSearchOpen
+                    ? "bg-white border-gray-500"
                     : "border-gray-200 focus:bg-white hover:border-gray-300"
-                }`}
+                  }`}
               />
 
               {/* Search Dropdown Overlay */}
               <div
-                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${
-                  isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-                }`}
+                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
+                  }`}
               >
                 {searchQuery.trim() === "" ? (
                   <div className="p-5">
-                    <button 
-                      type="button" 
-                      className="w-full cursor-pointer flex items-center justify-between pb-4 text-gray-500 transition-colors" 
+                    <button
+                      type="button"
+                      className="w-full cursor-pointer flex items-center justify-between pb-4 text-gray-500 transition-colors"
                       onClick={closeSearch}
                     >
                       <div className="flex items-center gap-2">
@@ -156,13 +171,14 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
                     </button>
                     <div className="h-[1px] w-full bg-gray-200 mb-4 rounded-full"></div>
                     <div className="mb-3 text-gray-800  font-bold">جستجوهای محبوب</div>
+                    {/* در قسمت رندر کردن دسته‌بندی‌ها (جستجوهای محبوب) */}
                     <div className="flex flex-wrap gap-2.5">
-                      {response.map((cat: any, index: number) => (
+                      {popularCategories.map((cat: any, index: number) => (
                         <Link
                           key={cat?.id || index}
                           href={`/category/${cat?.catSlug || ''}`}
                           onClick={closeSearch}
-                          className="rounded-full text-11 lg:text-12 border border-gray-200 px-4 py-2  text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
+                          className="rounded-full text-11 lg:text-12 border border-gray-200 px-4 py-2 text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
                         >
                           {cat?.catName || "بدون نام"}
                         </Link>
@@ -235,7 +251,7 @@ export default function HeaderTop({ response = [] }: NavbarProps) {
             </button>
 
             {/* سبد خرید */}
-          
+
 
             {/* منوی کاربری */}
             <div className="relative z-10" ref={wrapperRef}>

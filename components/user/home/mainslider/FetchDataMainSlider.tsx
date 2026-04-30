@@ -3,11 +3,15 @@ import React from 'react'
 import ShowMainSlider from './ShowMainSlider'
 
 export default async function FetchDataMainSlider() {
-    // واکشی اطلاعات از دیتابیس
-    const dataMainSliderUser = await fetchMainSliderUserAction();
+    // واکشی کامل پاسخ (شامل success و data)
+    const response = await fetchMainSliderUserAction();
 
-    // استخراج آرایه دیتا (اگر خطایی بود آرایه خالی پاس داده می‌شود)
-    const sliders = dataMainSliderUser.data || [];
+    // اگر دیتایی نبود، چیزی رندر نمی‌کنیم
+    if (!response || !response.data || response.data.length === 0) {
+        return null;
+    }
 
-    return (<ShowMainSlider sliders={sliders} />)
+    return (
+        <ShowMainSlider initialSliders={response} />
+    )
 }
