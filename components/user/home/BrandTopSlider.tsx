@@ -10,22 +10,22 @@ import "swiper/css";
 import { BrandSliderSkeleton } from "@/components/ui/SkeletonLoding/BrandSliderSkeleton";
 
 const BANKS_DATA = [
-  { id: 1, name: "بانک ملی", logo: "/images/topSlider/بانک_ملی.png", href: "/banks/melli" },
-  { id: 2, name: "بانک ملت", logo: "/images/topSlider/بانک_ملت.png", href: "/banks/mellat" },
-  { id: 3, name: "بانک صادرات", logo: "/images/topSlider/بانک_صادرات.png", href: "/banks/saderat" },
-  { id: 4, name: "وزارت ارتباطات", logo: "/images/topSlider/وزارت_ارتباطات.png", href: "/banks/tejarat" },
+  { id: 1, name: "بانک ملی", logo: "/images/topSlider/بانک_ملی.png", href: "/" },
+  { id: 2, name: "بانک ملت", logo: "/images/topSlider/بانک_ملت.png", href: "/" },
+  { id: 3, name: "بانک صادرات", logo: "/images/topSlider/بانک_صادرات.png", href: "/" },
+  { id: 4, name: "وزارت ارتباطات", logo: "/images/topSlider/وزارت_ارتباطات.png", href: "/" },
   { id: 5, name: "بانک سپه", logo: "/images/topSlider/بانک_سپه.png", href: "/banks/sepah" },
-  { id: 6, name: "آموزش و پرورش", logo: "/images/topSlider/آموزش و پرورش.jpg", href: "/banks/pasargad" },
-  { id: 7, name: "وزارت بهداشت ", logo: "/images/topSlider/وزارت_بهداشت.jpg", href: "/banks/saman" },
-  { id: 8, name: "بانک اقتصاد نوین", logo: "/images/topSlider/بانک_اقتصاد_نوین.png", href: "/banks/en" },
-  { id: 9, name: "بانک پارسیان", logo: "/images/topSlider/بانک_پارسیان.png", href: "/banks/parsian" },
-  { id: 10, name: "وزارت دفاع", logo: "/images/topSlider/وزارت_دفاع.png", href: "/banks/keshavarzi" },
-  { id: 11, name: "سازمان امور مالیاتی", logo: "/images/topSlider/سازمان_امور_مالیاتی.jpg", href: "/banks/maskan" },
-  { id: 12, name: "دانشگاه فرهنگیان", logo: "/images/topSlider/دانشگاه_فرهنگیان.png", href: "/banks/refah" },
-  { id: 13, name: "سازمان فنی حرفه ایی", logo: "/images/topSlider/سازمان_آموزش_فنی_حرفه_ایی.png", href: "/banks/refah" },
-  { id: 14, name: "بانک دی", logo: "/images/topSlider/بانک_دی.png", href: "/banks/refah" },
-  { id: 15, name: "بانک رفاه", logo: "/images/topSlider/بانک_رفاه.png", href: "/banks/refah" },
-  { id: 16, name: "وزارت دادگستری", logo: "/images/topSlider/وزارت_دادگستری.png", href: "/banks/refah" },
+  { id: 6, name: "آموزش و پرورش", logo: "/images/topSlider/آموزش و پرورش.jpg", href: "/" },
+  { id: 7, name: "وزارت بهداشت ", logo: "/images/topSlider/وزارت_بهداشت.jpg", href: "/" },
+  { id: 8, name: "بانک اقتصاد نوین", logo: "/images/topSlider/بانک_اقتصاد_نوین.png", href: "/" },
+  { id: 9, name: "بانک پارسیان", logo: "/images/topSlider/بانک_پارسیان.png", href: "/" },
+  { id: 10, name: "وزارت دفاع", logo: "/images/topSlider/وزارت_دفاع.png", href: "/" },
+  { id: 11, name: "سازمان امور مالیاتی", logo: "/images/topSlider/سازمان_امور_مالیاتی.jpg", href: "/" },
+  { id: 12, name: "دانشگاه فرهنگیان", logo: "/images/topSlider/دانشگاه_فرهنگیان.png", href: "/" },
+  { id: 13, name: "سازمان فنی حرفه ایی", logo: "/images/topSlider/سازمان_آموزش_فنی_حرفه_ایی.png", href: "/" },
+  { id: 14, name: "بانک دی", logo: "/images/topSlider/بانک_دی.png", href: "/" },
+  { id: 15, name: "بانک رفاه", logo: "/images/topSlider/بانک_رفاه.png", href: "/" },
+  { id: 16, name: "وزارت دادگستری", logo: "/images/topSlider/وزارت_دادگستری.png", href: "/" },
 ];
 
 

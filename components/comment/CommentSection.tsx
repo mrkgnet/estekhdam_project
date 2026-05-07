@@ -154,7 +154,7 @@ export default function CommentSectionUI({ targetId, targetType, initialComments
             />
             <button
               type="submit"
-              disabled={!newComment.trim() || isPending}
+              // disabled={!newComment.trim() || isPending}
               className="absolute bottom-4 left-4 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white px-6 py-2 rounded-xl transition-all"
             >
               {isPending && !replyingTo ? "در حال ارسال..." : "ارسال دیدگاه"}

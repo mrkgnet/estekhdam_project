@@ -168,10 +168,12 @@ export default function ShowDataResources({
                             className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
                           >
                             <h3
-                              className="text-gray-800 md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300"
+                              className="text-slate-600 font-bold md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300"
                               title={p.name}
+                          
                             >
                               {p.name}
+                             
                             </h3>
 
                             <div className="flex flex-col gap-1.5 mt-2">

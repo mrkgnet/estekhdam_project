@@ -92,3 +92,17 @@ button {
 
 
 
+.loading-dot {
+  animation: bulletFire 0.9s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.15s);
+}
+
+@keyframes bulletFire {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.6); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-dot { animation: none !important; }
+}

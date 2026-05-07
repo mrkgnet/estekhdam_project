@@ -43,8 +43,8 @@ const PriceDisplay = ({ oldPrice, newPrice }: { oldPrice?: number, newPrice?: nu
 };
 
 interface ExamDetailsProps {
-    initialResponse: any;
-    slugValue: string;
+  initialResponse: any;
+  slugValue: string;
 }
 
 export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDetailsProps) {
@@ -83,7 +83,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
   ];
 
   return (
-    <div className="min-h-screen font-sans bg-slate-50/50 pb-[100px] lg:pb-12" dir="rtl">
+    <div className="min-h-screen font-sans  pb-[100px] lg:pb-12" dir="rtl">
       {/* افکت لودینگ نامحسوس در پس‌زمینه */}
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-5 transition-opacity duration-300 ${isFetching ? 'opacity-60' : 'opacity-100'}`}>
 
@@ -91,10 +91,10 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-start">
 
           {/* ==================== ستون سمت راست ==================== */}
-          <div className="lg:col-span-4 w-full">
+          <div className="lg:col-span-3 w-full">
             <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
               {/* IMAGE */}
@@ -134,6 +134,48 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
                   )}
                 </div>
 
+                
+
+               
+                {/* TRUST SECTION */}
+                <div className="border-t border-slate-100 pt-4 space-y-3 text-sm text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    دسترسی فوری بعد از خرید
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-green-600" />
+                    پرداخت امن
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RefreshCcw className="w-4 h-4 text-green-600" />
+                    بروزرسانی رایگان سوالات
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ==================== ستون سمت وسط ==================== */}
+          <div className="lg:col-span-6 w-full flex flex-col gap-3 lg:gap-8">
+            {/* تب‌های توضیحات */}
+            <div className="bg-white rounded shadow-sm border border-slate-200/60 p-1">
+              <TabSectionCR product={product} isLoading={false} />
+            </div>
+
+
+          </div>
+
+          {/* ==================== ستون سمت راست ==================== */}
+          <div className="lg:col-span-3 w-full">
+            <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+        
+
+              <div className="p-3 space-y-6">
+                {/* TITLE */}
+               
+
                 {/* QUICK STATS */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-slate-50 rounded-lg p-3 text-center">
@@ -141,19 +183,19 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
                     <div className="text-sm font-semibold text-slate-800">
                       {product._count?.questions || 0}
                     </div>
-                    <div className="text-xs text-slate-500">سوال</div>
+                    <span className="text-10 text-slate-500">سوال</span>
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 text-center">
                     <Clock className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                    <div className="text-xs text-slate-700">چهار گزینه‌ای</div>
-                    <div className="text-xs text-slate-500">نوع</div>
+                    <span className="text-10 text-slate-700">پرسش های چهار گزینه‌ای </span>
+                   
                   </div>
 
                   <div className="bg-slate-50 rounded-lg p-3 text-center">
                     <Text className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                    <div className="text-xs text-slate-700">تشریحی</div>
-                    <div className="text-xs text-slate-500">پاسخ</div>
+                   
+                    <span className="text-10 text-slate-500">پاسخ تشریحی</span>
                   </div>
                 </div>
 
@@ -187,38 +229,20 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
                   </Link>
                 </div>
 
-                {/* TRUST SECTION */}
-                <div className="border-t border-slate-100 pt-4 space-y-3 text-sm text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
-                    دسترسی فوری بعد از خرید
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                    پرداخت امن
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <RefreshCcw className="w-4 h-4 text-green-600" />
-                    بروزرسانی رایگان سوالات
-                  </div>
-                </div>
+                
               </div>
             </div>
           </div>
 
-          {/* ==================== ستون سمت چپ ==================== */}
-          <div className="lg:col-span-8 w-full flex flex-col gap-6 lg:gap-8">
-            {/* تب‌های توضیحات */}
-            <div className="bg-white rounded shadow-sm border border-slate-200/60 p-1">
-              <TabSectionCR product={product} isLoading={false} />
-            </div>
 
-            {/* بخش نظرات */}
-            <div className="">
-              <CommentManagment targetId={product.id} targetType="product" />
-            </div>
-          </div>
 
+
+
+
+        </div>
+        {/* بخش نظرات */}
+        <div className="">
+          <CommentManagment targetId={product.id} targetType="product" />
         </div>
       </div>
     </div>
