@@ -138,6 +138,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     }
   };
 
+  const handlePhoneKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // اگر کلید فشرده شده "Enter" بود
+  if (e.key === "Enter") {
+    e.preventDefault(); // جلوگیری از رفتار پیش‌فرض مرورگر (مثلا سابمیت فرم)
+    handleSendOTP();    // تابع ارسال کد را فراخوانی کن
+  }
+};
+
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -233,6 +242,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                         inputMode="numeric"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.trim())}
+                         onKeyDown={handlePhoneKeyDown} // این خط اضافه می‌شود
                         placeholder="09123456789"
                         className="w-full pr-10 py-3 px-2.5 border text-[15px] border-slate-200 rounded-xl outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                         dir="ltr"

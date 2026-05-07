@@ -1,10 +1,10 @@
-// app/(user)/resources/questions/ShowDataQues.tsx
-
 "use client";
 
 import React, { useState, useTransition, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDataQues } from "@/actions/user/resources/course/DataQues/Actions";
 import {
   ChevronRight, ChevronLeft, ChevronDown, CheckCircle2, XCircle, Lightbulb,
   GraduationCap, Loader2, List, PlayCircle, Filter, Edit,
@@ -40,24 +40,22 @@ type Chapter = {
 }
 
 type Props = {
+  initialResponse: any; // داده‌های SSR
   courseId: string;
-  dbQuestion: DBQuestion;
-  totalCount: number;
   currentStep: number;
-  hasPurchased: boolean;
-  chapters: Chapter[];
-  pname: string
+  chapterId?: string;
+  questionType?: string;
+  pname: string;
 };
 
 const persianLetterMap: Record<ChoiceKey, string> = { A: "الف", B: "ب", C: "ج", D: "د" };
 
 export default function ExamPage({
+  initialResponse,
   courseId,
-  dbQuestion,
-  totalCount,
   currentStep,
-  hasPurchased,
-  chapters,
+  chapterId,
+  questionType,
   pname
 }: Props) {
 
@@ -66,19 +64,31 @@ export default function ExamPage({
   const searchParams = useSearchParams();
   const commentsRef = React.useRef<HTMLDivElement | null>(null);
 
+  // === React Query Setup ===
+  const { data: response, isFetching } = useQuery({
+    // کلید شامل تمام پارامترهایی است که تغییر آنها یعنی دیتای جدید
+    queryKey: ['exam-question', courseId, currentStep, chapterId, questionType],
+    queryFn: async () => await fetchDataQues(courseId, currentStep, chapterId, questionType),
+    initialData: initialResponse,
+    staleTime: 1000 * 60 * 5, // ۵ دقیقه کش برای سوالات
+  });
+
+  // استخراج متغیرها از response ریکت کوئری
+  const dbQuestion = response?.data as DBQuestion;
+  const totalCount = response?.totalCount || 0;
+  const hasPurchased = response?.hasPurchased || false;
+  const chapters = (response?.chapters || []) as Chapter[];
 
   // خواندن مقادیر فعلی فیلترها از URL
   const currentChapterId = searchParams.get("chapterId");
   const currentQuestionType = searchParams.get("questionType");
 
-  const [isPending, startTransition] = useTransition();
+  const [isPendingRoute, startTransition] = useTransition(); // برای نمایش لودینگ تغییر مسیر
   const [selected, setSelected] = useState<ChoiceKey | null>(null);
 
   // وضعیت باز و بسته بودن آکاردئون‌های فیلتر (درون منو)
   const [isChaptersOpen, setIsChaptersOpen] = useState(true);
   const [isTypeOpen, setIsTypeOpen] = useState(true);
-
-  // وضعیت باز و بسته بودن کل منوی فیلتر در حالت موبایل
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
@@ -92,9 +102,21 @@ export default function ExamPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [targetStep, setTargetStep] = useState<number | null>(null);
 
+  // ریست کردن انتخاب کاربر وقتی آیدی سوال تغییر کرد
   useEffect(() => {
     setSelected(null);
   }, [dbQuestion?.id]);
+
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileFilterOpen]);
 
   // متد کمکی برای حذف فیلترها و حفظ بقیه پارامترها (مثل pname)
   const getClearFiltersUrl = () => {
@@ -128,16 +150,16 @@ export default function ExamPage({
     });
   };
 
-  const handleChapterClick = (chapterId: string | null) => {
+  const handleChapterClick = (id: string | null) => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setIsMobileFilterOpen(false);
     }
-    if (chapterId === currentChapterId) return;
+    if (id === currentChapterId) return;
 
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("step", "1");
-      if (chapterId) params.set("chapterId", chapterId);
+      if (id) params.set("chapterId", id);
       else params.delete("chapterId");
 
       router.push(`${pathname}?${params.toString()}`);
@@ -160,7 +182,7 @@ export default function ExamPage({
     });
   };
 
-  const formatQuestion = (dbQ: DBQuestion) => {
+  const formatQuestion = (dbQ?: DBQuestion) => {
     if (!dbQ) return null;
     const keys: ChoiceKey[] = ["A", "B", "C", "D"];
     const correctIndex = dbQ.correctAnswer > 0 ? dbQ.correctAnswer - 1 : 0;
@@ -177,6 +199,9 @@ export default function ExamPage({
   const q = formatQuestion(dbQuestion);
   const progressPercentage = totalCount > 0 ? Math.round((currentStep / totalCount) * 100) : 0;
 
+  // ترکیب وضعیت لودینگ ریکت کوئری و تغییر مسیر Next.js
+  const isAnyLoading = isFetching || isPendingRoute;
+
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
     if (targetStep !== null) {
@@ -187,40 +212,14 @@ export default function ExamPage({
       });
     }
   };
-  useEffect(() => {
-    if (isMobileFilterOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileFilterOpen]);
-
 
   const breadcrumbItems = [
-
-
-    {
-      label: pname,
-      href: `/resources/course/${pname}`,
-    },
-
-    {
-      label: 'سوالات',
-      href: ``,
-    },
-
+    { label: pname, href: `/resources/course/${pname}` },
+    { label: 'سوالات', href: `` },
   ];
 
-
-
   return (
-    <div className=" min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
-      {/* bread crumb  */}
-
-
+    <div className="min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
       <div className="mt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
@@ -232,9 +231,8 @@ export default function ExamPage({
       </AnimatePresence>
 
       <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-
-        {/* 🟢 سایدبار با قابلیت فیلترهای چندگانه */}
-
+        
+        {/* ==================== سایدبار ==================== */}
         <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
 
           <button
@@ -243,75 +241,28 @@ export default function ExamPage({
               commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               setIsMobileFilterOpen(false);
             }}
-            aria-expanded={isMobileFilterOpen}
-            aria-controls="comments-section"
-            className="
-    group relative w-full
-    rounded-2xl border border-slate-200/80
-    bg-white/90 backdrop-blur-sm
-    px-4 py-3
-    shadow-sm
-    transition-all duration-200
-    hover:border-slate-400 hover:bg-white hover:shadow-md
-    active:scale-[0.98]
-    focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2
-  "
+            className="group relative w-full rounded-2xl border border-slate-200/80 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-sm transition-all duration-200 hover:border-slate-400 hover:bg-white hover:shadow-md active:scale-[0.98] outline-none"
           >
             <div className="flex items-center justify-between gap-3">
-              {/* Right side (RTL: right is icon + text) */}
               <div className="flex items-center gap-3 min-w-0">
-                {/* آیکون دایره‌ای با بهبود */}
-                <span
-                  className="
-          inline-flex h-9 w-9 shrink-0 items-center justify-center
-          rounded-full
-          bg-gradient-to-br from-slate-100 to-slate-200
-          text-slate-600 shadow-inner
-          transition-all duration-200
-          group-hover:scale-105 group-hover:from-slate-200 group-hover:to-slate-300
-          group-hover:text-slate-800
-        "
-                >
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 shadow-inner transition-all duration-200 group-hover:scale-105 group-hover:from-slate-200 group-hover:to-slate-300 group-hover:text-slate-800">
                   <MessageCircle className="h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110" />
                 </span>
-
                 <div className="min-w-0 text-right">
-                  <p className="truncate  font-medium tracking-tight text-slate-800">
-                    نظرات کاربران
-                  </p>
-                  <p className="truncate text-10 sm:text-12 leading-tight text-slate-400">
-                    دیدگاه‌ها و تجربه‌ی دیگران
-                  </p>
+                  <p className="truncate font-medium tracking-tight text-slate-800">نظرات کاربران</p>
+                  <p className="truncate text-10 sm:text-12 leading-tight text-slate-400">دیدگاه‌ها و تجربه‌ی دیگران</p>
                 </div>
               </div>
-
-              {/* Left side (chevron + optional badge) */}
               <div className="flex items-center gap-2 shrink-0">
-                {/* عدد نظرات (اختیاری) - اگر دارید */}
-                {/* <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-        ۱۲۳
-      </span> */}
-
-                <ChevronDown
-                  className={`
-          h-4.5 w-4.5 text-slate-400
-          transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
-          group-hover:text-slate-600
-          ${isMobileFilterOpen ? "rotate-180" : "rotate-0"}
-        `}
-                />
+                <ChevronDown className="h-4.5 w-4.5 text-slate-400 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:text-slate-600" />
               </div>
             </div>
           </button>
 
-
-
-
           <div className="flex text-10 gap-2">
             <SendPQComponent />
-            {q.code && (
+            {q?.code && (
               <CopyClipBoard className="text-10" text={q.code} label="شناسه سوال:" />
-
             )}
           </div>
 
@@ -329,54 +280,39 @@ export default function ExamPage({
             </button>
           </div>
 
-
-
-          {/* هدر سایدبار در دسکتاپ */}
-          <div className="hidden lg:flex z-20 items-center justify-between w-full  px-2 py-1 bg-gray-50/50 rounded border border-gray-100/50 backdrop-blur-sm">
-            {/* سمت راست - فیلتر */}
+          <div className="hidden lg:flex z-20 items-center justify-between w-full px-2 py-1 bg-gray-50/50 rounded border border-gray-100/50 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-white rounded shadow-sm border border-gray-200/60">
                 <Filter className="w-4 h-4 text-gray-700" />
               </div>
-              <h3 className="text-sm  bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              <h3 className="text-sm bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                 فیلتر سوالات
               </h3>
             </div>
-
-            {/* سمت چپ - دکمه گزارش مشکل */}
-
           </div>
 
           <div className="hidden lg:flex z-10 bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden flex-col">
-
-
-            {/* دکمه پاک کردن کل فیلترها - اصلاح شده برای حفظ pname */}
             <Link
               href={getClearFiltersUrl()}
-              onClick={() => typeof window !== 'undefined' && window.innerWidth < 1024 && setIsMobileFilterOpen(false)}
               className="group flex items-center justify-between bg-slate-50 border-b border-slate-200/60 p-3 transition-all hover:bg-slate-100"
             >
               <div className="flex items-center gap-3 text-slate-700 transition-colors">
                 <List className="w-5 h-5 text-slate-500 group-hover:text-slate-800" />
-                <span className=" ">نمایش همه سوالات دوره</span>
+                <span>نمایش همه سوالات دوره</span>
               </div>
             </Link>
 
-            {/* 🟢 آکاردئون سرفصل‌ها */}
+            {/* آکاردئون سرفصل‌ها */}
             <div className="border-b border-slate-200/60">
               <button
                 onClick={() => setIsChaptersOpen(!isChaptersOpen)}
-                className="w-full bg-white hover:bg-slate-50 transition-colors p-4 flex items-center justify-between cursor-pointer outline-none"
+                className="w-full bg-white hover:bg-slate-50 transition-colors p-4 flex items-center justify-between outline-none"
               >
                 <div className="flex items-center gap-2">
                   <PlayCircle className="w-5 h-5 text-rose-500" />
-                  <h2 className=" text-slate-700 ">
-                    بر اساس سرفصل
-                  </h2>
+                  <h2 className="text-slate-700">بر اساس سرفصل</h2>
                 </div>
-                <ChevronDown
-                  className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isChaptersOpen ? "rotate-0" : "rotate-90"}`}
-                />
+                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isChaptersOpen ? "rotate-0" : "rotate-90"}`} />
               </button>
 
               <AnimatePresence initial={false}>
@@ -385,16 +321,13 @@ export default function ExamPage({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.1, ease: "easeInOut" }}
                     className="overflow-hidden bg-slate-50/50"
                   >
                     <div className="p-2 flex flex-col gap-1 max-h-[40vh] overflow-y-auto custom-scrollbar">
                       <button
                         onClick={() => handleChapterClick(null)}
-                        disabled={isPending}
-                        className={`text-right p-2.5 rounded transition-all
-                            ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}
-                          `}
+                        disabled={isAnyLoading}
+                        className={`text-right p-2.5 rounded transition-all ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}`}
                       >
                         همه سرفصل‌ها
                       </button>
@@ -405,14 +338,8 @@ export default function ExamPage({
                             <button
                               key={chapter.id}
                               onClick={() => handleChapterClick(chapter.id)}
-                              disabled={isPending}
-                              className={`relative flex items-center justify-between w-full text-right p-2.5 rounded transition-all cursor-pointer overflow-hidden
-                                ${isActive
-                                  ? 'bg-rose-100 text-rose-700 '
-                                  : 'text-slate-600 hover:bg-slate-100'
-                                }
-                                ${isPending ? 'opacity-60 cursor-not-allowed' : ''}
-                                `}
+                              disabled={isAnyLoading}
+                              className={`flex items-center justify-between w-full text-right p-2.5 rounded transition-all ${isActive ? 'bg-rose-100 text-rose-700' : 'text-slate-600 hover:bg-slate-100'} ${isAnyLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                             >
                               <span className="truncate pr-1">{chapter.title}</span>
                               {isActive && <CheckCircle2 className="w-4 h-4 shrink-0 text-rose-600" />}
@@ -420,9 +347,7 @@ export default function ExamPage({
                           );
                         })
                       ) : (
-                        <div className="text-center text-slate-400 py-4 ">
-                          سرفصلی یافت نشد.
-                        </div>
+                        <div className="text-center text-slate-400 py-4">سرفصلی یافت نشد.</div>
                       )}
                     </div>
                   </motion.div>
@@ -430,21 +355,17 @@ export default function ExamPage({
               </AnimatePresence>
             </div>
 
-            {/* 🟢 آکاردئون نوع سوال */}
+            {/* آکاردئون نوع سوال */}
             <div>
               <button
                 onClick={() => setIsTypeOpen(!isTypeOpen)}
-                className="w-full bg-white hover:bg-slate-50 transition-colors p-4 flex items-center justify-between cursor-pointer outline-none"
+                className="w-full bg-white hover:bg-slate-50 transition-colors p-4 flex items-center justify-between outline-none"
               >
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-5 h-5 text-blue-500" />
-                  <h2 className=" text-slate-700 ">
-                    بر اساس نوع سوال
-                  </h2>
+                  <h2 className="text-slate-700">بر اساس نوع سوال</h2>
                 </div>
-                <ChevronDown
-                  className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isTypeOpen ? "rotate-0" : "rotate-90"}`}
-                />
+                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isTypeOpen ? "rotate-0" : "rotate-90"}`} />
               </button>
 
               <AnimatePresence initial={false}>
@@ -453,27 +374,20 @@ export default function ExamPage({
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.1, ease: "easeInOut" }}
                     className="overflow-hidden bg-slate-50/50"
                   >
                     <div className="p-3 flex flex-col gap-2">
-
                       <button
                         onClick={() => handleTypeClick(null)}
-                        disabled={isPending}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all 
-                            ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
-                          `}
+                        disabled={isAnyLoading}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
                       >
                         همه نوع سوالات
                       </button>
-
                       <button
                         onClick={() => handleTypeClick("SARASARI")}
-                        disabled={isPending}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all 
-                            ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
-                          `}
+                        disabled={isAnyLoading}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
                       >
                         <div className="flex items-center gap-2">
                           <GraduationCap className={`w-4 h-4 ${currentQuestionType === "SARASARI" ? "text-purple-600" : "text-slate-400"}`} />
@@ -481,13 +395,10 @@ export default function ExamPage({
                         </div>
                         {currentQuestionType === "SARASARI" && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
                       </button>
-
                       <button
                         onClick={() => handleTypeClick("TALIFI")}
-                        disabled={isPending}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all 
-                            ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}
-                          `}
+                        disabled={isAnyLoading}
+                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
                       >
                         <div className="flex items-center gap-2">
                           <Edit className={`w-4 h-4 ${currentQuestionType === "TALIFI" ? "text-orange-600" : "text-slate-400"}`} />
@@ -495,16 +406,15 @@ export default function ExamPage({
                         </div>
                         {currentQuestionType === "TALIFI" && <CheckCircle2 className="w-4 h-4 text-orange-600" />}
                       </button>
-
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
           </div>
         </aside>
 
+        {/* ==================== محتوای اصلی (سوال) ==================== */}
         <main className="w-full flex-1 flex flex-col min-w-0 pb-10">
           <header className="flex items-center justify-between bg-white p-4 sm:p-5 rounded shadow-sm border border-gray-300 mb-5">
             <div className="flex items-center gap-4">
@@ -512,15 +422,13 @@ export default function ExamPage({
                 <GraduationCap className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h1 className="">شبیه‌ساز آزمون</h1>
+                <h1>شبیه‌ساز آزمون</h1>
                 {totalCount > 0 ? (
-                  <p className="text-slate-500  mt-0.5">
-                    سوال <span className=" text-slate-700">{currentStep}</span> از <span className=" text-slate-700">{totalCount}</span>
+                  <p className="text-slate-500 mt-0.5">
+                    سوال <span className="text-slate-700">{currentStep}</span> از <span className="text-slate-700">{totalCount}</span>
                   </p>
                 ) : (
-                  <p className="text-red-500  mt-0.5 ">
-                    سوالی با این فیلترها یافت نشد!
-                  </p>
+                  <p className="text-red-500 mt-0.5">سوالی با این فیلترها یافت نشد!</p>
                 )}
               </div>
             </div>
@@ -530,22 +438,18 @@ export default function ExamPage({
                 <circle cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
                 <motion.circle
                   cx="50%" cy="50%" r="42%"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="transparent"
-                  strokeLinecap="round"
-                  strokeDasharray={100}
-                  animate={{ strokeDashoffset: 100 - progressPercentage }}
-                  className="text-green-500"
-                  pathLength="100"
+                  stroke="currentColor" strokeWidth="4" fill="transparent" strokeLinecap="round"
+                  strokeDasharray={100} animate={{ strokeDashoffset: 100 - progressPercentage }}
+                  className="text-green-500" pathLength="100"
                 />
               </svg>
-              <span className="absolute   text-slate-700">{progressPercentage}%</span>
+              <span className="absolute text-slate-700">{progressPercentage}%</span>
             </div>
           </header>
 
-          <div className="relative z-10 border border-gray-300 ">
-            {isPending && (
+          <div className="relative z-10 border border-gray-300">
+            {/* ترکیب Loader ریکت کوئری و Next Navigation */}
+            {isAnyLoading && (
               <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded border border-white/50">
                 <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
               </div>
@@ -560,17 +464,11 @@ export default function ExamPage({
                   exit={{ opacity: 0, y: -10 }}
                   className="bg-white rounded shadow-sm border border-slate-200/60 p-5 sm:p-8"
                 >
-
-                  {/* بخش مربوط به عنوان سوال و نمایش کد سوال اضافه شده است */}
-                  <div className="flex text-13  md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-                    <h2 className="text-slate-800 leading-relaxed flex-1">
-                      {q.text}
-                    </h2>
-
-
+                  <div className="flex text-13 md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+                    <h2 className="text-slate-800 leading-relaxed flex-1">{q.text}</h2>
                   </div>
 
-                  <div className="space-y-3.5 ">
+                  <div className="space-y-3.5">
                     {q.choices.map((ch) => {
                       const isUserChoice = selected === ch.key;
                       const isRight = ch.key === q.correct;
@@ -579,22 +477,22 @@ export default function ExamPage({
                       return (
                         <button
                           key={ch.key}
-                          disabled={showResult || isPending}
+                          disabled={showResult || isAnyLoading}
                           onClick={() => setSelected(ch.key)}
-                          className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border-2 transition-all cursor-pointer text-right outline-none active:scale-[0.99]
-                            ${!showResult ? 'border-slate-100 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500' :
-                              isRight ? 'border-green-500 bg-green-50/50' :
-                                isUserChoice ? 'border-red-500 bg-red-50/50' : 'border-slate-50 bg-slate-50/30 opacity-50'}
+                          className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border-2 transition-all text-right outline-none active:scale-[0.99]
+                            ${!showResult ? 'border-slate-100 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500 cursor-pointer' :
+                              isRight ? 'border-green-500 bg-green-50/50 cursor-default' :
+                                isUserChoice ? 'border-red-500 bg-red-50/50 cursor-default' : 'border-slate-50 bg-slate-50/30 opacity-50 cursor-default'}
                             `}
                         >
                           <div className="flex items-center gap-4">
-                            <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center  shrink-0 transition-colors
+                            <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors
                                 ${isUserChoice || (showResult && isRight) ? 'bg-white shadow-sm border border-slate-100' : 'bg-slate-100 text-slate-500'}
                                 ${showResult && isRight ? 'text-green-600' : isUserChoice ? 'text-red-600' : ''}
                             `}>
                               {persianLetterMap[ch.key]}
                             </span>
-                            <span className={` ${isUserChoice || isRight ? 'text-slate-900 ' : 'text-slate-700'}`}>
+                            <span className={`${isUserChoice || isRight ? 'text-slate-900' : 'text-slate-700'}`}>
                               {ch.text}
                             </span>
                           </div>
@@ -613,7 +511,7 @@ export default function ExamPage({
                         className="mt-8 pt-6 border-t border-slate-100 overflow-hidden"
                       >
                         <div className="p-5 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded border border-blue-100/60">
-                          <div className="flex items-center gap-2 mb-3 text-blue-800 ">
+                          <div className="flex items-center gap-2 mb-3 text-blue-800">
                             <Lightbulb className="w-5 h-5 text-blue-600" />
                             <span>پاسخ تشریحی</span>
                           </div>
@@ -629,27 +527,27 @@ export default function ExamPage({
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-10 flex flex-col items-center justify-center text-center">
                 <Filter className="w-16 h-16 text-slate-200 mb-4" />
-                <h3 className="text-slate-600   mb-2">سوالی یافت نشد!</h3>
-                <p className="text-slate-500 ">با فیلترهای انتخاب شده هیچ سوالی برای نمایش وجود ندارد.</p>
+                <h3 className="text-slate-600 mb-2">سوالی یافت نشد!</h3>
+                <p className="text-slate-500">با فیلترهای انتخاب شده هیچ سوالی برای نمایش وجود ندارد.</p>
               </div>
             )}
 
             {totalCount > 0 && (
-              <div className=" fixed bottom-0 left-0 border border-gray-300 w-full p-4 bg-white/90 backdrop-blur-xl border-t  shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50 lg:relative lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:shadow-none lg:p-0 lg:mt-6 lg:z-auto">
-                <div className="flex gap-4 items-center justify-between w-full max-w-lg mx-auto lg:max-w-none ">
+              <div className="fixed bottom-0 left-0 border border-gray-300 w-full p-4 bg-white/90 backdrop-blur-xl border-t shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50 lg:relative lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:shadow-none lg:p-0 lg:mt-6 lg:z-auto">
+                <div className="flex gap-4 items-center justify-between w-full max-w-lg mx-auto lg:max-w-none">
                   <button
-                    disabled={currentStep === 1 || isPending}
+                    disabled={currentStep === 1 || isAnyLoading}
                     onClick={() => handleNavigation(currentStep - 1)}
-                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-10 sm:h-12 rounded text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 h-10 sm:h-12 rounded text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-medium"
                   >
                     <ChevronRight className="w-5 h-5" />
                     سوال قبلی
                   </button>
 
                   <button
-                    disabled={currentStep === totalCount || isPending}
+                    disabled={currentStep === totalCount || isAnyLoading}
                     onClick={() => handleNavigation(currentStep + 1)}
-                    className="flex-1 flex items-center cursor-pointer justify-center gap-2 h-10 sm:h-12 rounded bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-base"
+                    className="flex-1 flex items-center justify-center gap-2 h-10 sm:h-12 rounded bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 disabled:opacity-40 disabled:cursor-not-allowed font-medium text-base"
                   >
                     سوال بعدی
                     <ChevronLeft className="w-5 h-5" />
@@ -657,32 +555,25 @@ export default function ExamPage({
                 </div>
               </div>
             )}
-
           </div>
 
-          {/* پرسش و پاسخ با دیگران */}
           <div className="mt-8">
             <div className="bg-white rounded shadow-sm border border-slate-200/60 p-4 sm:p-5">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* right side */}
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
                     <MessageCircleQuestion className="w-5 h-5 text-indigo-600" />
                   </div>
-
                   <div>
                     <h3 className="text-slate-800 font-semibold flex items-center gap-2">
                       پرسش و پاسخ با دیگران
                       <Sparkles className="w-4 h-4 text-amber-500" />
                     </h3>
                     <p className="text-slate-500 text-sm mt-1 leading-7">
-                      سوالت رو درباره همین تست بپرس یا به بقیه کمک کن. پاسخ‌های دقیق و کوتاه
-                      سریع‌تر دیده می‌شن.
+                      سوالت رو درباره همین تست بپرس یا به بقیه کمک کن. پاسخ‌های دقیق و کوتاه سریع‌تر دیده می‌شن.
                     </p>
                   </div>
                 </div>
-
-                {/* left side chips */}
                 <div className="flex flex-wrap gap-2 sm:justify-end">
                   <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
                     <Users className="w-3.5 h-3.5" />
@@ -696,58 +587,41 @@ export default function ExamPage({
             </div>
           </div>
 
-          <div ref={commentsRef} className="">
+          <div ref={commentsRef}>
             {dbQuestion?.id && (
               <CommentManagment targetId={dbQuestion.id} targetType="question" />
             )}
           </div>
 
-
         </main>
       </div>
 
-
-
-      {/* filter sidebar */}
+      {/* ==================== فیلتر نسخه موبایل ==================== */}
       <AnimatePresence>
         {isMobileFilterOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               className="fixed inset-0 z-[90] bg-black/40 lg:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMobileFilterOpen(false)}
             />
-
-            {/* Bottom Sheet */}
             <motion.div
               className="fixed inset-x-0 bottom-0 z-[95] lg:hidden"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
             >
               <div className="mx-auto w-full max-w-2xl rounded-t-2xl bg-white shadow-2xl border-t border-slate-200">
-                {/* Handle + Header */}
                 <div className="px-4 pt-3 pb-2 border-b border-slate-100">
                   <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300" />
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-slate-800">فیلتر سوالات</h3>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileFilterOpen(false)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
-                    >
+                    <button onClick={() => setIsMobileFilterOpen(false)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
                       بستن
                     </button>
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="max-h-[75vh] overflow-y-auto p-3 space-y-3">
-                  {/* پاک کردن فیلترها */}
                   <Link
                     href={getClearFiltersUrl()}
                     onClick={() => setIsMobileFilterOpen(false)}
@@ -759,43 +633,25 @@ export default function ExamPage({
                     </div>
                   </Link>
 
-                  {/* سرفصل‌ها */}
                   <div className="rounded-xl border border-slate-200 overflow-hidden">
-                    <button
-                      onClick={() => setIsChaptersOpen(!isChaptersOpen)}
-                      className="w-full bg-white p-4 flex items-center justify-between"
-                    >
+                    <button onClick={() => setIsChaptersOpen(!isChaptersOpen)} className="w-full bg-white p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <PlayCircle className="w-5 h-5 text-rose-500" />
                         <span className="text-slate-700">بر اساس سرفصل</span>
                       </div>
                       <ChevronDown className={`w-5 h-5 text-slate-400 transition ${isChaptersOpen ? "rotate-180" : ""}`} />
                     </button>
-
                     <AnimatePresence initial={false}>
                       {isChaptersOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-slate-50"
-                        >
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-slate-50">
                           <div className="p-2 flex flex-col gap-1 max-h-[34vh] overflow-y-auto">
-                            <button
-                              onClick={() => handleChapterClick(null)}
-                              className={`text-right p-2.5 rounded ${!currentChapterId ? "bg-rose-100 text-rose-700" : "text-slate-600 hover:bg-slate-100"}`}
-                            >
+                            <button onClick={() => handleChapterClick(null)} className={`text-right p-2.5 rounded ${!currentChapterId ? "bg-rose-100 text-rose-700" : "text-slate-600 hover:bg-slate-100"}`}>
                               همه سرفصل‌ها
                             </button>
                             {chapters.map((chapter) => {
                               const isActive = currentChapterId === chapter.id;
                               return (
-                                <button
-                                  key={chapter.id}
-                                  onClick={() => handleChapterClick(chapter.id)}
-                                  className={`flex items-center justify-between w-full text-right p-2.5 rounded ${isActive ? "bg-rose-100 text-rose-700" : "text-slate-600 hover:bg-slate-100"
-                                    }`}
-                                >
+                                <button key={chapter.id} onClick={() => handleChapterClick(chapter.id)} className={`flex items-center justify-between w-full text-right p-2.5 rounded ${isActive ? "bg-rose-100 text-rose-700" : "text-slate-600 hover:bg-slate-100"}`}>
                                   <span className="truncate">{chapter.title}</span>
                                   {isActive && <CheckCircle2 className="w-4 h-4 text-rose-600" />}
                                 </button>
@@ -807,53 +663,26 @@ export default function ExamPage({
                     </AnimatePresence>
                   </div>
 
-                  {/* نوع سوال */}
                   <div className="rounded-xl border border-slate-200 overflow-hidden">
-                    <button
-                      onClick={() => setIsTypeOpen(!isTypeOpen)}
-                      className="w-full bg-white p-4 flex items-center justify-between"
-                    >
+                    <button onClick={() => setIsTypeOpen(!isTypeOpen)} className="w-full bg-white p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <GraduationCap className="w-5 h-5 text-blue-500" />
                         <span className="text-slate-700">بر اساس نوع سوال</span>
                       </div>
                       <ChevronDown className={`w-5 h-5 text-slate-400 transition ${isTypeOpen ? "rotate-180" : ""}`} />
                     </button>
-
                     <AnimatePresence initial={false}>
                       {isTypeOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-slate-50"
-                        >
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-slate-50">
                           <div className="p-3 flex flex-col gap-2">
-                            <button
-                              onClick={() => handleTypeClick(null)}
-                              className={`p-2.5 rounded-lg border ${!currentQuestionType ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-600"}`}
-                            >
+                            <button onClick={() => handleTypeClick(null)} className={`p-2.5 rounded-lg border ${!currentQuestionType ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-600"}`}>
                               همه نوع سوالات
                             </button>
-
-                            <button
-                              onClick={() => handleTypeClick("SARASARI")}
-                              className={`flex items-center justify-between p-2.5 rounded-lg border ${currentQuestionType === "SARASARI"
-                                ? "border-purple-500 bg-purple-50 text-purple-700"
-                                : "border-slate-200 bg-white text-slate-600"
-                                }`}
-                            >
+                            <button onClick={() => handleTypeClick("SARASARI")} className={`flex items-center justify-between p-2.5 rounded-lg border ${currentQuestionType === "SARASARI" ? "border-purple-500 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-600"}`}>
                               <span>سوالات سراسری</span>
                               {currentQuestionType === "SARASARI" && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
                             </button>
-
-                            <button
-                              onClick={() => handleTypeClick("TALIFI")}
-                              className={`flex items-center justify-between p-2.5 rounded-lg border ${currentQuestionType === "TALIFI"
-                                ? "border-orange-500 bg-orange-50 text-orange-700"
-                                : "border-slate-200 bg-white text-slate-600"
-                                }`}
-                            >
+                            <button onClick={() => handleTypeClick("TALIFI")} className={`flex items-center justify-between p-2.5 rounded-lg border ${currentQuestionType === "TALIFI" ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 bg-white text-slate-600"}`}>
                               <span>سوالات تالیفی</span>
                               {currentQuestionType === "TALIFI" && <CheckCircle2 className="w-4 h-4 text-orange-600" />}
                             </button>
@@ -868,12 +697,6 @@ export default function ExamPage({
           </>
         )}
       </AnimatePresence>
-
-
-
-
     </div>
-
-
   );
 }

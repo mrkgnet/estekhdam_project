@@ -65,7 +65,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
   return (
     <div className="contents ">
       <div className="w-full h-full flex flex-col relative group rounded shadow-xl shadow-blue-900/5 border border-white/80 bg-gradient-to-br from-slate-50 to-blue-50/40">
-        
+
         <style jsx global>{`
           .modern-slider .swiper-pagination-bullet {
             width: 8px;
@@ -82,21 +82,22 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           }
           .modern-slider .swiper-button-next,
           .modern-slider .swiper-button-prev {
-            width: 44px;
-            height: 44px;
-            background-color: rgba(255, 255, 255, 0.9);
+            width: 36px;
+            height: 36px;
+           
             backdrop-filter: blur(4px);
             border-radius: 10%;
             color: #2563eb;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border:1px solid gray;
+            padding:5px;
             transition: all 0.3s ease;
-            opacity: 0;
-            transform: scale(0.9);
+            opacity: 1;
+            transform: scale(0.7);
           }
           .modern-slider:hover .swiper-button-next,
           .modern-slider:hover .swiper-button-prev {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(0.7);
           }
           .modern-slider .swiper-button-next { left: 20px; right: auto; }
           .modern-slider .swiper-button-prev { right: 20px; left: auto; }
@@ -113,7 +114,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           loop={sliders.length > 1}
           dir="rtl"
           autoplay={{
-            delay: 5000,
+            delay: 5000000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -132,37 +133,17 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
           {sliders.map((s, index) => (
             <SwiperSlide key={s.id} className="h-full">
-              <div className="flex flex-col lg:flex-row h-full text-xs md:text-sm gap-6 lg:gap-12 items-center justify-between p-4 md:p-8">
-                
-                <div className="order-2 lg:order-1 flex-1 w-full space-y-4 flex flex-col justify-center z-10 px-2 sm:px-4 lg:px-0 text-center lg:text-right">
-                  <div className="inline-flex items-center justify-center lg:justify-start gap-1.5 px-3 py-1.5 rounded-full bg-blue-100/80 text-blue-700 text-xs w-fit mx-auto lg:mx-0 animate-pulse mb-2">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    ویژه کاربران
-                  </div>
-
+              <div className="flex flex-col lg:flex-row h-full text-xs md:text-sm gap-6 lg:gap-12  justify-between  ">
+                <div className="order-2 lg:order-1 flex-1 w-full space-y-4 flex flex-col justify-center  z-10 px-2 sm:px-4 lg:px-0  lg:text-right">
                   {s.title && (
-                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold leading-[1.6] text-slate-800 tracking-tight">
+                    <h2 className="text-xl text-center  font-bold  text-slate-800 tracking-tight">
                       {s.title}
                     </h2>
                   )}
-
-                  {s.description && (
-                    <p className="text-slate-600 leading-relaxed text-sm lg:text-base line-clamp-3 md:line-clamp-4 font-medium max-w-2xl mx-auto lg:mx-0">
-                      {s.description}
-                    </p>
-                  )}
-
-                  {s.targetLink && s.targetLink !== "#" && (
-                    <div className="pt-2 pb-4 flex justify-center lg:justify-start">
-                      <Link
-                        href={s.targetLink}
-                        className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 w-full sm:w-auto"
-                      >
-                        مشاهده جزئیات بیشتر
-                        <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
-                      </Link>
-                    </div>
-                  )}
+                  <button>
+                    مشاهده  اطلاعات بیشتر
+                  </button>
+               
                 </div>
 
                 <div className="order-1 lg:order-2 relative shrink-0 w-full lg:w-1/2 max-w-[450px] flex items-center justify-center mx-auto lg:mx-0 mt-4 lg:mt-0">

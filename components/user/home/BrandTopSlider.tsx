@@ -41,7 +41,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
   const showSkeleton = !isMounted || !isSwiperReady;
 
   return (
-    <div className="bg-white relative py-4 group/slider overflow-hidden rounded">
+    <div className=" relative py-4 group/slider overflow-hidden rounded">
       <style jsx>{`
         :global(.brand-swiper .swiper-wrapper) {
           transition-timing-function: linear !important;

@@ -41,7 +41,7 @@ export default function HomePage() {
             </section>
             <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
               <div className="lg:col-span-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-full">
+                <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-full">
                   <FetchDataMainSlider />
                 </div>
               </div>

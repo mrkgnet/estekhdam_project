@@ -10,7 +10,8 @@ export default function QuickAccessHero() {
     { name: "🏥 وزارت بهداشت", href: "/" },
     { name: "⚖️ قوه قضاییه", href: "/" },
     { name: "🛢️ شرکت نفت", href: "/" },
-    { name: "🏢 تامین اجتماعی", href: "/" }
+    { name: "🏢 تامین اجتماعی", href: "/" },
+    { name: " و ...  ", href: "/" }
   ];
 
   // متنی که می‌خواهیم تایپ شود
@@ -47,7 +48,7 @@ export default function QuickAccessHero() {
   }, [displayText, isDeleting, fullText]);
 
   return (
-    <div className="bg-white rounded p-8 border   border-slate-200 shadow-sm text-center mb-6 relative overflow-hidden">
+    <div className="shadow rounded-xl p-8 border   border-slate-200  text-center mb-6 relative overflow-hidden">
         {/* یک دایره تزئینی محو در پس زمینه */}
         <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-blue-50 rounded-full blur-3xl z-0"></div>
 
@@ -56,13 +57,13 @@ export default function QuickAccessHero() {
                 <Briefcase size={32} />
             </div>
             
-            <h1 className=" font-bold text-slate-600 text-15 sm:text-18 md:text-18 text-gray-800  mb-3 h-10 flex justify-center items-center ">
+            <h1 className=" font-bold text-slate-600 text-16 sm:text-19 md:text-20   mb-3 h-10 flex justify-center items-center ">
                 {displayText}
                 {/* نشانگر چشمک زن ماشین تحریر */}
                 <span className="inline-block w-[3px] h-8 bg-blue-600 ml-1 animate-pulse"></span>
             </h1>
             
-            <p className="text-slate-600  mb-8 max-w-xl mx-auto ">
+            <p className="text-slate-600 text-13 md:text-14  mb-8 max-w-xl mx-auto ">
                 وقت خود را برای پیدا کردن منابع هدر ندهید. ما تمام سوالات ادوار گذشته را با پاسخ تشریحی برای شما آماده کرده‌ایم.
             </p>
 

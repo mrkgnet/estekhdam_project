@@ -16,6 +16,7 @@ import {
 import SafeImage from "@/components/ui/SafeImage";
 import Pagination from "@/components/ui/Pagination";
 import { GridSkeleton } from "@/components/ui/SkeletonLoding/GridSkeleton";
+import FilterResource from "@/components/user/FilterResource";
 
 type ProductType = {
   id: string | number;
@@ -52,7 +53,7 @@ export default function ShowDataResources({
   limit,
   title,
 }: ShowDataResourcesProps) {
-  const searchParams = useSearchParams(); 
+  const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
 
   // تعریف کلید کوئری وابسته به تمام پارامترهای جستجو و صفحه‌بندی
@@ -92,46 +93,12 @@ export default function ShowDataResources({
 
   return (
     <section className="w-full min-h-screen overflow-hidden font-sans" dir="rtl">
-      
-      {/* هدر فیلترها و نمایش تعداد کل */}
-      <div className="flex flex-col sm:flex-row items-center justify-between mt-6 mb-2 gap-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link 
-            href="?category=بانک-سوالات" 
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              currentCategory === 'بانک-سوالات' 
-                ? 'bg-red-500 text-white shadow-md' 
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            بانک سوالات
-          </Link>
-          <Link 
-            href="?category=دفترچه-های-استخدامی" 
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              currentCategory === 'دفترچه-های-استخدامی' 
-                ? 'bg-red-500 text-white shadow-md' 
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            دفترچه‌های استخدامی
-          </Link>
-          {currentCategory && (
-            <Link href="?" className="px-3 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
-              نمایش همه
-            </Link>
-          )}
-        </div>
 
-        <div className="bg-blue-50 border border-blue-100 text-blue-800 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-opacity">
-          تعداد کل محصولات:
-          {isFetching ? (
-            <span className="w-6 h-4 bg-blue-200 animate-pulse rounded block"></span>
-          ) : (
-            <span className="font-bold text-lg">{totalCount}</span>
-          )}
-        </div>
-      </div>
+      <FilterResource
+        currentCategory={currentCategory}
+        totalCount={totalCount}
+        isFetching={isFetching}
+      />
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* افکت محو شدن هنگام دریافت اطلاعات جدید از بک‌گراند */}

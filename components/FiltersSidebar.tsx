@@ -500,7 +500,7 @@ export default function FiltersSidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.1 }}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
               onClick={() => setMobileOpen(false)}
             />
@@ -509,7 +509,7 @@ export default function FiltersSidebar() {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              transition={{ type: "spring", damping: 15, stiffness: 200 }}
               className="absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl bg-slate-50 shadow-xl flex flex-col z-10"
             >
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white rounded-t-3xl">

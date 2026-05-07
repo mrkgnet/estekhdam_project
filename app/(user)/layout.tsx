@@ -13,7 +13,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <>
 
 
-      <div className="min-h-screen flex flex-col bg-slate-50  ">
+      <div className="min-h-screen flex flex-col   ">
         <HeaderTopComponnet />
         <NavbarUser />
         <div className="flex flex-1">

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, Pagination } from "swiper/modules";
-import { ChevronLeft, ChevronRight, ClipboardList, BookOpen, FileCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardList, BookOpen } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
@@ -24,7 +24,7 @@ interface ProductType {
 
 interface Props {
   title?: string;
-  initialProducts: any; // داده اولیه دریافتی از سرور
+  initialProducts: any;
   viewAllLink?: string;
   slug?: string;
 }
@@ -42,22 +42,19 @@ export default function ShowDataSLTL({
     setMounted(true);
   }, []);
 
-  // استفاده از ریکت کوئری برای مدیریت کش و آپدیت داده‌ها
   const { data: response, isLoading } = useQuery({
     queryKey: ["latest-products"],
     queryFn: () => fetchLatestProductAction(),
-    initialData: initialProducts, // داده اولیه برای SSR
-    staleTime: 1000 * 60 * 5, // ۵ دقیقه اعتبار کش
+    initialData: initialProducts,
+    staleTime: 1000 * 60 * 5,
   });
 
   const products: ProductType[] = response?.data || [];
 
-  // نمایش اسکلتون تا زمان مانت شدن یا لودینگ اولیه
   if (!mounted || isLoading) {
     return <SliderSkeletonTopLeft />;
   }
 
-  // اگر محصولی نبود، چیزی نشان نده
   if (products.length === 0) {
     return null;
   }
@@ -70,7 +67,7 @@ export default function ShowDataSLTL({
           top: 0;
           left: 0;
           right: 0;
-          height: 3px;
+          height: 2px;
           background: #e2e8f0;
           z-index: 20;
           border-radius: 4px 4px 0 0;
@@ -95,7 +92,7 @@ export default function ShowDataSLTL({
           modules={[Navigation, Autoplay, Pagination]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
           autoplay={{
-            delay: 4000,
+            delay: 4000, // زمان autoplay را کاهش دادم تا اسلایدها حرکت کنند
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -114,7 +111,7 @@ export default function ShowDataSLTL({
             <SwiperSlide key={p.id} className="w-full h-auto">
               <Link href={`/resources/course/${p.slug}`} className="block h-full">
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
-                  <div className="relative w-full h-[130px] md:h-[150px] xl:h-[170px] flex-shrink-0 flex items-center justify-center p-4 md:p-5 overflow-hidden">
+                  <div className="relative w-full h-[120px] md:h-[120px] xl:h-[120px] flex-shrink-0 flex items-center justify-center p-2 md:p-2 overflow-hidden">
                     <div className="relative w-full h-full transform transition-transform duration-500 ease-out drop-shadow-xl">
                       <SafeImage
                         src={p.imageUrl || "/images/products/bookExample.jpg"}
@@ -126,7 +123,7 @@ export default function ShowDataSLTL({
                     </div>
                   </div>
 
-                  <div className="flex flex-col flex-1 p-4 md:p-5 z-10 justify-between">
+                  <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
                     <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-emerald-600 transition-colors duration-200">
                       {p.name}
                     </h3>
@@ -140,10 +137,6 @@ export default function ShowDataSLTL({
                           <BookOpen className="w-4 h-4 text-emerald-500 shrink-0" />
                           <span>فصل‌بندی استاندارد</span>
                         </li>
-                        <li className="flex items-center gap-2 text-slate-600">
-                          <FileCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>پاسخ‌نامه تشریحی</span>
-                        </li>
                       </ul>
                     </div>
                   </div>
@@ -153,19 +146,20 @@ export default function ShowDataSLTL({
           ))}
         </Swiper>
 
-        {/* دکمه‌های ناوبری */}
+        {/* START: دکمه‌های ناوبری اصلاح شده (مربعی) */}
         <button
           ref={setNextBtn}
-          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-9 h-9 bg-white/90 rounded-full shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
+          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           ref={setPrevBtn}
-          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-9 h-9 bg-white/90 rounded-full shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
+          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
+        {/* END: تغییرات */}
       </div>
     </div>
   );

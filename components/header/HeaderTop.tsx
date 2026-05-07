@@ -36,7 +36,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
   // پیاده‌سازی ریکت کوئری
   // پیاده‌سازی ریکت کوئری
   const { data: categoryResponse } = useQuery({
-    queryKey: ['categories-navbar'], 
+    queryKey: ['categories-navbar'],
     queryFn: () => getDataCategory(),
     initialData: initialCategories, // حالا این متغیر به درستی مقداردهی می‌شود
     staleTime: 1000 * 60 * 60 * 24, // 💡 پیشنهاد: این خط را اضافه کنید تا دیتا ۲۴ ساعت کش شود و سرعت به حداکثر برسد
@@ -113,22 +113,43 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
         <div className="mx-auto  pl-6 h-[72px] px-6  flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
-          <div className="flex items-center">
+          {/* Brand Modern Block */}
+          <div className="relative inline-flex items-center">
+
+            {/* PRO Badge */}
+            <span className="absolute -top-2 -left-2 bg-gradient-to-r from-red-600 to-red-700 
+    text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
+              PRO
+            </span>
+
             <Link
-              href={'/'}
-              className="p-2 text-gray-600 flex items-center gap-2 transition-colors duration-200 rounded-lg hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-100"
-              aria-label="باز کردن منو"
+              href="/"
+              aria-label="خانه"
+              className="group flex flex-col px-5 py-0.5 border border-gray-300 rounded-xl bg-white 
+       hover:shadow-md hover:border-blue-300 transition-all duration-300"
             >
-              <span className=" font-medium">عکس برند</span>
+              {/* Brand Title */}
+              <span className="text-base font-extrabold text-gray-800 tracking-tight group-hover:text-blue-700 transition">
+                استخدام
+              </span>
+
+              {/* Brand Slogan */}
+              <span className="text-[8px] font-medium text-gray-500 group-hover:text-gray-700 transition mt-0.5">
+                یک گام جلوتر از رقبا
+              </span>
             </Link>
           </div>
+
+
+
+
 
           {/* Center Search */}
           <div
             ref={searchContainerRef}
             className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${isMobileSearchOpen
-                ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
-                : "hidden"
+              ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
+              : "hidden"
               }`}
           >
             <div className="relative w-full max-w-[650px]">
@@ -147,8 +168,8 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
                 className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${isSearchOpen
-                    ? "bg-white border-gray-500"
-                    : "border-gray-200 focus:bg-white hover:border-gray-300"
+                  ? "bg-white border-gray-500"
+                  : "border-gray-200 focus:bg-white hover:border-gray-300"
                   }`}
               />
 

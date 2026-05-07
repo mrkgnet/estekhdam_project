@@ -258,7 +258,7 @@ export default function ShowDataTabProCat({
         <div className="relative flex-1 w-full flex items-center overflow-hidden group/tabs px-1 sm:px-6">
           <button
             ref={setPrevTabBtn}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 rounded-full shadow border border-slate-200 flex items-center justify-center text-slate-600 hover:text-orange-500 transition-all opacity-0 group-hover/tabs:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 rounded shadow border border-slate-400 flex items-center justify-center text-slate-600 hover:text-orange-500 transition-all opacity-0 group-hover/tabs:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
             aria-label="تب قبلی"
           >
             <ChevronRight className="w-4 h-4" />
@@ -298,7 +298,7 @@ export default function ShowDataTabProCat({
 
           <button
             ref={setNextTabBtn}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 rounded-full shadow border border-slate-200 flex items-center justify-center text-slate-600 hover:text-orange-500 transition-all opacity-0 group-hover/tabs:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 rounded shadow border border-slate-400 flex items-center justify-center text-slate-600 hover:text-orange-500 transition-all opacity-0 group-hover/tabs:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
             aria-label="تب بعدی"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function ShowDataTabProCat({
       >
         <button
           ref={setPrevBtn}
-          className="absolute top-1/2 right-2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all z-10 opacity-0 group-hover/content:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+          className="absolute top-1/2 right-2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded shadow border border-slate-400 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all z-10 opacity-0 group-hover/content:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
           aria-label="اسلاید قبلی"
         >
           <ChevronRight className="w-5 h-5" />
@@ -347,14 +347,14 @@ export default function ShowDataTabProCat({
                 </SwiperSlide>
               ))
             : currentProducts.map((product: ProductType, index: number) => (
-                <SwiperSlide key={product.id ?? index} className="w-full md:!w-[220px]">
+                <SwiperSlide key={product.id ?? index} className="w-full md:!w-[200px]">
                   <Link
                     href={`/resources/course/${product.slug}`}
                     aria-label={`مشاهده جزئیات ${product.name}`}
                     className="block h-full"
                   >
                     <article className="group/card flex flex-col h-full border border-slate-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-all">
-                      <div className="relative w-full aspect-[4/5] bg-slate-50 flex items-center justify-center p-4 overflow-hidden">
+                      <div className="relative w-full aspect-[4/5] bg-slate-50 flex items-center justify-center p-2 overflow-hidden">
                         <div className="relative w-full h-full transition-transform duration-500 ">
                           <SafeImage
                             src={product.imageUrl || "/images/products/bookExample.jpg"}
@@ -369,7 +369,7 @@ export default function ShowDataTabProCat({
                       </div>
 
                       <div className="flex flex-col flex-1 p-3 md:p-4 space-y-3">
-                        <h4 className="text-slate-600 leading-snug line-clamp-2 min-h-[2.6rem] group-hover/card:text-green-700 transition-colors">
+                        <h4 className="text-slate-600 font-bold leading-snug line-clamp-2  group-hover/card:text-green-700 transition-colors">
                           {product.name}
                         </h4>
 
@@ -378,15 +378,13 @@ export default function ShowDataTabProCat({
                             <FileQuestion className="w-3.5 h-3.5" />
                             سوالات طبقه بندی شده
                           </span>
-                          <span className="inline-flex text-[11px] items-center gap-1 text-slate-600 px-2 py-1 rounded">
-                            <FileText className="w-3.5 h-3.5 text-slate-400" />
-                            دارای پاسخ تشریحی
+                            <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
+                            <FileQuestion className="w-3.5 h-3.5" />
+                           پاسخ نامه تشریحی
                           </span>
                         </div>
 
-                        <button className="mt-auto w-full h-9 rounded-lg bg-blue-50 text-slate-600 transition-all group-hover/card:bg-green-600 group-hover/card:text-white">
-                          مشاهده بانک سوالات
-                        </button>
+                        
                       </div>
                     </article>
                   </Link>
@@ -407,7 +405,7 @@ export default function ShowDataTabProCat({
 
         <button
           ref={setNextBtn}
-          className="absolute top-1/2 left-2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all z-10 opacity-0 group-hover/content:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
+          className="absolute top-1/2 left-2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded shadow border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all z-10 opacity-0 group-hover/content:opacity-100 disabled:opacity-0 disabled:pointer-events-none"
           aria-label="اسلاید بعدی"
         >
           <ChevronLeft className="w-5 h-5" />

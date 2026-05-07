@@ -45,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} bg-slate-50  text-13 sm:text-13 md:text-13 `} suppressHydrationWarning>
+      <body className={`${iransans.className}   text-13 sm:text-13 md:text-13 `} suppressHydrationWarning>
 
         <Providers>
           <NextTopLoader color="#ef4444" height={2} showSpinner={false} />
@@ -59,7 +59,7 @@ export default function RootLayout({
             />
 
             {/* صفحه */}
-            <div className="min-h-screen flex flex-col bg-slate-50">
+            <div className="min-h-screen flex flex-col ">
 
               <main className="  ">{children}</main>
               <Footer />

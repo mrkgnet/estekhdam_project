@@ -19,7 +19,6 @@ export default async function Page({
 }) {
 
   const { pid, pname, step, chapterId, questionType } = await searchParams
-  console.log(pname)
 
   if (!pid) {
     return (
