@@ -61,8 +61,8 @@ export default function ShowDataSLTL({
 
   return (
     <div className="w-full mx-auto relative px-2 h-full" dir="rtl">
-      <style jsx global>{`
-        .custom-swiper-progress {
+            <style jsx global>{`
+         .custom-swiper-progress {
           position: absolute;
           top: 0;
           left: 0;
@@ -72,9 +72,12 @@ export default function ShowDataSLTL({
           z-index: 20;
           border-radius: 4px 4px 0 0;
           overflow: hidden;
+          /* تغییر رنگ پیش‌فرض Swiper */
+          --swiper-pagination-color: #2563eb; 
         }
         .custom-swiper-progress .swiper-pagination-progressbar-fill {
-          background: linear-gradient(to left, #16a34a, #22c55e);
+          /* استفاده از !important برای اطمینان از اعمال رنگ */
+          background: #2563eb !important; 
           position: absolute;
           left: 0;
           top: 0;

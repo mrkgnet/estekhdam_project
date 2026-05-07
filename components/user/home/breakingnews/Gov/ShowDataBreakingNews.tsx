@@ -139,7 +139,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
             <Link
               key={it.id}
               href={it.href}
-              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md"
             >
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                 <BrandLogo src={it.image} alt={it.title} />
@@ -162,7 +162,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
                 </div>
               </div>
 
-              <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 sm:border-0 w-full sm:w-auto">
+              <div className="hidden md:flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 sm:border-0 w-full sm:w-auto">
                 <CountdownTimer endAt={it.endAt} active />
               </div>
             </Link>

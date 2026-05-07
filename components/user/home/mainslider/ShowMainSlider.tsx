@@ -39,7 +39,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     queryKey: ["main-slider"],
     queryFn: () => fetchMainSliderUserAction(),
     initialData: initialSliders,
-    staleTime: 1000 * 60 * 30, // ۳۰ دقیقه اعتبار کش (چون اسلایدر دیر به دیر عوض می‌شود)
+    staleTime: 1000 * 60 * 30, // ۳۰ دقیقه اعتبار کش
   });
 
   const sliders: SliderDBItem[] = response?.data || [];
@@ -50,10 +50,9 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     }
   };
 
-  // نمایش حالت بارگذاری تا زمان مانت شدن یا لودینگ اولیه ریکت کوئری
   if (!isMounted || isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-full min-h-[300px] gap-3 text-slate-400 bg-white rounded border border-slate-200">
+      <div className="flex flex-col items-center justify-center w-full h-full min-h-[165px] gap-3 text-slate-400 bg-white rounded border border-slate-200">
         <Loader2 className="w-10 h-10 animate-spin text-[#2b5c9e]" />
         <span className="text-sm">در حال بارگذاری اسلایدر...</span>
       </div>
@@ -64,7 +63,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
   return (
     <div className="contents ">
-      <div className="w-full h-full flex flex-col relative group rounded shadow-xl shadow-blue-900/5 border border-white/80 bg-gradient-to-br from-slate-50 to-blue-50/40">
+      <div className="w-full h-full flex flex-col relative group rounded shadow-xl shadow-blue-900/5 border border-white/80 to-blue-50/40">
 
         <style jsx global>{`
           .modern-slider .swiper-pagination-bullet {
@@ -84,7 +83,6 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           .modern-slider .swiper-button-prev {
             width: 36px;
             height: 36px;
-           
             backdrop-filter: blur(4px);
             border-radius: 10%;
             color: #2563eb;
@@ -114,14 +112,14 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           loop={sliders.length > 1}
           dir="rtl"
           autoplay={{
-            delay: 5000000,
+            delay: 7000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
           pagination={{ clickable: true }}
           navigation={true}
           onAutoplayTimeLeft={onAutoplayTimeLeft}
-          className="w-full h-full flex-1 modern-slider pb-8 md:pb-4"
+          className="w-full h-[420px] md:h-[360px] flex-1 modern-slider pb-8 md:pb-4"
         >
           {/* نوار پیشرفت بالای اسلایدر */}
           <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-200/50 z-50">
@@ -133,34 +131,48 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
           {sliders.map((s, index) => (
             <SwiperSlide key={s.id} className="h-full">
-              <div className="flex flex-col lg:flex-row h-full text-xs md:text-sm gap-6 lg:gap-12  justify-between  ">
-                <div className="order-2 lg:order-1 flex-1 w-full space-y-4 flex flex-col justify-center  z-10 px-2 sm:px-4 lg:px-0  lg:text-right">
+              <div className="flex h-full items-stretch gap-4 md:gap-8">
+
+                {/* متن */}
+                <div className="order-1 w-full h-full flex flex-col justify-center gap-3 px-3 md:px-6 text-right">
                   {s.title && (
-                    <h2 className="text-xl text-center  font-bold  text-slate-800 tracking-tight">
+                    <h2 className="text-sm md:text-lg font-bold text-slate-800 tracking-tight">
                       {s.title}
                     </h2>
                   )}
-                  <button>
-                    مشاهده  اطلاعات بیشتر
-                  </button>
-               
+
+                  <Link
+                    href={s.href ?? "#"}
+                    className="inline-flex items-center gap-2 w-fit rounded-md
+               px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
+               hover:bg-blue-700 active:bg-blue-800 transition-colors
+               focus-visible:outline-none focus-visible:ring-2
+               focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                  >
+                    مشاهده اطلاعات بیشتر
+                 
+                  </Link>
                 </div>
 
-                <div className="order-1 lg:order-2 relative shrink-0 w-full lg:w-1/2 max-w-[450px] flex items-center justify-center mx-auto lg:mx-0 mt-4 lg:mt-0">
-                  <div className="relative w-full aspect-video rounded overflow-hidden shadow-lg border border-slate-100 bg-white">
+                {/* تصویر */}
+                <div className="order-2 w-full h-full flex items-center justify-center p-2 md:p-4">
+                  <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white ">
                     <Image
                       src={s.imageUrl}
                       alt={s.title || "تصویر اسلایدر"}
                       fill
-                      sizes="(max-width: 768px) 100vw, 450px"
-                      className="object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                      sizes="50vw"
+                      className="object-contain duration-700 ease-out"
                       priority={index === 0}
                     />
                   </div>
                 </div>
+
               </div>
             </SwiperSlide>
+
           ))}
+
         </Swiper>
       </div>
     </div>

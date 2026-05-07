@@ -29,14 +29,14 @@ export default function StatusBadge({ status }: { status: NewsStatus }) {
   const current = config[status] || config.NEWS;
 
   return (
-    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md border ${current.bg} ${current.border} w-fit`}>
+    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl border ${current.bg} ${current.border} w-fit`}>
       <span className="relative flex h-2 w-2">
         {current.animate && (
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${current.dot}`}></span>
         )}
         <span className={`relative inline-flex rounded-full h-2 w-2 ${current.dot}`}></span>
       </span>
-      <span className={`text-[11px] tracking-wide ${current.color}`}>
+      <span className={`text-[10px] tracking-wide ${current.color}`}>
         {current.text}
       </span>
     </div>

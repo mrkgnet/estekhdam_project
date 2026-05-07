@@ -129,7 +129,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
        hover:shadow-md hover:border-blue-300 transition-all duration-300"
             >
               {/* Brand Title */}
-              <span className="text-base font-extrabold text-gray-800 tracking-tight group-hover:text-blue-700 transition">
+              <span className="text-base font-extrabold text-blue-800 tracking-tight group-hover:text-blue-700 transition">
                 استخدام
               </span>
 

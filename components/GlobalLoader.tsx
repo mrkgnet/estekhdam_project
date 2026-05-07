@@ -1,48 +1,44 @@
-// مسیر: components/GlobalLoader.tsx
-"use client";
+import React from 'react';
 
-import React, { useState, useEffect } from "react";
-
-export default function GlobalLoader() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const handleLoad = () => setIsLoading(false);
-
-    if (document.readyState === "complete") {
-      setIsLoading(false);
-      return;
-    }
-
-    window.addEventListener("load", handleLoad);
-    return () => window.removeEventListener("load", handleLoad);
-  }, []);
-
-  if (!isLoading) return null;
-
+const CustomLoader = () => {
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-gray-500/40 backdrop-blur-[2px]">
-      <div className="bg-white text-xs md:text-sm w-48 h-48 rounded-3xl shadow-2xl flex flex-col items-center justify-center p-6 transform scale-100 animate-in zoom-in-95 duration-200">
-        <div className="text-slate-700 mb-4 text-center leading-tight flex flex-col items-center">
-          <p>در حال بارگذاری...</p>
-          <img src="/logo.svg" alt="Logo" className="w-20 mb-2 mt-2" />
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4" dir="rtl">
+      
+      <div className="bg-white rounded-[24px] shadow-xl p-10 w-full max-w-[360px] flex flex-col items-center justify-center">
+
+        {/* بخش نقطه‌های سبز رنگ با افکت پرش قطاری */}
+        <div className="flex gap-2.5 mb-8 h-8 items-center">
+          {[0, 1, 2, 3, 4, 5].map((index) => (
+            <div
+              key={index}
+              className="w-4 h-4 bg-[#398d75] rounded-full"
+              style={{
+                animation: `wave-bounce 1.2s infinite ease-in-out`,
+                animationDelay: `${index * 0.1}s`, // تاخیر متوالی برای ایجاد حالت قطاری
+              }}
+            ></div>
+          ))}
         </div>
 
-        <div className="flex gap-1.5 mt-2" dir="ltr">
-          <div
-            className="w-2.5 h-2.5 bg-red-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0ms" }}
-          />
-          <div
-            className="w-2.5 h-2.5 bg-red-400 rounded-full animate-bounce"
-            style={{ animationDelay: "150ms" }}
-          />
-          <div
-            className="w-2.5 h-2.5 bg-red-300 rounded-full animate-bounce"
-            style={{ animationDelay: "300ms" }}
-          />
-        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-3">روان درمان</h2>
+        <p className="text-gray-700 text-base font-medium">از شکیبایی شما سپاسگزار است.</p>
+
+        {/* کی‌فریم پرش به بالا و پایین */}
+        <style jsx global>{`
+          @keyframes wave-bounce {
+            0%, 100% {
+              transform: translateY(0);
+              opacity: 0.6;
+            }
+            50% {
+              transform: translateY(-12px);
+              opacity: 1;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
-}
+};
+
+export default CustomLoader;
