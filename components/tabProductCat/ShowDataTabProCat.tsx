@@ -112,15 +112,15 @@ export default function ShowDataTabProCat({
     return [
       ...(hasDirectProducts
         ? [
-            {
-              slug: "direct_products",
-              name: "همه‌ی منابع",
-              products: Array.isArray(mainCategory?.products)
-                ? mainCategory.products
-                : [],
-              isFallback: true,
-            },
-          ]
+          {
+            slug: "direct_products",
+            name: "همه‌ی منابع",
+            products: Array.isArray(mainCategory?.products)
+              ? mainCategory.products
+              : [],
+            isFallback: true,
+          },
+        ]
         : []),
       ...childTabs,
     ];
@@ -221,39 +221,48 @@ export default function ShowDataTabProCat({
 
   return (
     <section className="w-full space-y-5" dir="rtl" aria-label={categoryName}>
-      <header className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 md:p-5 rounded-2xl bg-gradient-to-l from-orange-100/80 via-orange-50/40 to-transparent border-r-4 border-orange-500 overflow-hidden">
-        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white/35 to-transparent pointer-events-none" />
-        <div className="relative flex items-center gap-3 z-10">
-          <span className="flex shrink-0 items-center justify-center w-11 h-11 rounded-xl bg-white border border-orange-100 text-orange-500 shadow-sm">
-            <Flame className="w-5 h-5" />
-          </span>
-          <div className="space-y-1">
-            <h2 className="font-semibold text-16 text-slate-600">
-              {categoryName}
-            </h2>
-            <p className="text-slate-600">
-              محبوب‌ترین و پربازدیدترین منابع آموزشی از نگاه کاربران
-            </p>
+      <header className="relative flex items-center justify-between w-full p-4 rounded-xl bg-gradient-to-l from-orange-50/80 to-transparent border border-slate-100 border-r-4 border-r-orange-500 overflow-hidden">
+
+        {/* بخش راست: آیکون و عنوان */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="flex shrink-0 items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl bg-white border border-orange-100 text-orange-500 shadow-sm">
+            <Flame className="w-5 h-5 md:w-6 md:h-6" />
           </div>
+          <h2 className="font-bold text-sm md:text-base text-slate-800">
+          مجموعه  {categoryName} 
+          </h2>
         </div>
+
+        {/* بخش چپ: دکمه مشاهده همه */}
+        <div className="z-10">
+          <Link
+            href={`/resources?category=${categorySlug}`}
+            className="group flex text-sm md:text-base items-center gap-1 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+            aria-label={`مشاهده همهٔ منابع دسته ${categoryName}`}
+          >
+            <span className="hidden sm:block ">مشاهده همه</span>
+             <span className="md:hidden sm:block "> همه</span>
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          </Link>
+        </div>
+
       </header>
 
+
       <nav
-        className="flex flex-col md:flex-row items-center justify-between gap-4 bg-[rgb(234,240,249)] border border-slate-200 rounded-xl p-2 md:p-3"
+        className="flex flex-col md:flex-row items-center justify-between  bg-[rgb(234,240,249)] border border-slate-200 rounded-xl p-2 md:p-3"
         aria-label="تب‌های دسته بندی"
       >
         <div className="flex items-center justify-between w-full md:w-auto md:pl-3">
-          <h3 className="text-slate-700 text-14 font-semibold  whitespace-nowrap hidden md:block">
+          {/* عنوان (نمایش در دسکتاپ) */}
+          <h3 className="hidden md:block text-sm md:text-base font-bold text-blue-800 whitespace-nowrap">
             {categoryName}
           </h3>
-          <Link
-            href={`/resources?category=${categorySlug}`}
-            className="md:hidden text-16 font-semibold text-[#2b5c9e] hover:text-[#1a3b66] flex items-center transition-colors"
-            aria-label={`مشاهده همهٔ منابع دسته ${categoryName}`}
-          >
-            دیدن همه <ChevronLeft className="w-4 h-4 mr-1" />
-          </Link>
+
+          {/* لینک "دیدن همه" (نمایش در موبایل) */}
+        
         </div>
+
 
         <div className="relative flex-1 w-full flex items-center overflow-hidden group/tabs px-1 sm:px-6">
           <button
@@ -280,10 +289,9 @@ export default function ShowDataTabProCat({
                 <button
                   onClick={() => handleTabChange(tab.slug)}
                   className={`px-4 py-2 rounded transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-300
-                    ${
-                      activeTab === tab.slug
-                        ? "bg-white text-slate-800 shadow-md"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                    ${activeTab === tab.slug
+                      ? "bg-white text-slate-800 shadow-md"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
                     }`}
                   role="tab"
                   aria-selected={activeTab === tab.slug}
@@ -342,54 +350,54 @@ export default function ShowDataTabProCat({
         >
           {isLoading
             ? skeletonSlides.map((skeleton, idx) => (
-                <SwiperSlide key={`skeleton-${idx}`} className="w-full md:!w-[220px]">
-                  {skeleton}
-                </SwiperSlide>
-              ))
+              <SwiperSlide key={`skeleton-${idx}`} className="w-full md:!w-[220px]">
+                {skeleton}
+              </SwiperSlide>
+            ))
             : currentProducts.map((product: ProductType, index: number) => (
-                <SwiperSlide key={product.id ?? index} className="w-full md:!w-[200px]">
-                  <Link
-                    href={`/resources/course/${product.slug}`}
-                    aria-label={`مشاهده جزئیات ${product.name}`}
-                    className="block h-full"
-                  >
-                    <article className="group/card flex flex-col h-full border border-slate-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-all">
-                      <div className="relative w-full aspect-[4/5] bg-slate-50 flex items-center justify-center p-2 overflow-hidden">
-                        <div className="relative w-full h-full transition-transform duration-500 ">
-                          <SafeImage
-                            src={product.imageUrl || "/images/products/bookExample.jpg"}
-                            alt={product.name}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 480px) 220px, (max-width: 768px) 320px, 200px"
-                        
-                            loading={index < 2 ? "eager" : "lazy"}
-                          />
-                        </div>
+              <SwiperSlide key={product.id ?? index} className="w-full md:!w-[200px]">
+                <Link
+                  href={`/resources/course/${product.slug}`}
+                  aria-label={`مشاهده جزئیات ${product.name}`}
+                  className="block h-full w-[190px] "
+                >
+                  <article className="group/card flex flex-col h-full border border-slate-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-all">
+                    <div className="relative w-full aspect-[4/5] bg-slate-50 flex items-center justify-center p-2 overflow-hidden">
+                      <div className="relative w-full h-full transition-transform duration-500 ">
+                        <SafeImage
+                          src={product.imageUrl || "/images/products/bookExample.jpg"}
+                          alt={product.name}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 480px) 220px, (max-width: 768px) 320px, 200px"
+
+                          loading={index < 2 ? "eager" : "lazy"}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col flex-1 p-3 md:p-4 space-y-3">
+                      <h4 className="text-slate-600 font-bold leading-snug line-clamp-2  group-hover/card:text-green-700 transition-colors">
+                        {product.name}
+                      </h4>
+
+                      <div className="space-y-2">
+                        <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
+                          <FileQuestion className="w-3.5 h-3.5" />
+                          سوالات طبقه بندی شده
+                        </span>
+                        <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
+                          <FileQuestion className="w-3.5 h-3.5" />
+                          پاسخ نامه تشریحی
+                        </span>
                       </div>
 
-                      <div className="flex flex-col flex-1 p-3 md:p-4 space-y-3">
-                        <h4 className="text-slate-600 font-bold leading-snug line-clamp-2  group-hover/card:text-green-700 transition-colors">
-                          {product.name}
-                        </h4>
 
-                        <div className="space-y-2">
-                          <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
-                            <FileQuestion className="w-3.5 h-3.5" />
-                            سوالات طبقه بندی شده
-                          </span>
-                            <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
-                            <FileQuestion className="w-3.5 h-3.5" />
-                           پاسخ نامه تشریحی
-                          </span>
-                        </div>
-
-                        
-                      </div>
-                    </article>
-                  </Link>
-                </SwiperSlide>
-              ))}
+                    </div>
+                  </article>
+                </Link>
+              </SwiperSlide>
+            ))}
 
           {!isLoading && currentProducts.length === 0 && (
             <SwiperSlide className="w-full">

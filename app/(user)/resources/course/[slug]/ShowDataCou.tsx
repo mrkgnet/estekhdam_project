@@ -23,6 +23,8 @@ import { ROUTES } from "@/lib/constats";
 import CommentManagment from "@/components/comment/CommentManagmet";
 import TabSectionCR from "@/components/user/TabSectionCR";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import ResourceLeft from "@/components/user/resourceLeft/ResourceLeft";
+import ResourceRight from "@/components/user/resourceRight/ResourceRight";
 
 // کامپوننت کمکی برای نمایش قیمت
 const PriceDisplay = ({ oldPrice, newPrice }: { oldPrice?: number, newPrice?: number }) => {
@@ -94,68 +96,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 items-start">
 
           {/* ==================== ستون سمت راست ==================== */}
-          <div className="lg:col-span-3 w-full">
-            <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-              {/* IMAGE */}
-              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center group">
-                {product.oldPrice && (
-                  <span className="absolute top-4 right-4 bg-rose-500 text-white text-xs px-3 py-1 rounded-full shadow z-10">
-                    تخفیف
-                  </span>
-                )}
-                <Image
-                  src={product.imageUrl && product.imageUrl !== "#" ? product.imageUrl : "/images/products/bookExample.jpg"}
-                  alt={product.name}
-                  fill
-                  className="object-contain p-8 transition duration-500"
-                  priority
-                />
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* TITLE */}
-                <div className="space-y-2">
-                  <h1 className="text-lg font-semibold text-slate-800 leading-7">
-                    {product.name}
-                  </h1>
-
-                  {product.categories?.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {product.categories.map((cat: any, idx: number) => (
-                        <span
-                          key={idx}
-                          className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
-                        >
-                          {cat.catName}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                
-
-               
-                {/* TRUST SECTION */}
-                <div className="border-t border-slate-100 pt-4 space-y-3 text-sm text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
-                    دسترسی فوری بعد از خرید
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                    پرداخت امن
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <RefreshCcw className="w-4 h-4 text-green-600" />
-                    بروزرسانی رایگان سوالات
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <ResourceLeft product={product} />
           {/* ==================== ستون سمت وسط ==================== */}
           <div className="lg:col-span-6 w-full flex flex-col gap-3 lg:gap-8">
             {/* تب‌های توضیحات */}
@@ -167,76 +108,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
           </div>
 
           {/* ==================== ستون سمت راست ==================== */}
-          <div className="lg:col-span-3 w-full">
-            <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-        
-
-              <div className="p-3 space-y-6">
-                {/* TITLE */}
-               
-
-                {/* QUICK STATS */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-slate-50 rounded-lg p-3 text-center">
-                    <FileText className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                    <div className="text-sm font-semibold text-slate-800">
-                      {product._count?.questions || 0}
-                    </div>
-                    <span className="text-10 text-slate-500">سوال</span>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-lg p-3 text-center">
-                    <Clock className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                    <span className="text-10 text-slate-700">پرسش های چهار گزینه‌ای </span>
-                   
-                  </div>
-
-                  <div className="bg-slate-50 rounded-lg p-3 text-center">
-                    <Text className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                   
-                    <span className="text-10 text-slate-500">پاسخ تشریحی</span>
-                  </div>
-                </div>
-
-                {/* PRICE */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
-                  <div className="text-sm text-slate-500">
-                    قیمت محصول
-                  </div>
-                  <PriceDisplay
-                    oldPrice={product.oldPrice}
-                    newPrice={product.newPrice}
-                  />
-                </div>
-
-                {/* CTA */}
-                <div className="space-y-3">
-                  <Link
-                    href={`/resources/course/questions?pid=${product.id}&pname=${product.slug}`}
-                    className="w-full h-12 border-2 border-slate-200 hover:bg-slate-50 rounded-xl flex items-center justify-center gap-2 transition bg-slate-100"
-                  >
-                    <PlayCircle className="w-5 h-5 text-green-600" />
-                    مشاهده رایگان بانک سوالات
-                  </Link>
-
-                  <Link
-                    href={`/cart/${product.id}`}
-                    className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 font-medium transition active:scale-[0.98]"
-                  >
-                    <ShoppingBasket className="w-5 h-5" />
-                    خرید محصول
-                  </Link>
-                </div>
-
-                
-              </div>
-            </div>
-          </div>
-
-
-
-
+          <ResourceRight product={product} />
 
 
         </div>

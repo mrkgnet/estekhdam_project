@@ -116,7 +116,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
               <button
                 key={item.id}
                 onClick={() => setActiveCategoryId(item.id)}
-                className={`flex w-1/2 md:w-auto items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-all ${
+                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${
                   active
                     ? "bg-white text-sky-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
@@ -146,7 +146,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
 
                 <div className="flex flex-col gap-4 min-w-0">
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h3 className="font-semibold text-slate-600 group-hover:text-sky-700 transition-colors">
+                    <h3 className="font-semibold text-13 md:text-14 lg:text-13 text-slate-600 group-hover:text-sky-700 transition-colors">
                       {it.title}
                     </h3>
                     <StatusBadge status={it.status || "NEWS"} />

@@ -165,10 +165,10 @@ export default function ShowDataResources({
 
                           <Link
                             href={productLink}
-                            className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
+                            className="flex flex-col flex-1 sm:px-3 md:px-4 z-10 py-0"
                           >
                             <h3
-                              className="text-slate-600 font-bold md:leading-relaxed line-clamp-2 min-h-0 sm:min-h-[2.5rem] md:min-h-[2.75rem] group-hover/card:text-green-700 transition-colors duration-300"
+                              className="text-slate-600 font-bold md:leading-relaxed line-clamp-2 min-h-0  group-hover/card:text-green-700 transition-colors duration-300"
                               title={p.name}
                           
                             >
@@ -192,9 +192,7 @@ export default function ShowDataResources({
                             </div>
 
                             <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
-                              <button className="hidden sm:flex w-full h-9 md:h-10 rounded-xl bg-blue-50 text-slate-600 font-medium items-center justify-center gap-2 group-hover/card:bg-green-600 group-hover/card:text-white group-hover/card:shadow-md group-hover/card:shadow-green-200 transition-all duration-300">
-                                مشاهده بانک سوالات
-                              </button>
+                             
 
                               <div className="text-gray-600 font-medium sm:hidden text-sm">
                                 {p.newPrice === 0 ? "رایگان" : toman(p.newPrice)}

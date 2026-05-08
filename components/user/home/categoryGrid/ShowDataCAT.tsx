@@ -54,24 +54,27 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 ">
       {/* بخش هدر */}
-      <div className="flex items-center justify-between mb-8 bg-gradient-to-l from-orange-200 via-orange-100 to-white px-3 py-2 rounded-md">
-        <h2 className="text-14 sm:text-16 md:text-16 flex text-slate-600 items-center gap-2">
-          <Grid size={14} />
+      <div className="flex items-center justify-between mb-8 px-4 py-3 bg-blue-50/50 border border-blue-100 rounded-xl">
+
+        {/* عنوان بخش */}
+        <h2 className="text-sm md:text-base font-bold text-slate-800 flex items-center gap-2">
+          <Grid className="w-5 h-5 text-blue-500" />
           دسته‌بندی‌ها
         </h2>
+
+        {/* لینک مشاهده همه */}
         <Link
           href="/resources"
-          className="text-14 sm:text-16 md:text-16 text-slate-600 flex items-center hover:text-blue-600 transition-colors gap-1"
+          className="group text-sm md:text-base font-medium text-blue-600 flex items-center gap-1.5 hover:text-blue-700 transition-colors"
         >
-          <span>همه</span>
-          <span className="leading-none mb-1">
-            <ArrowLeft size={14} />
-          </span>
+          <span>مشاهده همه</span>
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
         </Link>
+
       </div>
 
       {/* بخش گرید */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-6 md:gap-8">
+      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-6 md:gap-8">
         {categories.map((category) => (
           <Link
             key={category.id}
@@ -79,7 +82,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
             className="group flex flex-col items-center gap-3 text-center"
           >
             {/* باکس طوسی رنگ آیکون */}
-            <div className="w-20  aspect-square bg-slate-100 rounded-3xl flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">
+            <div className="w-18  aspect-square bg-slate-100 rounded-3xl flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">
               <div className="relative w-full h-full">
                 <Image
                   src={category.imageUrl || "/images/default-category.png"}

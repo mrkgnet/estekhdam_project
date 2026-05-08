@@ -117,7 +117,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex items-center justify-center cursor-pointer gap-2 px-5 sm:px-6 py-3.5 transition-colors whitespace-nowrap rounded-2xl flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  className="relative flex items-center  font-bold text-13 md:text-14 lg:text-13 justify-center cursor-pointer gap-2 px-5 sm:px-6 py-3.5 transition-colors whitespace-nowrap rounded-2xl flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                 >
                   {isActive && (
                     <motion.div
