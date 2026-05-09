@@ -30,8 +30,8 @@ const iransans = localFont({
   display: "swap",
 });
 
-<meta name="enamad" content="28191248" />
 
+<meta name="enamad" content="28191248" />
 
 export const metadata: Metadata = {
   title: "استخدام پرو",
