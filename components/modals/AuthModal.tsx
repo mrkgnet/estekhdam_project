@@ -85,20 +85,25 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     }
   };
 
-  const handleVerifyOTP = async () => {
-    if (otp.length < OTP_LENGTH) return;
+  // دریافت مستقیم کد برای جلوگیری از مشکل آپدیت نشدن لحظه‌ای State
+  const handleVerifyOTP = async (codeToVerify?: string) => {
+    const finalCode = codeToVerify || otp;
+    if (finalCode.length < OTP_LENGTH) return;
+    
     setLoading(true);
     try {
       const response = await fetch("/api/auth/verifyOTP", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code: otp }),
+        body: JSON.stringify({ phone, code: finalCode }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         toast.error(data?.error || "خطا در تأیید کد");
+        setOtp("");
+        otpRef.current?.focus();
         return;
       }
 
@@ -139,13 +144,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   };
 
   const handlePhoneKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  // اگر کلید فشرده شده "Enter" بود
-  if (e.key === "Enter") {
-    e.preventDefault(); // جلوگیری از رفتار پیش‌فرض مرورگر (مثلا سابمیت فرم)
-    handleSendOTP();    // تابع ارسال کد را فراخوانی کن
-  }
-};
-
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSendOTP();
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -242,7 +245,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                         inputMode="numeric"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.trim())}
-                         onKeyDown={handlePhoneKeyDown} // این خط اضافه می‌شود
+                        onKeyDown={handlePhoneKeyDown}
                         placeholder="09123456789"
                         className="w-full pr-10 py-3 px-2.5 border text-[15px] border-slate-200 rounded-xl outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
                         dir="ltr"
@@ -265,21 +268,45 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
               )}
 
               {step === 1 && (
-                <div className="space-y-4">
-                  <input
-                    ref={otpRef}
-                    type="tel"
-                    inputMode="numeric"
-                    value={otp}
-                    onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH))
-                    }
-                    maxLength={OTP_LENGTH}
-                    placeholder="- - - - -"
-                    className="w-full text-center tracking-widest text-[15px] border border-slate-200 rounded-xl py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-                    dir="ltr"
-                    autoComplete="one-time-code"
-                  />
+                <div className="space-y-6">
+                  {/* باکس‌های مربعی کد تأیید */}
+                  <div className="relative flex justify-between w-full" dir="ltr">
+                    {/* ساخت باکس‌های ظاهری */}
+                    {[...Array(OTP_LENGTH)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-xl transition-all ${
+                          otp.length === i && !loading
+                            ? "border-slate-900 ring-2 ring-slate-900/20 bg-slate-50" // باکسی که الان باید پر شود
+                            : otp[i]
+                            ? "border-slate-400 text-slate-900 bg-white" // باکس‌های پر شده
+                            : "border-slate-200 text-transparent bg-white" // باکس‌های خالی
+                        }`}
+                      >
+                        {otp[i] || ""}
+                      </div>
+                    ))}
+                    
+                    {/* اینپوت نامرئی واقعی روی همه باکس‌ها */}
+                    <input
+                      ref={otpRef}
+                      type="tel"
+                      inputMode="numeric"
+                      value={otp}
+                      disabled={loading}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, OTP_LENGTH);
+                        setOtp(val);
+                        // تأیید خودکار
+                        if (val.length === OTP_LENGTH && !loading) {
+                          handleVerifyOTP(val);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-text disabled:cursor-not-allowed"
+                      dir="ltr"
+                      autoComplete="one-time-code"
+                    />
+                  </div>
 
                   <div className="flex justify-between text-sm text-slate-600">
                     <button
@@ -295,7 +322,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   </div>
 
                   <button
-                    onClick={handleVerifyOTP}
+                    onClick={() => handleVerifyOTP()}
                     disabled={loading || otp.length < OTP_LENGTH}
                     className="w-full py-3 flex justify-center items-center bg-slate-900 hover:bg-slate-800 cursor-pointer text-white rounded-xl transition-colors disabled:opacity-60"
                   >

@@ -57,7 +57,7 @@ export default function PageHeader({
           {/* Actions */}
           {children && (
             <div className="w-full md:w-[360px] lg:w-[440px] shrink-0">
-              <div className="rounded-2xl border border-gray-200/70 bg-white shadow-sm p-2">
+              <div className="rounded bg-white  p-2">
                 {children}
               </div>
             </div>

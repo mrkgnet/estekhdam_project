@@ -59,7 +59,7 @@ export default function SearchInPage({
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className={`w-full bg-gray-50 hover:bg-gray-100/50 focus:bg-white border border-gray-200 text-gray-900 text-xs sm:text-sm rounded focus:ring-4 focus:ring-green-500/10 focus:border-green-500 block pr-12 ${
+        className={`w-full bg-gray-50 hover:bg-gray-100/50 focus:bg-white border border-gray-200 text-gray-900 text-xs sm:text-sm rounded focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 block pr-12 ${
           isSearching ? "pl-28" : "pl-12"
         } py-3 transition-all duration-300 shadow-sm placeholder:text-gray-400 outline-none`}
         placeholder={placeholder}

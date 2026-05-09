@@ -25,7 +25,7 @@ export default function HomePage() {
 
   return (
     <div>
- <RouteChangeLoader />
+      <RouteChangeLoader />
       <HeaderTopComponnet />
       <NavbarUser />
 
@@ -44,7 +44,7 @@ export default function HomePage() {
             <section className="w-full">
               <BrandTopSlider />
             </section>
-            <section className="w-full">
+            <section className="w-full bg-white">
               <HeroSearch />
             </section>
             <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
@@ -66,7 +66,7 @@ export default function HomePage() {
 
 
             {/* categor section  */}
-            <section className="w-full">
+            <section className="w-full bg-white rounded-2xl">
               <CategoryGrid />
             </section>
 

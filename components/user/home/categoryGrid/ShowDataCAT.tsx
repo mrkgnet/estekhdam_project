@@ -52,7 +52,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
   const categories = response.data;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 ">
+    <div className="w-full max-w-7xl mx-auto px-4 py-8  ">
       {/* بخش هدر */}
       <div className="flex items-center justify-between mb-8 px-4 py-3 bg-blue-50/50 border border-blue-100 rounded-xl">
 
@@ -82,7 +82,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
             className="group flex flex-col items-center gap-3 text-center"
           >
             {/* باکس طوسی رنگ آیکون */}
-            <div className="w-18  aspect-square bg-slate-100 rounded-3xl flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">
+            <div className="w-18  aspect-square border border-slate-400 rounded-3xl flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">
               <div className="relative w-full h-full">
                 <Image
                   src={category.imageUrl || "/images/default-category.png"}

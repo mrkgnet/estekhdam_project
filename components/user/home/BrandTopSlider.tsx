@@ -52,7 +52,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
 
       {/* Skeleton Overlay */}
       {showSkeleton && (
-        <div className="absolute inset-0 z-20 bg-white">
+        <div className="absolute inset-0 z-20">
           <BrandSliderSkeleton title={title} />
         </div>
       )}
@@ -66,8 +66,8 @@ export default function BrandTopSlider({ title }: { title?: string }) {
           </div>
         )}
 
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden md:block" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden md:block" />
+        <div className="absolute left-0 top-0 bottom-0 w-16  to-transparent z-10 pointer-events-none hidden md:block" />
+        <div className="absolute right-0 top-0 bottom-0 w-16  to-transparent z-10 pointer-events-none hidden md:block" />
 
         <Swiper
           modules={[Autoplay]}

@@ -34,8 +34,8 @@ const iransans = localFont({
 
 
 export const metadata: Metadata = {
-  title: "فروشگاه بازار هوش",
-  description: "فروشگاه بازار هوش",
+  title: "استخدام پرو",
+  description: "استخدام پرو",
   other: {
     enamad: "61003738",
   },
@@ -65,7 +65,7 @@ export default function RootLayout({
             <div className="min-h-screen flex flex-col ">
               <LoadingProvider>
               
-                <main className="  ">{children}</main>
+                <main className="bg-[#F8FAFC]  ">{children}</main>
               </LoadingProvider>
               <Footer />
             </div>

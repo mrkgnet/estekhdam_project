@@ -34,7 +34,7 @@ function ProgressiveImage({
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-xl bg-gray-50">
+    <div className="relative w-full h-full overflow-hidden rounded-xl ">
       {!loaded && (
         <div className="absolute inset-0 animate-pulse bg-gray-200" />
       )}

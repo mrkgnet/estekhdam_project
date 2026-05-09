@@ -50,7 +50,7 @@ function ProgressiveImage({
   const [loaded, setLoaded] = useState(false)
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-xl bg-gray-50">
+    <div className="relative w-full h-full overflow-hidden rounded-xl ">
       {!loaded && <div className="shimmer-overlay z-10" />}
 
       <Image
@@ -164,7 +164,7 @@ export default function ShowDataCat({
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto  ">
+      <div className="max-w-7xl mx-auto">
         <div
           className={`transition-opacity duration-300 ${
             isFetching ? 'opacity-50 pointer-events-none' : 'opacity-100'
@@ -175,13 +175,12 @@ export default function ShowDataCat({
               <div key={p.id} className="group relative">
                 <div
                   onClick={() => router.push(`/resources/course/${p.slug}`)}
-                  // ✅ تنظیم ارتفاع کلی کارت: flex-col باعث میشه محتوا بالای عکس بیاد
-                  // ✅ padding کمتر برای کل کارت (p-2)
-                  className="bg-white border border-gray-300 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
+                  // ✅ تغییر به `flex sm:flex-col` برای نمایش افقی در موبایل و عمودی در دسکتاپ
+                  className="bg-white border border-gray-300 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex sm:flex-col cursor-pointer"
                 >
                   {/* ✅ Image */}
-                  {/* ✅ aspect-[3/4] برای کوتاه‌تر شدن عکس */}
-                  <div className="relative w-full aspect-[3/4] p-2">
+                  {/* ✅ اضافه شدن `w-32 shrink-0 sm:w-full` برای محدود کردن عرض عکس در موبایل */}
+                  <div className="relative w-32 shrink-0 sm:w-full aspect-[3/4] p-2">
                     <ProgressiveImage
                       src={getSafeImageUrl(p.imageUrl)}
                       alt={p.name}
@@ -191,7 +190,6 @@ export default function ShowDataCat({
                   </div>
 
                   {/* ✅ Content */}
-                  {/* ✅ padding کمتر برای محتوا (p-3) */}
                   <div className="flex-1 flex flex-col justify-between p-3">
                     <div>
                       {/* ✅ Add to cart (Desktop) */}
@@ -209,15 +207,13 @@ export default function ShowDataCat({
                         <div className="flex-1 h-px bg-gray-200" />
                       </div>
 
-                      {/* ✅ عنوان محصول با فونت کمی کوچکتر (text-sm) و line-clamp*/}
                       <h3 className="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-green-700 transition">
                         {p.name}
                       </h3>
 
-                      {/* ✅ لیست ویژگی ها - فقط 2 مورد اول نمایش داده می شود */}
                       <ul className="mt-2 space-y-1 text-xs text-gray-600">
                         {['پاسخ تشریحی', 'بروزرسانی مداوم', 'سوالات طبقه بندی شده']
-                          .slice(0, 3) // ✅ فقط دو مورد اول را نمایش بده
+                          .slice(0, 3)
                           .map((item) => (
                             <li key={item} className="flex items-center gap-1">
                               <span className="w-1 h-1 bg-blue-500 rounded-full" />
@@ -243,16 +239,15 @@ export default function ShowDataCat({
                     </div>
 
                     {/* ✅ Price */}
-                    {/* ✅ فاصله کمتر برای قیمت (my-2) */}
-                    <div className="my-2 flex items-center justify-between">
+                    <div className="my-2 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-1 text-red-600">
-                        <CreditCard className="w-4 h-4" />
-                        <span className="text-sm font-bold">
+                        <CreditCard className="w-4 h-4 shrink-0" />
+                        <span className="text-sm font-bold whitespace-nowrap">
                           {toman(p.newPrice)}
                         </span>
                       </div>
 
-                      <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200 whitespace-nowrap">
                         <Play className="w-3.5 h-3.5" />
                         شروع رایگان
                       </span>
