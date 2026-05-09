@@ -1,23 +1,60 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllProductDataAction } from "@/actions/user/productsCat/Actions";
 import {
   BookOpen,
-  ArrowLeft,
-  Bookmark,
-  FileQuestion,
-  FileText,
-  ShoppingBasketIcon,
+  CreditCard,
+  Play,
+  ShoppingBasket,
 } from "lucide-react";
 import SafeImage from "@/components/ui/SafeImage";
 import Pagination from "@/components/ui/Pagination";
 import { GridSkeleton } from "@/components/ui/SkeletonLoding/GridSkeleton";
 import FilterResource from "@/components/user/FilterResource";
+import { useRouter } from "next/navigation";
 
+
+/* ---------------------------------- */
+/* ✅ Progressive Image */
+/* ---------------------------------- */
+const blurDataURL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
+
+function ProgressiveImage({
+  src,
+  alt,
+}: {
+  src: string;
+  alt: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden rounded-xl bg-gray-50">
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-gray-200" />
+      )}
+      <SafeImage
+        src={src}
+        alt={alt}
+        fill
+        placeholder="blur"
+        blurDataURL={blurDataURL}
+        onLoadingComplete={() => setLoaded(true)}
+        className={`object-contain transition-all duration-300 ${loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
+      />
+    </div>
+  );
+}
+
+/* ---------------------------------- */
+/* Types */
+/* ---------------------------------- */
 type ProductType = {
   id: string | number;
   name: string;
@@ -27,7 +64,7 @@ type ProductType = {
   imageUrl: string;
 };
 
-interface ShowDataResourcesProps {
+interface Props {
   initialProducts: ProductType[];
   initialTotalCount: number;
   initialTotalPages: number;
@@ -35,14 +72,17 @@ interface ShowDataResourcesProps {
   searchQuery: string;
   categoryQuery: string;
   limit: number;
-  title: string;
 }
 
-const toman = (n: number) => {
-  if (n === 0) return "رایگان";
-  return `${n?.toLocaleString("fa-IR")} تومان`;
-};
+/* ---------------------------------- */
+/* Utils */
+/* ---------------------------------- */
+const toman = (n: number) =>
+  n === 0 ? "رایگان" : `${n.toLocaleString("fa-IR")} تومان`;
 
+/* ---------------------------------- */
+/* Component */
+/* ---------------------------------- */
 export default function ShowDataResources({
   initialProducts,
   initialTotalCount,
@@ -51,172 +91,152 @@ export default function ShowDataResources({
   searchQuery,
   categoryQuery,
   limit,
-  title,
-}: ShowDataResourcesProps) {
+}: Props) {
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
-
-  // تعریف کلید کوئری وابسته به تمام پارامترهای جستجو و صفحه‌بندی
-  const queryKey = ["resources", currentPage, limit, searchQuery, categoryQuery];
+  const router = useRouter();
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey,
+    queryKey: ["resources", currentPage, limit, searchQuery, categoryQuery],
     queryFn: async () => {
-      const response = await fetchAllProductDataAction(
+      const res = await fetchAllProductDataAction(
         currentPage,
         limit,
         searchQuery,
         categoryQuery
       );
-      if (response.success) {
-        return {
-          products: response.data,
-          totalCount: response.totalCount,
-          totalPages: response.totalPages || 1,
-        };
-      }
-      return { products: [], totalCount: 0, totalPages: 1 };
+
+      return res.success
+        ? {
+          products: res.data,
+          totalCount: res.totalCount,
+          totalPages: res.totalPages || 1,
+        }
+        : { products: [], totalCount: 0, totalPages: 1 };
     },
-    // دیتای اولیه که از سرور آمده را تنظیم می‌کنیم
     initialData: {
       products: initialProducts,
       totalCount: initialTotalCount,
       totalPages: initialTotalPages,
     },
-    staleTime: 1000 * 60 * 5, // ۵ دقیقه کش برای هر صفحه و فیلتر
+    staleTime: 1000 * 60 * 5,
   });
 
-  // اگر دیتا واقعاً در حال لود اولیه است و دیتای قبلی هم نداریم (مگر اینکه initialData باشد که معمولاً هست)
-  const showSkeleton = isLoading && !data?.products?.length;
-
-  const { products, totalCount, totalPages } = data;
+  const { products, totalCount, totalPages } = data!;
+  const showSkeleton = isLoading && !products.length;
 
   return (
-    <section className="w-full min-h-screen overflow-hidden font-sans" dir="rtl">
-
+    <section dir="rtl" className="min-h-screen">
       <FilterResource
         currentCategory={currentCategory}
         totalCount={totalCount}
         isFetching={isFetching}
       />
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* افکت محو شدن هنگام دریافت اطلاعات جدید از بک‌گراند */}
-        <div className={`transition-opacity duration-300 ${isFetching && !showSkeleton ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-          {showSkeleton ? (
-            <GridSkeleton />
-          ) : !products || products.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-gray-50/50 min-h-[50vh] rounded-3xl border border-dashed border-gray-200 mt-6">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                <BookOpen className="w-10 h-10" />
-              </div>
-              <p className="text-gray-500 text-base">محصولی با این مشخصات یافت نشد.</p>
-            </div>
-          ) : (
-            <div className="relative w-full mt-6">
-              <div className="w-full sm:bg-white sm:rounded sm:border sm:border-gray-100 sm:p-6 sm:shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-4 sm:mt-0">
-                  {products.map((p, index) => {
-                    // محاسبه شماره آیتم بر اساس صفحه فعلی
-                    const itemNumber = (currentPage - 1) * limit + index + 1;
-                    const productLink = `/resources/course/${p.slug}`;
+      <div className="max-w-7xl mx-auto px-4">
+        {showSkeleton ? (
+          <GridSkeleton />
+        ) : !products.length ? (
+          <div className="py-20 text-center">
+            <BookOpen className="mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-500">محصولی یافت نشد</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+            {products.map((p) => (
+              <div key={p.id} className="group relative">
+                <div
+                  onClick={() => router.push(`/resources/course/${p.slug}`)}
+                  className="bg-white border border-gray-300 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex sm:block cursor-pointer"
+                >
+                  {/* ✅ Image */}
+                  <div className="relative w-32 sm:w-full aspect-[3/4] sm:aspect-[4/5] p-2">
+                    <ProgressiveImage
+                      src={p.imageUrl || "/images/products/bookExample.jpg"}
+                      alt={p.name}
+                    />
+                  </div>
 
-                    return (
-                      <div key={p.id} className="block h-auto">
-                        <div className="relative group/card flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
-                          <div className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white text-slate-600 rounded-full text-xs font-bold shadow-md border-2 border-white">
-                            {itemNumber}
-                          </div>
+                  {/* ✅ Content */}
+                  <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
+                    <div>
+                      {/* ✅ Add to cart (Desktop) */}
+                      <div className="hidden md:flex items-center justify-center gap-3 mb-2">
+                        <div className="flex-1 h-px bg-gray-200" />
 
-                          <Link
-                            href={productLink}
-                            className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
-                          >
-                            <button
-                              className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <Bookmark className="w-4 h-4" />
-                            </button>
-                            <div className="relative w-full h-full">
-                              <SafeImage
-                                src={p.imageUrl || "/images/products/bookExample.jpg"}
-                                alt={p.name}
-                                fill
-                                className="object-contain mix-blend-multiply md:p-0"
-                                sizes="(max-width: 640px) 130px, 200px"
-                              />
-                            </div>
-                          </Link>
+                        {/* ✅ CART LINK */}
+                        <Link
+                          href={`/cart/${p.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 rounded-full border text-gray-600 hover:text-green-600 hover:border-green-400 hover:bg-green-50 transition"
+                        >
+                          <ShoppingBasket className="w-4 h-4" />
+                        </Link>
 
-                          <div className="px-3 md:px-4 hidden sm:block">
-                            <Link
-                              href="/cart"
-                              aria-label="رفتن به سبد خرید"
-                              className="group flex items-center gap-3 py-2"
-                            >
-                              <span className="h-px flex-1 bg-slate-200" />
-                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-700 transition shrink-0">
-                                <ShoppingBasketIcon className="w-4 h-4" />
-                              </span>
-                              <span className="h-px flex-1 bg-slate-200" />
-                            </Link>
-                          </div>
-
-                          <Link
-                            href={productLink}
-                            className="flex flex-col flex-1 sm:px-3 md:px-4 z-10 py-0"
-                          >
-                            <h3
-                              className="text-slate-600 font-bold md:leading-relaxed line-clamp-2 min-h-0  group-hover/card:text-green-700 transition-colors duration-300"
-                              title={p.name}
-                          
-                            >
-                              {p.name}
-                             
-                            </h3>
-
-                            <div className="flex flex-col gap-1.5 mt-2">
-                              <div className="flex items-center">
-                                <span className="bg-[#EEF2FF] text-[10px] text-[#4F46E5] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
-                                  <FileQuestion className="w-3.5 h-3.5" />
-                                  سوالات طبقه بندی شده
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="text-[#121211] text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
-                                  <FileText className="w-3.5 h-3.5 text-gray-500" />
-                                  دارای پاسخ تشریحی
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
-                             
-
-                              <div className="text-gray-600 font-medium sm:hidden text-sm">
-                                {p.newPrice === 0 ? "رایگان" : toman(p.newPrice)}
-                              </div>
-
-                              <div className="text-[#3b82f6] text-xs flex items-center gap-1 sm:hidden">
-                                <span>شروع یادگیری</span>
-                                <ArrowLeft className="w-4 h-4" />
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
+                        <div className="flex-1 h-px bg-gray-200" />
                       </div>
-                    );
-                  })}
+
+                      <h3 className="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-green-700 transition">
+                        {p.name}
+                      </h3>
+
+                      <ul className="mt-2 space-y-1 text-xs text-gray-600">
+                        {[
+                          "پاسخ تشریحی",
+                          "بروزرسانی مداوم",
+                          "سوالات طبقه بندی شده",
+                        ].map((item) => (
+                          <li key={item} className="flex items-center gap-1">
+                            <span className="w-1 h-1 bg-blue-500 rounded-full" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* ✅ Add to cart (Mobile) */}
+                    <div className="flex md:hidden items-center justify-center gap-3 my-2">
+                      <div className="flex-1 h-px bg-gray-200" />
+
+                      <Link
+                        href={`/cart/${p.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 rounded-full border text-gray-600 hover:text-green-600 hover:border-green-400 hover:bg-green-50 transition"
+                      >
+                        <ShoppingBasket className="w-4 h-4" />
+                      </Link>
+
+                      <div className="flex-1 h-px bg-gray-200" />
+                    </div>
+
+                    {/* ✅ Price */}
+                    <div className="my-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-red-600">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-sm font-bold">
+                          {toman(p.newPrice)}
+                        </span>
+                      </div>
+
+                      <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+                        <Play className="w-3.5 h-3.5" />
+                        شروع رایگان
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            ))}
+
+          </div>
+        )}
 
         {!showSkeleton && totalPages > 1 && (
           <div className="mt-8 flex justify-center">
-            <Pagination totalPages={totalPages} currentPage={currentPage} />
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+            />
           </div>
         )}
       </div>

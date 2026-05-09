@@ -15,6 +15,49 @@ import SafeImage from "@/components/ui/SafeImage";
 import { fetchLatestProductAction } from "@/actions/user/latestProduct/Actions";
 import { SliderSkeletonTopLeft } from "@/components/ui/SkeletonLoding/SliderSkeletonTopLeft";
 
+/* ---------------------------------- */
+/* ✅ Blur داخلی (بدون فایل) */
+/* ---------------------------------- */
+const blurDataURL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
+
+/* ---------------------------------- */
+/* ✅ Progressive Image Component */
+/* ---------------------------------- */
+function ProgressiveImage({
+  src,
+  alt,
+  sizes,
+  className = "",
+}: {
+  src: string;
+  alt: string;
+  sizes?: string;
+  className?: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <SafeImage
+      src={src}
+      alt={alt}
+      fill
+      sizes={sizes}
+      placeholder="blur"
+      blurDataURL={blurDataURL}
+      onLoadingComplete={() => setLoaded(true)}
+      className={`
+        ${className}
+        transition-all duration-500 ease-out
+        ${loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-95"}
+      `}
+    />
+  );
+}
+
+/* ---------------------------------- */
+/* Types */
+/* ---------------------------------- */
 interface ProductType {
   id: string;
   name: string;
@@ -29,6 +72,9 @@ interface Props {
   slug?: string;
 }
 
+/* ---------------------------------- */
+/* Component */
+/* ---------------------------------- */
 export default function ShowDataSLTL({
   title = "آموزش‌های پرمخاطب",
   initialProducts,
@@ -61,8 +107,9 @@ export default function ShowDataSLTL({
 
   return (
     <div className="w-full mx-auto relative px-2 h-full" dir="rtl">
-            <style jsx global>{`
-         .custom-swiper-progress {
+      {/* Progress bar style */}
+      <style jsx global>{`
+        .custom-swiper-progress {
           position: absolute;
           top: 0;
           left: 0;
@@ -72,12 +119,10 @@ export default function ShowDataSLTL({
           z-index: 20;
           border-radius: 4px 4px 0 0;
           overflow: hidden;
-          /* تغییر رنگ پیش‌فرض Swiper */
-          --swiper-pagination-color: #2563eb; 
+          --swiper-pagination-color: #2563eb;
         }
         .custom-swiper-progress .swiper-pagination-progressbar-fill {
-          /* استفاده از !important برای اطمینان از اعمال رنگ */
-          background: #2563eb !important; 
+          background: #2563eb !important;
           position: absolute;
           left: 0;
           top: 0;
@@ -89,13 +134,13 @@ export default function ShowDataSLTL({
       `}</style>
 
       <div className="relative group h-full pt-2">
-        <div className="custom-swiper-progress"></div>
+        <div className="custom-swiper-progress" />
 
         <Swiper
           modules={[Navigation, Autoplay, Pagination]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
           autoplay={{
-            delay: 4000, // زمان autoplay را کاهش دادم تا اسلایدها حرکت کنند
+            delay: 4000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -114,22 +159,24 @@ export default function ShowDataSLTL({
             <SwiperSlide key={p.id} className="w-full h-auto">
               <Link href={`/resources/course/${p.slug}`} className="block h-full">
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
-                  <div className="relative w-full h-[120px] md:h-[120px] xl:h-[120px] flex-shrink-0 flex items-center justify-center p-2 md:p-2 overflow-hidden">
-                    <div className="relative w-full h-full transform transition-transform duration-500 ease-out drop-shadow-xl">
-                      <SafeImage
+                  {/* Image */}
+                  <div className="relative w-full h-[120px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
+                    <div className="relative w-full h-full">
+                      <ProgressiveImage
                         src={p.imageUrl || "/images/products/bookExample.jpg"}
                         alt={p.name}
-                        fill
-                        className="object-contain mix-blend-multiply"
                         sizes="(max-width: 768px) 170px, 400px"
+                        className="object-contain mix-blend-multiply"
                       />
                     </div>
                   </div>
 
+                  {/* Content */}
                   <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
                     <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-emerald-600 transition-colors duration-200">
                       {p.name}
                     </h3>
+
                     <div className="mt-auto">
                       <ul className="space-y-2 text-[11px]">
                         <li className="flex items-center gap-2 text-slate-600">
@@ -149,20 +196,20 @@ export default function ShowDataSLTL({
           ))}
         </Swiper>
 
-        {/* START: دکمه‌های ناوبری اصلاح شده (مربعی) */}
+        {/* Navigation buttons */}
         <button
           ref={setNextBtn}
-          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
+          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
+
         <button
           ref={setPrevBtn}
-          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden cursor-pointer"
+          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
-        {/* END: تغییرات */}
       </div>
     </div>
   );

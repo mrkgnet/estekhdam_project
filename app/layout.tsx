@@ -8,6 +8,9 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import Providers from "@/components/react-query/Providers";
+import { LoadingProvider } from "@/providers/loading-provider";
+import HomeLoaderEffect from "@/components/RouteChangeLoader";
+import RouteChangeLoader from "@/components/RouteChangeLoader";
 
 
 
@@ -60,8 +63,10 @@ export default function RootLayout({
 
             {/* صفحه */}
             <div className="min-h-screen flex flex-col ">
-
-              <main className="  ">{children}</main>
+              <LoadingProvider>
+              
+                <main className="  ">{children}</main>
+              </LoadingProvider>
               <Footer />
             </div>
           </AuthProvider>

@@ -1,232 +1,269 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
-import { fetchDataByCategory } from '@/actions/user/getDataByCategory/Actions';
-import { ProductListSkeleton_Client } from '@/components/ui/SkeletonLoding/ProductListSkeleton_Client';
-import {
-  Bookmark,
-  FileQuestion,
-  FileText,
-  ShoppingBasketIcon,
-  ArrowLeft
-} from "lucide-react";
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import { fetchDataByCategory } from '@/actions/user/getDataByCategory/Actions'
+import { ProductListSkeleton_Client } from '@/components/ui/SkeletonLoding/ProductListSkeleton_Client'
+import { CreditCard, Play, ShoppingBasket } from 'lucide-react'
 
-// توابع کمکی
+/* ---------------------------------- */
+/* ✅ Utils */
+/* ---------------------------------- */
 const toman = (n: number) => {
-    if (n === 0) return "رایگان";
-    return `${n?.toLocaleString("fa-IR")} تومان`;
-};
+  if (n === 0) return 'رایگان'
+  return `${n?.toLocaleString('fa-IR')} تومان`
+}
 
 const getSafeImageUrl = (url?: string | null) => {
-    if (!url || url === "null" || url.trim() === "") {
-        return "/images/products/bookExample.jpg";
-    }
-    if (!url.startsWith('http') && !url.startsWith('/')) {
-        return `/${url}`;
-    }
-    return url;
-};
+  if (!url || url === 'null' || url.trim() === '') {
+    return '/images/products/bookExample.jpg'
+  }
+  if (!url.startsWith('http') && !url.startsWith('/')) {
+    return `/${url}`
+  }
+  return url
+}
 
+/* ---------------------------------- */
+/* ✅ Inline Blur */
+/* ---------------------------------- */
+const blurDataURL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+'
+
+/* ---------------------------------- */
+/* ✅ Progressive Image + Shimmer */
+/* ---------------------------------- */
+function ProgressiveImage({
+  src,
+  alt,
+  sizes,
+  className = '',
+}: {
+  src: string
+  alt: string
+  sizes?: string
+  className?: string
+}) {
+  const [loaded, setLoaded] = useState(false)
+
+  return (
+    <div className="relative w-full h-full overflow-hidden rounded-xl bg-gray-50">
+      {!loaded && <div className="shimmer-overlay z-10" />}
+
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        placeholder="blur"
+        blurDataURL={blurDataURL}
+        onLoadingComplete={() => setLoaded(true)}
+        className={`
+          transition-all duration-500 ease-out object-contain
+          ${loaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-95'}
+          ${className}
+        `}
+      />
+    </div>
+  )
+}
+
+/* ---------------------------------- */
+/* Types */
+/* ---------------------------------- */
 interface ProductType {
-    id: string;
-    name: string;
-    slug: string;
-    oldPrice: number;
-    newPrice: number;
-    imageUrl?: string | null;
+  id: string
+  name: string
+  slug: string
+  oldPrice: number
+  newPrice: number
+  imageUrl?: string | null
 }
 
 interface CategoryType {
-    catName: string;
-    catSlug: string;
-    products: ProductType[];
+  catName: string
+  catSlug: string
+  products: ProductType[]
 }
 
 interface ShowDataProps {
-    initialResponse: {
-        success: boolean;
-        data: CategoryType | null;
-    };
-    slug: string;
-    searchQuery: string;
-    currentPage: number;
-    limit: number;
+  initialResponse: {
+    success: boolean
+    data: CategoryType | null
+  }
+  slug: string
+  searchQuery: string
+  currentPage: number
+  limit: number
 }
 
-export default function ShowDataCat({ 
-    initialResponse, 
-    slug, 
-    searchQuery, 
-    currentPage, 
-    limit 
+/* ---------------------------------- */
+/* Component */
+/* ---------------------------------- */
+export default function ShowDataCat({
+  initialResponse,
+  slug,
+  searchQuery,
+  currentPage,
+  limit,
 }: ShowDataProps) {
+  const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  useEffect(() => setMounted(true), [])
 
-    const { data: response, isFetching } = useQuery({
-        queryKey: ['category-products', slug, searchQuery, currentPage, limit],
-        queryFn: async () => {
-            return await fetchDataByCategory(slug, searchQuery, currentPage, limit);
-        },
-        initialData: initialResponse,
-        staleTime: 1000 * 60 * 10,
-    });
+  const { data: response, isFetching } = useQuery({
+    queryKey: ['category-products', slug, searchQuery, currentPage, limit],
+    queryFn: async () =>
+      await fetchDataByCategory(slug, searchQuery, currentPage, limit),
+    initialData: initialResponse,
+    staleTime: 1000 * 60 * 10,
+  })
 
-    const hasData = response?.success && response?.data;
-    const showSkeleton = !mounted || (isFetching && !hasData);
+  const hasData = response?.success && response?.data
+  const showSkeleton = !mounted || (isFetching && !hasData)
 
-    if (showSkeleton) {
-        return <ProductListSkeleton_Client />;
-    }
+  if (showSkeleton) return <ProductListSkeleton_Client />
+  if (!response?.success || !response?.data) return null
 
-    // وضعیت عدم یافتن دسته‌بندی
-    if (!response?.success || !response?.data) {
-        return (
-            <div className="container mx-auto p-4 md:p-8" dir="rtl">
-                <div className="flex flex-col items-center justify-center py-20 px-4 bg-white border border-slate-200 shadow-sm rounded-3xl text-center">
-                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-6">
-                        <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+  const products = response.data.products
+
+  return (
+    <section className="w-full min-h-screen font-sans" dir="rtl">
+      {/* ✅ Shimmer CSS */}
+      <style jsx global>{`
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        .shimmer-overlay {
+          position: absolute;
+          inset: 0;
+          background: #f1f5f9;
+          overflow: hidden;
+        }
+        .shimmer-overlay::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          transform: translateX(-100%);
+          background: linear-gradient(
+            110deg,
+            transparent 25%,
+            rgba(255, 255, 255, 0.6) 37%,
+            transparent 63%
+          );
+          animation: shimmer 1.2s infinite;
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto  ">
+        <div
+          className={`transition-opacity duration-300 ${
+            isFetching ? 'opacity-50 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+            {products.map((p) => (
+              <div key={p.id} className="group relative">
+                <div
+                  onClick={() => router.push(`/resources/course/${p.slug}`)}
+                  // ✅ تنظیم ارتفاع کلی کارت: flex-col باعث میشه محتوا بالای عکس بیاد
+                  // ✅ padding کمتر برای کل کارت (p-2)
+                  className="bg-white border border-gray-300 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer"
+                >
+                  {/* ✅ Image */}
+                  {/* ✅ aspect-[3/4] برای کوتاه‌تر شدن عکس */}
+                  <div className="relative w-full aspect-[3/4] p-2">
+                    <ProgressiveImage
+                      src={getSafeImageUrl(p.imageUrl)}
+                      alt={p.name}
+                      sizes="(max-width: 640px) 150px, 200px"
+                      className="mix-blend-multiply"
+                    />
+                  </div>
+
+                  {/* ✅ Content */}
+                  {/* ✅ padding کمتر برای محتوا (p-3) */}
+                  <div className="flex-1 flex flex-col justify-between p-3">
+                    <div>
+                      {/* ✅ Add to cart (Desktop) */}
+                      <div className="hidden md:flex items-center justify-center gap-3 mb-2">
+                        <div className="flex-1 h-px bg-gray-200" />
+
+                        <Link
+                          href={`/cart/${p.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 rounded-full border text-gray-600 hover:text-green-600 hover:border-green-400 hover:bg-green-50 transition"
+                        >
+                          <ShoppingBasket className="w-4 h-4" />
+                        </Link>
+
+                        <div className="flex-1 h-px bg-gray-200" />
+                      </div>
+
+                      {/* ✅ عنوان محصول با فونت کمی کوچکتر (text-sm) و line-clamp*/}
+                      <h3 className="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-green-700 transition">
+                        {p.name}
+                      </h3>
+
+                      {/* ✅ لیست ویژگی ها - فقط 2 مورد اول نمایش داده می شود */}
+                      <ul className="mt-2 space-y-1 text-xs text-gray-600">
+                        {['پاسخ تشریحی', 'بروزرسانی مداوم', 'سوالات طبقه بندی شده']
+                          .slice(0, 3) // ✅ فقط دو مورد اول را نمایش بده
+                          .map((item) => (
+                            <li key={item} className="flex items-center gap-1">
+                              <span className="w-1 h-1 bg-blue-500 rounded-full" />
+                              {item}
+                            </li>
+                          ))}
+                      </ul>
                     </div>
-                    <h2 className="text-xl font-bold text-slate-700 mb-2">دسته‌بندی مورد نظر یافت نشد!</h2>
-                    <p className="text-slate-500 text-sm mb-8">ممکن است لینک اشتباه باشد یا دسته‌بندی حذف شده باشد.</p>
-                    <Link href="/" className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
-                        بازگشت به صفحه اصلی
-                    </Link>
+
+                    {/* ✅ Add to cart (Mobile) */}
+                    <div className="flex md:hidden items-center justify-center gap-3 my-2">
+                      <div className="flex-1 h-px bg-gray-200" />
+
+                      <Link
+                        href={`/cart/${p.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-2 rounded-full border text-gray-600 hover:text-green-600 hover:border-green-400 hover:bg-green-50 transition"
+                      >
+                        <ShoppingBasket className="w-4 h-4" />
+                      </Link>
+
+                      <div className="flex-1 h-px bg-gray-200" />
+                    </div>
+
+                    {/* ✅ Price */}
+                    {/* ✅ فاصله کمتر برای قیمت (my-2) */}
+                    <div className="my-2 flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-red-600">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="text-sm font-bold">
+                          {toman(p.newPrice)}
+                        </span>
+                      </div>
+
+                      <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+                        <Play className="w-3.5 h-3.5" />
+                        شروع رایگان
+                      </span>
+                    </div>
+                  </div>
                 </div>
-            </div>
-        );
-    }
-
-    const products = response.data.products;
-
-    return (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative" dir="rtl">
-            <div className={`transition-opacity duration-300 ${isFetching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-                
-                {products.length === 0 ? (
-                    // وضعیت خالی بودن محصولات
-                    <div className="flex flex-col items-center justify-center py-24 bg-gray-50/50 min-h-[50vh] rounded-3xl border border-dashed border-gray-200 mt-6 text-center">
-                        <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p className="text-lg font-semibold text-gray-600 mb-1">محصولی یافت نشد</p>
-                        <p className="text-gray-500 text-sm">در حال حاضر محصولی در این دسته‌بندی وجود ندارد.</p>
-                    </div>
-                ) : (
-                    // گرید محصولات با استایل جدید
-                    <div className="w-full sm:bg-white sm:rounded sm:border sm:border-gray-100 sm:p-6 sm:shadow-[0_8px_30px_rgb(0,0,0,0.02)] mt-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-4 sm:mt-0">
-                            {products.map((p, index) => {
-                                const itemNumber = (currentPage - 1) * limit + index + 1;
-                                const productLink = `/resources/course/${p.slug}`;
-
-                                return (
-                                    <div key={p.id} className="block h-auto">
-                                        <div className="relative group/card  flex flex-row sm:flex-col h-full w-full border border-gray-200 sm:border-gray-300 rounded sm:rounded bg-white sm:hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 p-2.5 sm:p-0 gap-3 sm:gap-0">
-                                            
-                                            {/* شماره (Index Badge) */}
-                                            <div className="absolute -top-3 -right-3 z-20 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white text-slate-600 rounded-full text-xs font-bold shadow-md border-2 border-white">
-                                                {itemNumber}
-                                            </div>
-
-                                            {/* تصویر */}
-                                            <Link
-                                                href={productLink}
-                                                className="relative w-[130px] shrink-0 aspect-[4/3] sm:w-full sm:h-auto sm:aspect-[4/5] sm:bg-gradient-to-b sm:from-slate-50/50 sm:to-slate-100/50 flex items-center justify-center p-2 sm:p-4 md:p-5 border-l border-gray-300 overflow-hidden rounded-r sm:rounded-none sm:rounded-t"
-                                            >
-                                                <button
-                                                    className="absolute top-2 left-2 sm:right-2 z-10 text-gray-500 hover:text-gray-700 sm:hidden"
-                                                    onClick={(e) => e.preventDefault()}
-                                                >
-                                                    <Bookmark className="w-4 h-4" />
-                                                </button>
-                                                <div className="relative w-full h-full">
-                                                    <Image
-                                                        src={getSafeImageUrl(p.imageUrl)}
-                                                        alt={p.name}
-                                                        fill
-                                                        className="object-contain mix-blend-multiply md:p-0"
-                                                        sizes="(max-width: 640px) 130px, 200px"
-                                                    />
-                                                </div>
-                                            </Link>
-
-                                            {/* آیکون سبد خرید (فقط در دسکتاپ) */}
-                                            <div className="px-3 md:px-4 hidden sm:block">
-                                                <Link
-                                                    href="/cart"
-                                                    aria-label="رفتن به سبد خرید"
-                                                    className="group flex items-center gap-3 py-2"
-                                                >
-                                                    <span className="h-px flex-1 bg-slate-200" />
-                                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-700 transition shrink-0">
-                                                        <ShoppingBasketIcon className="w-4 h-4" />
-                                                    </span>
-                                                    <span className="h-px flex-1 bg-slate-200" />
-                                                </Link>
-                                            </div>
-
-                                            {/* محتوای کارت */}
-                                            <Link
-                                                href={productLink}
-                                                className="flex flex-col flex-1 sm:p-3 md:p-4 z-10 py-0.5"
-                                            >
-                                                <h3
-                                                    className="text-slate-600 font-bold md:leading-relaxed line-clamp-2 min-h-0  group-hover/card:text-green-700 transition-colors duration-300"
-                                                    title={p.name}
-                                                >
-                                                    {p.name}
-                                                </h3>
-
-                                                {/* ویژگی‌ها */}
-                                                <div className="flex flex-col gap-1.5 mt-2">
-                                                    <div className="flex items-center">
-                                                        <span className="bg-[#EEF2FF] text-[10px] text-[#4F46E5] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
-                                                            <FileQuestion className="w-3.5 h-3.5" />
-                                                            سوالات طبقه بندی شده
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        <span className="text-[#121211] text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium">
-                                                            <FileText className="w-3.5 h-3.5 text-gray-500" />
-                                                            دارای پاسخ تشریحی
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* بخش انتهای کارت */}
-                                                <div className="mt-auto pt-3 md:pt-4 flex items-center justify-between sm:block w-full">
-                                                    
-                                                  
-
-                                                    {/* قیمت موبایل */}
-                                                    <div className="text-gray-600 font-medium sm:hidden text-sm">
-                                                        {toman(p.newPrice)}
-                                                    </div>
-
-                                                    {/* دکمه موبایل */}
-                                                    <div className="text-[#3b82f6] text-xs flex items-center gap-1 sm:hidden">
-                                                        <span>شروع یادگیری</span>
-                                                        <ArrowLeft className="w-4 h-4" />
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-            </div>
+              </div>
+            ))}
+          </div>
         </div>
-    );
+      </div>
+    </section>
+  )
 }

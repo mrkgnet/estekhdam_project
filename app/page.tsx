@@ -14,10 +14,18 @@ import HeaderTopComponnet from "@/components/header/HeaderTopComponnet";
 
 import TabProductCat from "@/components/tabProductCat/TabProductCat";
 import SideBarUserComponent from "@/components/user/sidebar-user/SideBarUserComponent";
+import HomeLoaderEffect from "@/components/RouteChangeLoader";
+import RouteChangeLoader from "@/components/RouteChangeLoader";
 
 export default function HomePage() {
+
+
+
+
+
   return (
     <div>
+ <RouteChangeLoader />
       <HeaderTopComponnet />
       <NavbarUser />
 
@@ -28,7 +36,7 @@ export default function HomePage() {
       */}
 
 
-       <SideBarUserComponent />
+        <SideBarUserComponent />
 
         <main className="min-w-0 max-w-7xl m-auto flex-1 flex flex-col py-4 md:py-4 overflow-x-hidden">
           <div className="w-full  mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-6 lg:space-y-8">
@@ -65,7 +73,7 @@ export default function HomePage() {
             {/* ============================== */}
             {/* بخش اول:   پرمخاطب */}
             {/* ============================== */}
-   
+
             <div>
               <TabProductCat />
             </div>

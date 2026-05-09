@@ -28,7 +28,9 @@ const BANKS_DATA = [
   { id: 16, name: "وزارت دادگستری", logo: "/images/topSlider/وزارت_دادگستری.png", href: "/" },
 ];
 
-
+// ✅ Blur داخلی بدون فایل
+const blurDataURL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
 
 export default function BrandTopSlider({ title }: { title?: string }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -41,7 +43,7 @@ export default function BrandTopSlider({ title }: { title?: string }) {
   const showSkeleton = !isMounted || !isSwiperReady;
 
   return (
-    <div className=" relative py-4 group/slider overflow-hidden rounded">
+    <div className="relative py-4 group/slider overflow-hidden rounded">
       <style jsx>{`
         :global(.brand-swiper .swiper-wrapper) {
           transition-timing-function: linear !important;
@@ -59,23 +61,22 @@ export default function BrandTopSlider({ title }: { title?: string }) {
       <div className={`transition-opacity duration-300 ${showSkeleton ? "opacity-0" : "opacity-100"}`}>
         {title && (
           <div className="flex items-center gap-2.5 mb-6 px-2">
-            <div className="w-1.5 h-5 bg-green-500 rounded-full" aria-hidden="true"></div>
+            <div className="w-1.5 h-5 bg-green-500 rounded-full" />
             <h2 className="font-bold text-slate-800 tracking-tight">{title}</h2>
           </div>
         )}
 
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden md:block"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden md:block"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none hidden md:block" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none hidden md:block" />
 
         <Swiper
           modules={[Autoplay]}
           onInit={() => setIsSwiperReady(true)}
-          loop={true}
+          loop
           speed={3500}
           autoplay={{
             delay: 0,
             disableOnInteraction: false,
-            pauseOnMouseEnter: false,
           }}
           dir="rtl"
           breakpoints={{
@@ -88,30 +89,50 @@ export default function BrandTopSlider({ title }: { title?: string }) {
         >
           {BANKS_DATA.map((bank) => (
             <SwiperSlide key={bank.id} className="pt-2">
-              <Link
-                href={bank.href}
-                className="group flex flex-col items-center justify-start gap-3 w-full h-full outline-none"
-                title={bank.name}
-              >
-                <div className="w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] flex items-center justify-center p-3 relative rounded-full bg-white shadow-sm border border-slate-100/80 group-hover:border-green-100 group-hover:shadow-[0_8px_20px_-6px_rgba(22,163,74,0.3)] group-hover:ring-4 group-hover:ring-green-50 group-hover:-translate-y-1.5 transition-all duration-300 ease-out">
-                  <Image
-                    src={bank.logo}
-                    alt={`منابع آزمون استخدامی ${bank.name}`}
-                    fill
-                    className="object-contain p-3.5 group-hover:scale-110 transition-transform duration-300 ease-out mix-blend-multiply"
-                    sizes="(max-width: 480px) 64px, (max-width: 768px) 76px, 84px"
-                    priority
-                  />
-                </div>
-
-                <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
-                  {bank.name}
-                </span>
-              </Link>
+              <BrandItem bank={bank} />
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
     </div>
+  );
+}
+
+/* ---------------------------------- */
+/* ✅ Item با Blur خودکار */
+/* ---------------------------------- */
+
+function BrandItem({ bank }: { bank: any }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <Link
+      href={bank.href}
+      className="group flex flex-col items-center gap-3 w-full h-full outline-none"
+      title={bank.name}
+    >
+      <div className="w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] relative flex items-center justify-center p-3 rounded-full bg-white shadow-sm border border-slate-100/80
+        group-hover:border-green-100 group-hover:shadow-[0_8px_20px_-6px_rgba(22,163,74,0.3)]
+        group-hover:ring-4 group-hover:ring-green-50 group-hover:-translate-y-1.5
+        transition-all duration-300 ease-out"
+      >
+        <Image
+          src={bank.logo}
+          alt={`منابع آزمون استخدامی ${bank.name}`}
+          fill
+          sizes="(max-width: 480px) 64px, (max-width: 768px) 76px, 84px"
+          placeholder="blur"
+          blurDataURL={blurDataURL}
+          onLoadingComplete={() => setLoaded(true)}
+          className={`object-contain p-3.5 mix-blend-multiply transition-all duration-500 ease-out
+            ${loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-95"}
+          `}
+        />
+      </div>
+
+      <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
+        {bank.name}
+      </span>
+    </Link>
   );
 }
