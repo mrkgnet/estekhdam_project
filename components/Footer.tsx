@@ -79,7 +79,7 @@ export default function Footer() {
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
               <ShieldCheck className="h-3.5 w-3.5" /> منابع معتبر
             </span>
-            
+
           </div>
         </div>
       </div>
@@ -125,6 +125,29 @@ export default function Footer() {
                 <div className="mt-1 text-sm  text-slate-900">معتبر</div>
               </div>
             </div>
+
+
+            {/* E-namad */}
+            <div className="mt-6">
+              <div className="text-xs text-slate-500 mb-2">نماد اعتماد</div>
+
+              <div className="flex items-center gap-3">
+                <a
+                  referrerPolicy="origin"
+                  target="_blank"
+                  href="https://trustseal.enamad.ir/?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
+                  className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm hover:shadow transition"
+                >
+                  <img
+                    referrerPolicy="origin"
+                    src="https://trustseal.enamad.ir/logo.aspx?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
+                    alt="نماد اعتماد الکترونیکی"
+                    className="h-16 w-auto"
+                  />
+                </a>
+              </div>
+            </div>
+
           </div>
 
           {/* Quick Links */}
@@ -170,12 +193,12 @@ export default function Footer() {
                 </Link>
               </li>
 
-       
+
             </ul>
           </div>
 
-          
-          
+
+
           {/* Support */}
           <div className="lg:col-span-4">
             <div className="text-sm  text-slate-900">پشتیبانی</div>
