@@ -31,13 +31,13 @@ const iransans = localFont({
 });
 
 
-<meta name="enamad" content="28191248" />
+
 
 export const metadata: Metadata = {
   title: "استخدام پرو",
   description: "استخدام پرو",
   other: {
-    enamad: "61003738",
+    enamad: "28191248", // شماره صحیح خواسته‌شده
   },
 };
 
