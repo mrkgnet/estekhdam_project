@@ -116,11 +116,10 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
               <button
                 key={item.id}
                 onClick={() => setActiveCategoryId(item.id)}
-                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${
-                  active
+                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${active
                     ? "bg-white text-sky-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
-                }`}
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -139,6 +138,9 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
             <Link
               key={it.id}
               href={it.href}
+              target="_blank"
+              prefetch={true}
+              rel="noopener noreferrer"
               className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md"
             >
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">

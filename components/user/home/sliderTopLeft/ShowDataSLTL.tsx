@@ -123,7 +123,13 @@ export default function ShowDataSLTL({
         >
           {products.map((p, index) => (
             <SwiperSlide key={p.id} className="w-full h-auto">
-              <Link href={`/resources/course/${p.slug}`} className="block h-full">
+              <Link
+                href={`/resources/course/${p.slug}`}
+                className="block h-full"
+                target="_blank"
+                rel="noopener noreferrer"
+
+              >
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                   {/* Image */}
                   <div className="relative w-full h-[120px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">

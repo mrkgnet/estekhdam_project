@@ -9,22 +9,22 @@ const nextConfig: NextConfig = {
   // ۲. تنظیمات تصاویر
   images: {
     // فعال کردن فرمت‌های مدرن برای فشرده‌سازی حداکثری (اول AVIF، بعد WebP)
-    formats: ['image/avif', 'image/webp'],
-    
+    formats: ["image/avif", "image/webp"],
+    domains: ["trustseal.enamad.ir"],
     // اجازه لود عکس از دامنه‌های خارجی
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'account4all.ir',
+        protocol: "https",
+        hostname: "account4all.ir",
       },
       {
-        protocol: 'https',
-        hostname: 'mrkg.s3.ir-thr-at1.arvanstorage.ir',
+        protocol: "https",
+        hostname: "mrkg.s3.ir-thr-at1.arvanstorage.ir",
       },
     ],
-    
+
     // ❌ این خط باید حذف شود تا تبدیل به WebP کار کند!
-    // unoptimized: true, 
+    // unoptimized: true,
   },
 
   // ۳. فعال کردن حالت standalone برای استقرار در لیارا یا داکر
@@ -33,9 +33,8 @@ const nextConfig: NextConfig = {
   // ۴. فعال‌سازی آدرس‌دهی تایپ‌دار (بسیار مهم برای امنیت مسیرها)
   experimental: {
     typedRoutes: true,
-    
   },
-  
+
   // ۵. جلوگیری از نمایش هشدارهای غیرضروری در کنسول (اختیاری)
   eslint: {
     ignoreDuringBuilds: true,

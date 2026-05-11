@@ -1,0 +1,62 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 300 460"
+  fill="none"
+>
+  <!-- Yellow Card -->
+  <rect
+    x="0"
+    y="0"
+    width="300"
+    height="460"
+    rx="36"
+    fill="#FFD400"
+  />
+
+  <!-- Z Shape -->
+  <rect
+    x="110"
+    y="60"
+    width="80"
+    height="260"
+    rx="40"
+    transform="rotate(45 150 190)"
+    fill="#1F2A5A"
+  />
+
+  <!-- Top Left Triangle -->
+  <path
+    d="M60 60 L120 60 L60 120 Z"
+    fill="#1F2A5A"
+  />
+
+  <!-- Bottom Right Triangle -->
+  <path
+    d="M240 300 L180 300 L240 360 Z"
+    fill="#1F2A5A"
+  />
+
+  <!-- Text -->
+  <text
+    x="150"
+    y="350"
+    text-anchor="middle"
+    font-size="26"
+    font-family="sans-serif"
+    fill="#1F2A5A"
+  >
+    پرداخت امن با
+  </text>
+
+  <text
+    x="150"
+    y="395"
+    text-anchor="middle"
+    font-size="48"
+    font-weight="700"
+    font-family="sans-serif"
+    fill="#1F2A5A"
+  >
+    زرین‌پال
+  </text>
+</svg>

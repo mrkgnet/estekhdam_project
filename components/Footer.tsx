@@ -1,5 +1,6 @@
 // components/Footer.tsx
 import Link from "next/link";
+import Image from "next/image";
 import {
   Home,
   Search,
@@ -34,9 +35,10 @@ export default function Footer() {
       </div>
 
       {/* Top CTA */}
-      <div className="relative mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
-        <div className="rounded-[28px] border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur sm:p-6">
+      <div className="relative flex-col md:flex  justify-between mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+        <div className=" border border-slate-200 bg-white/80 p-5  backdrop-blur sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
             <div className="flex items-start gap-3">
               <div className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-900 text-white shadow-sm">
                 <Sparkles className="h-5 w-5" />
@@ -69,8 +71,8 @@ export default function Footer() {
                 آزمون‌ها و منابع
               </Link>
             </div>
-          </div>
 
+          </div>
           {/* quick chips */}
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
@@ -81,9 +83,16 @@ export default function Footer() {
             </span>
 
           </div>
+
+
+        </div>
+
+        {/*zarinpal and image  */}
+
+        <div className="">
+         <FooterTrustBadges />
         </div>
       </div>
-
       {/* Main */}
       <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-12">
@@ -128,26 +137,7 @@ export default function Footer() {
 
 
             {/* E-namad */}
-            <div className="mt-6">
-              <div className="text-xs text-slate-500 mb-2">نماد اعتماد</div>
-
-              <div className="flex items-center gap-3">
-                <a
-                  referrerPolicy="origin"
-                  target="_blank"
-                  href="https://trustseal.enamad.ir/?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-                  className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm hover:shadow transition"
-                >
-                  <img
-                    referrerPolicy="origin"
-                    src="https://trustseal.enamad.ir/logo.aspx?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-                    alt="نماد اعتماد الکترونیکی"
-                    className="h-16 w-auto"
-                  />
-                </a>
-              </div>
-            </div>
-
+            
           </div>
 
           {/* Quick Links */}
@@ -279,5 +269,38 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+
+export  function FooterTrustBadges() {
+  return (
+    <div className="mt-4 md:mt-0 font-bold bg-white rounded-lg p-3.5">
+      <h4 className="text-sm text-slate-700 mb-2">با خیال راحت خرید کنید</h4>
+
+      <div className="grid grid-cols-2 gap-4 max-w-xs justify-center items-center ">
+        <a
+          referrerPolicy="origin"
+          href="https://trustseal.enamad.ir/?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
+          target="_blank"
+          className="rounded-xl border bg-white p-2 shadow-sm hover:shadow w-[130px] h-[130px]"
+        >
+          <Image
+            src="https://trustseal.enamad.ir/logo.aspx?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
+            alt="نماد اعتماد الکترونیکی"
+            width={64}
+            height={64}
+          />
+        </a>
+
+        <Image
+          src="/images/footer/zrinpal.png"
+          alt="زرین‌پال"
+          width={140}
+          height={140}
+          className=""
+        />
+      </div>
+    </div>
   );
 }
