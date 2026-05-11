@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, EffectFade, Navigation } from "swiper/modules";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMainSliderUserAction } from "@/actions/user/mainslider/fetch/Actions";
 
@@ -28,18 +27,16 @@ interface ShowMainSliderProps {
 
 export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) {
   const progressRef = useRef<HTMLDivElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  // ❌ استیت‌های مربوط به isMounted و useEffect کاملاً حذف شدند تا SSR مسدود نشود.
 
   // استفاده از ریکت کوئری برای مدیریت کش اسلایدر
-  const { data: response, isLoading } = useQuery({
+  // چون initialData داریم، دیتای اولیه مستقیماً در رندر اول (SSR) استفاده می‌شود
+  const { data: response } = useQuery({
     queryKey: ["main-slider"],
     queryFn: () => fetchMainSliderUserAction(),
     initialData: initialSliders,
-    staleTime: 1000 * 60 * 30, // ۳۰ دقیقه اعتبار کش
+    staleTime: 2000, 
   });
 
   const sliders: SliderDBItem[] = response?.data || [];
@@ -50,14 +47,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     }
   };
 
-  if (!isMounted || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center w-full h-full min-h-[165px] gap-3 text-slate-400 bg-white rounded border border-slate-200">
-        <Loader2 className="w-10 h-10 animate-spin text-[#2b5c9e]" />
-        <span className="text-sm">در حال بارگذاری اسلایدر...</span>
-      </div>
-    );
-  }
+  // ❌ شرط if (!isMounted || isLoading) و لودینگ (Loader2) حذف شد.
+  // سرور مستقیماً کدهای HTML اسلایدر را رندر کرده و به مرورگر می‌فرستد.
 
   if (sliders.length === 0) return null;
 
@@ -142,7 +133,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                   )}
 
                   <Link
-                    href={s.href ?? "#"}
+                    // ✅ اصلاح: در تایپ شما targetLink بود، اما پایین href نوشته بودید.
+                    href={s.targetLink ?? "#"} 
                     className="inline-flex items-center gap-2 w-fit rounded-md
                px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
                hover:bg-blue-700 active:bg-blue-800 transition-colors
@@ -150,7 +142,6 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                focus-visible:ring-blue-400 focus-visible:ring-offset-2"
                   >
                     مشاهده اطلاعات بیشتر
-                 
                   </Link>
                 </div>
 
@@ -163,14 +154,16 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                       fill
                       sizes="50vw"
                       className="object-contain duration-700 ease-out"
+                      
+                      // ✅ تغییرات کلیدی برای سرعت لود:
                       priority={index === 0}
+                      fetchPriority={index === 0 ? "high" : "auto"}
                     />
                   </div>
                 </div>
 
               </div>
             </SwiperSlide>
-
           ))}
 
         </Swiper>

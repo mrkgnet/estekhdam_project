@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay, Pagination } from "swiper/modules";
 import { ChevronLeft, ChevronRight, ClipboardList, BookOpen } from "lucide-react";
@@ -11,49 +11,14 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import SafeImage from "@/components/ui/SafeImage";
+import SafeImage from "@/components/ui/SafeImage"; // فرض می‌کنیم این کامپوننت یک wrapper ساده برای next/image است
 import { fetchLatestProductAction } from "@/actions/user/latestProduct/Actions";
 import { SliderSkeletonTopLeft } from "@/components/ui/SkeletonLoding/SliderSkeletonTopLeft";
 
-/* ---------------------------------- */
-/* ✅ Blur داخلی (بدون فایل) */
-/* ---------------------------------- */
 const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
 
-/* ---------------------------------- */
-/* ✅ Progressive Image Component */
-/* ---------------------------------- */
-function ProgressiveImage({
-  src,
-  alt,
-  sizes,
-  className = "",
-}: {
-  src: string;
-  alt: string;
-  sizes?: string;
-  className?: string;
-}) {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <SafeImage
-      src={src}
-      alt={alt}
-      fill
-      sizes={sizes}
-      placeholder="blur"
-      blurDataURL={blurDataURL}
-      onLoadingComplete={() => setLoaded(true)}
-      className={`
-        ${className}
-        transition-all duration-500 ease-out
-        ${loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-95"}
-      `}
-    />
-  );
-}
+// ❌ کامپوننت ProgressiveImage حذف شد چون منطق آن با next/image زائد و کندتر است.
 
 /* ---------------------------------- */
 /* Types */
@@ -80,13 +45,9 @@ export default function ShowDataSLTL({
   initialProducts,
   viewAllLink = "/resources",
 }: Props) {
-  const [mounted, setMounted] = useState(false);
+  // ❌ حذف mounted state برای فعال‌سازی SSR
   const [prevBtn, setPrevBtn] = useState<HTMLButtonElement | null>(null);
   const [nextBtn, setNextBtn] = useState<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["latest-products"],
@@ -97,11 +58,15 @@ export default function ShowDataSLTL({
 
   const products: ProductType[] = response?.data || [];
 
-  if (!mounted || isLoading) {
+  // ✅ منطق جدید: اسکلتون فقط زمانی نمایش داده می‌شود که
+  // ۱. در حال لود شدن باشد (مثلا در navigation سمت کلاینت)
+  // ۲. و هیچ دیتای اولیه‌ای (از سرور) یا دیتای کش‌شده‌ای وجود نداشته باشد.
+  if (isLoading && products.length === 0) {
     return <SliderSkeletonTopLeft />;
   }
 
-  if (products.length === 0) {
+  // اگر بعد از لود شدن، محصولی وجود نداشت، چیزی نمایش نده
+  if (!isLoading && products.length === 0) {
     return null;
   }
 
@@ -109,6 +74,7 @@ export default function ShowDataSLTL({
     <div className="w-full mx-auto relative px-2 h-full" dir="rtl">
       {/* Progress bar style */}
       <style jsx global>{`
+        /* ... استایل‌ها بدون تغییر باقی می‌مانند ... */
         .custom-swiper-progress {
           position: absolute;
           top: 0;
@@ -155,18 +121,24 @@ export default function ShowDataSLTL({
           className="py-2 animate-in fade-in duration-500 static mt-2 h-full"
           dir="rtl"
         >
-          {products.map((p) => (
+          {products.map((p, index) => (
             <SwiperSlide key={p.id} className="w-full h-auto">
               <Link href={`/resources/course/${p.slug}`} className="block h-full">
                 <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                   {/* Image */}
                   <div className="relative w-full h-[120px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
                     <div className="relative w-full h-full">
-                      <ProgressiveImage
+                      {/* ✅ استفاده مستقیم از SafeImage (next/image) */}
+                      <SafeImage
                         src={p.imageUrl || "/images/products/bookExample.jpg"}
                         alt={p.name}
+                        fill
                         sizes="(max-width: 768px) 170px, 400px"
-                        className="object-contain mix-blend-multiply"
+                        placeholder="blur"
+                        blurDataURL={blurDataURL}
+                        // ✅ به ۲ آیتم اول اولویت بالا می‌دهیم تا سریع‌تر لود شوند
+                        priority={index < 2}
+                        className="object-contain mix-blend-multiply transition-opacity duration-300"
                       />
                     </div>
                   </div>
@@ -176,7 +148,6 @@ export default function ShowDataSLTL({
                     <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-emerald-600 transition-colors duration-200">
                       {p.name}
                     </h3>
-
                     <div className="mt-auto">
                       <ul className="space-y-2 text-[11px]">
                         <li className="flex items-center gap-2 text-slate-600">

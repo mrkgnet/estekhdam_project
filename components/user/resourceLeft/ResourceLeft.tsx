@@ -1,30 +1,27 @@
 "use client";
 
-import { useState } from "react";
+// ❌ دیگر نیازی به useState نیست
 import Image from "next/image";
 import { CheckCircle2, ShieldCheck, RefreshCcw } from "lucide-react";
 
 type Props = {
-  product: any;
+  product: any; // بهتر است تایپ دقیق‌تری برای product تعریف شود
 };
 
 const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjEyIiBmaWxsPSIjZjFmNWY5IiAvPgo8L3N2Zz4=";
 
 export default function ResourceLeft({ product }: Props) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  // ❌ حذف کامل state مربوط به لود شدن تصویر
+  // const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="lg:col-span-3 w-full">
       <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        
         {/* IMAGE */}
         <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
           
-          {/* Skeleton فقط برای تصویر */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-slate-100" />
-          )}
+          {/* ❌ اسکلتون حذف شد. placeholder="blur" کار آن را به شکل بهینه‌تری انجام می‌دهد. */}
 
           {product?.oldPrice && (
             <span className="absolute top-4 right-4 bg-rose-500 text-white text-xs px-3 py-1 rounded-full shadow z-10">
@@ -40,13 +37,12 @@ export default function ResourceLeft({ product }: Props) {
             }
             alt={product?.name || "product"}
             fill
-            priority
+            priority // ✅ بسیار عالی که priority وجود دارد. این برای LCP مهم است.
             placeholder="blur"
             blurDataURL={blurDataURL}
-            onLoadingComplete={() => setImageLoaded(true)}
-            className={`object-contain p-8 transition-all duration-700 ease-out
-              ${imageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"}
-            `}
+            // ❌ حذف onLoadingComplete
+            // ❌ حذف کلاس‌های شرطی. next/image خودش این انتقال را مدیریت می‌کند.
+            className="object-contain p-8"
           />
         </div>
 

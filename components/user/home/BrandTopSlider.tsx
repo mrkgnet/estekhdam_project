@@ -1,22 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
-
 import "swiper/css";
-import { BrandSliderSkeleton } from "@/components/ui/SkeletonLoding/BrandSliderSkeleton";
+
+/* ---------------------------------- */
+/* ✅ Data (Static – بهترین حالت) */
+/* ---------------------------------- */
 
 const BANKS_DATA = [
   { id: 1, name: "بانک ملی", logo: "/images/topSlider/بانک_ملی.png", href: "/" },
   { id: 2, name: "بانک ملت", logo: "/images/topSlider/بانک_ملت.png", href: "/" },
   { id: 3, name: "بانک صادرات", logo: "/images/topSlider/بانک_صادرات.png", href: "/" },
   { id: 4, name: "وزارت ارتباطات", logo: "/images/topSlider/وزارت_ارتباطات.png", href: "/" },
-  { id: 5, name: "بانک سپه", logo: "/images/topSlider/بانک_سپه.png", href: "/banks/sepah" },
+  { id: 5, name: "بانک سپه", logo: "/images/topSlider/بانک_سپه.png" , href: "/"},
   { id: 6, name: "آموزش و پرورش", logo: "/images/topSlider/آموزش و پرورش.jpg", href: "/" },
-  { id: 7, name: "وزارت بهداشت ", logo: "/images/topSlider/وزارت_بهداشت.jpg", href: "/" },
+  { id: 7, name: "وزارت بهداشت", logo: "/images/topSlider/وزارت_بهداشت.jpg", href: "/" },
   { id: 8, name: "بانک اقتصاد نوین", logo: "/images/topSlider/بانک_اقتصاد_نوین.png", href: "/" },
   { id: 9, name: "بانک پارسیان", logo: "/images/topSlider/بانک_پارسیان.png", href: "/" },
   { id: 10, name: "وزارت دفاع", logo: "/images/topSlider/وزارت_دفاع.png", href: "/" },
@@ -28,57 +31,62 @@ const BANKS_DATA = [
   { id: 16, name: "وزارت دادگستری", logo: "/images/topSlider/وزارت_دادگستری.png", href: "/" },
 ];
 
-// ✅ Blur داخلی بدون فایل
+/* ---------------------------------- */
+/* ✅ Blur Placeholder */
+/* ---------------------------------- */
+
 const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
 
+/* ---------------------------------- */
+/* ✅ Skeleton */
+/* ---------------------------------- */
+
+function BrandSliderSkeleton() {
+  return (
+    <div className="flex gap-4 px-2 py-4 animate-pulse">
+      {Array.from({ length: 13 }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] rounded-full bg-slate-200" />
+          <div className="w-14 h-3 rounded bg-slate-200" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------------------------------- */
+/* ✅ Main Component */
+/* ---------------------------------- */
+
 export default function BrandTopSlider({ title }: { title?: string }) {
-  const [isMounted, setIsMounted] = useState(false);
-  const [isSwiperReady, setIsSwiperReady] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const showSkeleton = !isMounted || !isSwiperReady;
+  const [swiperReady, setSwiperReady] = useState(false);
 
   return (
-    <div className="relative py-4 group/slider overflow-hidden rounded">
-      <style jsx>{`
-        :global(.brand-swiper .swiper-wrapper) {
-          transition-timing-function: linear !important;
-        }
-      `}</style>
-
-      {/* Skeleton Overlay */}
-      {showSkeleton && (
-        <div className="absolute inset-0 z-20">
-          <BrandSliderSkeleton title={title} />
+    <div className="relative py-4 overflow-hidden rounded">
+      {title && (
+        <div className="flex items-center gap-2.5 mb-6 px-2">
+          <div className="w-1.5 h-5 bg-green-500 rounded-full" />
+          <h2 className="font-bold text-slate-800">{title}</h2>
         </div>
       )}
 
-      {/* Real Slider */}
-      <div className={`transition-opacity duration-300 ${showSkeleton ? "opacity-0" : "opacity-100"}`}>
-        {title && (
-          <div className="flex items-center gap-2.5 mb-6 px-2">
-            <div className="w-1.5 h-5 bg-green-500 rounded-full" />
-            <h2 className="font-bold text-slate-800 tracking-tight">{title}</h2>
-          </div>
-        )}
+      {/* ✅ Skeleton */}
+      {!swiperReady && <BrandSliderSkeleton />}
 
-        <div className="absolute left-0 top-0 bottom-0 w-16  to-transparent z-10 pointer-events-none hidden md:block" />
-        <div className="absolute right-0 top-0 bottom-0 w-16  to-transparent z-10 pointer-events-none hidden md:block" />
-
+      {/* ✅ Swiper */}
+      <div
+        className={`transition-opacity duration-300 ${
+          swiperReady ? "opacity-100" : "opacity-0 absolute inset-0"
+        }`}
+      >
         <Swiper
           modules={[Autoplay]}
-          onInit={() => setIsSwiperReady(true)}
           loop
           speed={3500}
-          autoplay={{
-            delay: 0,
-            disableOnInteraction: false,
-          }}
+          autoplay={{ delay: 0, disableOnInteraction: false }}
           dir="rtl"
+          onInit={() => setSwiperReady(true)}
           breakpoints={{
             0: { slidesPerView: 3.5, spaceBetween: 12 },
             480: { slidesPerView: 4.5, spaceBetween: 16 },
@@ -87,9 +95,9 @@ export default function BrandTopSlider({ title }: { title?: string }) {
           }}
           className="brand-swiper w-full px-2 py-4"
         >
-          {BANKS_DATA.map((bank) => (
-            <SwiperSlide key={bank.id} className="pt-2">
-              <BrandItem bank={bank} />
+          {BANKS_DATA.map((bank, index) => (
+            <SwiperSlide key={bank.id}>
+              <BrandItem bank={bank} index={index} />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -99,19 +107,25 @@ export default function BrandTopSlider({ title }: { title?: string }) {
 }
 
 /* ---------------------------------- */
-/* ✅ Item با Blur خودکار */
+/* ✅ Item */
 /* ---------------------------------- */
 
-function BrandItem({ bank }: { bank: any }) {
-  const [loaded, setLoaded] = useState(false);
-
+function BrandItem({
+  bank,
+  index,
+}: {
+  bank: { name: string; logo: string; href: string };
+  index: number;
+}) {
   return (
     <Link
       href={bank.href}
       className="group flex flex-col items-center gap-3 w-full h-full outline-none"
       title={bank.name}
     >
-      <div className="w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] relative flex items-center justify-center p-3 rounded-full bg-white shadow-sm border border-slate-100/80
+      <div
+        className="relative w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px]
+        flex items-center justify-center p-3 rounded-full bg-white shadow-sm border border-slate-100/80
         group-hover:border-green-100 group-hover:shadow-[0_8px_20px_-6px_rgba(22,163,74,0.3)]
         group-hover:ring-4 group-hover:ring-green-50 group-hover:-translate-y-1.5
         transition-all duration-300 ease-out"
@@ -123,14 +137,12 @@ function BrandItem({ bank }: { bank: any }) {
           sizes="(max-width: 480px) 64px, (max-width: 768px) 76px, 84px"
           placeholder="blur"
           blurDataURL={blurDataURL}
-          onLoadingComplete={() => setLoaded(true)}
-          className={`object-contain p-3.5 mix-blend-multiply transition-all duration-500 ease-out
-            ${loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-95"}
-          `}
+          priority={index < 5}
+          className="object-contain p-3.5 mix-blend-multiply"
         />
       </div>
 
-      <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1">
+      <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1 text-xs sm:text-sm">
         {bank.name}
       </span>
     </Link>
