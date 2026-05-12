@@ -8,40 +8,44 @@ export async function POST(req: Request) {
     const { orderId, authority } = await req.json();
 
     if (!orderId || !authority) {
-        return NextResponse.json({ ok: false, message: "Order ID or Authority is missing" }, { status: 400 });
+        return NextResponse.json({ ok: false, message: "اطلاعات سفارش یا کد تایید یافت نشد." }, { status: 400 });
     }
 
     const order = await db.order.findUnique({
       where: { id: orderId },
-      select: { id: true, totalPrice: true, status: true, refId: true },
+      // دقت کنید: نام فیلد باید دقیقاً مطابق مدل Prisma شما باشد (pricePaid)
+      select: { id: true, pricePaid: true, status: true, refId: true },
     });
 
     if (!order) {
-      return NextResponse.json({ ok: false, message: "Order not found" }, { status: 404 });
+      return NextResponse.json({ ok: false, message: "سفارش یافت نشد." }, { status: 404 });
     }
 
-    if (order.status === "COMPLETED") {
+    if (order.status === "SUCCESS") {
       return NextResponse.json({ ok: true, refId: order.refId });
     }
 
     const merchant_id = process.env.ZARINPAL_MERCHANT_ID;
     if (!merchant_id) {
-      console.error("ZARINPAL_MERCHANT_ID is not defined in .env");
-      return NextResponse.json({ ok: false, message: "Server configuration error" }, { status: 500 });
+      return NextResponse.json({ ok: false, message: "تنظیمات درگاه (Merchant ID) انجام نشده است." }, { status: 500 });
     }
 
-    // ارسال درخواست به زرین‌پال برای وریفای پرداخت
+    // ارسال درخواست تایید به زرین‌پال
     const zpRes = await fetch(VERIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
         merchant_id,
-        amount: order.totalPrice,
-        authority: authority, // FIX: Always use the authority from the callback, not the one from the database
+        amount: order.pricePaid*10, // اصلاح شد: استفاده از pricePaid
+        authority: authority,
       }),
     });
 
     const zp = await zpRes.json();
+    
+    // لاگ برای عیب‌یابی در کنسول سرور (Runflare/Vercel)
+    console.log("Zarinpal Response:", JSON.stringify(zp, null, 2));
+
     const code = zp?.data?.code;
     const refId = zp?.data?.ref_id;
 
@@ -49,26 +53,22 @@ export async function POST(req: Request) {
       await db.order.update({
         where: { id: orderId },
         data: {
-          status: "COMPLETED",
+          status: "SUCCESS",
           refId: refId ? String(refId) : (order.refId || null),
-          authority: authority, // Optionally update the authority to the one that was successful
           paidAt: new Date(),
         },
       });
       return NextResponse.json({ ok: true, refId: refId || order.refId });
     }
 
-    // LOG: Log Zarinpal's response on failure for easier debugging
-    console.log("Zarinpal verification failed. Response:", JSON.stringify(zp, null, 2));
-
+    // اگر تراکنش ناموفق بود
     await db.order.update({ where: { id: orderId }, data: { status: "FAILED" } });
     
-    // Provide a more descriptive error message
-    const errorMessage = zp?.errors?.message || "Payment verification failed";
-    return NextResponse.json({ ok: false, message: errorMessage, zp }, { status: 400 });
+    const errorMessage = zp?.errors?.message || "تایید پرداخت توسط بانک انجام نشد.";
+    return NextResponse.json({ ok: false, message: errorMessage }, { status: 400 });
     
   } catch (e) {
-    console.error("Payment verify internal server error:", e);
-    return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
+    console.error("Payment verify error:", e);
+    return NextResponse.json({ ok: false, message: "خطای داخلی سرور" }, { status: 500 });
   }
 }
