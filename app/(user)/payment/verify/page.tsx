@@ -32,12 +32,12 @@ function VerifyComponent() {
   const [refId, setRefId] = useState<string | null>(null);
   const [isCancelled, setIsCancelled] = useState(false);
 
-  useEffect(() => {
+   useEffect(() => {
     // --- Get data from URL and localStorage ---
     const authority = searchParams.get('Authority');
     const status = searchParams.get('Status');
-    // نکته: ما فرض می‌کنیم شما orderId را قبل از انتقال به درگاه در localStorage ذخیره کرده‌اید
-    const orderId = localStorage.getItem('orderId'); 
+    // بررسی URL و سپس LocalStorage
+    const orderId = searchParams.get('orderId') || localStorage.getItem('orderId'); 
 
     // --- Handle User Cancellation ---
     if (status && status !== 'OK') {
@@ -67,8 +67,9 @@ function VerifyComponent() {
         if (response.ok) {
           setIsSuccess(true);
           setRefId(data.refId);
-          localStorage.removeItem('orderId'); // Clean up after verification
+          localStorage.removeItem('orderId'); // Clean up
         } else {
+          // در اینجا اگر زرین‌پال خطای 101 داد، بک‌اند باید status 200 بدهد یا دیتا را هندل کند
           setError(data.message || 'خطا در تایید پرداخت. لطفا با پشتیبانی تماس بگیرید.');
         }
       } catch (err) {
@@ -80,6 +81,7 @@ function VerifyComponent() {
 
     verifyPayment();
   }, [searchParams]);
+
 
   // --- Render UI based on state ---
   const containerClasses = "min-h-screen flex items-center justify-center bg-gray-100 p-4";
