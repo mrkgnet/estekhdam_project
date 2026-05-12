@@ -56,7 +56,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/jobnews/government"
-                className="inline-flex items-center text-12 sm:text-13 lg:text-12 justify-center gap-2 rounded-2xl bg-blue-900 px-5 py-3  text-white transition "
+                className="inline-flex items-center text-12 sm:text-13 lg:text-13 justify-center gap-2 rounded-2xl bg-blue-900 px-5 py-3  text-white transition "
               >
                 <BriefcaseBusiness className="h-4 w-4" />
                 مشاهده فرصت‌های شغلی
@@ -65,10 +65,10 @@ export default function Footer() {
 
               <Link
                 href="/resources"
-                className="inline-flex items-center text-12 sm:text-13 lg:text-12 bg-blue-800 justify-center gap-2 rounded-2xl border border-slate-200  px-5 py-3   text-white transition "
+                className="inline-flex font-bold items-center text-12 sm:text-13 lg:text-13 bg-blue-800 justify-center gap-2 rounded-2xl border border-slate-200  px-5 py-3   text-white transition "
               >
                 <BookOpen className="h-4 w-4" />
-                آزمون‌ها و منابع
+                آزمون‌ها و منابع بروز
               </Link>
             </div>
 
