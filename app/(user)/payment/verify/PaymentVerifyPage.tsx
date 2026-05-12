@@ -1,67 +1,189 @@
-// app/payment/verify/page.tsx
-"use client";
+// file: app/payment/verify/page.tsx
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+'use client';
 
-export default function PaymentVerifyPage() {
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import Link from 'next/link';
+import { FaCheckCircle, FaTimesCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
+
+// ====================================================================
+//  Wrapper for Suspense (Required for useSearchParams in App Router)
+// ====================================================================
+function PaymentVerifyPage() {
+  return (
+    <Suspense fallback={<LoadingState message="در حال بارگذاری صفحه..." />}>
+      <VerifyComponent />
+    </Suspense>
+  );
+}
+
+// ====================================================================
+//  Main Verification Component
+// ====================================================================
+function VerifyComponent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
-  const authority = searchParams.get("Authority");
-  const status = searchParams.get("Status");
+  const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState<{
-    ok: boolean;
-    refId?: string;
-    message?: string;
-  } | null>(null);
+  // State Management
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [refId, setRefId] = useState<string | null>(null);
+  const [isCancelled, setIsCancelled] = useState(false);
 
   useEffect(() => {
-    if (!orderId || !authority) {
-      setResult({ ok: false, message: "اطلاعات پرداخت نامعتبر است" });
-      setLoading(false);
+    // --- Get data from URL and localStorage ---
+    const authority = searchParams.get('Authority');
+    const status = searchParams.get('Status');
+    // نکته: ما فرض می‌کنیم شما orderId را قبل از انتقال به درگاه در localStorage ذخیره کرده‌اید
+    const orderId = localStorage.getItem('orderId'); 
+
+    // --- Handle User Cancellation ---
+    if (status && status !== 'OK') {
+      setIsCancelled(true);
+      setIsLoading(false);
       return;
     }
 
-    if (status !== "OK") {
-      setResult({ ok: false, message: "پرداخت توسط کاربر لغو شد" });
-      setLoading(false);
+    // --- Validate inputs ---
+    if (!authority || !orderId) {
+      setError('اطلاعات پرداخت ناقص است. لطفا مجددا تلاش کنید.');
+      setIsLoading(false);
       return;
     }
 
-    fetch("/api/payment/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, authority }),
-    })
-      .then((res) => res.json())
-      .then((data) => setResult(data))
-      .catch(() =>
-        setResult({ ok: false, message: "خطا در ارتباط با سرور" })
-      )
-      .finally(() => setLoading(false));
-  }, [orderId, authority, status]);
+    // --- Call verification API ---
+    const verifyPayment = async () => {
+      try {
+        const response = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ authority, orderId }),
+        });
 
-  if (loading) {
-    return <p className="text-center mt-10">در حال بررسی پرداخت...</p>;
-  }
+        const data = await response.json();
 
-  if (!result?.ok) {
+        if (response.ok) {
+          setIsSuccess(true);
+          setRefId(data.refId);
+          localStorage.removeItem('orderId'); // Clean up after verification
+        } else {
+          setError(data.message || 'خطا در تایید پرداخت. لطفا با پشتیبانی تماس بگیرید.');
+        }
+      } catch (err) {
+        setError('خطای ارتباط با سرور. لطفا اتصال اینترنت خود را بررسی کنید.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams]);
+
+  // --- Render UI based on state ---
+  const containerClasses = "min-h-screen flex items-center justify-center bg-gray-100 p-4";
+
+  if (isLoading) {
     return (
-      <div className="text-center mt-10 text-red-600">
-        ❌ پرداخت ناموفق بود
-        <br />
-        {result?.message}
+      <div className={containerClasses}>
+        <LoadingState message="در حال بررسی اطلاعات پرداخت شما... لطفاً شکیبا باشید." />
       </div>
     );
   }
 
-  return (
-    <div className="text-center mt-10 text-green-600">
-      ✅ پرداخت با موفقیت انجام شد
-      <br />
-      کد رهگیری: {result.refId}
-    </div>
-  );
+  if (isCancelled) {
+    return (
+      <div className={containerClasses}>
+        <ResultCard
+          icon={<FaExclamationTriangle className="text-yellow-500 text-6xl" />}
+          title="پرداخت لغو شد"
+          message="شما از ادامه فرآیند پرداخت انصراف دادید."
+        >
+          <button
+            onClick={() => router.push('/cart')}
+            className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+          >
+            بازگشت به سبد خرید
+          </button>
+        </ResultCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={containerClasses}>
+        <ResultCard
+          icon={<FaTimesCircle className="text-red-500 text-6xl" />}
+          title="پرداخت ناموفق"
+          message={error}
+        >
+          <button
+            onClick={() => router.push('/cart')} // Or wherever you want to redirect
+            className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+          >
+            تلاش مجدد و بازگشت به سبد خرید
+          </button>
+        </ResultCard>
+      </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div className={containerClasses}>
+        <ResultCard
+          icon={<FaCheckCircle className="text-green-500 text-6xl" />}
+          title="پرداخت با موفقیت انجام شد"
+          message="از خرید شما متشکریم! سفارش شما با موفقیت ثبت شد."
+        >
+          {refId && (
+            <div className="bg-gray-100 p-3 rounded-lg text-center my-6 border border-gray-200">
+              <p className="text-sm text-gray-600">شماره پیگیری تراکنش:</p>
+              <p className="text-lg font-bold text-gray-800 tracking-widest select-all">{refId}</p>
+            </div>
+          )}
+          <Link href="/dashboard/orders" className="w-full block bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3">
+            مشاهده سفارش‌ها
+          </Link>
+          <Link href="/" className="w-full block text-blue-600 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+            بازگشت به صفحه اصلی
+          </Link>
+        </ResultCard>
+      </div>
+    );
+  }
+
+  return null; // Should not be reached
 }
+
+
+// ====================================================================
+//  Reusable UI Components
+// ====================================================================
+
+interface ResultCardProps {
+  icon: React.ReactNode;
+  title: string;
+  message: string;
+  children?: React.ReactNode;
+}
+
+const ResultCard = ({ icon, title, message, children }: ResultCardProps) => (
+  <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 max-w-md w-full text-center transform transition-all hover:shadow-2xl duration-300">
+    <div className="flex justify-center mb-5 animate-pulse-once">{icon}</div>
+    <h1 className="text-2xl font-bold text-gray-800 mb-3">{title}</h1>
+    <p className="text-gray-600 mb-6 min-h-[40px]">{message}</p>
+    <div className="mt-8">{children}</div>
+  </div>
+);
+
+const LoadingState = ({ message }: { message: string }) => (
+  <div className="flex flex-col items-center justify-center text-center text-gray-700">
+    <FaSpinner className="animate-spin text-blue-500 text-5xl mb-4" />
+    <p className="text-lg font-semibold">{message}</p>
+  </div>
+);
+
+export default PaymentVerifyPage;
