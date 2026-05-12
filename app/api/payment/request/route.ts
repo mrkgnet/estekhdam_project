@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const currentUser = await infoCurentUser();
 
     // بررسی دسترسی کاربر
-    if (!currentUser || currentUser.role !== "user") {
+    if (!currentUser || currentUser.role !== "user" || currentUser.role !== "admin") {
       console.log("❌ Access denied: User");
       // ✅ مشکل اول رفع شد: استفاده از NextResponse
       return NextResponse.json({ success: false, message: "دسترسی غیرمجاز. لطفا وارد شوید." }, { status: 401 });
