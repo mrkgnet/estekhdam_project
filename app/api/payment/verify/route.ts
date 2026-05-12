@@ -13,7 +13,6 @@ export async function POST(req: Request) {
 
     const order = await db.order.findUnique({
       where: { id: orderId },
-      // دقت کنید: نام فیلد باید دقیقاً مطابق مدل Prisma شما باشد (pricePaid)
       select: { id: true, pricePaid: true, status: true, refId: true },
     });
 
@@ -36,26 +35,24 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
         merchant_id,
-        amount: order.pricePaid*10, // اصلاح شد: استفاده از pricePaid
+        amount: order.pricePaid * 10, 
         authority: authority,
       }),
     });
 
     const zp = await zpRes.json();
     
-    // لاگ برای عیب‌یابی در کنسول سرور (Runflare/Vercel)
-    console.log("Zarinpal Response:", JSON.stringify(zp, null, 2));
-
     const code = zp?.data?.code;
     const refId = zp?.data?.ref_id;
 
     if (code === 100 || code === 101) {
+      // آپدیت موفقیت آمیز سفارش در دیتابیس (بدون paidAt)
       await db.order.update({
         where: { id: orderId },
         data: {
           status: "SUCCESS",
           refId: refId ? String(refId) : (order.refId || null),
-          paidAt: new Date(),
+          // paidAt حذف شد چون در دیتابیس شما وجود ندارد
         },
       });
       return NextResponse.json({ ok: true, refId: refId || order.refId });
@@ -68,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, message: errorMessage }, { status: 400 });
     
   } catch (e) {
-    console.error("Payment verify error:", e);
+    console.error("Payment verify error:", e); // این لاگ الان دارد خطای Prisma را نشان می‌دهد
     return NextResponse.json({ ok: false, message: "خطای داخلی سرور" }, { status: 500 });
   }
 }

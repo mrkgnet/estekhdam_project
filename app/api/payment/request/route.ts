@@ -19,6 +19,7 @@ export async function POST(req: Request) {
     };
 
     const firstItem = items && items.length > 0 ? items[0] : null;
+    
 
     if (!firstItem || !firstItem.productId) {
       return NextResponse.json({ ok: false, message: "سبد خرید نامعتبر است." }, { status: 400 });
