@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import FetchDataCart from "./FetchDataCart";
-import LoadingDots from "@/components/LoadingIphone";
+import LoadingIphone from "@/components/LoadingIphone";
+
 
 export default async function Page({
   params,
@@ -11,7 +12,7 @@ export default async function Page({
 
   return (
     <div>
-      <Suspense fallback={<LoadingDots />}>
+      <Suspense fallback={<LoadingIphone />}>
         <FetchDataCart pid={id} />
       </Suspense>
     </div>

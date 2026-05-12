@@ -1,6 +1,6 @@
 "use client";
 
-export default function LoadingDots() {
+export default function LoadingIphone() {
   return (
     <div className="flex flex-col justify-center items-center mt-10">
       <div className="flex gap-2 mb-3">

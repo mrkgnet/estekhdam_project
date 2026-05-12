@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import PaymentVerifyPage from "./PaymentVerifyPage";
-import LoadingDots from "./LoadingDots";
+import LoadingIphone from "@/components/LoadingIphone";
+
 
 export const dynamic = "force-dynamic";
 
 export default function Page() {
   return (
-    <Suspense fallback={<LoadingDots />}>
+    <Suspense fallback={<LoadingIphone />}>
       <PaymentVerifyPage />
     </Suspense>
   );
