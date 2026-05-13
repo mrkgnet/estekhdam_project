@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         hostname: "account4all.ir",
       },
       {
+            protocol: 'https',
+            hostname: 'estekhdampro.hot.ir-central1.arvanstorage.ir',
+            port: '',
+            pathname: '/**', // اجازه دسترسی به تمام مسیرهای این دامنه
+          },
+      {
         protocol: "https",
         hostname: "mrkg.s3.ir-thr-at1.arvanstorage.ir",
       },

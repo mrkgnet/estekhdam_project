@@ -124,6 +124,6 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error("verify error:", error);
-    return NextResponse.json({ error: "خطای داخلی سرور" }, { status: 500 });
+    return NextResponse.json({ error: "مشکل داخلی سرور:لطفا چند دقیقه دیگر مجددامتحان کنید" }, { status: 500 });
   }
 }
