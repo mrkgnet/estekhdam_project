@@ -90,7 +90,7 @@ export default function Footer() {
         {/*zarinpal and image  */}
 
         <div className="">
-         <FooterTrustBadges />
+          <FooterTrustBadges />
         </div>
       </div>
       {/* Main */}
@@ -137,7 +137,7 @@ export default function Footer() {
 
 
             {/* E-namad */}
-            
+
           </div>
 
           {/* Quick Links */}
@@ -273,25 +273,33 @@ export default function Footer() {
 }
 
 
-export  function FooterTrustBadges() {
+export function FooterTrustBadges() {
   return (
     <div className="mt-4 md:mt-0 font-bold bg-white rounded-lg p-3.5">
       <h4 className="text-sm text-slate-700 mb-2">با خیال راحت خرید کنید</h4>
 
       <div className="grid grid-cols-2 gap-4 max-w-xs justify-center items-center ">
+
+
         <a
           referrerPolicy="origin"
-          href="https://trustseal.enamad.ir/?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
           target="_blank"
-          className="rounded-xl border bg-white p-2 shadow-sm hover:shadow w-[130px] h-[130px]"
+          rel="noreferrer"
+          href="https://trustseal.enamad.ir/?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
         >
-          <Image
-            src="https://trustseal.enamad.ir/logo.aspx?id=6135366&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-            alt="نماد اعتماد الکترونیکی"
-            width={64}
-            height={64}
+          <img
+            referrerPolicy="origin"
+            src="https://trustseal.enamad.ir/logo.aspx?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
+            alt="اینماد"
+            style={{ cursor: "pointer" }}
           />
         </a>
+
+
+
+
+
+
 
         <Image
           src="/images/footer/zrinpal.png"
