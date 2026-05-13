@@ -3,7 +3,7 @@
 import { editDataProductAction } from "@/actions/admin/products/government/editproduct/Actions";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import { generatePersianSlug } from "@/lib/generateSlug";
-import { ArrowLeft, UploadCloud, X, LayoutList, Tag, DollarSign, ListChecks, Type } from "lucide-react";
+import { ArrowLeft, UploadCloud, X, LayoutList, Tag, DollarSign, ListChecks, Type, Link as LinkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -22,8 +22,8 @@ interface Product {
     newPrice: number;
     oldPrice?: number | null;
     imageUrl?: string | null;
-    categoryIds?: string[]; // 🟢 این خط اضافه شد (آرایه آیدی‌ها که از دیتابیس می‌آید)
-    categories?: Category[]; // این را نگه دارید مشکلی ندارد
+    categoryIds?: string[];
+    categories?: Category[];
     features?: string[]
 }
 
@@ -37,31 +37,28 @@ const initialState = { success: false, message: "" };
 export default function ShowDataProduct({ productData, allCategories }: EditProductProps) {
     const router = useRouter();
     const formRef = useRef<HTMLFormElement>(null);
-
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [state, formAction, isPending] = useActionState(editDataProductAction, initialState);
 
-    // استیت‌ها
-    // 🟢 مقداردهی اولیه اصلاح شد: پیدا کردن آبجکت دسته‌بندی‌ها از روی آیدی آن‌ها
+    // استیت‌های دسته‌بندی و ویژگی‌ها
     const [selectedCategories, setSelectedCategories] = useState<Category[]>(() => {
         if (productData?.categoryIds && productData.categoryIds.length > 0) {
-            // آیدی‌ها را با لیست کل دسته‌بندی‌ها مقایسه کرده و آبجکت‌های کامل را برمی‌گرداند
             return allCategories.filter((cat) => productData.categoryIds!.includes(cat.id));
         }
         return [];
     });
-
     const [features, setFeatures] = useState<string[]>(() => productData?.features || []);
     const [featureInput, setFeatureInput] = useState("");
-    const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
-
-    // 🔴 1. مقداردهی اولیه استیت با توضیحات قبلی محصول
+    // استیت‌های مربوط به توضیحات و نام/اسلاگ
     const [description, setDescription] = useState(productData.description || "");
+    const [productName, setProductName] = useState(productData.name || "");
+    const [productSlug, setProductSlug] = useState(productData.slug || "");
 
-
-
+    // استیت‌های مربوط به تصویر
+    const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
+    const [externalImageUrl, setExternalImageUrl] = useState("");
 
     useEffect(() => {
         if (state?.message) {
@@ -107,26 +104,38 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
         }
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setPreviewImage(URL.createObjectURL(file));
-        }
-    };
-
-    const clearImage = () => {
-        setPreviewImage(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-
-    // 🔴 استیت‌های مربوط به تولید خودکار اسلاگ
-    const [productName, setProductName] = useState(productData.name || "");
-    const [productSlug, setProductSlug] = useState(productData.slug || "");
-
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setProductName(val);
         setProductSlug(generatePersianSlug(val));
+    };
+
+    // مدیریت تغییر لینک تصویر
+    const handleExternalUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setExternalImageUrl(val);
+        if (val) {
+            setPreviewImage(val);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        } else {
+            setPreviewImage(productData?.imageUrl || null); // بازگشت به عکس قبلی در صورت خالی شدن لینک
+        }
+    };
+
+    // مدیریت انتخاب فایل تصویر
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setExternalImageUrl("");
+            setPreviewImage(URL.createObjectURL(file));
+        }
+    };
+
+    // پاک کردن تصویر
+    const clearImage = () => {
+        setPreviewImage(null);
+        setExternalImageUrl("");
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
@@ -149,9 +158,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
             <form ref={formRef} action={formAction} className="space-y-8">
                 <input type="hidden" name="id" value={productData.id} />
                 <input type="hidden" name="existingImageUrl" value={productData.imageUrl || ""} />
-                 {/* 🔴 2. فیلد مخفی برای ارسال استیت ادیتور به اکشن */}
                 <input type="hidden" name="description" value={description} />
-
 
                 {selectedCategories.map((cat, index) => (
                     <input key={`cat-${index}`} type="hidden" name="categoryIds" value={cat.id} />
@@ -171,7 +178,6 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-700">نام محصول <span className="text-red-500">*</span></label>
-                            {/* 🔴 اینجا value به productName تغییر کرد */}
                             <input
                                 type="text"
                                 onChange={handleNameChange}
@@ -185,7 +191,6 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                             <label className="text-sm font-semibold text-gray-700 flex justify-between">
                                 <span>اسلاگ (شناسه URL) <span className="text-red-500">*</span></span>
                             </label>
-                            {/* 🔴 اینجا value به productSlug تغییر کرد */}
                             <input
                                 type="text"
                                 onChange={(e) => setProductSlug(e.target.value)}
@@ -213,18 +218,41 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                         </div>
                     </div>
 
-                    {/* آپلود عکس */}
-                    <div className="space-y-3 pt-4 border-t border-gray-100">
-                        <label className="text-sm font-semibold text-gray-700">تصویر محصول <span className="text-red-500">*</span></label>
-                        <div className="relative border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50/50 rounded transition-all overflow-hidden group">
+                    {/* بخش آپلود یا لینک عکس */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                        <label className="text-sm font-semibold text-gray-700">تصویر محصول (آپلود فایل یا ورود لینک)</label>
+                        
+                        <div className="relative">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <LinkIcon className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <input 
+                                type="url" 
+                                name="externalImageUrl"
+                                value={externalImageUrl}
+                                onChange={handleExternalUrlChange}
+                                disabled={!!(previewImage && !externalImageUrl && fileInputRef.current?.value)}
+                                placeholder="لینک مستقیم تصویر را اینجا وارد کنید"
+                                className="w-full pr-10 pl-4 py-3 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left disabled:opacity-50"
+                                dir="ltr"
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-center space-x-4 space-x-reverse text-gray-400 text-sm">
+                            <span className="h-[1px] w-full bg-gray-200"></span>
+                            <span>یا</span>
+                            <span className="h-[1px] w-full bg-gray-200"></span>
+                        </div>
+
+                        <div className={`relative border-2 border-dashed rounded transition-all overflow-hidden group ${externalImageUrl ? 'border-gray-200 bg-gray-100 opacity-50' : 'border-gray-300 hover:border-blue-400 bg-gray-50/50'}`}>
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                required={!previewImage}
                                 name="imageFile"
                                 accept="image/*"
                                 onChange={handleImageChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                disabled={!!externalImageUrl}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
                             />
                             {!previewImage ? (
                                 <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -313,17 +341,12 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                     </section>
                 </div>
 
-          
-
-                {/* 4. استفاده از کامپوننت ادیتور در بخش توضیحات */}
-        {/* 🔴 3. بخش textarea قدیمی حذف شد و کامپوننت ادیتور اصلاح شد */}
+                {/* توضیحات محصول */}
                 <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-4">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                         <Tag className="w-4 h-4 text-blue-500" /> توضیحات محصول
                     </label>
-                    
                     <div className="border border-gray-200 rounded overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-                        {/* 🔴 فقط از value و onChange استفاده کنید */}
                         <RichTextEditor 
                             value={description}
                             onChange={setDescription} 
@@ -331,15 +354,8 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                     </div>
                 </section>
 
-
-
-
-
-
-
-
                 {/* نوار دکمه شناور */}
-                <div className=" left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50">
+                <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50">
                     <div className="w-full max-w-5xl flex justify-end gap-4 px-4 sm:px-6 lg:px-8">
                         <button type="button" onClick={() => router.back()} className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium transition-colors">
                             انصراف

@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import {
     ArrowRight, CheckCircle2, MapPin, Plus, Save, Briefcase,
     Calendar, Info, Image as ImageIcon, ArrowLeft, UploadCloud, X,
-    PackagePlus
+    PackagePlus, LinkIcon
 } from "lucide-react";
 import { createNewsGovermentAction } from "@/actions/admin/jobnews/government/addnews/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
@@ -20,7 +20,6 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import DateObject from "react-date-object";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 
-// وضعیت‌های قابل انتخاب
 const STATUS_OPTIONS = [
     { key: "OPEN", label: "ثبت نام" },
     { key: "CARD_RECEIVED", label: "دریافت کارت" },
@@ -28,7 +27,6 @@ const STATUS_OPTIONS = [
     { key: "NEWS", label: "اطلاعیه و خبر" },
 ];
 
-// تعریف تایپ برای محصولات دریافتی
 interface ProductType {
     id: string;
     name?: string;
@@ -51,17 +49,17 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     const [cities, setCities] = useState<string[]>([]);
     const [cityInput, setCityInput] = useState("");
     
-    // استیت توضیحات برای RichTextEditor
     const [description, setDescription] = useState("");
 
-    // --- استیت‌های جدید برای محصولات ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-    // ------------------------------------
 
-    // ✅ تاریخ‌های فارسی
     const [startAt, setStartAt] = useState<DateObject | null>(null);
     const [endAt, setEndAt] = useState<DateObject | null>(null);
+
+    // استیت‌های مربوط به تصویر
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [externalImageUrl, setExternalImageUrl] = useState("");
 
     useEffect(() => {
         if (!state) return;
@@ -73,8 +71,9 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
             setCityInput("");
             setTitle("");
             setSlugNews("");
-            setDescription(""); // خالی کردن ادیتور
+            setDescription("");
             setPreviewImage(null);
+            setExternalImageUrl("");
             setSelectedProductIds([]);
             setStartAt(null);
             setEndAt(null);
@@ -85,7 +84,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
         }
     }, [state, router]);
 
-    // توابع مدیریت آرایه‌ها
     const addJob = () => {
         const value = jobInput.trim();
         if (!value || jobs.includes(value)) return;
@@ -107,7 +105,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
         }
     };
 
-    // --- تابع انتخاب/حذف محصول از لیست ---
     const toggleProductSelection = (productId: string) => {
         setSelectedProductIds(prev =>
             prev.includes(productId)
@@ -116,12 +113,19 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
         );
     };
 
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    // توابع مدیریت تصویر (لینک و فایل)
+    const handleExternalUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const url = e.target.value;
+        setExternalImageUrl(url);
+        setPreviewImage(url);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setPreviewImage(URL.createObjectURL(file));
+            setExternalImageUrl("");
         } else {
             setPreviewImage(null);
         }
@@ -130,10 +134,10 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     const removeImage = (e: React.MouseEvent) => {
         e.preventDefault();
         setPreviewImage(null);
+        setExternalImageUrl("");
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // slug generator 
     const [title, setTitle] = useState("");
     const [slugNews, setSlugNews] = useState("");
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +148,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
 
     return (
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 relative text-xs md:text-sm">
-            {/* هدر صفحه */}
             <div className="flex flex-wrap items-center justify-between mt-6 mb-8 gap-4">
                 <div>
                     <h1 className="text-2xl text-slate-800">ثبت آگهی استخدام جدید</h1>
@@ -163,25 +166,12 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                 <input type="hidden" name="jobs" value={JSON.stringify(jobs)} />
                 <input type="hidden" name="cities" value={JSON.stringify(cities)} />
 
-                {/* --- اینپوت مخفی برای ارسال محصولات به اکشن سرور --- */}
-                {selectedProductIds.map((id) => (
-                    <input key={id} type="hidden" name="productIds" value={id} />
-                ))}
+                {/* اصلاح شده: ارسال به صورت JSON String برای سازگاری با اکشن سرور */}
+                <input type="hidden" name="productIds" value={JSON.stringify(selectedProductIds)} />
 
-                {/* ارسال محتوای RichTextEditor به سرور */}
                 <input type="hidden" name="description" value={description} />
-
-                {/* ✅ تاریخ‌ها به صورت ISO ارسال می‌شوند */}
-                <input
-                    type="hidden"
-                    name="startAt"
-                    value={startAt ? startAt.toDate().toISOString() : ""}
-                />
-                <input
-                    type="hidden"
-                    name="endAt"
-                    value={endAt ? endAt.toDate().toISOString() : ""}
-                />
+                <input type="hidden" name="startAt" value={startAt ? startAt.toDate().toISOString() : ""} />
+                <input type="hidden" name="endAt" value={endAt ? endAt.toDate().toISOString() : ""} />
 
                 {state?.success === false && (
                     <div className="p-4 bg-red-50 text-red-700 rounded-xl border border-red-100 flex items-center gap-2">
@@ -221,39 +211,88 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                         </div>
                     </div>
 
-                    {/* بخش ادیتور متن */}
                     <div className="space-y-3">
                         <label className="text-slate-700">توضیحات تکمیلی</label>
                         <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-                            <RichTextEditor
-                                value={description}
-                                onChange={setDescription}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 pt-4">
-                        <label className="text-slate-700 flex items-center gap-2">تصویر کاور آگهی <span className="text-red-500">*</span></label>
-                        <div className="relative group w-full sm:w-96">
-                            <input type="file" required={!previewImage} name="imageFile" accept="image/*" onChange={handleImageChange} ref={fileInputRef} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                            <div className={`w-full border-2 border-dashed rounded-2xl overflow-hidden transition-all flex flex-col items-center justify-center gap-2 ${previewImage ? 'border-blue-500 bg-blue-50 h-48' : 'border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 h-32'}`}>
-                                {previewImage ? (
-                                    <div className="relative w-full h-full group-hover:opacity-90 transition-opacity">
-                                        <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
-                                        <button onClick={removeImage} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-md" title="حذف تصویر"><X className="w-4 h-4" /></button>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="p-3 bg-white rounded-full shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors"><UploadCloud className="w-6 h-6" /></div>
-                                        <span className="text-slate-500">برای انتخاب عکس کلیک کنید یا فایل را بکشید</span>
-                                    </>
-                                )}
-                            </div>
+                            <RichTextEditor value={description} onChange={setDescription} />
                         </div>
                     </div>
                 </div>
 
-                {/* 2. زمانبندی و شرایط */}
+                {/* 2. تصویر کاور */}
+                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-6">
+                    <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <ImageIcon className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-slate-800">تصویر کاور آگهی <span className="text-red-500">*</span></h2>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                        <div className="w-full space-y-6 flex-1">
+                            <div className="space-y-3">
+                                <label className="text-slate-700 flex items-center gap-2">
+                                    <LinkIcon className="w-4 h-4 text-slate-500" />
+                                    لینک مستقیم تصویر (اولویت اول)
+                                </label>
+                                <input
+                                    type="url"
+                                    name="externalImageUrl"
+                                    value={externalImageUrl}
+                                    onChange={handleExternalUrlChange}
+                                    disabled={!!(fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files.length > 0)}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all disabled:bg-slate-100 disabled:opacity-50 text-left dir-ltr"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-4 w-full">
+                                <div className="h-px bg-slate-200 flex-1"></div>
+                                <span className="text-slate-400 text-xs">یا</span>
+                                <div className="h-px bg-slate-200 flex-1"></div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-slate-700 flex items-center gap-2">
+                                    <UploadCloud className="w-4 h-4 text-slate-500" />
+                                    آپلود فایل تصویر
+                                </label>
+                                <input
+                                    type="file"
+                                    name="imageFile"
+                                    ref={fileInputRef}
+                                    onChange={handleImageChange}
+                                    disabled={!!externalImageUrl}
+                                    accept="image/*"
+                                    className="w-full border border-slate-200 rounded-xl p-2 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="w-full md:w-1/3 flex flex-col items-center gap-3">
+                            <span className="text-slate-700 w-full text-right">پیش‌نمایش:</span>
+                            {previewImage ? (
+                                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-200 shadow-sm group">
+                                    <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={removeImage}
+                                        className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="w-full aspect-video rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                                    <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                                    <span className="text-sm">عکسی انتخاب نشده</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. زمانبندی و شرایط */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-6">
                         <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
@@ -288,7 +327,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                                 />
                             </div>
 
-                            {/* --- دکمه باز کردن مودال انتخاب محصول --- */}
                             <div className="space-y-2 pt-4 border-t border-slate-100">
                                 <label className="text-slate-700 block mb-2">محصولات مرتبط با این آزمون</label>
                                 <button
@@ -329,18 +367,18 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                     </div>
                 </div>
 
-                {/* 3. تگ‌ها (شغل‌ها و شهرها) - اضافه شده در اینجا */}
+                {/* 4. تگ‌ها (شغل‌ها و شهرها) */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 space-y-4">
                         <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
                                 <Briefcase className="w-5 h-5" />
                             </div>
                             <h2 className="text-slate-800">شغل‌های مورد نیاز</h2>
                         </div>
                         <div className="flex gap-2">
-                            <input value={jobInput} onChange={(e) => setJobInput(e.target.value)} onKeyDown={(e) => handleKeyDown(e, addJob)} placeholder="مثلا: آموزگار ابتدایی (Enter)" className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none" />
-                            <button type="button" onClick={addJob} className="bg-purple-100 text-purple-700 p-3 rounded-xl hover:bg-purple-200 shrink-0"><Plus className="w-5 h-5" /></button>
+                            <input value={jobInput} onChange={(e) => setJobInput(e.target.value)} onKeyDown={(e) => handleKeyDown(e, addJob)} placeholder="مثلا: آموزگار ابتدایی (Enter)" className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                            <button type="button" onClick={addJob} className="bg-indigo-100 text-indigo-700 p-3 rounded-xl hover:bg-indigo-200 shrink-0"><Plus className="w-5 h-5" /></button>
                         </div>
                         <div className="flex flex-wrap gap-2 pt-2 min-h-[40px] items-start">
                             {jobs.length === 0 && <span className="text-slate-400 py-1">موردی اضافه نشده است</span>}
@@ -385,7 +423,7 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
                 </div>
             </form>
 
-            {/* ============== مودال انتخاب محصول ============== */}
+            {/* مودال انتخاب محصول */}
             <AnimatePresence>
                 {isModalOpen && (
                     <div dir="rtl" className="fixed inset-0 z-50 flex items-center justify-center p-4">

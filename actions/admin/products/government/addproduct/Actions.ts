@@ -15,10 +15,15 @@ export default async function addProductAction(prevState: any, formData: FormDat
     }
 
     const imageFile = formData.get("imageFile") as File;
+    const externalImageUrl = formData.get("externalImageUrl") as string;
     let finalImageUrl = null;
 
-    // مدیریت آپلود عکس با سیستم هشینگ
-    if (imageFile && imageFile.size > 0) {
+    // 1. بررسی لینک مستقیم (اولویت با لینک است)
+    if (externalImageUrl && externalImageUrl.trim() !== "") {
+      finalImageUrl = externalImageUrl.trim();
+    }
+    // 2. مدیریت آپلود عکس با سیستم هشینگ (اگر لینکی داده نشده بود)
+    else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -83,15 +88,12 @@ export default async function addProductAction(prevState: any, formData: FormDat
           description,
           features: features,
 
-          // 🟢 روش صحیح و استاندارد ثبت رابطه چند به چند در پستگرس
+          // روش صحیح و استاندارد ثبت رابطه چند به چند در پستگرس
           categories: {
             connect: categoryIdsFromForm.map((catId) => ({ id: catId })),
           },
         },
       });
-
-      // 🔴 تمام حلقه for...of مربوط به آپدیت دسته بندی (tx.category.update)
-      // را به طور کامل پاک کنید، چون پریزما با دستور connect بالا خودش همه کارها را انجام داد.
     });
 
     revalidatePath("/adminp/products/government/addproduct");

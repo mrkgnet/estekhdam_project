@@ -12,7 +12,6 @@ export async function getDataEditProduct(id: string) {
 
     const productData = await db.product.findUnique({
       where: { id: id },
-      // 🟢 در پستگرس باید include کنیم تا دسته‌بندی‌های متصل هم واکشی شوند
       include: {
         categories: {
           select: {
@@ -27,7 +26,6 @@ export async function getDataEditProduct(id: string) {
       return { success: false, message: "محصول مورد نظر یافت نشد", product: null };
     }
 
-    // 🟡 برای سازگاری با فرم کلاینت شما، آیدی دسته‌بندی‌ها را به صورت یک آرایه ساده (categoryIds) استخراج می‌کنیم
     const formattedProduct = {
       ...productData,
       categoryIds: productData.categories.map(cat => cat.id)

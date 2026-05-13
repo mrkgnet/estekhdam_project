@@ -1,3 +1,5 @@
+// file: addMainSliderAction.ts
+
 "use server";
 
 import { infoCurentUser } from "@/lib/auth";
@@ -11,56 +13,54 @@ export async function addMainSliderAction(prevState: any, formData: FormData) {
   try {
     const currentUser = await infoCurentUser();
 
-    // بررسی دسترسی ادمین
     if (!currentUser || currentUser.role !== "admin") {
-      console.log("❌ Access denied: User is not admin");
       return {
         success: false,
-        message: "دسترسی غیرمجاز. فقط ادمین می‌تواند اسلایدر اضافه کند.",
+        message: "دسترسی غیرمجاز.",
       };
     }
 
-    // ۱. دریافت اطلاعات از FormData
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const targetLink = formData.get("targetLink") as string;
     const imageFile = formData.get("imageFile") as File | null;
+    const externalImageUrl = formData.get("externalImageUrl") as string | null;
 
-    // ۲. اعتبارسنجی (عکس اجباری است)
-    if (!imageFile || imageFile.size === 0) {
+    let finalImageUrl = "";
+
+    // ۱. اولویت با لینک خارجی
+    if (externalImageUrl && externalImageUrl.trim().startsWith('http')) {
+        finalImageUrl = externalImageUrl.trim();
+    } 
+    // ۲. اگر لینک خارجی نبود، فایل را بررسی کن
+    else if (imageFile && imageFile.size > 0) {
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const hash = crypto.createHash("sha256").update(buffer).digest("hex");
+      const extension = path.extname(imageFile.name) || ".jpg";
+      const filename = `${hash}${extension}`;
+
+      const uploadDir = path.join(process.cwd(), "public", "images", "mainSlider");
+      const savePath = path.join(uploadDir, filename);
+      
+      await fs.mkdir(uploadDir, { recursive: true });
+
+      // برای جلوگیری از نوشتن مجدد فایل موجود
+      try {
+        await fs.access(savePath);
+      } catch {
+        await fs.writeFile(savePath, buffer);
+      }
+      
+      finalImageUrl = `/images/mainSlider/${filename}`;
+    }
+
+    // ۳. اعتبارسنجی نهایی
+    if (!finalImageUrl) {
       return {
         success: false,
-        message: "انتخاب تصویر برای اسلایدر الزامی است.",
+        message: "لطفاً یک تصویر آپلود کنید یا لینک معتبر آن را وارد نمایید.",
       };
     }
-
-    // ۳. مدیریت آپلود عکس با سیستم هشینگ
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
-    const extension = path.extname(imageFile.name) || ".jpg";
-    const filename = `${hash}${extension}`;
-
-    // مسیر ذخیره‌سازی پوشه mainSlider
-    const uploadDir = path.join(process.cwd(), "public", "images", "mainSlider");
-    const savePath = path.join(uploadDir, filename);
-
-    // ساخت پوشه در صورت عدم وجود
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    let fileExists = false;
-    try {
-      await fs.access(savePath);
-      fileExists = true;
-    } catch (error) {
-      fileExists = false;
-    }
-
-    // اگر فایلی با این هش وجود نداشت، آن را ذخیره کن
-    if (!fileExists) {
-      await fs.writeFile(savePath, buffer);
-    }
-
-    const finalImageUrl = `/images/mainSlider/${filename}`;
 
     // ۴. ذخیره در دیتابیس
     await db.mainSlider.create({
@@ -72,20 +72,18 @@ export async function addMainSliderAction(prevState: any, formData: FormData) {
       },
     });
 
-    // ۵. به‌روزرسانی کش صفحاتی که اسلایدر در آن‌ها نمایش داده می‌شود
-    revalidatePath("/"); // صفحه اصلی سایت
-    revalidatePath("/admin/mainslider"); // مسیر صفحه مدیریت اسلایدر خود را در صورت نیاز اصلاح کنید
+    revalidatePath("/");
+    revalidatePath("/admin/mainslider");
 
     return {
       success: true,
-      message: "اسلایدر با موفقیت ایجاد و منتشر شد.",
+      message: "اسلایدر با موفقیت ایجاد شد.",
     };
   } catch (error) {
     console.error("❌ Error in addMainSliderAction:", error);
-
     return {
       success: false,
-      message: "خطایی در برقراری ارتباط با سرور یا آپلود فایل رخ داد.",
+      message: "خطایی در سرور رخ داد.",
     };
   }
 }

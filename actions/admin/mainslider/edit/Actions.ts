@@ -1,3 +1,5 @@
+// file: editMainSliderAction.ts
+
 "use server";
 
 import { infoCurentUser } from "@/lib/auth";
@@ -11,23 +13,31 @@ export async function editMainSliderAction(prevState: any, formData: FormData) {
   try {
     const currentUser = await infoCurentUser();
 
-    // بررسی دسترسی ادمین
     if (!currentUser || currentUser.role !== "admin") {
       return {
         success: false,
-        message: "دسترسی غیرمجاز. فقط ادمین می‌تواند اسلایدر را ویرایش کند.",
+        message: "دسترسی غیرمجاز.",
       };
     }
 
     const id = formData.get("id") as string;
+    if (!id) {
+      return { success: false, message: "شناسه اسلایدر یافت نشد." };
+    }
+
     const existingImageUrl = formData.get("existingImageUrl") as string;
-    const imageFile = formData.get("imageFile") as File;
+    const imageFile = formData.get("imageFile") as File | null;
+    const externalImageUrl = formData.get("externalImageUrl") as string | null;
     
-    // اگر فایل جدیدی نیامده بود، مقدار پیش‌فرض همان عکس قبلی است
+    // مقدار پیش‌فرض همان عکس قبلی است
     let finalImageUrl = existingImageUrl;
 
-    // مدیریت آپلود عکس با سیستم هشینگ (فقط در صورتی که عکس جدید انتخاب شده باشد)
-    if (imageFile && imageFile.size > 0) {
+    // ۱. اولویت با لینک خارجی جدید
+    if (externalImageUrl && externalImageUrl.trim().startsWith('http')) {
+        finalImageUrl = externalImageUrl.trim();
+    }
+    // ۲. اگر لینک جدیدی نبود، فایل آپلود شده جدید را بررسی کن
+    else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -38,48 +48,34 @@ export async function editMainSliderAction(prevState: any, formData: FormData) {
 
       await fs.mkdir(uploadDir, { recursive: true });
 
-      let fileExists = false;
       try {
         await fs.access(savePath);
-        fileExists = true;
-      } catch (error) {
-        fileExists = false;
-      }
-
-      if (!fileExists) {
+      } catch {
         await fs.writeFile(savePath, buffer);
       }
 
       finalImageUrl = `/images/mainSlider/${filename}`;
     }
+    // ۳. اگر کاربر لینک را پاک کرده ولی فایلی هم آپلود نکرده باشد
+    else if (externalImageUrl !== null && externalImageUrl.trim() === '' && (!imageFile || imageFile.size === 0)) {
+        finalImageUrl = ''; // خالی کردن لینک
+    }
 
-    // ۱. دریافت بقیه اطلاعات از FormData
+    if (!finalImageUrl) {
+        return { success: false, message: "تصویر اسلایدر نمی‌تواند خالی باشد." };
+    }
+
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const targetLink = formData.get("targetLink") as string;
-
-    // تبدیل order به عدد
     const orderRaw = formData.get("order");
     const order = orderRaw ? parseInt(orderRaw as string, 10) : 0;
-
-    // بررسی چک‌باکس
     const isActive = formData.get("isActive") === "on";
 
-    // ۲. اعتبارسنجی
-    if (!id) {
-      return { success: false, message: "شناسه اسلایدر یافت نشد." };
-    }
-    
-    // اگر کاربر عکس را از فرم پاک کرد و عکس جدیدی هم آپلود نکرد
-    if (!finalImageUrl || finalImageUrl.trim() === "") {
-      return { success: false, message: "انتخاب تصویر اسلایدر الزامی است." };
-    }
-
-    // ۳. آپدیت در دیتابیس
     await db.mainSlider.update({
       where: { id: id },
       data: {
-        imageUrl: finalImageUrl.trim(), // ذخیره لینک نهایی (قبلی یا جدید)
+        imageUrl: finalImageUrl.trim(),
         title: title ? title.trim() : null,
         description: description ? description.trim() : null,
         targetLink: targetLink ? targetLink.trim() : null,
@@ -88,9 +84,8 @@ export async function editMainSliderAction(prevState: any, formData: FormData) {
       },
     });
 
-    // ۴. به‌روزرسانی کش صفحات
     revalidatePath("/"); 
-    revalidatePath("/adminp/mainslider"); 
+    revalidatePath("/admin/mainslider"); // مسیر را متناسب با پروژه خود تغییر دهید
 
     return {
       success: true,
@@ -100,7 +95,7 @@ export async function editMainSliderAction(prevState: any, formData: FormData) {
     console.error("❌ Error in editMainSliderAction:", error);
     return {
       success: false,
-      message: "خطایی در برقراری ارتباط با پایگاه داده رخ داد.",
+      message: "خطایی در سرور رخ داد.",
     };
   }
 }

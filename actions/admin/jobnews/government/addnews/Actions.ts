@@ -3,8 +3,6 @@
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-
-// تایپ Enum را ایمپورت کنید
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
@@ -22,31 +20,28 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     }
 
     const rawData = Object.fromEntries(formData.entries());
+    let finalImageUrl: string | null = null;
 
-    // 1. استخراج فایل از فرم‌دیتا
+    // 1. بررسی لینک مستقیم (اولویت اول)
+    const externalImageUrl = formData.get("externalImageUrl") as string;
     const imageFile = formData.get("imageFile") as File;
-    let finalImageUrl = null;
 
-    // 2. مدیریت آپلود عکس با سیستم هشینگ (جلوگیری از آپلود تکراری)
-    if (imageFile && imageFile.size > 0) {
+    if (externalImageUrl && externalImageUrl.trim() !== "") {
+      finalImageUrl = externalImageUrl.trim();
+    } 
+    // 2. در صورت عدم وجود لینک، بررسی فایل آپلود شده
+    else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
 
-      // ساخت هش بر اساس محتوای فایل
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
-
-      // استخراج پسوند فایل (مثلا .jpg یا .png)
       const extension = path.extname(imageFile.name) || ".jpg";
-
-      // اسم فایل ترکیبی از هش محتوا و پسوند آن است
       const filename = `${hash}${extension}`;
 
       const uploadDir = path.join(process.cwd(), "public", "images", "jobnews", "government");
       const savePath = path.join(uploadDir, filename);
 
-      // اطمینان از وجود پوشه
       await fs.mkdir(uploadDir, { recursive: true });
 
-      // بررسی اینکه آیا عکسی با این محتوا از قبل در سرور وجود دارد؟
       let fileExists = false;
       try {
         await fs.access(savePath);
@@ -55,12 +50,8 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         fileExists = false;
       }
 
-      // فقط در صورتی فایل را در هارد می‌نویسیم که از قبل وجود نداشته باشد
       if (!fileExists) {
         await fs.writeFile(savePath, buffer);
-        console.log("عکس جدید بود و در سرور ذخیره شد.");
-      } else {
-        console.log("این عکس از قبل در سرور وجود داشت. از همان استفاده شد.");
       }
 
       finalImageUrl = `/images/jobnews/government/${filename}`;
@@ -83,7 +74,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
     
-    // پارس کردن آرایه‌ها (با fallback امن)
+    // پارس کردن آرایه‌ها (داده‌ها به صورت JSON.stringify از کلاینت ارسال شده‌اند)
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
     const productIds = JSON.parse((formData.get("productIds") as string) || "[]");
@@ -107,8 +98,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
       };
     }
 
-    // 5. ذخیره در دیتابیس
-      // 5. ذخیره در دیتابیس
+    // 5. ذخیره در دیتابیس با ایجاد رابطه چند به چند برای محصولات
     await db.governmentNews.create({
       data: {
         title,
@@ -123,19 +113,13 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         maxAge,
         isMainSlider: isSlider,
         status: finalStatus,
-        jobs,     // چون در پستگرس آرایه رشته‌ای (String[]) پشتیبانی می‌شود این مورد مشکلی ندارد
-        cities,   // این هم مشکلی ندارد
-        
-        // ❌ خطای شما اینجاست: در پستگرس نمی‌توانید آرایه آی‌دی‌ها را مستقیم بفرستید
-        // productIds, 
-        
-        // ✅ روش درست برای پستگرس (ایجاد رابطه چند به چند):
+        jobs,     
+        cities,   
         products: {
            connect: productIds.map((id: string) => ({ id: id }))
         }
       },
     });
-
 
     revalidatePath("/adminp/jobnews/government/add-news");
     revalidatePath("/adminp/jobnews/government");

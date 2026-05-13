@@ -6,8 +6,6 @@ import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
 
-
-
 export async function editDataProductAction(prevState: any, formData: FormData) {
   try {
     const currentUser = await infoCurentUser();
@@ -25,18 +23,23 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
       oldPrice: oldPriceStr = "",
       newPrice: newPriceStr = "",
       description = "",
-      existingImageUrl = "", // عکس قبلی که از فرم می‌آید
+      existingImageUrl = "", // عکس قبلی
     } = rawData as Record<string, string>;
 
     if (!id) {
       return { success: false, message: "آیدی محصول یافت نشد" };
     }
 
-    // 🔴 مدیریت آپلود عکس با سیستم هشینگ
     const imageFile = formData.get("imageFile") as File | null;
-    let finalImageUrl = existingImageUrl; // به صورت پیش‌فرض عکس قبلی را در نظر می‌گیریم
+    const externalImageUrl = formData.get("externalImageUrl") as string | null;
+    let finalImageUrl = existingImageUrl;
 
-    if (imageFile && imageFile.size > 0) {
+    // اولویت با لینک خارجی
+    if (externalImageUrl && externalImageUrl.trim() !== "") {
+      finalImageUrl = externalImageUrl.trim();
+    }
+    // در صورت نبود لینک مستقیم، فایل آپلود شده را بررسی می‌کنیم
+    else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -59,7 +62,7 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
         await fs.writeFile(savePath, buffer);
       }
       
-      finalImageUrl = `/images/products/${filename}`; // عکس جدید جایگزین شد
+      finalImageUrl = `/images/products/${filename}`; 
     }
 
     const categoryIds = formData.getAll("categoryIds") as string[];
@@ -69,7 +72,7 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
     const oldPrice = oldPriceStr ? parseInt(oldPriceStr, 10) : 0;
     const slug = rawSlug.trim().replace(/\s+/g, "-").toLowerCase();
 
-  await db.product.update({
+    await db.product.update({
       where: { id: id },
       data: {
         name,
@@ -79,7 +82,6 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
         imageUrl: finalImageUrl,
         description,
         features: features,
-        // 🔴 تغییر مهم برای پستگرس: استفاده از set به جای categoryIds
         categories: {
           set: categoryIds.map((catId) => ({ id: catId })),
         },

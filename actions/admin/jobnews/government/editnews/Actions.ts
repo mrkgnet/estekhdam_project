@@ -19,11 +19,18 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       };
     }
 
-    // استخراج فایل از فرم‌دیتا
-    const imageFile = formData.get("imageFile") as File;
-    let finalImageUrl = null;
+    const rawData = Object.fromEntries(formData.entries());
+    let finalImageUrl: string | null = null;
 
-    if (imageFile && imageFile.size > 0) {
+    // 1. بررسی لینک مستقیم تصویر
+    const externalImageUrl = formData.get("externalImageUrl") as string;
+    const imageFile = formData.get("imageFile") as File;
+
+    if (externalImageUrl && externalImageUrl.trim() !== "") {
+      finalImageUrl = externalImageUrl.trim();
+    } 
+    // 2. در صورت عدم وجود لینک، بررسی فایل آپلود شده
+    else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -48,8 +55,6 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       finalImageUrl = `/images/jobnews/government/${filename}`;
     }
 
-    const rawData = Object.fromEntries(formData.entries());
-
     const {
       id = "",
       title = "",
@@ -72,9 +77,9 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
     
-    // در PostgreSQL این آرایه‌ها به صورت native پشتیبانی می‌شوند (String[])
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
+    const productIds = JSON.parse((formData.get("productIds") as string) || "[]");
     
     const price = priceStr ? parseInt(priceStr) : 0;
     const maxAge = maxAgeStr ? parseInt(maxAgeStr) : 0;
@@ -90,9 +95,6 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
     if (checkSlug && checkSlug.id !== id) {
       return { success: false, message: "نام اسلاگ تکراری است." };
     }
-
-    // دریافت آیدی محصولات
-    const productIds = formData.getAll("productIds") as string[];
 
     // به‌روزرسانی در دیتابیس PostgreSQL
     await db.governmentNews.update({
@@ -112,10 +114,8 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
         status: finalStatus,
         jobs, 
         cities,
-        // 🚨 تغییر مهم برای PostgreSQL 🚨
-        // به جای پاس دادن مستقیم آرایه، از سینتکس set استفاده می‌کنیم
         products: {
-          set: productIds.map((pid) => ({ id: pid })),
+          set: productIds.map((pid: string) => ({ id: pid })),
         },
       }
     });
@@ -127,5 +127,38 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
   } catch (error) {
     console.error("خطا در ویرایش آگهی:", error);
     return { success: false, message: "خطایی در ویرایش اطلاعات رخ داد." };
+  }
+}
+
+// برای دریافت اطلاعات خبر به همراه آیدی محصولات مرتبط
+export async function getDataEditNewsGov(id: string) {
+  try {
+    if (!id) {
+      return { success: false, message: "شناسه آگهی نامعتبر است" };
+    }
+
+    const product = await db.governmentNews.findUnique({
+      where: { id: id },
+      include: {
+        products: {
+          select: { id: true }
+        }
+      }
+    });
+
+    if (!product) {
+      return { success: false, message: "آگهی یافت نشد" };
+    }
+
+    // اضافه کردن productIds به آبجکت برای استفاده در فرم کلاینت
+    const productWithIds = {
+      ...product,
+      productIds: product.products.map((p) => p.id)
+    };
+
+    return { success: true, product: productWithIds };
+  } catch (error) {
+    console.error("خطا در دریافت اطلاعات آگهی:", error);
+    return { success: false, message: "خطایی در دریافت اطلاعات دیتابیس رخ داد" };
   }
 }
