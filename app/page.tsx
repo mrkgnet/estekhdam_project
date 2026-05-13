@@ -1,83 +1,79 @@
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
-// import Header from "@/components/Header"; 
-import FetchDataMainSlider from "../components/user/home/mainslider/FetchDataMainSlider";
-import BreakingNewsComponent from "@/components/user/home/breakingnews/Gov/page";
-import BrandTopSlider from "@/components/user/home/BrandTopSlider";
-// import BankProductComponent from "@/components/user/home/TopicResource/page"; // این مورد استفاده نشده بود
-import SliderTopLeftComponent from "@/components/user/home/sliderTopLeft/page";
-import HeroSearch from "@/components/HeroSearch";
-import CategoryGrid from "@/components/user/home/categoryGrid/CategoryGrid";
-
+// 1. کامپوننت‌های بالای صفحه (بدون تغییر - لود فوری)
 import NavbarUser from "@/components/navbar/Navbar";
 import HeaderTopComponnet from "@/components/header/HeaderTopComponnet";
-
-
-import TabProductCat from "@/components/tabProductCat/TabProductCat";
 import SideBarUserComponent from "@/components/user/sidebar-user/SideBarUserComponent";
-import HomeLoaderEffect from "@/components/RouteChangeLoader";
-import RouteChangeLoader from "@/components/RouteChangeLoader";
+import BrandTopSlider from "@/components/user/home/BrandTopSlider";
+import HeroSearch from "@/components/HeroSearch";
+import FetchDataMainSlider from "../components/user/home/mainslider/FetchDataMainSlider";
+
+// 2. کامپوننت‌های پایین صفحه (Lazy Load با next/dynamic)
+// با این کار حجم فایل جاوا اسکریپت اولیه صفحه به شدت کاهش می‌یابد
+const SliderTopLeftComponent = dynamic(() => import("@/components/user/home/sliderTopLeft/page"), {
+  loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-xl min-h-[220px]"></div>,
+});
+
+const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
+  loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
+});
+
+const CategoryGrid = dynamic(() => import("@/components/user/home/categoryGrid/CategoryGrid"), {
+  loading: () => <div className="h-64 w-full bg-slate-100 animate-pulse rounded-2xl"></div>,
+});
+
+const TabProductCat = dynamic(() => import("@/components/tabProductCat/TabProductCat"), {
+  loading: () => <div className="h-96 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
+});
 
 export default function HomePage() {
-
-
-
-
-
   return (
     <div>
-      {/* <RouteChangeLoader /> */}
       <HeaderTopComponnet />
       <NavbarUser />
 
-      <div className="flex min-h-screen  font-sans">
-        {/* 
-        نکته UX: سایدبار در حالت موبایل معمولا باید مخفی شود (مثلا hidden lg:flex) 
-        و با یک دکمه همبرگری باز شود. فرض بر این است که این هندلینگ داخل خود کامپوننت SideBar انجام شده است.
-      */}
-
-
+      <div className="flex min-h-screen font-sans">
         <SideBarUserComponent />
 
         <main className="min-w-0 max-w-7xl m-auto flex-1 flex flex-col py-4 md:py-4 overflow-x-hidden">
-          <div className="w-full  mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-6 lg:space-y-8">
-
+          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-4 md:space-y-6 lg:space-y-8">
+            
+            {/* بخش‌های بالای صفحه - لود فوری */}
             <section className="w-full">
               <BrandTopSlider />
             </section>
+            
             <section className="w-full bg-white">
               <HeroSearch />
             </section>
+
             <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
               <div className="lg:col-span-4">
-                <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden  h-[220px] md:h-full">
-                  <FetchDataMainSlider />
+                <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
+                  {/* اگر این کامپوننت دیتای سنگین از سرور میگیرد، آن را در Suspense قرار میدهیم */}
+                  <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse"></div>}>
+                    <FetchDataMainSlider />
+                  </Suspense>
                 </div>
               </div>
-              <div className="lg:col-span-2 min-w-0  overflow-hidden h-full">
+              <div className="lg:col-span-2 min-w-0 overflow-hidden h-full">
                 <SliderTopLeftComponent />
               </div>
             </section>
-            <section>
-              {/* جدیدترین خبرها */}
-              <div className="w-full">
-                <BreakingNewsComponent />
-              </div>
+
+            {/* بخش‌های پایین صفحه - لود تنبل */}
+            <section className="w-full">
+              <BreakingNewsComponent />
             </section>
 
-
-            {/* categor section  */}
             <section className="w-full bg-white rounded-2xl">
               <CategoryGrid />
             </section>
 
-            {/* ============================== */}
-            {/* بخش اول:   پرمخاطب */}
-            {/* ============================== */}
-
-            <div>
+            <section className="w-full">
               <TabProductCat />
-            </div>
-
+            </section>
 
           </div>
         </main>
