@@ -113,3 +113,21 @@ button {
     animation: none;
   }
 }
+
+
+/*  */
+
+ .blink-dot {
+          animation: blink 1.4s infinite both;
+        }
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+        .delay-400 {
+          animation-delay: 0.4s;
+        }
+        @keyframes blink {
+          0% { opacity: 0.2; }
+          20% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
