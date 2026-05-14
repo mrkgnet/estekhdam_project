@@ -8,10 +8,12 @@ import { Pagination, Autoplay, EffectFade, Navigation } from "swiper/modules";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMainSliderUserAction } from "@/actions/user/mainslider/fetch/Actions";
 
+
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import "swiper/css/navigation";
+import DotsLoader from "@/components/ui/Loading/DotsLoader";
 
 type SliderDBItem = {
   id: string;
@@ -25,29 +27,11 @@ interface ShowMainSliderProps {
   initialSliders: any;
 }
 
-// ✅ یک اسکلتون هم‌اندازه با اسلایدر اصلی برای جلوگیری از پرش
-const MainSliderSkeleton = () => (
-  <div className="w-full h-[420px] md:h-[260px] flex flex-col relative rounded shadow-xl shadow-blue-900/5 border border-slate-100 bg-slate-50 animate-pulse">
-    <div className="flex h-full items-stretch gap-4 md:gap-8 p-2 md:p-4">
-      {/* Skeleton Text */}
-      <div className="order-1 w-full h-full flex flex-col justify-center gap-4 px-3 md:px-6">
-        <div className="h-6 bg-slate-200 rounded-md w-3/4"></div>
-        <div className="h-10 bg-slate-200 rounded-md w-40 mt-2"></div>
-      </div>
-      {/* Skeleton Image */}
-      <div className="order-2 w-full h-full flex items-center justify-center">
-        <div className="w-full h-full bg-slate-200 rounded-md"></div>
-      </div>
-    </div>
-  </div>
-);
-
 export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) {
   const progressRef = useRef<HTMLDivElement>(null);
-  
-  // ✅ بازگرداندن isMounted برای جلوگیری از پرش هیدریشن در Swiper
-  const [isMounted, setIsMounted] = useState(false);
 
+  // ✅ جلوگیری از پرش هیدریشن
+  const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -56,7 +40,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     queryKey: ["main-slider"],
     queryFn: () => fetchMainSliderUserAction(),
     initialData: initialSliders,
-    staleTime: 2000, 
+    staleTime: 2000,
   });
 
   const sliders: SliderDBItem[] = response?.data || [];
@@ -67,10 +51,11 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     }
   };
 
-  // ✅ نمایش اسکلتون تا زمانی که در کلاینت مانت شود
-  if (!isMounted) {
-    return <MainSliderSkeleton />;
-  }
+  // ✅ لودر قبل از mount
+  if (!isMounted) return <DotsLoader />;
+
+  // ✅ لودر هنگام لود
+  if (isLoading && sliders.length === 0) return <DotsLoader />;
 
   if (!isLoading && sliders.length === 0) return null;
 
@@ -99,8 +84,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
             backdrop-filter: blur(4px);
             border-radius: 10%;
             color: #2563eb;
-            border:1px solid gray;
-            padding:5px;
+            border: 1px solid gray;
+            padding: 5px;
             transition: all 0.3s ease;
             opacity: 1;
             transform: scale(0.7);
@@ -132,9 +117,9 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           pagination={{ clickable: true }}
           navigation={true}
           onAutoplayTimeLeft={onAutoplayTimeLeft}
-          className="w-full h-[420px] md:h-[360px] flex-1 modern-slider pb-8 md:pb-4"
+          className="w-full h-[620px] md:h-[360px] flex-1 modern-slider pb-8 md:pb-4"
         >
-          {/* نوار پیشرفت بالای اسلایدر */}
+          {/* نوار پیشرفت */}
           <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-200/50 z-50">
             <div
               ref={progressRef}
@@ -155,12 +140,12 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                   )}
 
                   <Link
-                    href={s.targetLink ?? "#"} 
+                    href={s.targetLink ?? "#"}
                     className="inline-flex items-center gap-2 w-fit rounded-md
-               px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
-               hover:bg-blue-700 active:bg-blue-800 transition-colors
-               focus-visible:outline-none focus-visible:ring-2
-               focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                      px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
+                      hover:bg-blue-700 active:bg-blue-800 transition-colors
+                      focus-visible:outline-none focus-visible:ring-2
+                      focus-visible:ring-blue-400 focus-visible:ring-offset-2"
                   >
                     مشاهده اطلاعات بیشتر
                   </Link>
@@ -168,7 +153,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
                 {/* تصویر */}
                 <div className="order-2 w-full h-full flex items-center justify-center p-2 md:p-4">
-                  <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white ">
+                  <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
                     <Image
                       src={s.imageUrl}
                       alt={s.title || "تصویر اسلایدر"}
@@ -184,7 +169,6 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
               </div>
             </SwiperSlide>
           ))}
-
         </Swiper>
       </div>
     </div>

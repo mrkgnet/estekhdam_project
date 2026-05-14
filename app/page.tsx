@@ -50,7 +50,7 @@ export default function HomePage() {
 
             <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
               <div className="lg:col-span-4">
-                <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
+                <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[200px] md:h-full">
                   {/* اگر این کامپوننت دیتای سنگین از سرور میگیرد، آن را در Suspense قرار میدهیم */}
                   <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse"></div>}>
                     <FetchDataMainSlider />

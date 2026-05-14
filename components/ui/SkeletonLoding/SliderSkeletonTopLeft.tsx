@@ -2,7 +2,7 @@ function ProductCardSkeleton() {
   return (
     <div className="flex flex-col h-full w-full border border-gray-200 rounded overflow-hidden bg-white animate-pulse">
       {/* تصویر */}
-      <div className="relative w-full h-[130px] md:h-[150px] xl:h-[170px] flex-shrink-0 p-4 md:p-5">
+      <div className="relative w-full h-[130px] md:h-[150px] xl:h-[155px] flex-shrink-0 p-4 md:p-5">
         <div className="w-full h-full rounded bg-slate-200" />
       </div>
 
