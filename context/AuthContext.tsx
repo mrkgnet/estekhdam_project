@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        
+
         if (error.response?.status === 401 && !originalRequest._retry) {
           if (originalRequest.url === "/api/auth/refresh") {
             return Promise.reject(error);
@@ -38,14 +38,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           try {
             await axios.post("/api/auth/refresh");
             return axios(originalRequest);
-          } catch (refreshError) {
-            setUser(null);
-            setIsLoggedIn(false);
-            console.error("Refresh token expired, user logged out");
+          } catch (refreshError: any) {
+            if (refreshError.response?.status === 401) {
+              setUser(null);
+              setIsLoggedIn(false);
+              // تغییر به log یا حذف کامل این خط
+              console.log("Refresh token expired or not found, user is guest.");
+            }
             return Promise.reject(refreshError);
           }
+
         }
-        
         return Promise.reject(error);
       }
     );
@@ -83,26 +86,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    // 14 دقیقه = 14 * 60 * 1000 میلی‌ثانیه
     const interval = setInterval(async () => {
       try {
         await axios.post("/api/auth/refresh");
         console.log("Token refreshed automatically in background");
-      } catch (error) {
-        console.error("Failed to auto-refresh token, logging out");
-        logOut();
+      } catch (error: any) {
+        // 🟢 اصلاح مهم: در صورت قطعی اینترنت لاگ‌اوت نکن
+        if (error.response?.status === 401) {
+          console.error("Refresh token expired, logging out");
+          logOut();
+        }
       }
     }, 14 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [isLoggedIn]);
 
+
   // 🟢 (اختیاری اما مفید) اگر کاربر تب مرورگر را رها کرد و بعد از مدت طولانی برگشت یا لینک را عوض کرد
   useEffect(() => {
     const handleFocus = () => {
       if (isLoggedIn) checkAuth();
     };
-    
+
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [isLoggedIn]);
