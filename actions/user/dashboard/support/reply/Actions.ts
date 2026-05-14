@@ -16,7 +16,7 @@ export async function replyTicketUserAction(prevState: any, formData: FormData) 
     const ticketId = formData.get("ticketId") as string;
     const message = formData.get("message") as string;
 
-    console.log(ticketId , " " , message )
+  
 
     if (!ticketId || !message || message.trim() === "") {
       return { success: false, message: "متن پیام نمی‌تواند خالی باشد." };

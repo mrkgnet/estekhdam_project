@@ -10,7 +10,7 @@ export default async function FetchTabProCat() {
         return <div className="text-center p-4 text-slate-500">هیچ دسته‌بندی یافت نشد.</div>;
     }
 
-    console.log(response.data)
+   
 
     return (
         <div className="flex flex-col gap-12 w-full">

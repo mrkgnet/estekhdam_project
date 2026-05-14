@@ -10,7 +10,7 @@ export async function addNewCommentUser(prevState: any, formData: FormData) {
     const targetType = formData.get("targetType") as string; // مثلا "product", "governmentNews", "blog"
     const parentId = formData.get("parentId") as string | null;
     const pathname = formData.get("pathname") as string; // گرفتن مسیر صفحه برای رفرش داینامیک
-    console.log(targetId , " ----------" , targetType, '--------' , pathname)
+    // console.log(targetId , " ----------" , targetType, '--------' , pathname)
 
     if (!text || text.length < 2) {
       return { error: "متن کامنت خیلی کوتاه است." };

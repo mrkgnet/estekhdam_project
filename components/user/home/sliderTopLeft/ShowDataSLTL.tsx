@@ -11,7 +11,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import SafeImage from "@/components/ui/SafeImage"; 
+import SafeImage from "@/components/ui/SafeImage";
 import { fetchLatestProductAction } from "@/actions/user/latestProduct/Actions";
 import { SliderSkeletonTopLeft } from "@/components/ui/SkeletonLoding/SliderSkeletonTopLeft";
 
@@ -52,11 +52,13 @@ export default function ShowDataSLTL({
     setIsMounted(true);
   }, []);
 
-  const { data: response, isLoading } = useQuery({
+  const { data: response, isLoading, refetch } = useQuery({
     queryKey: ["latest-products"],
-    queryFn: () => fetchLatestProductAction(),
+    queryFn: fetchLatestProductAction,
     initialData: initialProducts,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   const products: ProductType[] = response?.data || [];
