@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Grid } from "lucide-react";
 import { CategoryGridSkeleton } from "@/components/ui/SkeletonLoding/CategoryGridSkeleton";
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 // تعریف تایپ دیتابیس شما (نام فیلدها را با Prisma Schema خود چک کنید)
 type CategoryType = {

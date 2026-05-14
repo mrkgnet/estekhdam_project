@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,17 +22,37 @@ type SliderDBItem = {
 };
 
 interface ShowMainSliderProps {
-  initialSliders: any; // داده اولیه از سمت سرور
+  initialSliders: any;
 }
+
+// ✅ یک اسکلتون هم‌اندازه با اسلایدر اصلی برای جلوگیری از پرش
+const MainSliderSkeleton = () => (
+  <div className="w-full h-[420px] md:h-[260px] flex flex-col relative rounded shadow-xl shadow-blue-900/5 border border-slate-100 bg-slate-50 animate-pulse">
+    <div className="flex h-full items-stretch gap-4 md:gap-8 p-2 md:p-4">
+      {/* Skeleton Text */}
+      <div className="order-1 w-full h-full flex flex-col justify-center gap-4 px-3 md:px-6">
+        <div className="h-6 bg-slate-200 rounded-md w-3/4"></div>
+        <div className="h-10 bg-slate-200 rounded-md w-40 mt-2"></div>
+      </div>
+      {/* Skeleton Image */}
+      <div className="order-2 w-full h-full flex items-center justify-center">
+        <div className="w-full h-full bg-slate-200 rounded-md"></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) {
   const progressRef = useRef<HTMLDivElement>(null);
+  
+  // ✅ بازگرداندن isMounted برای جلوگیری از پرش هیدریشن در Swiper
+  const [isMounted, setIsMounted] = useState(false);
 
-  // ❌ استیت‌های مربوط به isMounted و useEffect کاملاً حذف شدند تا SSR مسدود نشود.
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // استفاده از ریکت کوئری برای مدیریت کش اسلایدر
-  // چون initialData داریم، دیتای اولیه مستقیماً در رندر اول (SSR) استفاده می‌شود
-  const { data: response } = useQuery({
+  const { data: response, isLoading } = useQuery({
     queryKey: ["main-slider"],
     queryFn: () => fetchMainSliderUserAction(),
     initialData: initialSliders,
@@ -47,13 +67,15 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     }
   };
 
-  // ❌ شرط if (!isMounted || isLoading) و لودینگ (Loader2) حذف شد.
-  // سرور مستقیماً کدهای HTML اسلایدر را رندر کرده و به مرورگر می‌فرستد.
+  // ✅ نمایش اسکلتون تا زمانی که در کلاینت مانت شود
+  if (!isMounted) {
+    return <MainSliderSkeleton />;
+  }
 
-  if (sliders.length === 0) return null;
+  if (!isLoading && sliders.length === 0) return null;
 
   return (
-    <div className="contents ">
+    <div className="contents">
       <div className="w-full h-full flex flex-col relative group rounded shadow-xl shadow-blue-900/5 border border-white/80 to-blue-50/40">
 
         <style jsx global>{`
@@ -133,7 +155,6 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                   )}
 
                   <Link
-                    // ✅ اصلاح: در تایپ شما targetLink بود، اما پایین href نوشته بودید.
                     href={s.targetLink ?? "#"} 
                     className="inline-flex items-center gap-2 w-fit rounded-md
                px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
@@ -152,10 +173,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                       src={s.imageUrl}
                       alt={s.title || "تصویر اسلایدر"}
                       fill
-                      sizes="50vw"
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-contain duration-700 ease-out"
-                      
-                      // ✅ تغییرات کلیدی برای سرعت لود:
                       priority={index === 0}
                       fetchPriority={index === 0 ? "high" : "auto"}
                     />

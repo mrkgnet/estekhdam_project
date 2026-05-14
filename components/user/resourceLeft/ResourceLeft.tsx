@@ -37,11 +37,11 @@ export default function ResourceLeft({ product }: Props) {
             }
             alt={product?.name || "product"}
             fill
-            priority // ✅ بسیار عالی که priority وجود دارد. این برای LCP مهم است.
+            priority
+            fetchPriority="high" // 👈 اولویت‌دهی اجباری به مرورگر
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // 👈 به شدت مهم برای کاهش حجم دانلود
             placeholder="blur"
             blurDataURL={blurDataURL}
-            // ❌ حذف onLoadingComplete
-            // ❌ حذف کلاس‌های شرطی. next/image خودش این انتقال را مدیریت می‌کند.
             className="object-contain p-8"
           />
         </div>
