@@ -11,15 +11,10 @@ interface TabSectionCRProps {
 
 export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) {
   const tabs = [
-    { id: "description", label: "درباره آزمون", icon: BookOpen },
+    { id: "description", label: "درباره محصول", icon: BookOpen },
     { id: "features", label: "ویژگی‌ها", icon: Star },
   ];
 
-  const defaultRules = [
-    "پس از شروع آزمون، امکان توقف زمان وجود ندارد.",
-    "پاسخ‌های اشتباه دارای نمره منفی نمی‌باشند.",
-    "در صورت قطع اینترنت، پاسخ‌های ثبت شده ذخیره می‌شوند.",
-  ];
 
   const [activeTab, setActiveTab] = useState(tabs[0].id);
 

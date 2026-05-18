@@ -13,22 +13,32 @@ export async function editQuestionAction(prevState: any, formData: FormData) {
     // دریافت داده‌ها از فرم ویرایش
     const id = formData.get("id") as string;
     const productId = formData.get("productId") as string;
-    const chapterIdEdit = formData.get("chapterIdEdit") as string;
-    const text = formData.get("questionTextEdit") as string;
+    const chapterIdEdit = formData.get("chapterId") as string;
+    const validChapterIdEdit = chapterIdEdit === "" ? null : chapterIdEdit;
+    const text = formData.get("questionText") as string;
     
-    // 👇 دریافت نوع سوال از فرم ویرایش 👇
-    const questionTypeEdit = formData.get("questionTypeEdit") as "SARASARI" | "TALIFI";
+    // ✅ دریافت و تبدیل categoryChapterId به Int
+    const categoryChapterId = formData.get("categoryChapterId") as string;
+    const validCategoryChapterId = 
+      categoryChapterId && categoryChapterId.trim() !== "" 
+        ? parseInt(categoryChapterId, 10) 
+        : null;
+    
+    // دریافت نوع سوال از فرم ویرایش
+    const questionTypeEdit = formData.get("questionType") as "SARASARI" | "TALIFI";
     
     // دریافت گزینه‌ها
-    const option_0 = formData.get("optionEdit_0") as string;
-    const option_1 = formData.get("optionEdit_1") as string;
-    const option_2 = formData.get("optionEdit_2") as string;
-    const option_3 = formData.get("optionEdit_3") as string;
+    const option_0 = formData.get("option_0") as string;
+    const option_1 = formData.get("option_1") as string;
+    const option_2 = formData.get("option_2") as string;
+    const option_3 = formData.get("option_3") as string;
 
-    const oldCorrectAnswer = parseInt(formData.get("correctAnswerEdit") as string);
+    const oldCorrectAnswer = parseInt(formData.get("correctAnswer") as string);
     const correctAnswer = oldCorrectAnswer + 1;
 
-    const explanations = formData.get("answerTextEdit") as string;
+    // دریافت توضیحات و نکات کنکوری (Rich Text Editor)
+    const explanations = formData.get("answerText") as string;
+    const examPoints = formData.get("examPoints") as string; 
 
     // اعتبارسنجی اولیه
     if (!id || !text || isNaN(correctAnswer)) {
@@ -37,17 +47,44 @@ export async function editQuestionAction(prevState: any, formData: FormData) {
 
     const options = [option_0, option_1, option_2, option_3];
 
+    // دریافت اطلاعات فعلی سوال برای بررسی تغییر فصل
+    const existingQuestion = await db.question.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingQuestion) {
+      return { success: false, message: "سوال یافت نشد." };
+    }
+
+    // محاسبه مجدد شماره سوال در صورت تغییر فصل
+    let finalChapterOrder = existingQuestion.chapterOrder;
+
+    if (existingQuestion.chapterId !== validChapterIdEdit) {
+      if (validChapterIdEdit) {
+        // اگر به فصل جدیدی منتقل شده، برود به عنوان سوال آخر آن فصل
+        const countInNewChapter = await db.question.count({
+          where: { chapterId: validChapterIdEdit },
+        });
+        finalChapterOrder = countInNewChapter + 1;
+      } else {
+        // اگر کلا از فصل خارج شده (بدون فصل شده)
+        finalChapterOrder = null;
+      }
+    }
+
     // آپدیت در دیتابیس
     await db.question.update({
       where: { id: id },
       data: {
         questionText: text,
-        chapterId: chapterIdEdit === "" ? null : chapterIdEdit, 
-        // 👇 اضافه کردن نوع سوال به دیتای آپدیت 👇
+        chapterId: validChapterIdEdit, 
+        categoryChapterId: validCategoryChapterId, // ✅ اضافه شد
+        chapterOrder: finalChapterOrder,
         questionType: questionTypeEdit,
         options: options,
         correctAnswer: correctAnswer,
         answerText: explanations, 
+        examPoints: examPoints, 
       },
     });
 

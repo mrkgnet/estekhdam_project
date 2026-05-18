@@ -24,6 +24,7 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
       newPrice: newPriceStr = "",
       description = "",
       existingImageUrl = "", // عکس قبلی
+      isActive: isActiveStr = "true", // ✅ دریافت فیلد isActive
     } = rawData as Record<string, string>;
 
     if (!id) {
@@ -61,8 +62,8 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
       if (!fileExists) {
         await fs.writeFile(savePath, buffer);
       }
-      
-      finalImageUrl = `/images/products/${filename}`; 
+
+      finalImageUrl = `/images/products/${filename}`;
     }
 
     const categoryIds = formData.getAll("categoryIds") as string[];
@@ -71,6 +72,7 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
     const newPrice = newPriceStr ? parseInt(newPriceStr, 10) : 0;
     const oldPrice = oldPriceStr ? parseInt(oldPriceStr, 10) : 0;
     const slug = rawSlug.trim().replace(/\s+/g, "-").toLowerCase();
+    const isActive = isActiveStr === "true"; // ✅ تبدیل string به boolean
 
     await db.product.update({
       where: { id: id },
@@ -82,6 +84,8 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
         imageUrl: finalImageUrl,
         description,
         features: features,
+        isActive, // ✅ اضافه کردن به دیتابیس
+
         categories: {
           set: categoryIds.map((catId) => ({ id: catId })),
         },

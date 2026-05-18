@@ -4,6 +4,7 @@ import LinearLoader from '@/components/LinearLoader'
 import PageHeader from "@/components/ui/PageHeader";
 import SearchInPage from "@/components/searchInPage/SearchInPage";
 import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
+import DotsLoader from '@/components/ui/Loading/DotsLoader';
 
 export default async function page({ 
   params, 
@@ -42,7 +43,7 @@ export default async function page({
         <SearchInPage placeholder="جستجوی محصول در این دسته..." />
       </PageHeader>
 
-      <Suspense   key={suspenseKey} fallback={<ThreeDotsLoader /> } >
+      <Suspense   key={suspenseKey} fallback={<DotsLoader /> } >
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FetchDataByCat 
              slug={decodedSlug} 

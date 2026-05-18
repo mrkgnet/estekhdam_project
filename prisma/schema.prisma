@@ -148,6 +148,7 @@ model Product {
   description String?
   imageUrl    String?
   features    String[]
+  isActive    Boolean  @default(true) // فیلد جدید برای فعال/غیرفعال
 
   // رابطه چند به چند با دسته‌بندی
   categories Category[] @relation("ProductCategories")
@@ -194,15 +195,29 @@ model Chapter {
   updatedAt DateTime @updatedAt
 }
 
+model CategoryChapter {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String?
+  isActive    Boolean    @default(true)
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
 model Question {
-  id            String       @id @default(uuid())
-  questionText  String
-  options       String[]
-  correctAnswer Int
-  answerText    String?
-  questionType  QuestionType @default(TALIFI)
-  questionCode  String?
-  isActive      Boolean      @default(true)
+  id             String       @id @default(uuid())
+  questionNumber Int          @default(autoincrement())
+  chapterOrder   Int?
+  questionText   String
+  options        String[]
+  correctAnswer  Int
+  answerText     String?
+  examPoints     String?
+  questionType   QuestionType @default(TALIFI)
+  questionCode   String?
+  isActive       Boolean      @default(true)
 
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -210,11 +225,16 @@ model Question {
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  // ۲. اصلاح رابطه با CategoryChapter (دقت کنید نوع فیلد باید Int باشد تا با CategoryChapter.id همخوان شود)
+  categoryChapterId Int?
+  categoryChapter   CategoryChapter? @relation(fields: [categoryChapterId], references: [id], onDelete: SetNull)
+
   issues    QuestionIssue[]
   comments  Comment[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
+  @@index([categoryChapterId])
   @@index([productId])
   @@index([chapterId])
   @@index([questionType])

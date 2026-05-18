@@ -1,12 +1,17 @@
 "use client";
 
 import { editDataProductAction } from "@/actions/admin/products/government/editproduct/Actions";
-import RichTextEditor from "@/components/editor/RichTextEditor";
+import BasicInfoSection from "@/components/admin/products/basicInfoSection/BasicInfoSection";
+import CategorySection from "@/components/admin/products/categorySection/CategorySection";
+import DescriptionSection from "@/components/admin/products/descriptionSection/DescriptionSection";
+import FeaturesSection from "@/components/admin/products/featuresSection/FeaturesSection";
+import FormActions from "@/components/admin/products/formActions/FormActions";
 import { generatePersianSlug } from "@/lib/generateSlug";
-import { ArrowLeft, UploadCloud, X, LayoutList, Tag, DollarSign, ListChecks, Type, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
 
 interface Category {
     id: string;
@@ -24,7 +29,8 @@ interface Product {
     imageUrl?: string | null;
     categoryIds?: string[];
     categories?: Category[];
-    features?: string[]
+    features?: string[];
+    isActive?: boolean;
 }
 
 interface EditProductProps {
@@ -34,75 +40,43 @@ interface EditProductProps {
 
 const initialState = { success: false, message: "" };
 
-export default function ShowDataProduct({ productData, allCategories }: EditProductProps) {
+export default function ShowDataProduct({
+    productData,
+    allCategories,
+}: EditProductProps) {
     const router = useRouter();
     const formRef = useRef<HTMLFormElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [state, formAction, isPending] = useActionState(editDataProductAction, initialState);
+    const [state, formAction, isPending] = useActionState(
+        editDataProductAction,
+        initialState
+    );
 
-    // استیت‌های دسته‌بندی و ویژگی‌ها
+    const [isActive, setIsActive] = useState<boolean>(productData?.isActive ?? true);
     const [selectedCategories, setSelectedCategories] = useState<Category[]>(() => {
-        if (productData?.categoryIds && productData.categoryIds.length > 0) {
+        if (productData?.categoryIds?.length) {
             return allCategories.filter((cat) => productData.categoryIds!.includes(cat.id));
         }
         return [];
     });
     const [features, setFeatures] = useState<string[]>(() => productData?.features || []);
-    const [featureInput, setFeatureInput] = useState("");
-
-    // استیت‌های مربوط به توضیحات و نام/اسلاگ
     const [description, setDescription] = useState(productData.description || "");
+    const [previewImage, setPreviewImage] = useState<string | null>(
+        productData?.imageUrl || null
+    );
+    const [externalImageUrl, setExternalImageUrl] = useState<string>(""); // ✅ state جدید
     const [productName, setProductName] = useState(productData.name || "");
     const [productSlug, setProductSlug] = useState(productData.slug || "");
 
-    // استیت‌های مربوط به تصویر
-    const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
-    const [externalImageUrl, setExternalImageUrl] = useState("");
-
     useEffect(() => {
-        if (state?.message) {
-            if (state.success) {
-                toast.success(state.message);
-                router.back();
-            } else {
-                toast.error(state.message);
-            }
+        if (!state?.message) return;
+        if (state.success) {
+            toast.success(state.message);
+            router.back();
+        } else {
+            toast.error(state.message);
         }
     }, [state, router]);
-
-    const handleSelectCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = e.target.value;
-        if (selectedId === "") return;
-        const categoryObj = allCategories.find(c => c.id === selectedId);
-        if (categoryObj && !selectedCategories.some((cat) => cat.id === selectedId)) {
-            setSelectedCategories((prev) => [...prev, categoryObj]);
-        }
-        e.target.value = "";
-    };
-
-    const removeCategory = (idToRemove: string) => {
-        setSelectedCategories((prev) => prev.filter((cat) => cat.id !== idToRemove));
-    };
-
-    const addFeature = () => {
-        const trimmed = featureInput.trim();
-        if (trimmed && !features.includes(trimmed)) {
-            setFeatures([...features, trimmed]);
-            setFeatureInput("");
-        }
-    };
-
-    const removeFeature = (indexToRemove: number) => {
-        setFeatures(features.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addFeature();
-        }
-    };
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -110,40 +84,14 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
         setProductSlug(generatePersianSlug(val));
     };
 
-    // مدیریت تغییر لینک تصویر
-    const handleExternalUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        setExternalImageUrl(val);
-        if (val) {
-            setPreviewImage(val);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        } else {
-            setPreviewImage(productData?.imageUrl || null); // بازگشت به عکس قبلی در صورت خالی شدن لینک
-        }
-    };
-
-    // مدیریت انتخاب فایل تصویر
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setExternalImageUrl("");
-            setPreviewImage(URL.createObjectURL(file));
-        }
-    };
-
-    // پاک کردن تصویر
-    const clearImage = () => {
-        setPreviewImage(null);
-        setExternalImageUrl("");
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-
     return (
         <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6" dir="rtl">
             <div className="flex flex-wrap items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">ویرایش محصول</h1>
-                    <p className="text-gray-500 text-sm mt-2">تغییرات مورد نیاز را اعمال کرده و ذخیره کنید</p>
+                    <p className="text-gray-500 text-sm mt-2">
+                        تغییرات مورد نیاز را اعمال کرده و ذخیره کنید
+                    </p>
                 </div>
                 <button
                     type="button"
@@ -159,212 +107,53 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
                 <input type="hidden" name="id" value={productData.id} />
                 <input type="hidden" name="existingImageUrl" value={productData.imageUrl || ""} />
                 <input type="hidden" name="description" value={description} />
+                <input type="hidden" name="isActive" value={String(isActive)} />
+                <input type="hidden" name="externalImageUrl" value={externalImageUrl} /> {/* ✅ فیلد جدید */}
 
-                {selectedCategories.map((cat, index) => (
-                    <input key={`cat-${index}`} type="hidden" name="categoryIds" value={cat.id} />
+                {selectedCategories.map((cat) => (
+                    <input key={cat.id} type="hidden" name="categoryIds" value={cat.id} />
                 ))}
                 {features.map((feature, index) => (
-                    <input key={`feat-${index}`} type="hidden" name="features" value={feature} />
+                    <input key={`${feature}-${index}`} type="hidden" name="features" value={feature} />
                 ))}
 
-                <section className="bg-white p-6 md:p-8 rounded shadow-sm border border-gray-100 space-y-6">
-                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded">
-                            <Type className="w-5 h-5" />
-                        </div>
-                        <h2 className="text-lg font-bold text-gray-800">اطلاعات اصلی و تصویر</h2>
-                    </div>
+                <BasicInfoSection
+                    productName={productName}
+                    productSlug={productSlug}
+                    oldPrice={productData.oldPrice}
+                    newPrice={productData.newPrice}
+                    isActive={isActive}
+                    previewImage={previewImage}
+                    externalImageUrl={externalImageUrl} // ✅ prop جدید
+                    onNameChange={handleNameChange}
+                    onSlugChange={setProductSlug}
+                    onActiveChange={setIsActive}
+                    onImageChange={setPreviewImage}
+                    onExternalImageUrlChange={setExternalImageUrl} // ✅ prop جدید
+                />
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700">نام محصول <span className="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                onChange={handleNameChange}
-                                name="name"
-                                value={productName}
-                                required
-                                className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 flex justify-between">
-                                <span>اسلاگ (شناسه URL) <span className="text-red-500">*</span></span>
-                            </label>
-                            <input
-                                type="text"
-                                onChange={(e) => setProductSlug(e.target.value)}
-                                name="slug"
-                                value={productSlug}
-                                required
-                                className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left font-mono text-sm"
-                                dir="ltr"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <DollarSign className="w-4 h-4 text-gray-400" /> قیمت قبل (تومان)
-                            </label>
-                            <input type="number" name="oldPrice" defaultValue={productData.oldPrice || ""} className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <DollarSign className="w-4 h-4 text-green-500" /> قیمت جدید فروش (تومان) <span className="text-red-500">*</span>
-                            </label>
-                            <input type="number" name="newPrice" defaultValue={productData.newPrice} required className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-green-500" />
-                        </div>
-                    </div>
-
-                    {/* بخش آپلود یا لینک عکس */}
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                        <label className="text-sm font-semibold text-gray-700">تصویر محصول (آپلود فایل یا ورود لینک)</label>
-                        
-                        <div className="relative">
-                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <LinkIcon className="h-4 w-4 text-gray-400" />
-                            </div>
-                            <input 
-                                type="url" 
-                                name="externalImageUrl"
-                                value={externalImageUrl}
-                                onChange={handleExternalUrlChange}
-                                disabled={!!(previewImage && !externalImageUrl && fileInputRef.current?.value)}
-                                placeholder="لینک مستقیم تصویر را اینجا وارد کنید"
-                                className="w-full pr-10 pl-4 py-3 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left disabled:opacity-50"
-                                dir="ltr"
-                            />
-                        </div>
-
-                        <div className="flex items-center justify-center space-x-4 space-x-reverse text-gray-400 text-sm">
-                            <span className="h-[1px] w-full bg-gray-200"></span>
-                            <span>یا</span>
-                            <span className="h-[1px] w-full bg-gray-200"></span>
-                        </div>
-
-                        <div className={`relative border-2 border-dashed rounded transition-all overflow-hidden group ${externalImageUrl ? 'border-gray-200 bg-gray-100 opacity-50' : 'border-gray-300 hover:border-blue-400 bg-gray-50/50'}`}>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                name="imageFile"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                disabled={!!externalImageUrl}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
-                            />
-                            {!previewImage ? (
-                                <div className="flex flex-col items-center justify-center py-10 text-center">
-                                    <div className="w-14 h-14 bg-white shadow-sm border border-gray-100 rounded flex items-center justify-center mb-4 text-gray-500 group-hover:text-blue-500 transition-colors">
-                                        <UploadCloud className="w-6 h-6" />
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-700">برای انتخاب عکس کلیک کنید یا عکس را اینجا رها کنید</p>
-                                </div>
-                            ) : (
-                                <div className="relative w-full h-64 bg-gray-100 flex items-center justify-center">
-                                    <img src={previewImage} alt="Preview" className="w-full h-full object-contain" />
-                                    <button
-                                        type="button"
-                                        onClick={clearImage}
-                                        className="absolute top-4 right-4 z-20 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded shadow-sm backdrop-blur-sm transition-all"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </section>
-
-                {/* 2. دسته‌بندی و ویژگی‌ها */}
                 <div className="grid md:grid-cols-2 gap-6">
-                    <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-5">
-                        <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                            <div className="p-2 bg-purple-50 text-purple-600 rounded">
-                                <LayoutList className="w-5 h-5" />
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-800">دسته‌بندی‌های محصول</h2>
-                        </div>
-                        <div className="space-y-4">
-                            <select defaultValue="" onChange={handleSelectCategory} className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
-                                <option value="" disabled>جستجو و انتخاب دسته‌بندی...</option>
-                                {allCategories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>{cat.catName}</option>
-                                ))}
-                            </select>
-                            <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
-                                {selectedCategories.map((cat, index) => (
-                                    <span key={index} className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded text-sm">
-                                        {cat.catName}
-                                        <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 bg-white rounded-full p-0.5">
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
+                    <CategorySection
+                        allCategories={allCategories}
+                        selectedCategories={selectedCategories}
+                        onCategoriesChange={setSelectedCategories}
+                    />
 
-                    <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-5">
-                        <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded">
-                                <ListChecks className="w-5 h-5" />
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-800">ویژگی‌ها و امکانات</h2>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={featureInput}
-                                    onChange={(e) => setFeatureInput(e.target.value)}
-                                    onKeyDown={handleKeyDown}
-                                    className="flex-1 px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                                    placeholder="مثال: دارای پاسخنامه تشریحی"
-                                />
-                                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded hover:bg-emerald-200 transition-colors font-medium">
-                                    افزودن
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
-                                {features.map((f, index) => (
-                                    <div key={index} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded text-sm">
-                                        <span>{f}</span>
-                                        <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded p-0.5">
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
+                    <FeaturesSection
+                        features={features}
+                        onFeaturesChange={setFeatures}
+                    />
                 </div>
 
-                {/* توضیحات محصول */}
-                <section className="bg-white p-6 rounded shadow-sm border border-gray-100 space-y-4">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                        <Tag className="w-4 h-4 text-blue-500" /> توضیحات محصول
-                    </label>
-                    <div className="border border-gray-200 rounded overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-                        <RichTextEditor 
-                            value={description}
-                            onChange={setDescription} 
-                        />
-                    </div>
-                </section>
+                <DescriptionSection
+                    description={description}
+                    onDescriptionChange={setDescription}
+                />
 
-                {/* نوار دکمه شناور */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50">
-                    <div className="w-full max-w-5xl flex justify-end gap-4 px-4 sm:px-6 lg:px-8">
-                        <button type="button" onClick={() => router.back()} className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-medium transition-colors">
-                            انصراف
-                        </button>
-                        <button type="submit" disabled={isPending} className="flex items-center cursor-pointer justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20">
-                            {isPending ? "در حال ذخیره..." : "ثبت تغییرات"}
-                        </button>
-                    </div>
-                </div>
+                <FormActions
+                    isPending={isPending}
+                    onCancel={() => router.back()}
+                />
             </form>
         </div>
     );

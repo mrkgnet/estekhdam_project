@@ -279,7 +279,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-full z-10 border border-gray-200 px-4 py-2 cursor-pointer text-green-600 hover:text-green-700 hover:bg-green-50 transition"
+                className="flex items-center gap-2 rounded z-10 border border-gray-200 px-4 py-2 cursor-pointer text-green-600 hover:text-green-700 hover:bg-green-50 transition"
                 aria-haspopup="menu"
                 aria-expanded={open}
               >
@@ -289,7 +289,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
 
               <div
                 className={[
-                  "absolute left-0 top-[calc(100%+10px)] z-50 w-46 rounded-xl bg-white shadow-lg border border-slate-100 overflow-hidden",
+                  "absolute left-0 top-[calc(100%+10px)] z-50 w-46 rounded bg-white shadow-lg border border-slate-200 overflow-hidden",
                   "transition-all duration-200 origin-top",
                   open
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"

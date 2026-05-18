@@ -171,7 +171,8 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                 <div key={x.id} className="group rounded-xl border border-slate-200 bg-white p-5 hover:shadow-xl hover:border-emerald-100 transition-all duration-500">
                   <Link
                     href={`/jobnews/government/${x.slugNews}`}
-
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
 
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">

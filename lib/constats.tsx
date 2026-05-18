@@ -100,6 +100,11 @@ export const tabsDataAdminPanel = [
         title: "مدیریت دسته ها کاربران",
         url: "/adminp/categories",
       },
+      {
+        id: 62,
+        title: "مدیریت دسته فصل ها ",
+        url: "/adminp/category_chapter",
+      },
     ]
   },
 

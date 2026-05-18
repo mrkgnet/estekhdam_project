@@ -26,13 +26,12 @@ type ShowDataTabProCatProps = {
 
 const SkeletonCard = React.memo(function SkeletonCard() {
   return (
-    <div className="h-full border border-slate-200 rounded-xl bg-white overflow-hidden animate-pulse">
-      <div className="w-full aspect-[4/5] bg-slate-100" />
-      <div className="p-3 space-y-3">
+    <div className="h-full border border-gray-300 rounded bg-white overflow-hidden animate-pulse">
+      <div className="w-full h-[120px] bg-slate-100" />
+      <div className="p-2 md:p-5 space-y-3">
         <div className="h-4 bg-slate-200 rounded" />
         <div className="h-4 bg-slate-100 rounded w-4/5" />
         <div className="h-4 bg-slate-100 rounded w-3/5" />
-        <div className="h-9 bg-slate-200 rounded-lg" />
       </div>
     </div>
   );
@@ -86,22 +85,18 @@ export default function ShowDataTabProCat({
   mainCategory,
   isLoading = false,
 }: ShowDataTabProCatProps) {
-  // ✅ mount state
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // استخراج زیردسته‌ها به صورت ایمن
   const rawTabs = useMemo(
     () => (Array.isArray(mainCategory?.children) ? mainCategory.children : []),
     [mainCategory?.children],
   );
 
-  // بررسی اینکه آیا خود دسته اصلی محصول مستقیمی دارد یا خیر
   const hasDirectProducts = Boolean(mainCategory?.products?.length);
 
-  // ساخت لیست تب‌ها
   const tabList = useMemo(() => {
     const childTabs = rawTabs.map((tab: CategoryType) => ({
       slug: tab.catSlug || tab.slug || tab.id,
@@ -126,22 +121,18 @@ export default function ShowDataTabProCat({
     ];
   }, [rawTabs, hasDirectProducts, mainCategory?.products]);
 
-  // تب پیش‌فرض
   const defaultTab = tabList[0]?.slug ?? "";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
-  // بروزرسانی اکتیو تب در صورتی که دیتا با تاخیر لود شد
   useEffect(() => {
     if (!activeTab && defaultTab) {
       setActiveTab(defaultTab);
     }
   }, [defaultTab, activeTab]);
 
-  // Refهای مربوط به دکمه‌های ناوبری اسلایدر تب‌ها (هدر)
   const [prevTabBtn, setPrevTabBtn] = useState<HTMLButtonElement | null>(null);
   const [nextTabBtn, setNextTabBtn] = useState<HTMLButtonElement | null>(null);
 
-  // Refهای مربوط به دکمه‌های ناوبری اسلایدر محصولات (محتوا)
   const [prevBtn, setPrevBtn] = useState<HTMLButtonElement | null>(null);
   const [nextBtn, setNextBtn] = useState<HTMLButtonElement | null>(null);
 
@@ -162,20 +153,18 @@ export default function ShowDataTabProCat({
     setActiveTab(tabSlug);
   }, []);
 
+  // دقیقا مثل اسلایدر قبلی
   const sliderBreakpoints = useMemo(
     () => ({
-      320: { slidesPerView: 2.15, spaceBetween: 10 },
-      480: { slidesPerView: 2.7, spaceBetween: 12 },
-      640: { slidesPerView: 3.3, spaceBetween: 12 },
-      768: { slidesPerView: 3, spaceBetween: 14 },
-      1024: { slidesPerView: 4, spaceBetween: 16 },
+      480: { slidesPerView: 4.8, spaceBetween: 12 },
+      768: { slidesPerView: 4, spaceBetween: 16 },
       1280: { slidesPerView: 5, spaceBetween: 16 },
     }),
     [],
   );
 
   const skeletonSlides = useMemo(
-    () => Array.from({ length: 5 }, (_, idx) => <SkeletonCard key={idx} />),
+    () => Array.from({ length: 4 }, (_, idx) => <SkeletonCard key={idx} />),
     [],
   );
 
@@ -184,7 +173,6 @@ export default function ShowDataTabProCat({
 
   const showSkeleton = !mounted || isLoading;
 
-  // اگر هیچ تبی (نه فرزند و نه محصول مستقیم) وجود نداشت و لودینگ هم نبود
   if (tabList.length === 0 && !isLoading) return null;
   if (!activeTab && !isLoading) return null;
 
@@ -197,18 +185,14 @@ export default function ShowDataTabProCat({
           <button className="absolute top-1/2 right-2 -translate-y-1/2 w-9 h-9 bg-slate-200 rounded-full shadow border border-slate-200"></button>
           <Swiper
             modules={[Navigation]}
-            spaceBetween={12}
-            slidesPerView={1.15}
+            spaceBetween={10}
+            slidesPerView={2}
             breakpoints={sliderBreakpoints}
             className="py-2 px-1"
             dir="rtl"
-            style={{ height: "400px" }}
           >
             {skeletonSlides.map((skeleton, idx) => (
-              <SwiperSlide
-                key={`skeleton-${idx}`}
-                className="w-full md:!w-[220px] h-full"
-              >
+              <SwiperSlide key={`skeleton-${idx}`} className="w-full h-auto">
                 {skeleton}
               </SwiperSlide>
             ))}
@@ -222,18 +206,15 @@ export default function ShowDataTabProCat({
   return (
     <section className="w-full space-y-5" dir="rtl" aria-label={categoryName}>
       <header className="relative flex items-center justify-between w-full p-4 rounded-xl bg-gradient-to-l from-orange-50/80 to-transparent border border-slate-100 border-r-4 border-r-orange-500 overflow-hidden">
-
-        {/* بخش راست: آیکون و عنوان */}
         <div className="flex items-center gap-3 z-10">
           <div className="flex shrink-0 items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl bg-white border border-orange-100 text-orange-500 shadow-sm">
             <Flame className="w-5 h-5 md:w-6 md:h-6" />
           </div>
           <h2 className="font-bold text-sm md:text-base text-slate-800">
-          مجموعه  {categoryName} 
+            مجموعه {categoryName}
           </h2>
         </div>
 
-        {/* بخش چپ: دکمه مشاهده همه */}
         <div className="z-10">
           <Link
             href={`/resources?category=${categorySlug}`}
@@ -241,28 +222,21 @@ export default function ShowDataTabProCat({
             aria-label={`مشاهده همهٔ منابع دسته ${categoryName}`}
           >
             <span className="hidden sm:block ">مشاهده همه</span>
-             <span className="md:hidden sm:block "> همه</span>
+            <span className="md:hidden sm:block "> همه</span>
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           </Link>
         </div>
-
       </header>
-
 
       <nav
         className="flex flex-col md:flex-row items-center justify-between  bg-[rgb(234,240,249)] border border-slate-200 rounded-xl p-2 md:p-3"
         aria-label="تب‌های دسته بندی"
       >
         <div className="flex items-center justify-between w-full md:w-auto md:pl-3">
-          {/* عنوان (نمایش در دسکتاپ) */}
           <h3 className="hidden md:block text-sm md:text-base font-bold text-blue-800 whitespace-nowrap">
             {categoryName}
           </h3>
-
-          {/* لینک "دیدن همه" (نمایش در موبایل) */}
-        
         </div>
-
 
         <div className="relative flex-1 w-full flex items-center overflow-hidden group/tabs px-1 sm:px-6">
           <button
@@ -342,57 +316,63 @@ export default function ShowDataTabProCat({
           key={activeTab}
           modules={[Navigation]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
-          spaceBetween={12}
-          slidesPerView={1.15}
+          spaceBetween={10}
+          slidesPerView={2}
           breakpoints={sliderBreakpoints}
           className="py-2 px-1"
           dir="rtl"
         >
           {isLoading
             ? skeletonSlides.map((skeleton, idx) => (
-              <SwiperSlide key={`skeleton-${idx}`} className="w-full md:!w-[220px]">
+              <SwiperSlide key={`skeleton-${idx}`} className="w-full h-auto">
                 {skeleton}
               </SwiperSlide>
             ))
             : currentProducts.map((product: ProductType, index: number) => (
-              <SwiperSlide key={product.id ?? index} className="w-full md:!w-[200px]">
+              <SwiperSlide key={product.id ?? index} className="w-full h-auto">
                 <Link
                   href={`/resources/course/${product.slug}`}
                   aria-label={`مشاهده جزئیات ${product.name}`}
-                  className="block h-full w-[190px] "
+                  className="block h-full"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <article className="group/card flex flex-col h-full border border-slate-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-all">
-                    <div className="relative w-full aspect-[4/5] bg-slate-50 flex items-center justify-center p-2 overflow-hidden">
-                      <div className="relative w-full h-full transition-transform duration-500 ">
+                  <article className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
+                    <div className="relative w-full h-[150px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
+
+                      {/* ✅ Label */}
+                      <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">
+                        آنلاین
+                      </span>
+                      <div className="relative w-full h-full">
                         <SafeImage
                           src={product.imageUrl || "/images/products/bookExample.jpg"}
                           alt={product.name}
                           fill
-                          className="object-contain"
-                          sizes="(max-width: 480px) 220px, (max-width: 768px) 320px, 200px"
-
+                          className="object-contain mix-blend-multiply transition-opacity duration-300"
+                          sizes="(max-width: 768px) 170px, 400px"
                           loading={index < 2 ? "eager" : "lazy"}
                         />
                       </div>
                     </div>
 
-                    <div className="flex flex-col flex-1 p-3 md:p-4 space-y-3">
-                      <h4 className="text-slate-600 font-bold leading-snug line-clamp-2  group-hover/card:text-green-700 transition-colors">
+                    <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
+                      <h4 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-emerald-600 transition-colors duration-200">
                         {product.name}
                       </h4>
 
-                      <div className="space-y-2">
-                        <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
-                          <FileQuestion className="w-3.5 h-3.5" />
-                          سوالات طبقه بندی شده
-                        </span>
-                        <span className="inline-flex text-[11px] items-center gap-1 bg-indigo-50 text-indigo-600 px-2 py-1 rounded">
-                          <FileQuestion className="w-3.5 h-3.5" />
-                          پاسخ نامه تشریحی
-                        </span>
+                      <div className="mt-auto">
+                        <ul className="space-y-2 text-[11px]">
+                          <li className="flex items-center gap-2 text-slate-600">
+                            <FileQuestion className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>سوالات طبقه‌بندی شده</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-slate-600">
+                            <FileText className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <span>پاسخ نامه تشریحی</span>
+                          </li>
+                        </ul>
                       </div>
-
-
                     </div>
                   </article>
                 </Link>

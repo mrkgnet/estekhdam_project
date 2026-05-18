@@ -80,6 +80,8 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
         {categories.map((category) => (
           <Link
             key={category.id}
+            target="_blank"
+            rel="noopener noreferrer"
             href={`/category/${category.catSlug}`} // استفاده از slug برای لینک‌دهی داینامیک
             className="group flex flex-col items-center gap-3 text-center"
           >

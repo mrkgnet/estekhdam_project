@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import FetchData from './FetchData';
-import LinearLoader from '@/components/LinearLoader';
-import SpinerLoader from '@/components/SpinerLoader';
+
+import DotsLoader from '@/components/ui/Loading/DotsLoader';
 
 
 
@@ -19,7 +19,7 @@ export default async function EditProduct({ searchParams }: { searchParams: Prom
         // تگ Suspense باید کامپوننت Actions را دربر بگیرد
 
 
-        <Suspense fallback={<SpinerLoader />}>
+        <Suspense fallback={<DotsLoader />}>
             <FetchData  currentPage={currentPage} searchQuery={searchQuery} limit={limit} />
         </Suspense>
     );

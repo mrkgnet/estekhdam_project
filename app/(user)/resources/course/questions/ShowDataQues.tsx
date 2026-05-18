@@ -8,11 +8,7 @@ import { fetchDataQues } from "@/actions/user/resources/course/DataQues/Actions"
 import {
   ChevronRight, ChevronLeft, ChevronDown, CheckCircle2, XCircle, Lightbulb,
   GraduationCap, Loader2, List, PlayCircle, Filter, Edit,
-  Home,
-  Users,
-  MessageCircleQuestion,
-  Sparkles,
-  MessageCircle
+  Users, MessageCircleQuestion, Sparkles, MessageCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -30,6 +26,7 @@ type DBQuestion = {
   options: string[];
   correctAnswer: number;
   answerText: string;
+  examPoints: string;
   questionCode: string;
 };
 
@@ -40,7 +37,7 @@ type Chapter = {
 }
 
 type Props = {
-  initialResponse: any; // داده‌های SSR
+  initialResponse: any;
   courseId: string;
   currentStep: number;
   chapterId?: string;
@@ -64,32 +61,31 @@ export default function ExamPage({
   const searchParams = useSearchParams();
   const commentsRef = React.useRef<HTMLDivElement | null>(null);
 
-  // === React Query Setup ===
   const { data: response, isFetching } = useQuery({
-    // کلید شامل تمام پارامترهایی است که تغییر آنها یعنی دیتای جدید
     queryKey: ['exam-question', courseId, currentStep, chapterId, questionType],
     queryFn: async () => await fetchDataQues(courseId, currentStep, chapterId, questionType),
     initialData: initialResponse,
-    staleTime: 1000 * 60 * 5, // ۵ دقیقه کش برای سوالات
+    staleTime: 1000 * 60 * 5,
   });
 
-  // استخراج متغیرها از response ریکت کوئری
   const dbQuestion = response?.data as DBQuestion;
   const totalCount = response?.totalCount || 0;
   const hasPurchased = response?.hasPurchased || false;
   const chapters = (response?.chapters || []) as Chapter[];
 
-  // خواندن مقادیر فعلی فیلترها از URL
   const currentChapterId = searchParams.get("chapterId");
   const currentQuestionType = searchParams.get("questionType");
 
-  const [isPendingRoute, startTransition] = useTransition(); // برای نمایش لودینگ تغییر مسیر
+  const [isPendingRoute, startTransition] = useTransition();
   const [selected, setSelected] = useState<ChoiceKey | null>(null);
 
-  // وضعیت باز و بسته بودن آکاردئون‌های فیلتر (درون منو)
   const [isChaptersOpen, setIsChaptersOpen] = useState(true);
   const [isTypeOpen, setIsTypeOpen] = useState(true);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  // === State برای مدال پرش به سوال ===
+  const [isJumpModalOpen, setIsJumpModalOpen] = useState(false);
+  const [jumpTarget, setJumpTarget] = useState("");
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -102,13 +98,12 @@ export default function ExamPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [targetStep, setTargetStep] = useState<number | null>(null);
 
-  // ریست کردن انتخاب کاربر وقتی آیدی سوال تغییر کرد
   useEffect(() => {
     setSelected(null);
   }, [dbQuestion?.id]);
 
   useEffect(() => {
-    if (isMobileFilterOpen) {
+    if (isMobileFilterOpen || isJumpModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -116,9 +111,8 @@ export default function ExamPage({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMobileFilterOpen]);
+  }, [isMobileFilterOpen, isJumpModalOpen]);
 
-  // متد کمکی برای حذف فیلترها و حفظ بقیه پارامترها (مثل pname)
   const getClearFiltersUrl = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("chapterId");
@@ -148,6 +142,17 @@ export default function ExamPage({
       params.set("step", newStep.toString());
       router.push(`${pathname}?${params.toString()}`);
     });
+  };
+
+  const handleJumpSubmit = () => {
+    const target = parseInt(jumpTarget);
+    if (!isNaN(target) && target >= 1 && target <= totalCount) {
+      setIsJumpModalOpen(false);
+      handleNavigation(target);
+      setJumpTarget("");
+    } else {
+      alert(`لطفاً عددی بین ۱ تا ${totalCount} وارد کنید.`);
+    }
   };
 
   const handleChapterClick = (id: string | null) => {
@@ -192,14 +197,13 @@ export default function ExamPage({
       choices: dbQ.options.map((optText, i) => ({ key: keys[i], text: optText })),
       correct: keys[correctIndex],
       explanation: dbQ.answerText,
+      examPoints: dbQ.examPoints,
       code: dbQ.questionCode,
     };
   };
 
   const q = formatQuestion(dbQuestion);
   const progressPercentage = totalCount > 0 ? Math.round((currentStep / totalCount) * 100) : 0;
-
-  // ترکیب وضعیت لودینگ ریکت کوئری و تغییر مسیر Next.js
   const isAnyLoading = isFetching || isPendingRoute;
 
   const handleLoginSuccess = () => {
@@ -219,7 +223,7 @@ export default function ExamPage({
   ];
 
   return (
-    <div className="min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
+    <div className="min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8 " dir="rtl">
       <div className="mt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
@@ -230,11 +234,78 @@ export default function ExamPage({
         )}
       </AnimatePresence>
 
-      <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-        
-        {/* ==================== سایدبار ==================== */}
-        <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
+      {/* ==================== مدال پرش به سوال ==================== */}
+      <AnimatePresence>
+        {isJumpModalOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setIsJumpModalOpen(false)}
+            />
 
+            {/* Modal */}
+            <motion.div
+              className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+              initial={{ opacity: 0, y: -150, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -120, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            >
+              <div className="bg-white rounded shadow-xl w-full max-w-sm overflow-hidden pointer-events-auto border border-slate-200">
+
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-2">
+                    پرش به سوال خاص
+                  </h3>
+                  <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+                    شماره سوال مورد نظر خود را وارد کنید (بین ۱ تا{" "}
+                    <span className="font-bold text-slate-700">{totalCount}</span>
+                    ).
+                  </p>
+
+                  <input
+                    type="number"
+                    min={1}
+                    max={totalCount}
+                    value={jumpTarget}
+                    onChange={(e) => setJumpTarget(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleJumpSubmit(); }}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="مثلاً: 5"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex bg-slate-50/80 border-t border-slate-100 p-4 gap-3 justify-end">
+                  <button
+                    onClick={() => setIsJumpModalOpen(false)}
+                    className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-800 rounded-xl transition-colors"
+                  >
+                    انصراف
+                  </button>
+
+                  <button
+                    onClick={handleJumpSubmit}
+                    className="px-5 py-2.5 text-sm font-medium bg-red-400 text-white rounded-xl hover:bg-green-700 active:scale-95 transition-all shadow-sm"
+                  >
+                    تایید و انتقال
+                  </button>
+                </div>
+
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+
+      <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+        <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
           <button
             type="button"
             onClick={() => {
@@ -280,16 +351,18 @@ export default function ExamPage({
             </button>
           </div>
 
-          <div className="hidden lg:flex z-20 items-center justify-between w-full px-2 py-1 bg-gray-50/50 rounded border border-gray-100/50 backdrop-blur-sm">
+          <div className="hidden lg:flex items-center justify-between w-full px-3 py-2 rounded-lg border border-gray-400 bg-white/60 backdrop-blur z-20">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-white rounded shadow-sm border border-gray-200/60">
-                <Filter className="w-4 h-4 text-gray-700" />
+              <div className="flex items-center justify-center w-7 h-7 rounded-md bg-white border border-gray-200 shadow-sm">
+                <Filter className="w-4 h-4 text-gray-600" />
               </div>
-              <h3 className="text-sm bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+
+              <h3 className="text-sm font-semibold text-gray-800">
                 فیلتر سوالات
               </h3>
             </div>
           </div>
+
 
           <div className="hidden lg:flex z-10 bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden flex-col">
             <Link
@@ -302,7 +375,6 @@ export default function ExamPage({
               </div>
             </Link>
 
-            {/* آکاردئون سرفصل‌ها */}
             <div className="border-b border-slate-200/60">
               <button
                 onClick={() => setIsChaptersOpen(!isChaptersOpen)}
@@ -317,30 +389,16 @@ export default function ExamPage({
 
               <AnimatePresence initial={false}>
                 {isChaptersOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden bg-slate-50/50"
-                  >
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-slate-50/50">
                     <div className="p-2 flex flex-col gap-1 max-h-[40vh] overflow-y-auto custom-scrollbar">
-                      <button
-                        onClick={() => handleChapterClick(null)}
-                        disabled={isAnyLoading}
-                        className={`text-right p-2.5 rounded transition-all ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}`}
-                      >
+                      <button onClick={() => handleChapterClick(null)} disabled={isAnyLoading} className={`text-right p-2.5 rounded transition-all ${!currentChapterId ? 'bg-rose-100 text-rose-700 ' : 'text-slate-600 hover:bg-slate-100'}`}>
                         همه سرفصل‌ها
                       </button>
                       {chapters.length > 0 ? (
                         chapters.map((chapter) => {
                           const isActive = currentChapterId === chapter.id;
                           return (
-                            <button
-                              key={chapter.id}
-                              onClick={() => handleChapterClick(chapter.id)}
-                              disabled={isAnyLoading}
-                              className={`flex items-center justify-between w-full text-right p-2.5 rounded transition-all ${isActive ? 'bg-rose-100 text-rose-700' : 'text-slate-600 hover:bg-slate-100'} ${isAnyLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
-                            >
+                            <button key={chapter.id} onClick={() => handleChapterClick(chapter.id)} disabled={isAnyLoading} className={`flex items-center justify-between w-full text-right p-2.5 rounded transition-all ${isActive ? 'bg-rose-100 text-rose-700' : 'text-slate-600 hover:bg-slate-100'} ${isAnyLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                               <span className="truncate pr-1">{chapter.title}</span>
                               {isActive && <CheckCircle2 className="w-4 h-4 shrink-0 text-rose-600" />}
                             </button>
@@ -355,7 +413,6 @@ export default function ExamPage({
               </AnimatePresence>
             </div>
 
-            {/* آکاردئون نوع سوال */}
             <div>
               <button
                 onClick={() => setIsTypeOpen(!isTypeOpen)}
@@ -370,36 +427,19 @@ export default function ExamPage({
 
               <AnimatePresence initial={false}>
                 {isTypeOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden bg-slate-50/50"
-                  >
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-slate-50/50">
                     <div className="p-3 flex flex-col gap-2">
-                      <button
-                        onClick={() => handleTypeClick(null)}
-                        disabled={isAnyLoading}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
-                      >
+                      <button onClick={() => handleTypeClick(null)} disabled={isAnyLoading} className={`flex items-center gap-2 p-2.5 rounded-lg border transition-all ${!currentQuestionType ? 'border-blue-500 bg-blue-50 text-blue-700 ' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
                         همه نوع سوالات
                       </button>
-                      <button
-                        onClick={() => handleTypeClick("SARASARI")}
-                        disabled={isAnyLoading}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
-                      >
+                      <button onClick={() => handleTypeClick("SARASARI")} disabled={isAnyLoading} className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "SARASARI" ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
                         <div className="flex items-center gap-2">
                           <GraduationCap className={`w-4 h-4 ${currentQuestionType === "SARASARI" ? "text-purple-600" : "text-slate-400"}`} />
                           <span>سوالات سراسری</span>
                         </div>
                         {currentQuestionType === "SARASARI" && <CheckCircle2 className="w-4 h-4 text-purple-600" />}
                       </button>
-                      <button
-                        onClick={() => handleTypeClick("TALIFI")}
-                        disabled={isAnyLoading}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}
-                      >
+                      <button onClick={() => handleTypeClick("TALIFI")} disabled={isAnyLoading} className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${currentQuestionType === "TALIFI" ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
                         <div className="flex items-center gap-2">
                           <Edit className={`w-4 h-4 ${currentQuestionType === "TALIFI" ? "text-orange-600" : "text-slate-400"}`} />
                           <span>سوالات تالیفی</span>
@@ -414,7 +454,6 @@ export default function ExamPage({
           </div>
         </aside>
 
-        {/* ==================== محتوای اصلی (سوال) ==================== */}
         <main className="w-full flex-1 flex flex-col min-w-0 pb-10">
           <header className="flex items-center justify-between bg-white p-4 sm:p-5 rounded shadow-sm border border-gray-300 mb-5">
             <div className="flex items-center gap-4">
@@ -422,9 +461,19 @@ export default function ExamPage({
                 <GraduationCap className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h1>شبیه‌ساز آزمون</h1>
+                <div className="flex items-center gap-3">
+                  <h1>شبیه‌ساز آزمون</h1>
+                  {totalCount > 0 && (
+                    <button
+                      onClick={() => setIsJumpModalOpen(true)}
+                      className="text-xs bg-rose-400 text-white hover:bg-slate-200 text-slate-700 py-1 px-2.5 rounded-lg transition-colors border border-slate-200"
+                    >
+                      برو به سواله ...
+                    </button>
+                  )}
+                </div>
                 {totalCount > 0 ? (
-                  <p className="text-slate-500 mt-0.5">
+                  <p className="text-slate-500 mt-1">
                     سوال <span className="text-slate-700">{currentStep}</span> از <span className="text-slate-700">{totalCount}</span>
                   </p>
                 ) : (
@@ -448,7 +497,6 @@ export default function ExamPage({
           </header>
 
           <div className="relative z-10 border border-gray-300">
-            {/* ترکیب Loader ریکت کوئری و Next Navigation */}
             {isAnyLoading && (
               <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded border border-white/50">
                 <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
@@ -464,8 +512,8 @@ export default function ExamPage({
                   exit={{ opacity: 0, y: -10 }}
                   className="bg-white rounded shadow-sm border border-slate-200/60 p-5 sm:p-8"
                 >
-                  <div className="flex text-13 md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-                    <h2 className="text-slate-800 leading-relaxed flex-1">{q.text}</h2>
+                  <div className="flex text-14 md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+                    <h2 dangerouslySetInnerHTML={{ __html: q.text }} className="text-slate-800 leading-relaxed flex-1 text-14"></h2>
                   </div>
 
                   <div className="space-y-3.5">
@@ -480,12 +528,12 @@ export default function ExamPage({
                           disabled={showResult || isAnyLoading}
                           onClick={() => setSelected(ch.key)}
                           className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border-2 transition-all text-right outline-none active:scale-[0.99]
-                            ${!showResult ? 'border-slate-100 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500 cursor-pointer' :
+                            ${!showResult ? 'border-slate-300 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500 cursor-pointer' :
                               isRight ? 'border-green-500 bg-green-50/50 cursor-default' :
                                 isUserChoice ? 'border-red-500 bg-red-50/50 cursor-default' : 'border-slate-50 bg-slate-50/30 opacity-50 cursor-default'}
                             `}
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4 text-14">
                             <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors
                                 ${isUserChoice || (showResult && isRight) ? 'bg-white shadow-sm border border-slate-100' : 'bg-slate-100 text-slate-500'}
                                 ${showResult && isRight ? 'text-green-600' : isUserChoice ? 'text-red-600' : ''}
@@ -513,11 +561,25 @@ export default function ExamPage({
                         <div className="p-5 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded border border-blue-100/60">
                           <div className="flex items-center gap-2 mb-3 text-blue-800">
                             <Lightbulb className="w-5 h-5 text-blue-600" />
-                            <span>پاسخ تشریحی</span>
+                            <span className="font-bold">پاسخ تشریحی</span>
                           </div>
-                          <p className="text-slate-700 leading-8 text-justify">
-                            {q.explanation || "پاسخ تشریحی برای این سوال ثبت نشده است."}
-                          </p>
+                          {q.explanation ? (
+                            <p dangerouslySetInnerHTML={{ __html: q.explanation }} className="text-slate-700 text-14 leading-8 text-justify"></p>
+                          ) : (
+                            <p className="...">پاسخ تشریحی برای این سوال ثبت نشده است.</p>
+                          )}
+                        </div>
+
+                        <div className="p-5 mt-3 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50/30 rounded border border-blue-100/60">
+                          <div className="flex items-center gap-2 mb-3 text-blue-800">
+                            <Lightbulb className="w-5 h-5 text-blue-600" />
+                            <span className="font-bold"> نکات کلیدی کنکوری</span>
+                          </div>
+                          {q.examPoints ? (
+                            <p dangerouslySetInnerHTML={{ __html: q.examPoints }} className="text-slate-700 text-14 leading-8 text-justify"></p>
+                          ) : (
+                            <p className="...">نکته کنکوری برای این سوال ثبت نشده است.</p>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -610,7 +672,7 @@ export default function ExamPage({
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
             >
-              <div className="mx-auto w-full max-w-2xl rounded-t-2xl bg-white shadow-2xl border-t border-slate-200">
+              <div className="mx-auto w-full max-w-2xl rounded-t-2xl bg-white shadow-2xl border-t border-slate-400">
                 <div className="px-4 pt-3 pb-2 border-b border-slate-100">
                   <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300" />
                   <div className="flex items-center justify-between">

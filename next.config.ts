@@ -8,29 +8,23 @@ const nextConfig: NextConfig = {
 
   // ۲. تنظیمات تصاویر
   images: {
-    // فعال کردن فرمت‌های مدرن برای فشرده‌سازی حداکثری (اول AVIF، بعد WebP)
     formats: ["image/avif", "image/webp"],
     domains: ["trustseal.enamad.ir"],
-    // اجازه لود عکس از دامنه‌های خارجی
     remotePatterns: [
+      { protocol: "https", hostname: "account4all.ir" },
       {
         protocol: "https",
-        hostname: "account4all.ir",
+        hostname: "estekhdampro.hot.ir-central1.arvanstorage.ir",
+        port: "",
+        pathname: "/**",
       },
-      {
-            protocol: 'https',
-            hostname: 'estekhdampro.hot.ir-central1.arvanstorage.ir',
-            port: '',
-            pathname: '/**', // اجازه دسترسی به تمام مسیرهای این دامنه
-          },
+      { protocol: "https", hostname: "mrkg.s3.ir-thr-at1.arvanstorage.ir" },
       {
         protocol: "https",
-        hostname: "mrkg.s3.ir-thr-at1.arvanstorage.ir",
+        hostname: "fm-2dnm-estekhdamt.runflare.run",
+        pathname: "/data/**",
       },
     ],
-
-    // ❌ این خط باید حذف شود تا تبدیل به WebP کار کند!
-    // unoptimized: true,
   },
 
   // ۳. فعال کردن حالت standalone برای استقرار در لیارا یا داکر

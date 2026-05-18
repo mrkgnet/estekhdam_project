@@ -4,6 +4,7 @@ import FetchDataUser from "./FetchDataUser";
 import SearchInPage from "@/components/searchInPage/SearchInPage";
 import PageHeader from "@/components/ui/PageHeader";
 import { ThreeDotsLoader } from "@/components/ui/ThreeDotsLoader"; // ایمپورت لودر جداگانه
+import DotsLoader from "@/components/ui/Loading/DotsLoader";
 
 export default async function page({ searchParams }: { searchParams: Promise<{ query?: string, category?: string, page?: string }> }) {
   const params = await searchParams;
@@ -34,7 +35,7 @@ export default async function page({ searchParams }: { searchParams: Promise<{ q
 
 
 
-      <Suspense key={suspenseKey} fallback={<ThreeDotsLoader />}>
+      <Suspense key={suspenseKey} fallback={<DotsLoader />}>
         <FetchDataUser
           currentPage={currentPage}
           searchQuery={searchQuery}

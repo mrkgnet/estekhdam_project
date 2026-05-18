@@ -17,7 +17,6 @@ import { GridSkeleton } from "@/components/ui/SkeletonLoding/GridSkeleton";
 import FilterResource from "@/components/user/FilterResource";
 import { useRouter } from "next/navigation";
 
-
 /* ---------------------------------- */
 /* ✅ Progressive Image */
 /* ---------------------------------- */
@@ -34,7 +33,7 @@ function ProgressiveImage({
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-xl ">
+    <div className="relative w-full h-full overflow-hidden rounded-xl">
       {!loaded && (
         <div className="absolute inset-0 animate-pulse bg-gray-200" />
       )}
@@ -45,8 +44,9 @@ function ProgressiveImage({
         placeholder="blur"
         blurDataURL={blurDataURL}
         onLoadingComplete={() => setLoaded(true)}
-        className={`object-contain transition-all duration-300 ${loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
-          }`}
+        className={`object-contain transition-all duration-300 ${
+          loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
       />
     </div>
   );
@@ -108,10 +108,10 @@ export default function ShowDataResources({
 
       return res.success
         ? {
-          products: res.data,
-          totalCount: res.totalCount,
-          totalPages: res.totalPages || 1,
-        }
+            products: res.data,
+            totalCount: res.totalCount,
+            totalPages: res.totalPages || 1,
+          }
         : { products: [], totalCount: 0, totalPages: 1 };
     },
     initialData: {
@@ -142,29 +142,36 @@ export default function ShowDataResources({
             <p className="text-gray-500">محصولی یافت نشد</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+          <div className="grid gap-4 mt-2 justify-center md:[grid-template-columns:repeat(auto-fill,250px)]">
             {products.map((p) => (
-              <div key={p.id} className="group relative">
+              <div key={p.id} className="group relative md:w-[250px]">
                 <div
                   onClick={() => router.push(`/resources/course/${p.slug}`)}
-                  className="bg-white border border-gray-300 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex sm:block cursor-pointer"
+                  className="bg-white border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 cursor-pointer md:w-[250px] flex flex-row md:flex-col"
                 >
                   {/* ✅ Image */}
-                  <div className="relative w-32 sm:w-full aspect-[3/4] sm:aspect-[4/5] p-2">
-                    <ProgressiveImage
-                      src={p.imageUrl || "/images/products/bookExample.jpg"}
-                      alt={p.name}
-                    />
+                  <div className="relative w-[110px] md:w-full md:h-[150px] flex-shrink-0 flex items-center justify-center md:p-2 overflow-hidden">
+                       {/* ✅ Label */}
+                      <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">
+                        آنلاین  
+                      </span>
+
+                  
+                    <div className="relative w-full h-full">
+                      <ProgressiveImage
+                        src={p.imageUrl || "/images/products/bookExample.jpg"}
+                        alt={p.name}
+                      />
+                    </div>
                   </div>
 
                   {/* ✅ Content */}
-                  <div className="flex-1 flex flex-col justify-between p-3 sm:p-4">
+                  <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
                     <div>
                       {/* ✅ Add to cart (Desktop) */}
                       <div className="hidden md:flex items-center justify-center gap-3 mb-2">
                         <div className="flex-1 h-px bg-gray-200" />
 
-                        {/* ✅ CART LINK */}
                         <Link
                           href={`/cart/${p.id}`}
                           onClick={(e) => e.stopPropagation()}
@@ -176,18 +183,18 @@ export default function ShowDataResources({
                         <div className="flex-1 h-px bg-gray-200" />
                       </div>
 
-                      <h3 className="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-green-700 transition">
+                      <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[1.5rem] group-hover:text-emerald-600 transition-colors duration-200">
                         {p.name}
                       </h3>
 
-                      <ul className="mt-2 space-y-1 text-xs text-gray-600">
+                      <ul className="mt-2 space-y-2 text-[11px] text-slate-600">
                         {[
                           "پاسخ تشریحی",
                           "بروزرسانی مداوم",
                           "سوالات طبقه بندی شده",
                         ].map((item) => (
-                          <li key={item} className="flex items-center gap-1">
-                            <span className="w-1 h-1 bg-blue-500 rounded-full" />
+                          <li key={item} className="flex items-center gap-2">
+                            <span className="w-1 h-1 bg-emerald-500 rounded-full" />
                             {item}
                           </li>
                         ))}
@@ -197,7 +204,6 @@ export default function ShowDataResources({
                     {/* ✅ Add to cart (Mobile) */}
                     <div className="flex md:hidden items-center justify-center gap-3 my-2">
                       <div className="flex-1 h-px bg-gray-200" />
-
                       <Link
                         href={`/cart/${p.id}`}
                         onClick={(e) => e.stopPropagation()}
@@ -205,12 +211,11 @@ export default function ShowDataResources({
                       >
                         <ShoppingBasket className="w-4 h-4" />
                       </Link>
-
                       <div className="flex-1 h-px bg-gray-200" />
                     </div>
 
                     {/* ✅ Price */}
-                    <div className="my-3 flex items-center justify-between">
+                    <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center gap-1 text-red-600">
                         <CreditCard className="w-4 h-4" />
                         <span className="text-sm font-bold">
@@ -227,16 +232,12 @@ export default function ShowDataResources({
                 </div>
               </div>
             ))}
-
           </div>
         )}
 
         {!showSkeleton && totalPages > 1 && (
           <div className="mt-8 flex justify-center">
-            <Pagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-            />
+            <Pagination totalPages={totalPages} currentPage={currentPage} />
           </div>
         )}
       </div>

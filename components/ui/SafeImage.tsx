@@ -38,7 +38,7 @@ type SafeImageProps = ImageProps;
 const SafeImage = ({ src, alt, ...props }: SafeImageProps) => {
   const safeSrc = getSafeImageUrl(src as string | null);
 
-  return <NextImage priority src={safeSrc} alt={alt} {...props} />;
+  return <NextImage  src={safeSrc} alt={alt} {...props} />;
 };
 
 export default SafeImage;

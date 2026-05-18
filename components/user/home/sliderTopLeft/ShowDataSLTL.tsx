@@ -43,7 +43,6 @@ export default function ShowDataSLTL({
   initialProducts,
   viewAllLink = "/resources",
 }: Props) {
-  // ✅ بازگرداندن isMounted برای جلوگیری از پرش Swiper
   const [isMounted, setIsMounted] = useState(false);
   const [prevBtn, setPrevBtn] = useState<HTMLButtonElement | null>(null);
   const [nextBtn, setNextBtn] = useState<HTMLButtonElement | null>(null);
@@ -52,7 +51,7 @@ export default function ShowDataSLTL({
     setIsMounted(true);
   }, []);
 
-  const { data: response, isLoading, refetch } = useQuery({
+  const { data: response, isLoading } = useQuery({
     queryKey: ["latest-products"],
     queryFn: fetchLatestProductAction,
     initialData: initialProducts,
@@ -63,19 +62,16 @@ export default function ShowDataSLTL({
 
   const products: ProductType[] = response?.data || [];
 
-  // ✅ نمایش اسکلتون تا زمانی که کامپوننت روی کلاینت مانت نشده یا در حال لود است
   if (!isMounted || (isLoading && products.length === 0)) {
     return <SliderSkeletonTopLeft />;
   }
 
-  // اگر محصولی وجود نداشت
   if (!isLoading && products.length === 0) {
     return null;
   }
 
   return (
     <div className="w-full mx-auto relative px-2 h-full" dir="rtl">
-      {/* Progress bar style */}
       <style jsx global>{`
         .custom-swiper-progress {
           position: absolute;
@@ -124,7 +120,7 @@ export default function ShowDataSLTL({
           dir="rtl"
         >
           {products.map((p, index) => {
-            const isPriority = index < 2; // دو اسلاید اول
+            const isPriority = index < 2;
 
             return (
               <SwiperSlide key={p.id} className="w-full h-auto">
@@ -136,7 +132,12 @@ export default function ShowDataSLTL({
                 >
                   <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                     {/* Image */}
-                    <div className="relative w-full h-[120px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
+                    <div className="relative w-full h-[130px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
+                      {/* ✅ Label */}
+                      <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">
+                        آنلاین  
+                      </span>
+
                       <div className="relative w-full h-full">
                         <SafeImage
                           src={p.imageUrl || "/images/products/bookExample.jpg"}
@@ -146,7 +147,7 @@ export default function ShowDataSLTL({
                           placeholder="blur"
                           blurDataURL={blurDataURL}
                           priority={isPriority}
-                          fetchPriority={isPriority ? "high" : "auto"} // ✅ اولویت‌دهی اجباری به دانلود عکس‌های اولیه
+                          fetchPriority={isPriority ? "high" : "auto"}
                           className="object-contain mix-blend-multiply transition-opacity duration-300"
                         />
                       </div>

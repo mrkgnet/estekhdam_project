@@ -47,7 +47,7 @@ export default function FilterResource({
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-700">فیلترها</h2>
 
-        <div className="text-xs bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-opacity">
+        <div className="text-xs bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1.5 rounded flex items-center gap-1.5 transition-opacity">
           {isFetching ? (
             <span className="inline-block w-8 h-3 bg-blue-200 animate-pulse rounded" />
           ) : (
@@ -68,7 +68,7 @@ export default function FilterResource({
               <button
                 key={filter.value}
                 onClick={() => handleFilter(filter.value)}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${
+                className={`shrink-0 px-4 py-2 rounded text-xs font-medium transition-all duration-200 border ${
                   isActive
                     ? "bg-red-500 text-white border-red-500 shadow-md"
                     : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300"

@@ -81,7 +81,7 @@ export default async function middleware(request: NextRequest) {
   // ۳. کاربر هیچ توکن معتبری ندارد
   // ==========================================
   if (isProtected) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
