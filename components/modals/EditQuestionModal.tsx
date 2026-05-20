@@ -65,13 +65,14 @@ export default function EditQuestionModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-      onClick={onClose}
+     
     >
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -50, opacity: 0 }}
-        className="bg-white p-6 rounded w-full max-w-2xl shadow-xl flex flex-col max-h-[95vh]"
+        // تغییر از max-w-2xl به max-w-4xl برای فضای بیشتر ادیتورها
+        className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4 border-b pb-2">
@@ -156,6 +157,7 @@ export default function EditQuestionModal({
             <RichTextEditor value={questionText} onChange={setQuestionText} />
           </div>
 
+          {/* ================= شروع تغییرات بخش گزینه‌ها ================= */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold">
               گزینه‌ها *{" "}
@@ -164,41 +166,45 @@ export default function EditQuestionModal({
               </span>
             </label>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {options.map((opt, index) => (
                 <div
                   key={index}
-                  className={`flex items-center border p-2 rounded focus-within:outline focus-within:outline-blue-500 transition-colors ${
+                  className={`flex flex-col border rounded p-3 transition-colors ${
                     correctAnswer === index
-                      ? "border-green-500 bg-green-50/50"
+                      ? "border-green-500 bg-green-50/30 shadow-sm"
                       : "border-gray-300"
                   }`}
                 >
-                  <input
-                    type="radio"
-                    name="correctAnswer"
-                    value={index}
-                    required
-                    onChange={() => setCorrectAnswer(index)}
-                    checked={correctAnswer === index}
-                    className="ml-2 w-4 h-4 cursor-pointer accent-green-600"
-                  />
-                  <span className="text-xs text-gray-400 font-bold ml-2 w-4 text-center">
-                    {index + 1}
-                  </span>
-                  <input
-                    type="text"
-                    name={`option_${index}`}
-                    value={opt}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    required
-                    placeholder={`متن گزینه ${index + 1}`}
-                    className="w-full bg-transparent outline-none text-sm"
-                  />
+                  <div className="flex items-center gap-2 mb-2 border-b pb-2">
+                    <input
+                      type="radio"
+                      name="correctAnswer"
+                      value={index}
+                      required
+                      onChange={() => setCorrectAnswer(index)}
+                      checked={correctAnswer === index}
+                      className="w-4 h-4 cursor-pointer accent-green-600"
+                    />
+                    <span className="text-sm font-bold text-gray-700">
+                      گزینه {index + 1}
+                    </span>
+                  </div>
+                  {/* اینپوت مخفی برای ارسال دیتا به اکشن سمت سرور */}
+                  <input type="hidden" name={`option_${index}`} value={opt} />
+                  
+                  {/* استفاده از ادیتور برای هر گزینه */}
+                  <div className="flex-grow">
+                     <RichTextEditor
+                       value={opt}
+                       onChange={(value) => handleOptionChange(index, value)}
+                     />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+          {/* ================= پایان تغییرات بخش گزینه‌ها ================= */}
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold">توضیحات سوال *</label>

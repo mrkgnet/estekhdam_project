@@ -72,9 +72,12 @@ export async function fetchDataQues(id: string, step: number = 1, chapterId?: st
       where: whereCondition,
     });
 
-    const question = await db.question.findFirst({
+     const question = await db.question.findFirst({
       where: whereCondition,
-      orderBy: { createdAt: "asc" },
+      orderBy: [
+        { createdAt: "asc" },
+        { id: "asc" } // <--- اضافه کردن این خط برای جلوگیری از به هم ریختن ترتیب
+      ],
       skip: step - 1,
     });
 

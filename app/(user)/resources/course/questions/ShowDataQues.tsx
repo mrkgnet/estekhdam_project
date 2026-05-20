@@ -17,6 +17,7 @@ import CommentManagment from "@/components/comment/CommentManagmet";
 import SendPQComponent from "@/components/send-problem-question/SendPQComponent";
 import { CopyClipBoard } from "@/components/copy-clipboard/CopyClipBoard";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
+import FontSizeHandler from "@/components/user/questions/FontSizeHandler";
 
 type ChoiceKey = "A" | "B" | "C" | "D";
 
@@ -60,6 +61,7 @@ export default function ExamPage({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const commentsRef = React.useRef<HTMLDivElement | null>(null);
+  const [fontSize, setFontSize] = useState<number>(14);
 
   const { data: response, isFetching } = useQuery({
     queryKey: ['exam-question', courseId, currentStep, chapterId, questionType],
@@ -305,7 +307,15 @@ export default function ExamPage({
 
 
       <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+
         <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
+          {/* فونت */}
+          <div className="header-section flex bg-white justify-between items-center border border-slate-400">
+            <h5>تغییر اندازه فونت متن</h5>
+            <FontSizeHandler fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
+
           <button
             type="button"
             onClick={() => {
@@ -454,7 +464,7 @@ export default function ExamPage({
           </div>
         </aside>
 
-        <main className="w-full flex-1 flex flex-col min-w-0 pb-10">
+        <main className="w-full flex-1 flex flex-col min-w-0 pb-10" style={{ fontSize: `${fontSize}px` }}>
           <header className="flex items-center justify-between bg-white p-4 sm:p-5 rounded shadow-sm border border-gray-300 mb-5">
             <div className="flex items-center gap-4">
               <div className="bg-green-100 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl shrink-0">
@@ -480,6 +490,7 @@ export default function ExamPage({
                   <p className="text-red-500 mt-0.5">سوالی با این فیلترها یافت نشد!</p>
                 )}
               </div>
+
             </div>
 
             <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shrink-0">
@@ -512,8 +523,8 @@ export default function ExamPage({
                   exit={{ opacity: 0, y: -10 }}
                   className="bg-white rounded shadow-sm border border-slate-200/60 p-5 sm:p-8"
                 >
-                  <div className="flex text-14 md:text-14 flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-                    <h2 dangerouslySetInnerHTML={{ __html: q.text }} className="text-slate-800 leading-relaxed flex-1 text-14"></h2>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
+                    <h2 dangerouslySetInnerHTML={{ __html: q.text }} className="text-slate-800 leading-relaxed flex-1"></h2>
                   </div>
 
                   <div className="space-y-3.5">
@@ -528,24 +539,28 @@ export default function ExamPage({
                           disabled={showResult || isAnyLoading}
                           onClick={() => setSelected(ch.key)}
                           className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-xl border-2 transition-all text-right outline-none active:scale-[0.99]
-                            ${!showResult ? 'border-slate-300 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500 cursor-pointer' :
+              ${!showResult ? 'border-slate-300 hover:border-green-300 hover:bg-slate-50 focus-visible:border-green-500 cursor-pointer' :
                               isRight ? 'border-green-500 bg-green-50/50 cursor-default' :
                                 isUserChoice ? 'border-red-500 bg-red-50/50 cursor-default' : 'border-slate-50 bg-slate-50/30 opacity-50 cursor-default'}
-                            `}
+              `}
                         >
-                          <div className="flex items-center gap-4 text-14">
+                          <div className="flex items-center gap-4 flex-1">
                             <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors
-                                ${isUserChoice || (showResult && isRight) ? 'bg-white shadow-sm border border-slate-100' : 'bg-slate-100 text-slate-500'}
-                                ${showResult && isRight ? 'text-green-600' : isUserChoice ? 'text-red-600' : ''}
-                            `}>
+                  ${isUserChoice || (showResult && isRight) ? 'bg-white shadow-sm border border-slate-100' : 'bg-slate-100 text-slate-500'}
+                  ${showResult && isRight ? 'text-green-600' : isUserChoice ? 'text-red-600' : ''}
+              `}>
                               {persianLetterMap[ch.key]}
                             </span>
-                            <span className={`${isUserChoice || isRight ? 'text-slate-900' : 'text-slate-700'}`}>
-                              {ch.text}
-                            </span>
+
+                            {/* استفاده از dangerouslySetInnerHTML برای گزینه ها */}
+                            <div
+                              className={`[&>p]:m-0 flex-1 ${isUserChoice || isRight ? 'text-slate-900' : 'text-slate-700'}`}
+                              dangerouslySetInnerHTML={{ __html: ch.text || "" }}
+                            />
                           </div>
-                          {showResult && isRight && <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />}
-                          {showResult && isUserChoice && !isRight && <XCircle className="w-6 h-6 text-red-500 shrink-0" />}
+
+                          {showResult && isRight && <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0 ml-2" />}
+                          {showResult && isUserChoice && !isRight && <XCircle className="w-6 h-6 text-red-500 shrink-0 ml-2" />}
                         </button>
                       );
                     })}
@@ -564,7 +579,7 @@ export default function ExamPage({
                             <span className="font-bold">پاسخ تشریحی</span>
                           </div>
                           {q.explanation ? (
-                            <p dangerouslySetInnerHTML={{ __html: q.explanation }} className="text-slate-700 text-14 leading-8 text-justify"></p>
+                            <p dangerouslySetInnerHTML={{ __html: q.explanation }} className="text-slate-700 leading-8 text-justify"></p>
                           ) : (
                             <p className="...">پاسخ تشریحی برای این سوال ثبت نشده است.</p>
                           )}
@@ -576,7 +591,7 @@ export default function ExamPage({
                             <span className="font-bold"> نکات کلیدی کنکوری</span>
                           </div>
                           {q.examPoints ? (
-                            <p dangerouslySetInnerHTML={{ __html: q.examPoints }} className="text-slate-700 text-14 leading-8 text-justify"></p>
+                            <p dangerouslySetInnerHTML={{ __html: q.examPoints }} className="text-slate-700 leading-8 text-justify"></p>
                           ) : (
                             <p className="...">نکته کنکوری برای این سوال ثبت نشده است.</p>
                           )}
@@ -586,6 +601,7 @@ export default function ExamPage({
                   </AnimatePresence>
                 </motion.div>
               </AnimatePresence>
+
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-10 flex flex-col items-center justify-center text-center">
                 <Filter className="w-16 h-16 text-slate-200 mb-4" />

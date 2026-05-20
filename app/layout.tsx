@@ -51,7 +51,11 @@ export default function RootLayout({
       <body className={`${iransans.className}   text-13 sm:text-13 md:text-13 `} suppressHydrationWarning>
 
         <Providers>
-          <NextTopLoader color="#ef4444" height={2} showSpinner={false} />
+          <NextTopLoader
+          
+          color="#ef4444" height={2} showSpinner={true}
+          
+          />
 
           <AuthProvider>
             <Toaster

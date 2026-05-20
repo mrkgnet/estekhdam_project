@@ -182,12 +182,13 @@ export default function ExamQuestionsPage({
                                              <td className="p-4 text-center text-gray-500 font-medium">{ q.questionCode}</td>
                                             <td className="p-4">
                                                 <div className="text-gray-800 font-medium text-sm line-clamp-2" dangerouslySetInnerHTML={{ __html: q.questionText || "" }} />
-                                                <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
+                                                <div className="flex flex-col gap-2 mt-2 text-xs text-gray-500">
                                                     {q.options.map((opt: string, i: number) => (
-                                                        <span key={i} className={`px-2 py-1 rounded-md ${i + 1 === q.correctAnswer ? "bg-green-50 text-green-700 border border-green-200 font-bold flex items-center gap-1" : "bg-gray-100"}`}>
-                                                            {i + 1 === q.correctAnswer && <CheckCircle2 className="w-3 h-3" />}
-                                                            {i + 1}- {opt}
-                                                        </span>
+                                                        <div key={i} className={`px-2 py-1.5 rounded-md flex items-center gap-2 ${i + 1 === q.correctAnswer ? "bg-green-50 text-green-700 border border-green-200 font-bold" : "bg-gray-100"}`}>
+                                                            {i + 1 === q.correctAnswer && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                                                            <span className="shrink-0">{i + 1}- </span>
+                                                            <div className="[&>p]:m-0" dangerouslySetInnerHTML={{ __html: opt || "" }} />
+                                                        </div>
                                                     ))}
                                                 </div>
                                             </td>
@@ -236,7 +237,7 @@ export default function ExamQuestionsPage({
                                         </tr>
                                     )})
                                 ) : (
-                                    <tr><td colSpan={7} className="p-12 text-center">هیچ سوالی یافت نشد!</td></tr>
+                                    <tr><td colSpan={8} className="p-12 text-center">هیچ سوالی یافت نشد!</td></tr>
                                 )}
                             </tbody>
                         </table>

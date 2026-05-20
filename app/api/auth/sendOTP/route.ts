@@ -37,6 +37,8 @@ export async function POST(request: Request) {
       const existingUser = await db.user.findUnique({
         where: { phoneNumber: phone },
       });
+
+      // console.log(code)
       let saveUser: User;
       
       if(existingUser){

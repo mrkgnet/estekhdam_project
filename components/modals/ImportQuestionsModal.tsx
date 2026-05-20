@@ -48,7 +48,7 @@ export default function ImportQuestionsModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-      onClick={onClose}
+      
     >
       <motion.div
         initial={{ y: -50, opacity: 0 }}
