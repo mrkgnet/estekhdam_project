@@ -367,7 +367,7 @@ export default function ExamPage({
                 <Filter className="w-4 h-4 text-gray-600" />
               </div>
 
-              <h3 className="text-sm font-semibold text-gray-800">
+              <h3 className="text-sm font-semibold border  border-slate-400 p-1 text-gray-800">
                 فیلتر سوالات
               </h3>
             </div>
