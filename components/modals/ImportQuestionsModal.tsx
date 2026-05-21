@@ -19,6 +19,8 @@ export default function ImportQuestionsModal({
   productId,
 }: ImportQuestionsModalProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  // استیت جدید برای نوع سوال
+  const [importType, setImportType] = useState<string>("ALL"); 
   const [isPending, startTransition] = useTransition();
 
   const handleImport = () => {
@@ -28,8 +30,12 @@ export default function ImportQuestionsModal({
     }
 
     startTransition(async () => {
-      // فراخوانی اکشن فقط با دو پارامتر
-      const result = await importQuestionsAction(productId, parseInt(selectedCategoryId));
+      // ارسال پارامتر سوم (نوع سوال) به اکشن
+      const result = await importQuestionsAction(
+        productId, 
+        parseInt(selectedCategoryId), 
+        importType
+      );
       
       if (result.success) {
         alert(result.message);
@@ -48,7 +54,6 @@ export default function ImportQuestionsModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-      
     >
       <motion.div
         initial={{ y: -50, opacity: 0 }}
@@ -68,7 +73,7 @@ export default function ImportQuestionsModal({
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="categorySelect" className="text-sm font-semibold text-gray-700">
               انتخاب دسته‌بندی سرفصل *
@@ -86,8 +91,52 @@ export default function ImportQuestionsModal({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
-              سیستم به صورت خودکار سوالات تکراری را نادیده گرفته و فقط سوالات جدید را وارد می‌کند.
+          </div>
+
+          {/* بخش جدید: انتخاب نوع سوال */}
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-700">
+              نوع سوالات برای ایمپورت *
+            </label>
+            <div className="flex flex-wrap items-center gap-6 bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="importType"
+                  value="ALL"
+                  checked={importType === "ALL"}
+                  onChange={(e) => setImportType(e.target.value)}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                />
+                <span className="text-gray-800 text-sm">همه سوالات</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="importType"
+                  value="SARASARI"
+                  checked={importType === "SARASARI"}
+                  onChange={(e) => setImportType(e.target.value)}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                />
+                <span className="text-gray-800 text-sm">سراسری (دولتی)</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="importType"
+                  value="TALIFI"
+                  checked={importType === "TALIFI"}
+                  onChange={(e) => setImportType(e.target.value)}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                />
+                <span className="text-gray-800 text-sm">تالیفی</span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500">
+              سیستم به صورت خودکار سوالات تکراری را نادیده گرفته و فقط سوالات جدید از نوع انتخاب شده را وارد می‌کند.
             </p>
           </div>
 

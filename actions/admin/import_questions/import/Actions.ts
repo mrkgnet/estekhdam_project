@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 
 export async function importQuestionsAction(
   productId: string, 
-  categoryChapterId: number
+  categoryChapterId: number,
+  importType: string // پارامتر جدید
 ) {
   try {
     const currentUser = await infoCurentUser();
@@ -15,16 +16,24 @@ export async function importQuestionsAction(
       return { success: false, message: "دسترسی غیرمجاز. فقط ادمین." };
     }
 
-    // ۱. واکشی سوالات منبع
+    // ۱. آماده‌سازی شرط جستجو بر اساس نوع سوال
+    const whereClause: any = { categoryChapterId: categoryChapterId };
+    
+    // اگر "همه سوالات" انتخاب نشده بود، فیلتر را اعمال کن
+    if (importType !== "ALL") {
+      whereClause.questionType = importType; // مقدار "SARASARI" یا "TALIFI"
+    }
+
+    // ۲. واکشی سوالات منبع با در نظر گرفتن فیلتر جدید
     const sourceQuestions = await db.question.findMany({
-      where: { categoryChapterId: categoryChapterId },
+      where: whereClause,
     });
 
     if (sourceQuestions.length === 0) {
-      return { success: false, message: "هیچ سوالی در این دسته‌بندی برای کپی کردن یافت نشد." };
+      return { success: false, message: "هیچ سوالی با این مشخصات در این دسته‌بندی برای کپی کردن یافت نشد." };
     }
 
-    // ۲. واکشی سوالات فعلی محصول برای جلوگیری از تکرار
+    // ۳. واکشی سوالات فعلی محصول برای جلوگیری از تکرار
     const existingQuestions = await db.question.findMany({
       where: { productId: productId },
       select: { questionText: true }
@@ -33,14 +42,14 @@ export async function importQuestionsAction(
     // ایجاد یک Set از متن سوالات برای جستجوی سریع‌تر
     const existingTexts = new Set(existingQuestions.map(q => q.questionText));
 
-    // ۳. فیلتر کردن سوالاتی که از قبل وجود ندارند
+    // ۴. فیلتر کردن سوالاتی که از قبل وجود ندارند
     const newQuestions = sourceQuestions.filter(q => !existingTexts.has(q.questionText));
 
     if (newQuestions.length === 0) {
-      return { success: true, message: "تمام سوالات این دسته‌بندی از قبل در این محصول وجود دارند. سوال جدیدی یافت نشد." };
+      return { success: true, message: "تمام سوالات انتخابی از قبل در این محصول وجود دارند. سوال جدیدی یافت نشد." };
     }
 
-    // ۴. آماده‌سازی داده‌های جدید
+    // ۵. آماده‌سازی داده‌های جدید
     const newQuestionsData = newQuestions.map((q) => ({
       questionText: q.questionText,
       options: q.options,
@@ -55,12 +64,12 @@ export async function importQuestionsAction(
       chapterId: q.chapterId, // اگر می‌خواهید سرفصل هم منتقل شود
     }));
 
-    // ۵. درج سوالات جدید
+    // ۶. درج سوالات جدید
     const insResult = await db.question.createMany({
       data: newQuestionsData,
     });
 
-    // ۶. رفرش کش
+    // ۷. رفرش کش
     revalidatePath(`/adminp/questions/${productId}`);
 
     return { 

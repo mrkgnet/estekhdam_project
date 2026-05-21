@@ -31,12 +31,23 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   const isPhoneValid = phone.startsWith("09") && phone.length === 11;
 
+  // ✅ مدیریت استیت‌ها و خواندن شماره ذخیره شده هنگام باز شدن مودال
   useEffect(() => {
     if (isOpen) {
       setStep(0);
-      setPhone("");
       setOtp("");
       setTimer(0);
+      
+      if (typeof window !== "undefined") {
+        const savedPhone = window.localStorage.getItem("savedUserPhone");
+        if (savedPhone) {
+          setPhone(savedPhone);
+        } else {
+          setPhone("");
+        }
+      } else {
+        setPhone("");
+      }
     }
   }, [isOpen]);
 
@@ -100,6 +111,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         setOtp("");
         otpRef.current?.focus();
         return;
+      }
+
+      // ✅ ذخیره شماره در localStorage پس از تایید موفق
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("savedUserPhone", phone);
       }
 
       toast.success("ورود موفقیت‌آمیز بود");
