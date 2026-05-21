@@ -1,10 +1,11 @@
 "use server"; // حتما باید در خط اول باشد
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath , unstable_noStore as noStore} from "next/cache";
 
 // دریافت لیست همه نوتیفیکیشن‌ها
 export async function getAllNotifications() {
+   noStore();
   try {
     return await db.notification.findMany({
       orderBy: { createdAt: "desc" }, 
