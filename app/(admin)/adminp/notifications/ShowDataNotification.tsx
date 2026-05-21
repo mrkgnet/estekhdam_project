@@ -28,9 +28,10 @@ function timeAgoFa(dateInput: string | Date) {
 }
 
 export default function NotificationsPage({ response }: { response: any[] }) {
+  
   const [notifications, setNotifications] = useState<any[]>(response);
   const router = useRouter();
-
+console.log(notifications)
   // بررسی پیام‌های نخوانده (برای دکمه خواندن همه)
   const hasUnread = useMemo(() => notifications.some(n => !n.isRead), [notifications]);
   
