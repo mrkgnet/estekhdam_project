@@ -309,7 +309,7 @@ export default function ExamPage({
       <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
 
 
-        <aside className="w-full lg:w-[300px] xl:w-[320px] lg:sticky lg:top-6 flex flex-col gap-3 shrink-0 z-20">
+        <aside className="w-full lg:w-[300px] xl:w-[320px]  lg:top-6 flex flex-col gap-3 shrink-0 z-20">
           {/* فونت */}
           <div className="header-section flex bg-white justify-between items-center border border-slate-400">
             <h5>تغییر اندازه فونت متن</h5>

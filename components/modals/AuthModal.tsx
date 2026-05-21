@@ -31,7 +31,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   const isPhoneValid = phone.startsWith("09") && phone.length === 11;
 
-  // ✅ مدیریت استیت‌ها و خواندن شماره ذخیره شده هنگام باز شدن مودال
   useEffect(() => {
     if (isOpen) {
       setStep(0);
@@ -113,7 +112,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         return;
       }
 
-      // ✅ ذخیره شماره در localStorage پس از تایید موفق
       if (typeof window !== "undefined") {
         window.localStorage.setItem("savedUserPhone", phone);
       }
@@ -282,7 +280,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       {[...Array(OTP_LENGTH)].map((_, i) => (
                         <div
                           key={i}
-                          className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-xl transition-all ${
+                          className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-xl transition-all relative ${
                             otp.length === i && !loading
                               ? "border-slate-900 ring-2 ring-slate-900/20 bg-slate-50"
                               : otp[i]
@@ -291,6 +289,12 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                           }`}
                         >
                           {otp[i] || ""}
+                          {/* ✅ نمایش کرسر در باکس فعال */}
+                          {otp.length === i && !loading && (
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="w-[2px] h-6 bg-slate-900 animate-pulse" />
+                            </span>
+                          )}
                         </div>
                       ))}
 

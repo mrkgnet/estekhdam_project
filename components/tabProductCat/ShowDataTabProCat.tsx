@@ -89,6 +89,7 @@ export default function ShowDataTabProCat({
   useEffect(() => {
     setMounted(true);
   }, []);
+  console.log(mainCategory)
 
   const rawTabs = useMemo(
     () => (Array.isArray(mainCategory?.children) ? mainCategory.children : []),
@@ -262,7 +263,7 @@ export default function ShowDataTabProCat({
               <SwiperSlide key={tab.slug} className="py-1" style={{ width: "max-content" }}>
                 <button
                   onClick={() => handleTabChange(tab.slug)}
-                  className={`px-4 py-2 rounded transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-300
+                  className={`px-4 py-2 rounded-full transition-all font-bold border border-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-300
                     ${activeTab === tab.slug
                       ? "bg-white text-slate-800 shadow-md"
                       : "text-slate-600 hover:text-slate-900 hover:bg-white/60"

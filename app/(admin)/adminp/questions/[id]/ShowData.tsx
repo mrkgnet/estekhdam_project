@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Edit, Trash2, HelpCircle, CheckCircle2, GraduationCap, Plus, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit, Trash2, HelpCircle, CheckCircle2, GraduationCap, Plus, Download } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import DeleteButton from "@/components/ui/DeleteButton";
 import deleteQuestionAction from "@/actions/admin/questions/gov/delete/Actions";
@@ -11,6 +11,7 @@ import AddQuestionModal from "@/components/modals/AddQuestionModal";
 import EditQuestionModal from "@/components/modals/EditQuestionModal";
 import ImportQuestionsModal from "@/components/modals/ImportQuestionsModal";
 import deleteAllQuestionCourseAction from "@/actions/admin/questions/gov/delete_all_questions/actions";
+import Pagination from "@/components/ui/Pagination"; // <--- اضافه کردن اینپورت
 
 export default function ExamQuestionsPage({
   productId,
@@ -31,7 +32,6 @@ export default function ExamQuestionsPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   
-
   // State های مدال افزودن
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [options, setOptions] = useState(["", "", "", ""]);
@@ -121,31 +121,8 @@ export default function ExamQuestionsPage({
     };
   }, [isModalOpen, editingQuestion, isImportModalOpen]);
 
-  // 🔄 تغییر صفحه با آپدیت URL
-  const goToPage = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
-    if (searchQuery) {
-      params.set("search", searchQuery);
-    }
-    router.push(`?${params.toString()}`);
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      goToPage(currentPage + 1);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      goToPage(currentPage - 1);
-    }
-  };
-
   // 🔍 جستجو با debounce - فقط وقتی searchQuery تغییر کنه
   useEffect(() => {
-    // اگر searchQuery با مقدار URL یکسان باشه، هیچ کاری نکن
     const currentSearch = searchParams.get("search") || "";
     if (searchQuery === currentSearch) return;
 
@@ -156,7 +133,6 @@ export default function ExamQuestionsPage({
         params.set("page", "1"); // ریست به صفحه اول
       } else {
         params.delete("search");
-        // اگر جستجو خالی شد، صفحه رو هم ریست کن
         if (currentPage !== 1) {
           params.set("page", "1");
         }
@@ -165,39 +141,7 @@ export default function ExamQuestionsPage({
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]); // فقط searchQuery رو وابسته کن
-
-  // تولید آرایه شماره صفحات
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push("...");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push("...");
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push("...");
-        pages.push(currentPage - 1);
-        pages.push(currentPage);
-        pages.push(currentPage + 1);
-        pages.push("...");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
+  }, [searchQuery]);
 
   const startIndex = (currentPage - 1) * 10;
 
@@ -377,54 +321,13 @@ export default function ExamQuestionsPage({
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-              <div className="text-sm text-gray-600">
-                نمایش {startIndex + 1} تا {Math.min(startIndex + 10, totalCount)} از {totalCount}{" "}
-                سوال
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={goToPrevPage}
-                  disabled={currentPage === 1}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {getPageNumbers().map((page, idx) =>
-                    page === "..." ? (
-                      <span key={`ellipsis-${idx}`} className="px-3 py-2 text-gray-400">
-                        ...
-                      </span>
-                    ) : (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page as number)}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? "bg-blue-600 text-white"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                <button
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
+          {/* استقاده از کامپوننت Pagination در اینجا */}
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            itemName="سوال"
+          />
         </div>
       </div>
 

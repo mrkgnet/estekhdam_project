@@ -1,6 +1,6 @@
-// components/ui/Pagination.tsx
 "use client";
 
+import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -9,10 +9,7 @@ interface PaginationProps {
   totalPages: number;
   totalCount: number;
   itemsPerPage?: number;
-  itemLabel?: string; // مثلا "سوال" یا "کاربر" یا "محصول"
-  showInfo?: boolean; // نمایش اطلاعات "نمایش 1 تا 10 از 100"
-  maxVisible?: number; // تعداد دکمه‌های قابل نمایش
-  className?: string;
+  itemName?: string;
 }
 
 export default function Pagination({
@@ -20,13 +17,12 @@ export default function Pagination({
   totalPages,
   totalCount,
   itemsPerPage = 10,
-  itemLabel = "آیتم",
-  showInfo = true,
-  maxVisible = 5,
-  className = "",
+  itemName = "مورد",
 }: PaginationProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
 
   const goToPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -47,7 +43,8 @@ export default function Pagination({
   };
 
   const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
+    const pages = [];
+    const maxVisible = 5;
 
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
@@ -76,27 +73,20 @@ export default function Pagination({
     return pages;
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalCount);
-
   if (totalPages <= 1) return null;
 
   return (
-    <div
-      className={`flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50 ${className}`}
-    >
-      {showInfo && (
-        <div className="text-sm text-gray-600">
-          نمایش {startIndex + 1} تا {endIndex} از {totalCount} {itemLabel}
-        </div>
-      )}
+    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+      <div className="text-sm text-gray-600">
+        نمایش {startIndex + 1} تا {Math.min(startIndex + itemsPerPage, totalCount)} از {totalCount}{" "}
+        {itemName}
+      </div>
 
       <div className="flex items-center gap-2">
         <button
           onClick={goToPrevPage}
           disabled={currentPage === 1}
           className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          aria-label="صفحه قبل"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -116,8 +106,6 @@ export default function Pagination({
                     ? "bg-blue-600 text-white"
                     : "hover:bg-gray-100 text-gray-700"
                 }`}
-                aria-label={`صفحه ${page}`}
-                aria-current={currentPage === page ? "page" : undefined}
               >
                 {page}
               </button>
@@ -129,7 +117,6 @@ export default function Pagination({
           onClick={goToNextPage}
           disabled={currentPage === totalPages}
           className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          aria-label="صفحه بعد"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
