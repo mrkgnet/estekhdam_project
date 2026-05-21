@@ -1,6 +1,7 @@
 import { getAllNotifications } from '@/actions/notification/getAllNotif/Actions'
 import React from 'react'
 import NotificationsPage from './ShowDataNotification'
+export const dynamic = "force-dynamic"; // 👈 این خط را اضافه کنید
 
 export default async function FetchDataNotification() {
     // گرفتن اطلاعات در سمت سرور
