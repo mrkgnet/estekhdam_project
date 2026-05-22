@@ -49,7 +49,7 @@ export default async function page() {
       {/* بخش پیش‌نمایش نمودار */}
       <div className="mt-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div className="h-40 flex items-center justify-center border-2 border-dashed border-gray-100 rounded-xl">
-          <p className="text-gray-400">محل قرارگیری نمودار فروش</p>
+          <p className="text-gray-400">محل قرارگیری نمودار فروش4341</p>
         </div>
       </div>
     </div>
