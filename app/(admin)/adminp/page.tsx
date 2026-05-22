@@ -1,5 +1,6 @@
 
-import UploadImage from "@/components/admin/UploadImage";
+
+import UploadImage from "@/components/admin/uploadImage";
 import { ArrowUpRight, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
 
