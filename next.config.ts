@@ -24,6 +24,13 @@ const nextConfig: NextConfig = {
         hostname: "fm-2dnm-estekhdamt.runflare.run",
         pathname: "/data/**",
       },
+      // 👇 این بخش برای رفع خطای عکس‌های جدید اضافه شد 👇
+      {
+        protocol: "https",
+        hostname: "s3.ir-tbz-sh1.arvanstorage.ir",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 
