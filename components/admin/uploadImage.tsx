@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from 'react';
-import { Upload, X, CheckCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Image as ImageIcon, Copy, Check } from 'lucide-react';
 
 interface UploadResponse {
   url?: string;
@@ -15,6 +15,7 @@ export default function UploadImage() {
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -111,8 +112,21 @@ export default function UploadImage() {
     setUploadedUrl('');
     setError('');
     setProgress(0);
+    setCopied(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(uploadedUrl);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
@@ -260,12 +274,26 @@ export default function UploadImage() {
               </a>
               <button
                 type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(uploadedUrl);
-                }}
-                className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
+                onClick={handleCopyLink}
+                className={`
+                  px-3 py-1 text-xs rounded transition-all duration-300 whitespace-nowrap flex items-center gap-1.5
+                  ${copied 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  }
+                `}
               >
-                کپی لینک
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    لینک کپی شد
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    کپی لینک
+                  </>
+                )}
               </button>
             </div>
           </div>
