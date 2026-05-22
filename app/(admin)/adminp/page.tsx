@@ -1,6 +1,10 @@
 
 
-import UploadImage from "@/components/admin/uploadImage";
+
+
+
+
+import UploadImage from "@/components/admin/uploadImage/UploadImage";
 import { ArrowUpRight, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -45,7 +49,14 @@ export default async function page() {
             </Link>
           </div>
         </div>
-      <UploadImage />
+   
+   <UploadImage />
+
+
+
+   
+
+
       </div>
 
       {/* بخش پیش‌نمایش نمودار */}
