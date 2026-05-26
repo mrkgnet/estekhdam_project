@@ -1,8 +1,9 @@
-// components/Navbar.tsx
 "use client";
 
+import React, { useRef, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useUiStore } from "@/store/useUiStore";
 import {
   Menu,
   Search,
@@ -16,39 +17,34 @@ import {
   Backpack,
   LogOut,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState, useEffect } from "react";
 import AuthModal from "../modals/AuthModal";
 import { getDataSearchMany } from "@/actions/search/Actions";
-import { useSidebarStore } from "@/store/sideBarStoreAdmin";
 import { useQuery } from "@tanstack/react-query";
 import { getDataCategory } from "@/actions/category/Actions";
+import NotificationBell from "../notification/notificationBell/NotificationBell";
+// ۱. ایمپورت کامپوننت جدید زنگوله
+
 
 interface NavbarProps {
   response?: any[];
+  initialCategories?: any[];
 }
 
 export default function HeaderTop({ initialCategories }: NavbarProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoggedIn, isLoading, logOut } = useAuth();
 
-  // پیاده‌سازی ریکت کوئری
   // پیاده‌سازی ریکت کوئری
   const { data: categoryResponse } = useQuery({
     queryKey: ['categories-navbar'],
     queryFn: () => getDataCategory(),
-    initialData: initialCategories, // حالا این متغیر به درستی مقداردهی می‌شود
-    staleTime: 1000 * 60 * 60 * 24, // 💡 پیشنهاد: این خط را اضافه کنید تا دیتا ۲۴ ساعت کش شود و سرعت به حداکثر برسد
+    initialData: initialCategories,
+    staleTime: 1000 * 60 * 60 * 24, // دیتا ۲۴ ساعت کش می‌شود
   });
 
   // ۵ تای اول را برای جستجوهای محبوب جدا می‌کنیم
   const popularCategories = categoryResponse?.data?.slice(0, 5) || [];
-
-
-
-
-
 
   const [open, setOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -57,13 +53,11 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
   // استیت‌های مربوط به جستجو
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get("search") || "");
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  const cartCount = 1;
 
   const closeSearch = () => {
     setIsSearchOpen(false);
@@ -109,16 +103,14 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
 
   return (
     <>
-      <header className="relative   z-50 w-full border-b border-gray-300   bg-white font-sans transition-all duration-300">
-        <div className="mx-auto  pl-6 h-[72px] px-6  flex items-center justify-between gap-4">
+      <header className="relative z-50 w-full border-b border-gray-300 bg-white font-sans transition-all duration-300">
+        <div className="mx-auto pl-6 h-[72px] px-6 flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
-          {/* Brand Modern Block */}
           <div className="relative inline-flex items-center">
-
             {/* PRO Badge */}
             <span className="absolute -top-2 -left-2 bg-gradient-to-r from-red-600 to-red-700 
-    text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
+              text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
               PRO
             </span>
 
@@ -126,38 +118,33 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
               href="/"
               aria-label="خانه"
               className="group flex flex-col px-5 py-0.5 border border-gray-300 rounded-xl bg-white 
-       hover:shadow-md hover:border-blue-300 transition-all duration-300"
+                hover:shadow-md hover:border-blue-300 transition-all duration-300"
             >
-              {/* Brand Title */}
               <span className="text-base font-extrabold text-blue-800 tracking-tight group-hover:text-blue-700 transition">
                 استخدام
               </span>
-
-              {/* Brand Slogan */}
               <span className="text-[8px] font-medium text-gray-500 group-hover:text-gray-700 transition mt-0.5">
                 یک گام جلوتر از رقبا
               </span>
             </Link>
           </div>
 
-
-
-
-
           {/* Center Search */}
           <div
             ref={searchContainerRef}
-            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${isMobileSearchOpen
-              ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
-              : "hidden"
-              }`}
+            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${
+              isMobileSearchOpen
+                ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
+                : "hidden"
+            }`}
           >
             <div className="relative w-full max-w-[650px]">
               {isSearching ? (
                 <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin" />
               ) : (
-                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${isSearchOpen ? "text-green-600" : "text-gray-400"
-                  }`} />
+                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
+                  isSearchOpen ? "text-green-600" : "text-gray-400"
+                }`} />
               )}
 
               <input
@@ -167,16 +154,16 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4  outline-none transition-all duration-200 ${isSearchOpen
-                  ? "bg-white border-gray-500"
-                  : "border-gray-200 focus:bg-white hover:border-gray-300"
-                  }`}
+                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4 outline-none transition-all duration-200 ${
+                  isSearchOpen ? "bg-white border-gray-500" : "border-gray-200 focus:bg-white hover:border-gray-300"
+                }`}
               />
 
               {/* Search Dropdown Overlay */}
               <div
-                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-                  }`}
+                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${
+                  isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
+                }`}
               >
                 {searchQuery.trim() === "" ? (
                   <div className="p-5">
@@ -187,19 +174,18 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                     >
                       <div className="flex items-center gap-2">
                         <LayoutGrid size={18} className="text-gray-400" />
-                        <span className=" font-medium">جستجو برای ...</span>
+                        <span className="font-medium">جستجو برای ...</span>
                       </div>
                     </button>
                     <div className="h-[1px] w-full bg-gray-200 mb-4 rounded-full"></div>
-                    <div className="mb-3 text-gray-800  font-bold">جستجوهای محبوب</div>
-                    {/* در قسمت رندر کردن دسته‌بندی‌ها (جستجوهای محبوب) */}
+                    <div className="mb-3 text-gray-800 font-bold">جستجوهای محبوب</div>
                     <div className="flex flex-wrap gap-2.5">
                       {popularCategories.map((cat: any, index: number) => (
                         <Link
                           key={cat?.id || index}
                           href={`/category/${cat?.catSlug || ''}`}
                           onClick={closeSearch}
-                          className="rounded-full text-11 lg:text-12 border border-gray-200 px-4 py-2 text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
+                          className="rounded-full text-12 border border-gray-200 px-4 py-2 text-gray-600 bg-white hover:border-green-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
                         >
                           {cat?.catName || "بدون نام"}
                         </Link>
@@ -222,7 +208,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                               onClick={closeSearch}
                               className="flex items-center justify-between p-3 text-black hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50 last:border-0"
                             >
-                              <div className=" font-medium text-gray-900 truncate">
+                              <div className="font-medium text-gray-900 truncate">
                                 {item.title}
                               </div>
                               <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded-md">
@@ -234,7 +220,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                       </div>
                     ) : (
                       !isSearching && (
-                        <div className="p-4 text-center  text-gray-500">
+                        <div className="p-4 text-center text-gray-500">
                           موردی یافت نشد.
                         </div>
                       )
@@ -246,7 +232,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                       className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 text-green-700 transition-colors text-right bg-green-50/50 mt-1"
                     >
                       <Search size={18} />
-                      <span className="">
+                      <span>
                         مشاهده همه نتایج برای <strong className="mx-1">"{searchQuery}"</strong>
                       </span>
                     </Link>
@@ -257,7 +243,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
           </div>
 
           {/* Left Section */}
-          <div className="flex items-center gap-4 md:gap-6 whitespace-nowrap">
+          <div className="flex items-center gap-4 md:gap-4 whitespace-nowrap">
             {/* آیکون سرچ موبایل */}
             <button
               type="button"
@@ -271,20 +257,20 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
               {isMobileSearchOpen ? <X size={20} /> : <Search size={20} strokeWidth={2.5} />}
             </button>
 
-            {/* سبد خرید */}
-
+            {/* ۲. اضافه شدن زنگوله اعلان‌ها در نوبار */}
+            <NotificationBell />
 
             {/* منوی کاربری */}
             <div className="relative z-10" ref={wrapperRef}>
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded z-10 border border-gray-200 px-4 py-2 cursor-pointer text-green-600 hover:text-green-700 hover:bg-green-50 transition"
+                className="flex items-center gap-2 rounded-xl border border-gray-200 h-10 px-4 cursor-pointer text-green-600 hover:text-green-700 hover:bg-green-50 transition"
                 aria-haspopup="menu"
                 aria-expanded={open}
               >
                 <User size={18} />
-                <span className="hidden sm:inline text-xs ">حساب کاربری</span>
+                <span className="hidden sm:inline text-xs">حساب کاربری</span>
               </button>
 
               <div
@@ -298,7 +284,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                 role="menu"
               >
                 {isLoading ? (
-                  <div className="flex justify-center py-3 text-gray-400 ">
+                  <div className="flex justify-center py-3 text-gray-400">
                     در حال بررسی...
                   </div>
                 ) : !isLoggedIn ? (
@@ -310,7 +296,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                     className="w-full flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 transition border-b border-slate-100"
                     role="menuitem"
                   >
-                    <span className="">ورود/ثبت‌نام</span>
+                    <span>ورود/ثبت‌نام</span>
                     <LogIn size={18} className="text-slate-500" />
                   </button>
                 ) : (
@@ -321,7 +307,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                       className="flex items-center justify-between px-4 py-3 text-green-600 bg-green-50 hover:bg-green-100 transition border-b border-red-100"
                       role="menuitem"
                     >
-                      <span className="">ورود به پنل </span>
+                      <span>ورود به پنل</span>
                       <User size={18} className="text-green-600" />
                     </Link>
                     <hr />
@@ -333,7 +319,7 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                       className="w-full flex items-center justify-between px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 transition"
                       role="menuitem"
                     >
-                      <span className="">خروج از حساب</span>
+                      <span>خروج از حساب</span>
                       <LogOut size={18} className="text-red-600" />
                     </button>
                   </div>
