@@ -11,7 +11,7 @@ import AddQuestionModal from "@/components/modals/AddQuestionModal";
 import EditQuestionModal from "@/components/modals/EditQuestionModal";
 import ImportQuestionsModal from "@/components/modals/ImportQuestionsModal";
 import deleteAllQuestionCourseAction from "@/actions/admin/questions/gov/delete_all_questions/actions";
-import Pagination from "@/components/ui/Pagination"; // <--- اضافه کردن اینپورت
+import Pagination from "@/components/ui/Pagination";
 
 export default function ExamQuestionsPage({
   productId,
@@ -194,17 +194,18 @@ export default function ExamQuestionsPage({
 
         <div className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
+            {/* اضافه شدن کلس table-fixed برای کنترل دقیق اندازه ستون‌ها */}
+            <table className="w-full text-right border-collapse table-fixed min-w-[1000px]">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 text-sm font-medium">
-                  <th className="p-4 w-16 text-center">ردیف</th>
-                  <th className="p-4 w-16 text-center">کد سوال</th>
-                  <th className="p-4 w-1/4">متن سوال</th>
-                  <th className="p-4 w-1/6">نوع سوال</th>
-                  <th className="p-4 w-1/6">دسته بندی </th>
-                  <th className="p-4 w-1/6">فصل</th>
-                  <th className="p-4 w-1/4">پاسخ سوال</th>
-                  <th className="p-4 text-center">عملیات</th>
+                  <th className="p-4 w-[6%] text-center">ردیف</th>
+                  <th className="p-4 w-[10%] text-center">کد سوال</th>
+                  <th className="p-4 w-[34%]">متن سوال</th>
+                  <th className="p-4 w-[10%]">نوع سوال</th>
+                  <th className="p-4 w-[12%]">دسته‌بندی</th>
+                  <th className="p-4 w-[12%]">فصل</th>
+                  <th className="p-4 w-[16%]">پاسخ تشریحی</th>
+                  <th className="p-4 w-[12%] text-center">عملیات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -216,41 +217,41 @@ export default function ExamQuestionsPage({
                     const actualIndex = startIndex + index + 1;
 
                     return (
-                      <tr key={q.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr key={q.id} className="hover:bg-gray-50/50 transition-colors group text-sm">
                         <td className="p-4 text-center text-gray-500 font-medium">
                           {actualIndex}
                         </td>
-                        <td className="p-4 text-center text-gray-500 font-medium">
+                        <td className="p-4 text-center text-gray-500 font-medium break-words">
                           {q.questionCode}
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 break-words">
                           <div
-                            className="text-gray-800 font-medium text-sm line-clamp-2"
+                            className="text-gray-800 font-medium line-clamp-3"
                             dangerouslySetInnerHTML={{ __html: q.questionText || "" }}
                           />
-                          <div className="flex flex-col gap-2 mt-2 text-xs text-gray-500">
+                          <div className="flex flex-col gap-1.5 mt-2 text-xs text-gray-500">
                             {q.options.map((opt: string, i: number) => (
                               <div
                                 key={i}
-                                className={`px-2 py-1.5 rounded-md flex items-center gap-2 ${
+                                className={`px-2 py-1 rounded-md flex items-start gap-2 ${
                                   i + 1 === q.correctAnswer
                                     ? "bg-green-50 text-green-700 border border-green-200 font-bold"
-                                    : "bg-gray-100"
-                                }`}
+                                    : "bg-gray-50"
+                                  }`}
                               >
                                 {i + 1 === q.correctAnswer && (
-                                  <CheckCircle2 className="w-3 h-3 shrink-0" />
+                                  <CheckCircle2 className="w-3. h-3.5 mt-0.5 shrink-0" />
                                 )}
                                 <span className="shrink-0">{i + 1}- </span>
                                 <div
-                                  className="[&>p]:m-0"
+                                  className="[&>p]:m-0 break-words"
                                   dangerouslySetInnerHTML={{ __html: opt || "" }}
                                 />
                               </div>
                             ))}
                           </div>
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 vertical-align-top">
                           {q.questionType === "SARASARI" ? (
                             <span className="bg-purple-50 text-purple-600 px-2 py-1 rounded-md text-xs font-bold border border-purple-100 flex items-center gap-1 w-max">
                               <GraduationCap className="w-3 h-3" /> سراسری
@@ -261,39 +262,35 @@ export default function ExamQuestionsPage({
                             </span>
                           )}
                         </td>
-                        <td className="p-4">
-                          <p className="text-gray-600 font-medium text-sm">
-                            {categoryName ? (
-                              <span className="bg-teal-50 text-teal-600 px-2 py-1 rounded-md text-xs border border-teal-100">
-                                {categoryName}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-xs">ندارد</span>
-                            )}
-                          </p>
+                        <td className="p-4 break-words">
+                          {categoryName ? (
+                            <span className="bg-teal-50 text-teal-600 px-2 py-1 rounded-md text-xs border border-teal-100 inline-block max-w-full truncate">
+                              {categoryName}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-xs">ندارد</span>
+                          )}
                         </td>
-                        <td className="p-4">
-                          <p className="text-gray-600 font-medium text-sm">
-                            {q.chapter?.title ? (
-                              <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs border border-blue-100">
-                                فصل {q.chapter.order}: {q.chapter.title}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-xs">عمومی</span>
-                            )}
-                          </p>
+                        <td className="p-4 break-words">
+                          {q.chapter?.title ? (
+                            <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-xs border border-blue-100 inline-block max-w-full">
+                              فصل {q.chapter.order}: {q.chapter.title}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-xs">عمومی</span>
+                          )}
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 break-words">
                           <div
-                            className="text-gray-800 font-medium text-sm line-clamp-2"
+                            className="text-gray-600 text-xs line-clamp-4"
                             dangerouslySetInnerHTML={{ __html: q.answerText || "" }}
                           />
                         </td>
                         <td className="p-4">
-                          <div className="flex items-center justify-center gap-2 transition-opacity">
+                          <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5">
                             <button
                               onClick={() => handleOpenEditModal(q)}
-                              className="p-1.5 text-blue-500 border border-gray-400 cursor-pointer hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="w-full sm:w-auto px-2 py-1 text-xs text-blue-500 border border-blue-300 cursor-pointer hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors text-center"
                             >
                               ویرایش
                             </button>
@@ -301,7 +298,7 @@ export default function ExamQuestionsPage({
                               id={q.id}
                               action={deleteQuestionAction}
                               itemName="این سوال"
-                              className="p-1.5 text-red-500 cursor-pointer border border-gray-400 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors hover:border-red-200"
+                              className="w-full sm:w-auto px-2 py-1 text-xs text-red-500 cursor-pointer border border-red-300 hover:bg-red-50 hover:text-red-700 rounded-md transition-colors text-center"
                             >
                               حذف
                             </DeleteButton>
@@ -321,7 +318,6 @@ export default function ExamQuestionsPage({
             </table>
           </div>
 
-          {/* استقاده از کامپوننت Pagination در اینجا */}
           <Pagination 
             currentPage={currentPage}
             totalPages={totalPages}
