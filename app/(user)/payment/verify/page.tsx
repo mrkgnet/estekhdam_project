@@ -1,5 +1,4 @@
 // file: app/payment/verify/page.tsx
-
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -8,18 +7,34 @@ import Link from 'next/link';
 import { FaCheckCircle, FaTimesCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 
 // ====================================================================
-//  Wrapper for Suspense (Required for useSearchParams in App Router)
+//  Reusable UI Components
 // ====================================================================
-function PaymentVerifyPage() {
-  return (
-    <Suspense fallback={<LoadingState message="در حال بارگذاری صفحه..." />}>
-      <VerifyComponent />
-    </Suspense>
-  );
+
+const LoadingState = ({ message }: { message: string }) => (
+  <div className="flex flex-col items-center justify-center text-center text-gray-700">
+    <FaSpinner className="animate-spin text-blue-500 text-5xl mb-4" />
+    <p className="text-lg font-semibold">{message}</p>
+  </div>
+);
+
+interface ResultCardProps {
+  icon: React.ReactNode;
+  title: string;
+  message: string;
+  children?: React.ReactNode;
 }
 
+const ResultCard = ({ icon, title, message, children }: ResultCardProps) => (
+  <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 max-w-md w-full text-center transform transition-all hover:shadow-2xl duration-300">
+    <div className="flex justify-center mb-5 animate-pulse-once">{icon}</div>
+    <h1 className="text-2xl font-bold text-gray-800 mb-3">{title}</h1>
+    <p className="text-gray-600 mb-6 min-h-[40px]">{message}</p>
+    <div className="mt-8">{children}</div>
+  </div>
+);
+
 // ====================================================================
-//  Main Verification Component
+//  Main Verification Component (Uses useSearchParams)
 // ====================================================================
 function VerifyComponent() {
   const searchParams = useSearchParams();
@@ -32,11 +47,10 @@ function VerifyComponent() {
   const [refId, setRefId] = useState<string | null>(null);
   const [isCancelled, setIsCancelled] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     // --- Get data from URL and localStorage ---
     const authority = searchParams.get('Authority');
     const status = searchParams.get('Status');
-    // بررسی URL و سپس LocalStorage
     const orderId = searchParams.get('orderId') || localStorage.getItem('orderId'); 
 
     // --- Handle User Cancellation ---
@@ -69,7 +83,6 @@ function VerifyComponent() {
           setRefId(data.refId);
           localStorage.removeItem('orderId'); // Clean up
         } else {
-          // در اینجا اگر زرین‌پال خطای 101 داد، بک‌اند باید status 200 بدهد یا دیتا را هندل کند
           setError(data.message || 'خطا در تایید پرداخت. لطفا با پشتیبانی تماس بگیرید.');
         }
       } catch (err) {
@@ -81,7 +94,6 @@ function VerifyComponent() {
 
     verifyPayment();
   }, [searchParams]);
-
 
   // --- Render UI based on state ---
   const containerClasses = "min-h-screen flex items-center justify-center bg-gray-100 p-4";
@@ -122,7 +134,7 @@ function VerifyComponent() {
           message={error}
         >
           <button
-            onClick={() => router.push('/cart')} // Or wherever you want to redirect
+            onClick={() => router.push('/cart')}
             className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
           >
             تلاش مجدد و بازگشت به سبد خرید
@@ -157,35 +169,16 @@ function VerifyComponent() {
     );
   }
 
-  return null; // Should not be reached
+  return null;
 }
 
-
 // ====================================================================
-//  Reusable UI Components
+//  Wrapper for Suspense (Required for useSearchParams in App Router)
 // ====================================================================
-
-interface ResultCardProps {
-  icon: React.ReactNode;
-  title: string;
-  message: string;
-  children?: React.ReactNode;
+export default function PaymentVerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100 p-4"><LoadingState message="در حال بارگذاری صفحه..." /></div>}>
+      <VerifyComponent />
+    </Suspense>
+  );
 }
-
-const ResultCard = ({ icon, title, message, children }: ResultCardProps) => (
-  <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 max-w-md w-full text-center transform transition-all hover:shadow-2xl duration-300">
-    <div className="flex justify-center mb-5 animate-pulse-once">{icon}</div>
-    <h1 className="text-2xl font-bold text-gray-800 mb-3">{title}</h1>
-    <p className="text-gray-600 mb-6 min-h-[40px]">{message}</p>
-    <div className="mt-8">{children}</div>
-  </div>
-);
-
-const LoadingState = ({ message }: { message: string }) => (
-  <div className="flex flex-col items-center justify-center text-center text-gray-700">
-    <FaSpinner className="animate-spin text-blue-500 text-5xl mb-4" />
-    <p className="text-lg font-semibold">{message}</p>
-  </div>
-);
-
-export default PaymentVerifyPage;

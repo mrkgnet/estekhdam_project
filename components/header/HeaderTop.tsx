@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -22,35 +22,31 @@ import { getDataSearchMany } from "@/actions/search/Actions";
 import { useQuery } from "@tanstack/react-query";
 import { getDataCategory } from "@/actions/category/Actions";
 import NotificationBell from "../notification/notificationBell/NotificationBell";
-// ۱. ایمپورت کامپوننت جدید زنگوله
-
 
 interface NavbarProps {
   response?: any[];
   initialCategories?: any[];
 }
 
-export default function HeaderTop({ initialCategories }: NavbarProps) {
+// ۱. نام کامپوننت اصلی را به HeaderContent تغییر می‌دهیم
+function HeaderContent({ initialCategories }: NavbarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, isLoading, logOut } = useAuth();
 
-  // پیاده‌سازی ریکت کوئری
   const { data: categoryResponse } = useQuery({
     queryKey: ['categories-navbar'],
     queryFn: () => getDataCategory(),
     initialData: initialCategories,
-    staleTime: 1000 * 60 * 60 * 24, // دیتا ۲۴ ساعت کش می‌شود
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
-  // ۵ تای اول را برای جستجوهای محبوب جدا می‌کنیم
   const popularCategories = categoryResponse?.data?.slice(0, 5) || [];
 
   const [open, setOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // استیت‌های مربوط به جستجو
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("search") || "");
@@ -108,7 +104,6 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
 
           {/* Right Section - برند */}
           <div className="relative inline-flex items-center">
-            {/* PRO Badge */}
             <span className="absolute -top-2 -left-2 bg-gradient-to-r from-red-600 to-red-700 
               text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
               PRO
@@ -132,19 +127,17 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
           {/* Center Search */}
           <div
             ref={searchContainerRef}
-            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${
-              isMobileSearchOpen
+            className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${isMobileSearchOpen
                 ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
                 : "hidden"
-            }`}
+              }`}
           >
             <div className="relative w-full max-w-[650px]">
               {isSearching ? (
                 <Loader2 size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin" />
               ) : (
-                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
-                  isSearchOpen ? "text-green-600" : "text-gray-400"
-                }`} />
+                <Search size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${isSearchOpen ? "text-green-600" : "text-gray-400"
+                  }`} />
               )}
 
               <input
@@ -154,16 +147,13 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4 outline-none transition-all duration-200 ${
-                  isSearchOpen ? "bg-white border-gray-500" : "border-gray-200 focus:bg-white hover:border-gray-300"
-                }`}
+                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4 outline-none transition-all duration-200 ${isSearchOpen ? "bg-white border-gray-500" : "border-gray-200 focus:bg-white hover:border-gray-300"
+                  }`}
               />
 
-              {/* Search Dropdown Overlay */}
               <div
-                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${
-                  isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-                }`}
+                className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
+                  }`}
               >
                 {searchQuery.trim() === "" ? (
                   <div className="p-5">
@@ -244,7 +234,6 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
 
           {/* Left Section */}
           <div className="flex items-center gap-4 md:gap-4 whitespace-nowrap">
-            {/* آیکون سرچ موبایل */}
             <button
               type="button"
               onClick={() => {
@@ -257,10 +246,8 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
               {isMobileSearchOpen ? <X size={20} /> : <Search size={20} strokeWidth={2.5} />}
             </button>
 
-            {/* ۲. اضافه شدن زنگوله اعلان‌ها در نوبار */}
             <NotificationBell />
 
-            {/* منوی کاربری */}
             <div className="relative z-10" ref={wrapperRef}>
               <button
                 type="button"
@@ -332,5 +319,15 @@ export default function HeaderTop({ initialCategories }: NavbarProps) {
 
       {isAuthModalOpen && <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />}
     </>
+  );
+}
+
+// ۲. خروجی اصلی کامپوننت را در Suspense قرار می‌دهیم
+export default function HeaderTop(props: NavbarProps) {
+  return (
+    // یک اسکلتون یا دیو ساده هم‌ارتفاع با هدر برای جلوگیری از پرش صفحه قرار می‌دهیم
+    <Suspense fallback={<div className="h-[72px] w-full border-b border-gray-300 bg-white"></div>}>
+      <HeaderContent {...props} />
+    </Suspense>
   );
 }
