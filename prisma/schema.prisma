@@ -114,7 +114,7 @@ model UserNotificationRead {
   globalNotification   GlobalNotification @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
 
   readAt DateTime @default(now())
-
+isDeleted Boolean  @default(false)
   // هر کاربر یک اعلان را فقط یکبار ثبت می‌کند
   @@unique([userId, globalNotificationId])
 }

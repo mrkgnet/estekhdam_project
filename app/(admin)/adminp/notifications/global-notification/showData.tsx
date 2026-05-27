@@ -1,6 +1,6 @@
 "use client";
 
-import { addGlobalNotificationAction, deleteGlobalNotificationAction, toggleNotificationStatusAction } from '@/actions/notification/global-notification/admin/add/Actions';
+import { addGlobalNotificationAction, toggleNotificationStatusAction } from '@/actions/notification/global-notification/admin/add/Actions';
 import React, { useState } from 'react';
 
 interface GlobalNotification {
@@ -12,11 +12,11 @@ interface GlobalNotification {
 }
 
 interface ShowDataGloabalNotificationProps {
-  initialNotifications?: GlobalNotification[]; // دریافت داده‌های اولیه از سمت سرور کامپوننت پدر
+  initialNotifications?: GlobalNotification[]; // دریافت داده‌های اولیه از سمت سرور
 }
 
 export default function ShowDataGloabalNotification({ initialNotifications = [] }: ShowDataGloabalNotificationProps) {
-  // مقداردهی اولیه استیت با داده‌های دریافتی از سرور
+  // ✅ مشکل اصلی اینجا بود: استیت اعلان‌ها تعریف نشده بود که اضافه شد
   const [notifications, setNotifications] = useState<GlobalNotification[]>(initialNotifications);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +24,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // هندل کردن تغییر وضعیت فعال/غیرفعال با سرور اکشن
+  // هندل کردن تغییر وضعیت با سرور اکشن
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     const res = await toggleNotificationStatusAction(id, currentStatus);
     if (res.success && res.data) {
@@ -49,7 +49,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
   };
 
   return (
-    <div className="p-4 max-w-7xl mx-auto font-sans" dir="rtl">
+    <div className="p-4  max-w-7xl mx-auto font-sans" dir="rtl">
       
       {/* هدر صفحه */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 gap-4">
@@ -131,12 +131,14 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
       {/* ================= مدال (Modal) افزودن پیغام ================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          
           <div 
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onClick={() => !isLoading && setIsModalOpen(false)}
           ></div>
 
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            
             <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50">
               <h3 className="font-bold text-gray-800 text-lg">ثبت پیغام همگانی جدید</h3>
               <button 
@@ -150,7 +152,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
               </button>
             </div>
 
-            {/* سابمیت فرم به صورت مستقیم با سرور اکشن */}
+            {/* پیاده‌سازی مستقیم فرم اکشن با سرور اکشن */}
             <form 
               action={async (formData) => {
                 setIsLoading(true);
@@ -158,7 +160,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
                 setIsLoading(false);
                 
                 if (res.success && res.data) {
-                  // اضافه کردن آنی داده جدید به بالای لیست بدون نیاز به رفرش صفحه
+                  // اضافه کردن فوري داده جدید به لیست بدون نیاز به رفرش کامل صفحه
                   setNotifications([res.data as GlobalNotification, ...notifications]);
                   setNewTitle("");
                   setNewMessage("");
@@ -186,7 +188,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
                 <label className="block text-sm font-semibold text-gray-700">متن کامل پیغام</label>
                 <textarea
                   name="message"
-                  required
+                  
                   rows={4}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -217,6 +219,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
                 </button>
               </div>
             </form>
+            
           </div>
         </div>
       )}
