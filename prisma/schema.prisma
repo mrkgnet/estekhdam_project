@@ -79,14 +79,44 @@ model User {
   role         Role      @default(user)
   isActive     Boolean   @default(true)
 
-  orders         Order[]
-  comments       Comment[]
-  tickets        Ticket[]        @relation("UserTickets")
-  ticketMessages TicketMessage[] @relation("UserMessages")
-  contacts       Contact[]
+  orders           Order[]
+  comments         Comment[]
+  tickets          Ticket[]               @relation("UserTickets")
+  ticketMessages   TicketMessage[]        @relation("UserMessages")
+  contacts         Contact[]
+  readGlobalNotifs UserNotificationRead[]
+
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+}
+
+model GlobalNotification {
+  id       String  @id @default(uuid())
+  title    String // عنوان اعلان
+  message  String // متن اعلان
+  isActive Boolean @default(true) // ادمین می‌تواند اعلان را مخفی/غیرفعال کند
+
+  // ارتباط با کاربرانی که این اعلان را خوانده‌اند
+  readBy UserNotificationRead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserNotificationRead {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  globalNotificationId String
+  globalNotification   GlobalNotification @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
+
+  readAt DateTime @default(now())
+
+  // هر کاربر یک اعلان را فقط یکبار ثبت می‌کند
+  @@unique([userId, globalNotificationId])
 }
 
 model RefreshToken {

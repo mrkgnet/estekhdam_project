@@ -161,6 +161,12 @@ export const tabsDataAdminPanel = [
         title: "مدیریت پیغام ها ",
         url: "/adminp/notifications",
       },
+       {
+        id: 102,
+        title: " مدیریت پیغام های کاربر ",
+        url: "/adminp/notifications/global-notification",
+      },
+      
     ]
   },
 
