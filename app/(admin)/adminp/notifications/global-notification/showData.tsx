@@ -1,6 +1,6 @@
 "use client";
 
-import { addGlobalNotificationAction, toggleNotificationStatusAction } from '@/actions/notification/global-notification/admin/add/Actions';
+import { addGlobalNotificationAction, deleteGlobalNotificationAction, toggleNotificationStatusAction } from '@/actions/notification/global-notification/admin/add/Actions';
 import React, { useState } from 'react';
 
 interface GlobalNotification {
