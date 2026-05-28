@@ -3,11 +3,11 @@ import React from 'react'
 import ShowDataCat from './ShowDataCat'
 
 export default async function FetchDataCat() {
-    const getDataCat = await getDataCategory()
-    
+  const getDataCat = await getDataCategory()
+
   return (
     <div>
-    <ShowDataCat getDataCat={getDataCat}  />  
+      <ShowDataCat getDataCat={getDataCat} />
     </div>
   )
 }

@@ -5,8 +5,6 @@ import { success } from "zod";
 export async function getDataCategory() {
   try {
    
- 
-
     // ۲. دریافت داده‌ها از دیتابیس
     const categories = await db.category.findMany({
       orderBy: {

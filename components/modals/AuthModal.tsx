@@ -178,7 +178,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             exit={{ opacity: 0, y: -40, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 220, damping: 22 }}
           >
-            <div className="relative rounded-3xl border border-slate-100 bg-white shadow-2xl">
+            {/* کارت اصلی بدون سایه */}
+            <div className="relative rounded-3xl border border-slate-100 bg-white">
               <div className="relative p-6">
                 <button
                   onClick={onClose}
@@ -203,7 +204,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                                 isDone
                                   ? "bg-emerald-500 border-emerald-500 text-white"
                                   : isActive
-                                  ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20" // تغییر به آبی
+                                  ? "bg-[#3b5998] border-[#3b5998] text-white"
                                   : "bg-white border-slate-200 text-slate-400"
                               }`}
                             >
@@ -211,7 +212,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                             </div>
                             <span
                               className={`text-[11px] ${
-                                isActive ? "text-blue-600 font-bold" : "text-slate-500" // تغییر به آبی
+                                isActive ? "text-[#3b5998] font-bold" : "text-slate-500"
                               }`}
                             >
                               {label}
@@ -232,8 +233,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 </div>
 
                 <div className="text-center mb-6">
-                  {/* تغییر پس‌زمینه آیکون قفل به آبی */}
-                  <div className="w-14 h-14 mx-auto bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-blue-600/30">
+                  <div className="w-14 h-14 mx-auto bg-[#3b5998] rounded-2xl flex items-center justify-center mb-3">
                     <Lock className="text-white" />
                   </div>
                   <h2 className="font-bold text-base text-slate-900">
@@ -257,7 +257,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                           onChange={(e) => setPhone(e.target.value.trim())}
                           onKeyDown={handlePhoneKeyDown}
                           placeholder="09123456789"
-                          className="w-full pr-10 py-3 px-2.5 border text-[15px] border-slate-200 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 transition" // تغییر فوکوس به آبی
+                          className="w-full pr-10 py-3 px-2.5 border text-[15px] border-slate-200 rounded-xl outline-none focus:border-[#3b5998] focus:ring-2 focus:ring-[#3b5998]/10 transition"
                           dir="ltr"
                         />
                       </div>
@@ -269,7 +269,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     <button
                       onClick={handleSendOTP}
                       disabled={!isPhoneValid || loading}
-                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 transition-all cursor-pointer text-white font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg shadow-blue-600/20 active:scale-[0.98]" // تغییر به دکمه آبی
+                      className="w-full py-2.5 bg-[#3b5998] hover:bg-[#2d4373] transition-all cursor-pointer text-white font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98]"
                     >
                       {loading ? <Loader2 className="animate-spin" /> : "ارسال کد"}
                       <ArrowRight className="w-4 h-4" />
@@ -280,12 +280,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 {/* مرحله یک: وارد کردن کد OTP */}
                 {step === 1 && (
                   <div className="space-y-6">
-                    {/* نمایش شماره موبایل کاربر در این مرحله */}
-                    <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3 text-center text-xs text-slate-600 flex items-center justify-between" dir="rtl">
-                      <span>کد تایید به شماره <strong className="text-blue-700 tracking-wider font-bold mx-1">{phone}</strong> ارسال شد.</span>
+                    <div className="bg-[#3b5998]/5 border border-[#3b5998]/15 rounded-xl p-3 text-center text-xs text-slate-600 flex items-center justify-between" dir="rtl">
+                      <span>کد تایید به شماره <strong className="text-[#3b5998] tracking-wider font-bold mx-1">{phone}</strong> ارسال شد.</span>
                       <button 
                         onClick={() => setStep(0)} 
-                        className="text-blue-600 hover:text-blue-800 font-bold underline transition"
+                        className="text-[#3b5998] hover:text-[#2d4373] font-bold underline transition"
                       >
                         ویرایش
                       </button>
@@ -297,7 +296,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                           key={i}
                           className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-xl transition-all relative ${
                             otp.length === i && !loading
-                              ? "border-blue-600 ring-2 ring-blue-600/20 bg-blue-50/20" // تغییر بوردر باکس فعال به آبی
+                              ? "border-[#3b5998] ring-2 ring-[#3b5998]/20 bg-[#3b5998]/5"
                               : otp[i]
                               ? "border-slate-400 text-slate-900 bg-white"
                               : "border-slate-200 text-transparent bg-white"
@@ -306,7 +305,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                           {otp[i] || ""}
                           {otp.length === i && !loading && (
                             <span className="absolute inset-0 flex items-center justify-center">
-                              <span className="w-[2px] h-6 bg-blue-600 animate-pulse" /> {/* تغییر کرسر به آبی */}
+                              <span className="w-[2px] h-6 bg-[#3b5998] animate-pulse" />
                             </span>
                           )}
                         </div>
@@ -335,11 +334,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       <button
                         onClick={handleResend}
                         disabled={timer > 0}
-                        className={timer > 0 ? "text-slate-400" : "text-blue-600 font-bold hover:text-blue-700 transition-colors"} // تغییر رنگ لینک به آبی
+                        className={timer > 0 ? "text-slate-400" : "text-[#3b5998] font-bold hover:text-[#2d4373] transition-colors"}
                       >
                         {timer > 0 ? formatTime(timer) : "ارسال مجدد کد"}
                       </button>
-                      <button onClick={() => setStep(0)} className="hover:text-blue-600 text-slate-500 transition-colors">
+                      <button onClick={() => setStep(0)} className="hover:text-[#3b5998] text-slate-500 transition-colors">
                         ویرایش شماره
                       </button>
                     </div>
@@ -347,7 +346,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     <button
                       onClick={() => handleVerifyOTP()}
                       disabled={loading || otp.length < OTP_LENGTH}
-                      className="w-full py-3 flex justify-center items-center bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-medium rounded-xl transition-all disabled:opacity-60 shadow shadow-blue-600/20 active:scale-[0.98]" // تغییر به دکمه آبی
+                      className="w-full py-3 flex justify-center items-center bg-[#3b5998] hover:bg-[#2d4373] cursor-pointer text-white font-medium rounded-xl transition-all disabled:opacity-60 active:scale-[0.98]"
                     >
                       {loading ? <Loader2 className="animate-spin" /> : "تأیید و ورود"}
                     </button>
