@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 // ۱. سرور اکشن برای ایجاد اعلان همگانی جدید (استفاده در فرم اکشن)
 export async function addGlobalNotificationAction(formData: FormData) {
@@ -52,6 +53,7 @@ export async function deleteGlobalNotificationAction(id: string) {
     await db.globalNotification.delete({
       where: { id },
     });
+    revalidatePath("/adminp/notifications/global-notification");
     return { success: true };
   } catch (error) {
     console.error("❌ Error deleting notification:", error);

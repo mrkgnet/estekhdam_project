@@ -187,8 +187,7 @@ export default function ShowDataGloabalNotification({ initialNotifications = [] 
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">متن کامل پیغام</label>
                 <textarea
-                  name="message"
-                  
+                  name="message"                  
                   rows={4}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
