@@ -4,26 +4,39 @@ import { db } from "@/lib/db";
 
 export async function fetchMainSliderUserAction() {
   try {
-    const result = await db.mainSlider.findMany({
-      // ۱. فقط اسلایدرهای فعال واکشی شوند
+    const result = await db.governmentNews.findMany({
+      // ۱. فقط اخبار فعال و آن‌هایی که اسلایدر اصلی هستند واکشی شوند
       where: {
         isActive: true,
+        isMainSlider: true,
       },
-      // ۲. مرتب‌سازی بر اساس فیلد order (صعودی: ۱، ۲، ۳...)
+      // ۲. مرتب‌سازی بر اساس جدیدترین‌ها
       orderBy: {
-        order: "asc", 
+        createdAt: "desc",
       },
-      // ۳. فقط فیلدهایی که سمت کاربر نیاز داریم انتخاب شوند (بهینه‌سازی)
+      // ۳. انتخاب فیلدهای مورد نیاز (اضافه شدن description و endAt)
       select: {
         id: true,
         imageUrl: true,
         title: true,
-        description: true,
-        targetLink: true, // برای قابلیت کلیک روی اسلایدر
+        description: true, // اضافه شد برای نمایش در اسلایدر
+        registerUrl: true, 
+        slugNews: true,    
+        endAt: true,       // اضافه شد برای محاسبه تایمر معکوس
       },
     });
 
-    return { success: true, data: result };
+    // ۴. نگاشت دیتای دیتابیس به ساختار مورد انتظار کامپوننت کلاینت
+    const formattedSliders = result.map((item) => ({
+      id: item.id,
+      imageUrl: item.imageUrl || "", 
+      title: item.title,
+      description: item.description,
+      targetLink: item.registerUrl || `/news/${item.slugNews}`, 
+      endAt: item.endAt ? item.endAt.toISOString() : null, // تبدیل تاریخ به فرمت رشته استاندارد ISO
+    }));
+
+    return { success: true, data: formattedSliders };
   } catch (error) {
     console.error("❌ Error fetching user main slider:", error);
     return { success: false, data: [] };

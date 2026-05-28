@@ -8,7 +8,6 @@ import { Pagination, Autoplay, EffectFade, Navigation } from "swiper/modules";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMainSliderUserAction } from "@/actions/user/mainslider/fetch/Actions";
 
-
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
@@ -21,16 +20,89 @@ type SliderDBItem = {
   title: string | null;
   description: string | null;
   targetLink: string | null;
+  endAt: string | null; 
 };
 
 interface ShowMainSliderProps {
   initialSliders: any;
 }
 
+// 🕒 کامپوننت داخلی و بهینه برای محاسبه و نمایش دایره‌ای/باکسی تایمر معکوس (نسخه بهینه شده برای موبایل)
+function CountdownTimer({ targetDate }: { targetDate: string | null }) {
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!targetDate) return;
+
+    const calculateTimeLeft = () => {
+      const difference = +new Date(targetDate) - +new Date();
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      });
+    };
+
+    calculateTimeLeft(); 
+    const interval = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="flex flex-col gap-0.5 md:gap-1 mt-1">
+      <span className="text-[10px] md:text-[11px] font-medium text-amber-600">زمان باقی‌مانده جهت ثبت نام:</span>
+      <div className="flex items-center gap-1 md:gap-1.5 w-fit bg-amber-50/60 border border-amber-200/50 p-1 md:p-1.5 rounded-lg md:rounded-xl" dir="ltr">
+        {/* ثانیه */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.seconds).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ثانیه</span>
+        </div>
+        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
+        {/* دقیقه */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.minutes).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">دقیقه</span>
+        </div>
+        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
+        {/* ساعت */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.hours).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ساعت</span>
+        </div>
+        
+        {/* روز */}
+        {timeLeft.days > 0 && (
+          <>
+            <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
+            <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+              <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.days).padStart(2, "0")}</span>
+              <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">روز</span>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) {
   const progressRef = useRef<HTMLDivElement>(null);
 
-  // ✅ جلوگیری از پرش هیدریشن
+  // ✅ اصلاح بخش جلوگیری از پرش هیدریشن
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -110,7 +182,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           loop={sliders.length > 1}
           dir="rtl"
           autoplay={{
-            delay: 7000,
+            delay: 70000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -119,7 +191,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           onAutoplayTimeLeft={onAutoplayTimeLeft}
           className="w-full h-[620px] md:h-[360px] flex-1 modern-slider pb-8 md:pb-4"
         >
-          {/* نوار پیشرفت */}
+          {/* نوار پیشرفت زمان اسلاید */}
           <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-200/50 z-50">
             <div
               ref={progressRef}
@@ -131,13 +203,26 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
             <SwiperSlide key={s.id} className="h-full">
               <div className="flex h-full items-stretch gap-4 md:gap-8">
 
-                {/* متن */}
+                {/* متن و توضیحات اسلاید */}
                 <div className="order-1 w-full h-full flex flex-col justify-center gap-3 px-3 md:px-6 text-right">
+                  
+                  {/* بجت مدرن و جذاب "خبر فوری" */}
+                  <div className="flex items-center gap-1.5 w-fit bg-red-50 text-red-600 border border-red-200/60 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide select-none">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                    خبر فوری
+                  </div>
+
                   {s.title && (
-                    <h2 className="text-sm md:text-lg font-bold text-slate-800 tracking-tight">
+                    <h2 className="text-sm md:text-lg font-bold text-slate-800 tracking-tight mt-1">
                       {s.title}
                     </h2>
                   )}
+                  
+                  {/* 🕒 تایمر معکوس ریسپانسیو */}
+                  <CountdownTimer targetDate={s.endAt} />
 
                   <Link
                     href={s.targetLink ?? "#"}
@@ -145,13 +230,13 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                       px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
                       hover:bg-blue-700 active:bg-blue-800 transition-colors
                       focus-visible:outline-none focus-visible:ring-2
-                      focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                      focus-visible:ring-blue-400 focus-visible:ring-offset-2 mt-2"
                   >
                     مشاهده اطلاعات بیشتر
                   </Link>
                 </div>
 
-                {/* تصویر */}
+                {/* تصویر اسلاید */}
                 <div className="order-2 w-full h-full flex items-center justify-center p-2 md:p-4">
                   <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
                     <Image

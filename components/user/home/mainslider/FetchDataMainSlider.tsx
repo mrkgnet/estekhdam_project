@@ -1,6 +1,6 @@
-import { fetchMainSliderUserAction } from '@/actions/user/mainslider/fetch/Actions'
-import React from 'react'
-import ShowMainSlider from './ShowMainSlider'
+import { fetchMainSliderUserAction } from '@/actions/user/mainslider/fetch/Actions';
+import React from 'react';
+import ShowMainSlider from './ShowMainSlider';
 
 export default async function FetchDataMainSlider() {
     // واکشی کامل پاسخ (شامل success و data)
@@ -13,5 +13,5 @@ export default async function FetchDataMainSlider() {
 
     return (
         <ShowMainSlider initialSliders={response} />
-    )
+    );
 }
