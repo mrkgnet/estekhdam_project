@@ -38,6 +38,8 @@ export async function POST(request: Request) {
         where: { phoneNumber: phone },
       });
 
+ 
+
       // console.log(code)
       let saveUser: User;
       

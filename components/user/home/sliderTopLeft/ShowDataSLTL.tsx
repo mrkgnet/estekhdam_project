@@ -71,7 +71,7 @@ export default function ShowDataSLTL({
   }
 
   return (
-    <div className="w-full mx-auto relative px-2 h-full" dir="rtl">
+    <div className="w-full mx-auto relative  h-full" dir="rtl">
       <style jsx global>{`
         .custom-swiper-progress {
           position: absolute;

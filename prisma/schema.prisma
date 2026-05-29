@@ -408,3 +408,18 @@ model Notification {
 
   @@index([isRead])
 }
+
+
+model TopBanner {
+  id         String   @id @default(uuid())
+  title      String   // متن بنر
+  imageUrl   String   // لینک عکس بنر
+  targetUrl  String   // لینک مقصد
+  slug       String   @unique // اسلاگ بنر
+  isActive   Boolean  @default(true) // فعال یا غیرفعال
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isActive])
+}

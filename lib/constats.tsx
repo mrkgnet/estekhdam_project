@@ -183,6 +183,21 @@ export const tabsDataAdminPanel = [
       },
     ]
   },
+
+  {
+    id: "13",
+    title: "بنر بالای صفحه ",
+    icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
+    url: "/adminp/top-banner",
+    subItems: [
+      {
+        id: 121,
+        title: "مدیریت  بن بالای صفحه ",
+        url: "/adminp/top-banner",
+      },
+    ]
+  },
+
 ];
 
 

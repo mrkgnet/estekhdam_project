@@ -66,23 +66,8 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
     <div className="flex flex-col gap-0.5 md:gap-1 mt-1">
       <span className="text-[10px] md:text-[11px] font-medium text-amber-600">زمان باقی‌مانده جهت ثبت نام:</span>
       <div className="flex items-center gap-1 md:gap-1.5 w-fit bg-amber-50/60 border border-amber-200/50 p-1 md:p-1.5 rounded-lg md:rounded-xl" dir="ltr">
-        {/* ثانیه */}
-        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
-          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.seconds).padStart(2, "0")}</span>
-          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ثانیه</span>
-        </div>
-        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
-        {/* دقیقه */}
-        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
-          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.minutes).padStart(2, "0")}</span>
-          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">دقیقه</span>
-        </div>
-        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
-        {/* ساعت */}
-        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
-          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.hours).padStart(2, "0")}</span>
-          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ساعت</span>
-        </div>
+  
+  
         
         {/* روز */}
         {timeLeft.days > 0 && (
@@ -94,6 +79,30 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
             </div>
           </>
         )}
+
+     {/* ساعت */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.hours).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ساعت</span>
+        </div>
+
+
+  {/* دقیقه */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.minutes).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">دقیقه</span>
+        </div>
+        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
+       
+
+
+              {/* ثانیه */}
+        <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
+          <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.seconds).padStart(2, "0")}</span>
+          <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ثانیه</span>
+        </div>
+        <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
+      
       </div>
     </div>
   );
