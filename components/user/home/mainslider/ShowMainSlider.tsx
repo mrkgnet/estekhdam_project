@@ -21,6 +21,7 @@ type SliderDBItem = {
   description: string | null;
   targetLink: string | null;
   endAt: string | null; 
+  slugNews :string | null;
 };
 
 interface ShowMainSliderProps {
@@ -234,7 +235,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                   <CountdownTimer targetDate={s.endAt} />
 
                   <Link
-                    href={s.targetLink ?? "#"}
+                    href={`/jobnews/government/${s.slugNews}` ?? "#"}
                     className="inline-flex items-center gap-2 w-fit rounded-md
                       px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
                       hover:bg-blue-700 active:bg-blue-800 transition-colors

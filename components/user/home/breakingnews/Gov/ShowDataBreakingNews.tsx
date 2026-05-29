@@ -68,12 +68,14 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
     setMounted(true);
   }, []);
 
-  // واکشی و مدیریت کش با ریکت کوئری
+  // واکشی و مدیریت کش با ریکت کوئری (تنظیم شده برای آپدیت ریل‌تایم)
   const { data: response, isLoading } = useQuery({
-    queryKey: ["breaking-news"], // کلید کوئری
+    queryKey: ["breaking-news"],
     queryFn: () => fetchBreakingNewsAction(),
     initialData: initialNews,
-    staleTime: 1000 * 60 * 15, // کش خبرها برای ۱۵ دقیقه معتبر است
+    staleTime: 0, // دیتا کهنه در نظر گرفته می‌شود تا همیشه آخرین نسخه را بگیریم
+    refetchInterval: 10000, // هر ۱۰ ثانیه در پس‌زمینه دیتا آپدیت می‌شود
+    refetchOnWindowFocus: true, // وقتی کاربر به تب سایت برمی‌گردد رفرش می‌شود
   });
 
   // استخراج آرایه دیتا از پاسخ
@@ -116,10 +118,11 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
               <button
                 key={item.id}
                 onClick={() => setActiveCategoryId(item.id)}
-                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${active
+                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${
+                  active
                     ? "bg-white text-sky-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
-                  }`}
+                }`}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -133,7 +136,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
       {showSkeleton ? (
         <BreakingNewsListSkeleton />
       ) : filteredNews.length > 0 ? (
-        <div className="flex max-h-[400px] flex-col gap-3 md:gap-4 overflow-y-auto pr-1 md:pr-2">
+        <div className="flex max-h-[400px] flex-col gap-3 md:gap-4 overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
           {filteredNews.map((it) => (
             <Link
               key={it.id}
@@ -175,8 +178,8 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
           <div className="rounded-full bg-slate-100 p-4 mb-4">
             <SearchX className="h-8 w-8 text-slate-400" />
           </div>
-          <h4 className="text-slate-700">آگهی استخدامی یافت نشد</h4>
-          <p className="mt-2 max-w-xs text-slate-500 leading-relaxed">
+          <h4 className="text-slate-700 font-semibold">آگهی استخدامی یافت نشد</h4>
+          <p className="mt-2 max-w-xs text-slate-500 text-sm leading-relaxed">
             در حال حاضر آگهی فعالی برای این دسته‌بندی وجود ندارد. لطفاً دسته‌بندی دیگر را بررسی کنید.
           </p>
         </div>

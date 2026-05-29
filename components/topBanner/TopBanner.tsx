@@ -9,7 +9,8 @@ export default function TopBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white relative shadow-md" dir="rtl">
+    // گرادیانت حذف شد و رنگ آبی کلاسیک فیسبوک (3b5998) اضافه شد
+    <div className="bg-[#3b5998] text-white relative shadow-md" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           
