@@ -53,6 +53,7 @@ export default function RootLayout({
                 style: { fontFamily: "inherit", direction: "rtl" },
               }}
             />
+              <GoogleAnalytics gaId="G-WG5HJVGCMR" />
 
             {/* صفحه */}
             <div className="min-h-screen flex flex-col">
@@ -62,7 +63,7 @@ export default function RootLayout({
 
               <LoadingProvider>
                 <main className="bg-[#F8FAFC] flex-1">{children}</main>
-                 <GoogleAnalytics gaId="G-WG5HJVGCMR" />
+               
               </LoadingProvider>
               <Footer />
             </div>
