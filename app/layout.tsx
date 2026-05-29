@@ -4,6 +4,7 @@ import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { GoogleAnalytics } from '@next/third-parties/google' // <--- ایمپورت
 
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
@@ -61,6 +62,7 @@ export default function RootLayout({
 
               <LoadingProvider>
                 <main className="bg-[#F8FAFC] flex-1">{children}</main>
+                 <GoogleAnalytics gaId="G-WG5HJVGCMR" />
               </LoadingProvider>
               <Footer />
             </div>
