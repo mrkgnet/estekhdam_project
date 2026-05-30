@@ -22,7 +22,7 @@ import { getDataSearchMany } from "@/actions/search/Actions";
 import { useQuery } from "@tanstack/react-query";
 import { getDataCategory } from "@/actions/category/Actions";
 import NotificationBell from "../notification/notificationBell/NotificationBell";
-
+import Image from "next/image";
 interface NavbarProps {
   response?: any[];
   initialCategories?: any[];
@@ -104,32 +104,26 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
           {/* Right Section - برند */}
           <div className="relative inline-flex items-center">
-            <span className="absolute -top-2 -left-2 bg-gradient-to-r from-red-600 to-red-700 
-              text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md ring-2 ring-white">
-              PRO
-            </span>
 
-            <Link
-              href="/"
-              aria-label="خانه"
-              className="group flex flex-col px-5 py-0.5 border border-gray-300 rounded-xl bg-white 
-                hover:shadow-md hover:border-blue-300 transition-all duration-300"
-            >
-              <span className="text-base font-extrabold text-blue-800 tracking-tight group-hover:text-blue-700 transition">
-                استخدام
-              </span>
-              <span className="text-[8px] font-medium text-gray-500 group-hover:text-gray-700 transition mt-0.5">
-                یک گام جلوتر از رقبا
-              </span>
-            </Link>
+
+            <Image
+              src="/images/newLgog .svg"
+              alt="لوگو سایت"
+              width={100}
+              height={40}
+              // کلاس زیر برای مدیریت سایز در موبایل و دسکتاپ اضافه شده است
+              className="w-[80px] md:w-[100px] h-auto transition-all duration-300"
+              priority
+            />
+
           </div>
 
           {/* Center Search */}
           <div
             ref={searchContainerRef}
             className={`z-50 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${isMobileSearchOpen
-                ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
-                : "hidden"
+              ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
+              : "hidden"
               }`}
           >
             <div className="relative w-full max-w-[650px]">
@@ -147,7 +141,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-                className={`w-full h-12 rounded border bg-gray-100 pr-11 pl-4 outline-none transition-all duration-200 ${isSearchOpen ? "bg-white border-gray-500" : "border-gray-200 focus:bg-white hover:border-gray-300"
+                className={`w-full h-12 rounded border border-slate-300 bg-gray-200 pr-11 pl-4 outline-none transition-all duration-200 ${isSearchOpen ? "bg-white border-gray-500" : "border-gray-200 focus:bg-white hover:border-gray-300"
                   }`}
               />
 
@@ -252,7 +246,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-xl border border-gray-200 h-10 px-4 cursor-pointer text-green-600 hover:text-green-700 hover:bg-green-50 transition"
+                className="flex items-center gap-2 rounded-xl border border-slate-400 h-10 px-4 cursor-pointer text-slate-600 hover:text-green-700 hover:bg-green-50 transition"
                 aria-haspopup="menu"
                 aria-expanded={open}
               >

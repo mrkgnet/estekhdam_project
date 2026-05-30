@@ -87,7 +87,7 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition relative cursor-pointer ${
+        className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-400 text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition relative cursor-pointer ${
           isOpen ? "bg-blue-50 border-blue-200 text-blue-600" : ""
         }`}
       >
