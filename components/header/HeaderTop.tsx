@@ -106,16 +106,24 @@ function HeaderContent({ initialCategories }: NavbarProps) {
           <div className="relative inline-flex items-center">
 
 
-            <Image
-              src="/images/newLgog .svg"
-              alt="لوگو سایت"
-              width={100}
-              height={40}
-              // کلاس زیر برای مدیریت سایز در موبایل و دسکتاپ اضافه شده است
-              className="w-[80px] md:w-[100px] h-auto transition-all duration-300"
-              priority
-            />
+            <Link
+              href="/"
+              aria-label="خانه"
+              
+            >
 
+              <Image
+                src="/images/newLgog .svg"
+                alt="لوگو سایت"
+                width={100}
+                height={40}
+                // کلاس زیر برای مدیریت سایز در موبایل و دسکتاپ اضافه شده است
+                className="w-[80px] md:w-[100px] h-auto transition-all duration-300"
+                priority
+              />
+            </Link>
+
+            
           </div>
 
           {/* Center Search */}

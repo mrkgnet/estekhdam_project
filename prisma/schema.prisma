@@ -69,7 +69,6 @@ model User {
   email         String?
   otpExpires    DateTime?
   refreshTokens RefreshToken[]
-
   firstName    String?
   lastName     String?
   nationalCode String?
@@ -86,9 +85,8 @@ model User {
   contacts         Contact[]
   readGlobalNotifs UserNotificationRead[]
 
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GlobalNotification {
@@ -113,8 +111,9 @@ model UserNotificationRead {
   globalNotificationId String
   globalNotification   GlobalNotification @relation(fields: [globalNotificationId], references: [id], onDelete: Cascade)
 
-  readAt DateTime @default(now())
-isDeleted Boolean  @default(false)
+  readAt    DateTime @default(now())
+  isDeleted Boolean  @default(false)
+
   // هر کاربر یک اعلان را فقط یکبار ثبت می‌کند
   @@unique([userId, globalNotificationId])
 }
@@ -409,17 +408,16 @@ model Notification {
   @@index([isRead])
 }
 
-
 model TopBanner {
-  id         String   @id @default(uuid())
-  title      String   // متن بنر
-  imageUrl   String   // لینک عکس بنر
-  targetUrl  String   // لینک مقصد
-  slug       String   @unique // اسلاگ بنر
-  isActive   Boolean  @default(true) // فعال یا غیرفعال
+  id        String  @id @default(uuid())
+  title     String // متن بنر
+  imageUrl  String // لینک عکس بنر
+  targetUrl String // لینک مقصد
+  slug      String  @unique // اسلاگ بنر
+  isActive  Boolean @default(true) // فعال یا غیرفعال
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive])
 }
