@@ -10,10 +10,13 @@ export interface StepItem {
 export const steps: StepItem[] = [
   { label: "اطلاعات پایه", icon: "👤" },
   { label: "تحصیلی", icon: "🎓" },
-  { label: "شغلی", icon: "💼" },
-  { label: "مهارت", icon: "⚡" },
-  { label: "پروژه", icon: "🚀" },
-  { label: "تحقیقات", icon: "🔬" },
+  { label: "سوابق شغلی", icon: "💼" },
+  { label: "مهارت ها", icon: "⚡" },
+  { label: "پروژه ها", icon: "🚀" },
+  { label: "تحقیقات", icon: "🔬" },  
+  { label: "مهارت‌های نرم‌افزاری", icon: "💻" },
+  { label: "جوایز و افتخارات", icon: "🏆" }, // مرحله جدید
+  { label: "کارآموزی‌ها", icon: "🌱" }, // مرحله جدید
   { label: "سایر", icon: "📎" },
 ];
 
@@ -27,7 +30,8 @@ export default function StepperHeaderResume({ steps, activeStep, setActiveStep }
   return (
     <div className="bg-white border-b border-slate-100 px-6 py-6">
       <div className="overflow-x-auto scrollbar-none">
-        <div className="flex items-center min-w-[650px] md:min-w-0 px-2">
+        {/* برای جلوگیری از فشرده شدن مراحل، حداقل عرض را کمی بیشتر کردم */}
+        <div className="flex items-center min-w-[850px] md:min-w-0 px-2">
           {steps.map((step, index) => {
             const isCompleted = activeStep > index;
             const isActive = activeStep === index;
