@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from 'react';
-import { Upload, X, CheckCircle, AlertCircle, Image as ImageIcon, Copy, Check } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Image as ImageIcon, Copy, Check, FileText } from 'lucide-react';
 
 interface UploadResponse {
   url?: string;
@@ -19,7 +19,8 @@ export default function UploadImage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  // اضافه شدن فرمت PDF به فرمت‌های مجاز
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -27,7 +28,7 @@ export default function UploadImage() {
 
     // Validation
     if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      setError('فقط فایل‌های تصویری (JPG, PNG, WebP, GIF) مجاز هستند');
+      setError('فقط فایل‌های تصویری و PDF مجاز هستند');
       return;
     }
 
@@ -64,7 +65,7 @@ export default function UploadImage() {
     formData.append('file', file);
 
     try {
-      // Simulate progress (since fetch doesn't support upload progress natively)
+      // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 90) {
@@ -151,8 +152,8 @@ export default function UploadImage() {
   return (
     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="flex items-center gap-2 mb-6">
-        <ImageIcon className="w-5 h-5 text-blue-600" />
-        <h3 className="text-lg font-semibold text-gray-800">آپلود تصویر</h3>
+        <Upload className="w-5 h-5 text-blue-600" />
+        <h3 className="text-lg font-semibold text-gray-800">آپلود فایل</h3>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -171,7 +172,7 @@ export default function UploadImage() {
             ref={fileInputRef}
             type="file"
             onChange={handleFileChange}
-            accept="image/*"
+            accept="image/*,application/pdf"
             className="hidden"
             disabled={uploading}
           />
@@ -186,17 +187,27 @@ export default function UploadImage() {
                   فایل را اینجا بکشید یا کلیک کنید
                 </p>
                 <p className="text-sm text-gray-500">
-                  JPG, PNG, WebP, GIF (حداکثر 5MB)
+                  تصویر یا PDF (حداکثر 5MB)
                 </p>
               </div>
             </div>
           ) : (
-            <div className="relative">
-              <img
-                src={previewUrl}
-                alt="Preview"
-                className="max-h-48 mx-auto rounded-lg shadow-sm"
-              />
+            <div className="relative p-2">
+              {file?.type === 'application/pdf' ? (
+                <div className="flex flex-col items-center justify-center py-6 bg-red-50 rounded-lg border border-red-100">
+                  <FileText className="w-16 h-16 text-red-500 mb-2" />
+                  <span className="text-sm text-red-700 font-medium max-w-[200px] truncate" dir="ltr">
+                    {file.name}
+                  </span>
+                </div>
+              ) : (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="max-h-48 mx-auto rounded-lg shadow-sm"
+                />
+              )}
+              
               {!uploading && (
                 <button
                   type="button"
@@ -204,7 +215,7 @@ export default function UploadImage() {
                     e.stopPropagation();
                     handleReset();
                   }}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute top-0 right-0 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -216,12 +227,16 @@ export default function UploadImage() {
         {/* File Info */}
         {file && !uploadedUrl && (
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center">
-                <ImageIcon className="w-5 h-5 text-blue-600" />
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-10 h-10 rounded bg-blue-100 flex-shrink-0 flex items-center justify-center">
+                {file.type === 'application/pdf' ? (
+                  <FileText className="w-5 h-5 text-red-600" />
+                ) : (
+                  <ImageIcon className="w-5 h-5 text-blue-600" />
+                )}
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">{file.name}</p>
+              <div className="overflow-hidden">
+                <p className="text-sm font-medium text-gray-800 truncate" dir="ltr">{file.name}</p>
                 <p className="text-xs text-gray-500">
                   {(file.size / 1024).toFixed(2)} KB
                 </p>
@@ -269,6 +284,7 @@ export default function UploadImage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:text-blue-700 underline break-all flex-1"
+                dir="ltr"
               >
                 {uploadedUrl}
               </a>
@@ -322,7 +338,7 @@ export default function UploadImage() {
             ) : (
               <>
                 <Upload className="w-4 h-4" />
-                آپلود تصویر
+                آپلود فایل
               </>
             )}
           </button>
