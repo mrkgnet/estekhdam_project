@@ -2,7 +2,7 @@
 
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, CategoryType } from "@prisma/client"; // 🟢 ایمپورت CategoryType
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import path from "path";
@@ -20,6 +20,9 @@ export default async function addCategoryAction(prevState: any, formData: FormDa
     const rawCatSlug = formData.get("catSlug") as string;
     const catSlug = rawCatSlug ? rawCatSlug.trim().replace(/\s+/g, "-").toLowerCase() : "";
     
+    // 🟢 استخراج فیلد Type و تعیین مقدار پیش‌فرض در صورت خالی بودن
+    const typeValue = (formData.get("type") as CategoryType) || "MAIN";
+
     const rawParentId = formData.get("parentId") as string;
     const parentId = rawParentId && rawParentId.trim() !== "" ? rawParentId : undefined;
     
@@ -42,16 +45,13 @@ export default async function addCategoryAction(prevState: any, formData: FormDa
       }
     }
 
-    // 🟢 مدیریت تصویر (اولویت با لینک خارجی است)
     const externalImageUrl = formData.get("externalImageUrl") as string;
     const imageFile = formData.get("imageFile") as File;
     let finalImageUrl = null;
 
     if (externalImageUrl && externalImageUrl.trim() !== "") {
-      // اگر کاربر لینک خارجی داده بود، مستقیماً همان را استفاده کن
       finalImageUrl = externalImageUrl.trim();
     } else if (imageFile && imageFile.size > 0) {
-      // اگر فایلی آپلود شده بود پردازشش کن
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -81,6 +81,7 @@ export default async function addCategoryAction(prevState: any, formData: FormDa
       data: {
         catName: catName,
         catSlug: catSlug,
+        type: typeValue, // 🟢 ثبت نوع دسته در دیتابیس
         imageUrl: finalImageUrl, 
         parentId: parentId, 
       },

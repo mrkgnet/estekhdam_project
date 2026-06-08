@@ -17,6 +17,7 @@ type Category = {
     catSlug: string;
     imageUrl?: string;
     parentId?: string | null;
+    type: "MAIN" | "FREE_RESOURCE" | "BLOG";
 };
 
 type CategoryNode = Category & { children: CategoryNode[] };
@@ -58,8 +59,9 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
     const [addCatName, setAddCatName] = useState("");
     const [addCatSlug, setAddCatSlug] = useState("");
     const [addParentId, setAddParentId] = useState("");
+    const [addType, setAddType] = useState<"MAIN" | "FREE_RESOURCE" | "BLOG">("MAIN");
     const [addPreviewImage, setAddPreviewImage] = useState<string | null>(null);
-    const [addExternalUrl, setAddExternalUrl] = useState(""); // 🟢 استیت لینک خارجی افزودن
+    const [addExternalUrl, setAddExternalUrl] = useState("");
 
     // ---------------- استیت‌های مودال ویرایش ----------------
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -70,8 +72,9 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
     const [editCatName, setEditCatName] = useState("");
     const [editCatSlug, setEditCatSlug] = useState("");
     const [editParentId, setEditParentId] = useState("");
+    const [editType, setEditType] = useState<"MAIN" | "FREE_RESOURCE" | "BLOG">("MAIN");
     const [editPreviewImage, setEditPreviewImage] = useState<string | null>(null);
-    const [editExternalUrl, setEditExternalUrl] = useState(""); // 🟢 استیت لینک خارجی ویرایش
+    const [editExternalUrl, setEditExternalUrl] = useState("");
 
     const addCategoryTree = useMemo(() => {
         const buildTree = (parentId: string | null = null): CategoryNode[] => {
@@ -99,7 +102,8 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
             setAddCatName("");
             setAddCatSlug("");
             setAddParentId("");
-            setAddExternalUrl(""); // 🟢 ریست لینک
+            setAddType("MAIN");
+            setAddExternalUrl("");
             clearAddImage();
             toast.success(addState?.message || "با موفقیت ثبت شد");
         }
@@ -126,8 +130,9 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
         setEditCatName(cat.catName);
         setEditCatSlug(cat.catSlug);
         setEditParentId(cat.parentId || "");
+        setEditType(cat.type || "MAIN");
         setEditPreviewImage(cat.imageUrl || null);
-        setEditExternalUrl(""); // 🟢 خالی کردن لینک هنگام باز شدن مودال
+        setEditExternalUrl("");
         setIsEditModalOpen(true);
     };
 
@@ -154,6 +159,14 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
         if (editFileInputRef.current) editFileInputRef.current.value = "";
     };
 
+    const getTypeBadge = (type: string) => {
+        switch (type) {
+            case "FREE_RESOURCE": return <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">منابع رایگان</span>;
+            case "BLOG": return <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-[10px] font-bold">مقالات وبلاگ</span>;
+            default: return <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold">اصلی / پولی</span>;
+        }
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto text-xs md:text-sm" dir="rtl">
             <div className="flex justify-between items-center mb-6">
@@ -170,9 +183,10 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                 <table className="w-full text-right border-collapse">
                     <thead className="bg-gray-50 text-gray-600">
                         <tr>
-                            <th className="p-4 border-b w-16 text-center">ردیف</th>
-                            <th className="p-4 border-b w-24 text-center">تصویر</th>
+                            <th className="p-4 border-b w-12 text-center">ردیف</th>
+                            <th className="p-4 border-b w-20 text-center">تصویر</th>
                             <th className="p-4 border-b">نام دسته</th>
+                            <th className="p-4 border-b">نوع</th>
                             <th className="p-4 border-b">والد (مادر)</th>
                             <th className="p-4 border-b">اسلاگ</th>
                             <th className="p-4 border-b">عملیات</th>
@@ -188,7 +202,7 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                                             {cat.imageUrl ? (
                                                 <Image src={cat.imageUrl} alt={cat.catName} fill className="object-cover" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-300">No Image</div>
+                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-300">بدون عکس</div>
                                             )}
                                         </div>
                                     </td>
@@ -199,12 +213,15 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                                         </div>
                                     </td>
                                     <td className="p-4">
+                                        {getTypeBadge(cat.type)}
+                                    </td>
+                                    <td className="p-4">
                                         {cat.parentId ? (
                                             <span className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-[11px]">
                                                 {categories.find(c => c.id === cat.parentId)?.catName || "نامشخص"}
                                             </span>
                                         ) : (
-                                            <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded text-[11px] font-semibold">دسته اصلی</span>
+                                            <span className="text-gray-400 text-[11px]">-</span>
                                         )}
                                     </td>
                                     <td className="p-4 text-gray-500 font-mono text-[11px]" dir="ltr">{cat.catSlug}</td>
@@ -231,17 +248,16 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="p-12 text-center text-gray-400">لیست دسته‌بندی‌ها خالی است.</td>
+                                <td colSpan={7} className="p-12 text-center text-gray-400">لیست دسته‌بندی‌ها خالی است.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* 🟢 مودال افزودن */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-                    <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh]">
+                    <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
                         <h2 className="text-lg font-bold mb-5 flex items-center gap-2 text-gray-800 border-b pb-3">
                             <span className="w-2 h-6 bg-blue-600 rounded"></span>
                             افزودن دسته جدید
@@ -253,7 +269,21 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                             
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">نام دسته‌بندی</label>
-                                <input type="text" required name="catName" value={addCatName} onChange={handleAddNameChange} className="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" placeholder="مثلاً: گوشی موبایل" />
+                                <input type="text" required name="catName" value={addCatName} onChange={handleAddNameChange} className="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" placeholder="مثلاً: منابع رایگان بانکی" />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">نوع دسته‌بندی</label>
+                                <select 
+                                    name="type" 
+                                    value={addType} 
+                                    onChange={(e) => setAddType(e.target.value as any)} 
+                                    className="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all bg-white"
+                                >
+                                    <option value="MAIN">اصلی (محصولات پولی و فروشگاهی)</option>
+                                    <option value="FREE_RESOURCE">منابع رایگان (دانلود بدون پرداخت)</option>
+                                    <option value="BLOG">مقالات وبلاگ</option>
+                                </select>
                             </div>
 
                             <div>
@@ -276,14 +306,16 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                                         </span>
                                     </label>
                                     <ul>
-                                        {addCategoryTree.map(node => (
+                                        {addCategoryTree.filter(node => node.type === addType).map(node => (
                                             <CategoryTreeNode key={node.id} node={node} selectedId={addParentId} onSelect={setAddParentId} />
                                         ))}
+                                        {addCategoryTree.filter(node => node.type === addType).length === 0 && (
+                                            <li className="text-gray-400 text-xs py-2 text-center">هیچ والد مرتبطی در این نوع یافت نشد.</li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
 
-                            {/* 🟢 بخش تصویر (انتخاب فایل یا درج لینک) */}
                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 space-y-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">لینک تصویر خارجی (اختیاری)</label>
@@ -329,10 +361,9 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                 </div>
             )}
 
-            {/* 🟢 مودال ویرایش */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-                    <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh]">
+                    <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
                         <h2 className="text-lg font-bold mb-5 flex items-center gap-2 text-gray-800 border-b pb-3">
                             <span className="w-2 h-6 bg-amber-500 rounded-full"></span>
                             ویرایش دسته‌بندی
@@ -346,6 +377,20 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">نام دسته‌بندی</label>
                                 <input type="text" required name="catName" value={editCatName} onChange={handleEditNameChange} className="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all" />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">نوع دسته‌بندی</label>
+                                <select 
+                                    name="type" 
+                                    value={editType} 
+                                    onChange={(e) => setEditType(e.target.value as any)} 
+                                    className="w-full border border-gray-200 p-2.5 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all bg-white"
+                                >
+                                    <option value="MAIN">اصلی (محصولات پولی و فروشگاهی)</option>
+                                    <option value="FREE_RESOURCE">منابع رایگان (دانلود بدون پرداخت)</option>
+                                    <option value="BLOG">مقالات وبلاگ</option>
+                                </select>
                             </div>
 
                             <div>
@@ -368,14 +413,13 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                                         </span>
                                     </label>
                                     <ul>
-                                        {editCategoryTree.map(node => (
+                                        {editCategoryTree.filter(node => node.type === editType).map(node => (
                                             <CategoryTreeNode key={node.id} node={node} selectedId={editParentId} onSelect={setEditParentId} />
                                         ))}
                                     </ul>
                                 </div>
                             </div>
 
-                            {/* 🟢 بخش تصویر در ویرایش */}
                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 space-y-3">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">لینک تصویر خارجی جدید</label>

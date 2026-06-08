@@ -2,7 +2,7 @@
 
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, CategoryType } from "@prisma/client"; // 🟢 ایمپورت CategoryType
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import path from "path";
@@ -21,6 +21,9 @@ export default async function editCategoryAction(prevState: any, formData: FormD
     const rawCatSlug = formData.get("catSlug") as string;
     const catSlug = rawCatSlug ? rawCatSlug.trim().replace(/\s+/g, "-").toLowerCase() : "";
     
+    // 🟢 استخراج فیلد Type از فرم
+    const typeValue = (formData.get("type") as CategoryType) || "MAIN";
+
     const rawParentId = formData.get("parentId") as string;
     const parentId = rawParentId && rawParentId.trim() !== "" ? rawParentId : null;
 
@@ -48,16 +51,13 @@ export default async function editCategoryAction(prevState: any, formData: FormD
         return { success: false, message: "یک دسته‌بندی نمی‌تواند والد خودش باشد." };
     }
 
-    // 🟢 مدیریت تصویر (اولویت با لینک خارجی است)
     const externalImageUrl = formData.get("externalImageUrl") as string;
     const imageFile = formData.get("imageFile") as File;
     let finalImageUrl = null;
 
     if (externalImageUrl && externalImageUrl.trim() !== "") {
-        // استفاده از لینک خارجی
         finalImageUrl = externalImageUrl.trim();
     } else if (imageFile && imageFile.size > 0) {
-        // آپلود فایل جدید
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
@@ -86,10 +86,10 @@ export default async function editCategoryAction(prevState: any, formData: FormD
     const updateData: any = {
         catName: catName,
         catSlug: catSlug,
+        type: typeValue, // 🟢 ویرایش نوع دسته در دیتابیس
         parentId: parentId,
     };
     
-    // اگر عکس یا لینک جدیدی ارسال شده بود آن را آپدیت کن در غیر اینصورت همان عکس قبلی باقی می‌ماند
     if (finalImageUrl) {
         updateData.imageUrl = finalImageUrl;
     }

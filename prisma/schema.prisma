@@ -59,6 +59,12 @@ enum QuestionType {
   TALIFI
 }
 
+enum CategoryType {
+  MAIN // دسته‌بندی‌های اصلی و محصولات پولی
+  FREE_RESOURCE // دسته‌بندی منابع رایگان
+  BLOG // در آینده می‌توانید مقالات را هم اضافه کنید
+}
+
 // ========= MODELS =========
 
 model User {
@@ -69,14 +75,14 @@ model User {
   email         String?
   otpExpires    DateTime?
   refreshTokens RefreshToken[]
-  firstName    String?
-  lastName     String?
-  nationalCode String?
-  avatar       String?
-  birthDate    DateTime?
-  gender       Gender    @default(UNKNOWN)
-  role         Role      @default(user)
-  isActive     Boolean   @default(true)
+  firstName     String?
+  lastName      String?
+  nationalCode  String?
+  avatar        String?
+  birthDate     DateTime?
+  gender        Gender         @default(UNKNOWN)
+  role          Role           @default(user)
+  isActive      Boolean        @default(true)
 
   orders           Order[]
   comments         Comment[]
@@ -195,21 +201,25 @@ model Product {
 }
 
 model Category {
-  id       String  @id @default(uuid())
-  catName  String  @unique
-  catSlug  String  @unique
-  imageUrl String?
+  id        String       @id @default(uuid())
+  catName   String       @unique
+  catSlug   String       @unique
+  imageUrl  String?
+  
+  // فیلد جدید برای تعیین نوع دسته‌بندی
+  type      CategoryType @default(MAIN)
 
-  parentId String?
-  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children Category[] @relation("CategoryToCategory")
+  parentId  String?
+  parent    Category?    @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  Category[]   @relation("CategoryToCategory")
 
-  products Product[] @relation("ProductCategories") // رابطه با محصول
+  products  Product[]    @relation("ProductCategories") // رابطه با محصول
 
-  createdAt DateTime? @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime?    @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@index([parentId])
+  @@index([type]) // ایندکس برای جستجوی سریع‌تر بر اساس نوع دسته‌بندی
 }
 
 model Chapter {
