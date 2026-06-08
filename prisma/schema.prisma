@@ -66,7 +66,11 @@ enum CategoryType {
 }
 
 
-
+// تعریف انواع محصول
+enum ProductType {
+  MAIN          // محصولات پولی و فروشگاهی (پیش‌فرض)
+  FREE_RESOURCE // منابع، جزوات و فایل‌های رایگان
+}
 
 
 
@@ -182,29 +186,36 @@ model MainSlider {
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String      @unique
+  
+  // فیلد جدید برای تعیین نوع محصول
+  type        ProductType @default(MAIN)
+
   oldPrice    Int?
   newPrice    Int?
   description String?
   imageUrl    String?
   features    String[]
-  isActive    Boolean  @default(true) // فیلد جدید برای فعال/غیرفعال
+  isActive    Boolean     @default(true) 
 
   // رابطه چند به چند با دسته‌بندی
-  categories Category[] @relation("ProductCategories")
+  categories  Category[]  @relation("ProductCategories")
 
-  questions Question[]
-  comments  Comment[]
-  orders    Order[]
-  chapters  Chapter[]
+  questions   Question[]
+  comments    Comment[]
+  orders      Order[]
+  chapters    Chapter[]
 
   // رابطه چندبه‌چند با خبر
   governmentNews GovernmentNews[] @relation("ProductNews")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // اضافه کردن ایندکس برای جستجوی سریع‌تر بر اساس نوع محصول
+  @@index([type])
 }
 
 model Category {

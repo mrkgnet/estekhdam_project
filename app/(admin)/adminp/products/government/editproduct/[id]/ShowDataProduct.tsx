@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-
 interface Category {
     id: string;
     catName: string;
@@ -23,6 +22,7 @@ interface Product {
     id: string;
     name: string;
     slug: string;
+    type?: "MAIN" | "FREE_RESOURCE"; // 🟢 اضافه شدن فیلد تایپ
     description?: string;
     newPrice: number;
     oldPrice?: number | null;
@@ -59,14 +59,18 @@ export default function ShowDataProduct({
         }
         return [];
     });
+    
     const [features, setFeatures] = useState<string[]>(() => productData?.features || []);
     const [description, setDescription] = useState(productData.description || "");
-    const [previewImage, setPreviewImage] = useState<string | null>(
-        productData?.imageUrl || null
-    );
-    const [externalImageUrl, setExternalImageUrl] = useState<string>(""); // ✅ state جدید
+    const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
+    const [externalImageUrl, setExternalImageUrl] = useState<string>(""); 
     const [productName, setProductName] = useState(productData.name || "");
     const [productSlug, setProductSlug] = useState(productData.slug || "");
+    
+    // 🟢 استیت‌های جدید برای نوع محصول و قیمت‌ها
+    const [productType, setProductType] = useState<"MAIN" | "FREE_RESOURCE">(productData.type || "MAIN");
+    const [newPrice, setNewPrice] = useState<string | number>(productData.newPrice ?? "");
+    const [oldPrice, setOldPrice] = useState<string | number>(productData.oldPrice ?? "");
 
     useEffect(() => {
         if (!state?.message) return;
@@ -96,7 +100,7 @@ export default function ShowDataProduct({
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-all shadow-sm font-medium"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm font-medium cursor-pointer"
                 >
                     <span>بازگشت</span>
                     <ArrowLeft className="w-4 h-4" />
@@ -108,7 +112,7 @@ export default function ShowDataProduct({
                 <input type="hidden" name="existingImageUrl" value={productData.imageUrl || ""} />
                 <input type="hidden" name="description" value={description} />
                 <input type="hidden" name="isActive" value={String(isActive)} />
-                <input type="hidden" name="externalImageUrl" value={externalImageUrl} /> {/* ✅ فیلد جدید */}
+                <input type="hidden" name="externalImageUrl" value={externalImageUrl} />
 
                 {selectedCategories.map((cat) => (
                     <input key={cat.id} type="hidden" name="categoryIds" value={cat.id} />
@@ -120,16 +124,23 @@ export default function ShowDataProduct({
                 <BasicInfoSection
                     productName={productName}
                     productSlug={productSlug}
-                    oldPrice={productData.oldPrice}
-                    newPrice={productData.newPrice}
+                    
+                    // 🟢 پاس دادن استیت‌های جدید به کامپوننت پایه
+                    productType={productType}
+                    onTypeChange={setProductType}
+                    newPrice={newPrice}
+                    oldPrice={oldPrice}
+                    onNewPriceChange={setNewPrice}
+                    onOldPriceChange={setOldPrice}
+
                     isActive={isActive}
                     previewImage={previewImage}
-                    externalImageUrl={externalImageUrl} // ✅ prop جدید
+                    externalImageUrl={externalImageUrl}
                     onNameChange={handleNameChange}
                     onSlugChange={setProductSlug}
                     onActiveChange={setIsActive}
                     onImageChange={setPreviewImage}
-                    onExternalImageUrlChange={setExternalImageUrl} // ✅ prop جدید
+                    onExternalImageUrlChange={setExternalImageUrl}
                 />
 
                 <div className="grid md:grid-cols-2 gap-6">

@@ -1,6 +1,7 @@
 "use server";
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ProductType } from "@prisma/client"; // 🟢 ایمپورت از Prisma
 import { revalidatePath } from "next/cache";
 import path from "path";
 import fs from "fs/promises";
@@ -56,17 +57,27 @@ export default async function addProductAction(prevState: any, formData: FormDat
       oldPrice: oldPriceStr = "",
       newPrice: newPriceStr = "",
       description = "",
+      type = "MAIN", // 🟢 استخراج نوع محصول
     } = rawData as Record<string, string>;
 
+    const productType = type as ProductType;
     const categoryIdsFromForm = formData.getAll("categories") as string[];
     const features = formData.getAll("features") as string[];
 
-    if (!name || !rawSlug || !newPriceStr) {
-      return { success: false, message: "نام، اسلاگ و قیمت جدید الزامی هستند." };
+    // 🟢 اعتبارسنجی مجدد برای نوع رایگان و پولی
+    if (!name || !rawSlug) {
+      return { success: false, message: "نام و اسلاگ محصول الزامی هستند." };
+    }
+    
+    // اگر محصول پولی است، وارد کردن قیمت الزامی است
+    if (productType === "MAIN" && !newPriceStr) {
+        return { success: false, message: "برای محصولات اصلی وارد کردن قیمت الزامی است." };
     }
 
-    const newPrice = parseInt(newPriceStr, 10);
-    const oldPrice = oldPriceStr ? parseInt(oldPriceStr, 10) : 0;
+    // 🟢 تعیین قیمت‌ها بر اساس نوع محصول
+    const newPrice = productType === "FREE_RESOURCE" ? 0 : parseInt(newPriceStr, 10);
+    const oldPrice = productType === "FREE_RESOURCE" ? 0 : (oldPriceStr ? parseInt(oldPriceStr, 10) : 0);
+    
     const slug = rawSlug.trim().replace(/\s+/g, "-").toLowerCase();
 
     const existingProduct = await db.product.findFirst({
@@ -78,17 +89,16 @@ export default async function addProductAction(prevState: any, formData: FormDat
     }
 
     await db.$transaction(async (tx) => {
-      const newProduct = await tx.product.create({
+      await tx.product.create({
         data: {
           name,
           slug,
+          type: productType, // 🟢 ذخیره نوع در دیتابیس
           oldPrice,
           newPrice,
           imageUrl: finalImageUrl || "",
           description,
           features: features,
-
-          // روش صحیح و استاندارد ثبت رابطه چند به چند در پستگرس
           categories: {
             connect: categoryIdsFromForm.map((catId) => ({ id: catId })),
           },

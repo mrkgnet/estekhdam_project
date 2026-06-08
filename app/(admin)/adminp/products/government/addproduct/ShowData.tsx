@@ -4,7 +4,7 @@ import addProductAction from "@/actions/admin/products/government/addproduct/Act
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import { 
   ArrowLeft, UploadCloud, X, LayoutList, Tag, 
-  DollarSign, ListChecks, Type, Link as LinkIcon 
+  DollarSign, ListChecks, Type, Link as LinkIcon, PackageOpen 
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useRef } from "react";
@@ -32,6 +32,12 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
   // استیت‌های مقادیر فرم
   const [productName, setProductName] = useState("");
   const [productSlug, setProductSlug] = useState("");
+  const [productType, setProductType] = useState<"MAIN" | "FREE_RESOURCE">("MAIN");
+  
+  // 🟢 استیت‌های جدید برای کنترل اصولی فیلدهای قیمت
+  const [newPrice, setNewPrice] = useState<string | number>("");
+  const [oldPrice, setOldPrice] = useState<string | number>("");
+
   const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
   const [features, setFeatures] = useState<string[]>([]);
   const [featureInput, setFeatureInput] = useState("");
@@ -40,7 +46,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [externalImageUrl, setExternalImageUrl] = useState("");
   
-  // 1. اضافه کردن استیت برای توضیحات ادیتور
+  // استیت برای توضیحات ادیتور
   const [description, setDescription] = useState("");
 
   useEffect(() => {
@@ -52,8 +58,10 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
         setFeatures([]);
         setProductName("");
         setProductSlug("");
+        setProductType("MAIN");
+        setNewPrice(""); // 🟢 ریست کردن قیمت جدید
+        setOldPrice(""); // 🟢 ریست کردن قیمت قدیم
         clearImage();
-        // 2. خالی کردن ادیتور بعد از ثبت موفق
         setDescription(""); 
       } else {
         toast.error(state.message);
@@ -61,43 +69,37 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
     }
   }, [state]);
 
-  // تولید خودکار اسلاگ
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setProductName(val);
     setProductSlug(val.trim().replace(/\s+/g, "-").toLowerCase());
   };
 
-  // مدیریت لینک خارجی تصویر
   const handleExternalUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setExternalImageUrl(val);
     if (val) {
       setPreviewImage(val);
-      // پاک کردن فایل انتخاب شده قبلی
       if (fileInputRef.current) fileInputRef.current.value = "";
     } else {
       setPreviewImage(null);
     }
   };
 
-  // مدیریت فایل تصویر
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setExternalImageUrl(""); // پاک کردن لینک خارجی
+      setExternalImageUrl(""); 
       setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  // پاک کردن کامل تصویر
   const clearImage = () => {
     setPreviewImage(null);
     setExternalImageUrl("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // مدیریت دسته‌بندی‌ها
   const handleSelectCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     if (selectedId === "") return;
@@ -112,7 +114,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
     setSelectedCategories((prev) => prev.filter((cat) => cat.id !== catToRemove));
   };
 
-  // مدیریت ویژگی‌ها
   const addFeature = () => {
     const trimmed = featureInput.trim();
     if (trimmed && !features.includes(trimmed)) {
@@ -144,7 +145,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm font-medium cursor-pointer"
         >
           <span>بازگشت</span>
           <ArrowLeft className="w-4 h-4" />
@@ -161,7 +162,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           <input key={`feat-${index}`} type="hidden" name="features" value={feature} />
         ))}
 
-        {/* 1. اطلاعات پایه و قیمت */}
+        {/* 1. اطلاعات پایه و تصویر */}
         <section className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -201,18 +202,58 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* انتخاب نوع محصول و قیمت‌گذاری */}
+          <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+            {/* نوع محصول */}
+            <div className="space-y-2">
+              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+                <PackageOpen className="w-4 h-4 text-blue-500"/> نوع محصول <span className="text-red-500">*</span>
+              </label>
+              <select 
+                name="type" 
+                value={productType}
+                onChange={(e) => setProductType(e.target.value as "MAIN" | "FREE_RESOURCE")}
+                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="MAIN">محصول اصلی / پولی</option>
+                <option value="FREE_RESOURCE">منابع رایگان / دانلودی</option>
+              </select>
+            </div>
+
+            {/* قیمت جدید */}
+            <div className="space-y-2">
+              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-green-500"/> قیمت فروش (تومان) <span className="text-red-500">*</span>
+              </label>
+              {/* 🟢 فیلد مدیریت شده با استیت */}
+              <input 
+                type="number" 
+                name="newPrice" 
+                required={productType === "MAIN"} 
+                readOnly={productType === "FREE_RESOURCE"}
+                value={productType === "FREE_RESOURCE" ? 0 : newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`} 
+                placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"} 
+              />
+              {productType === "FREE_RESOURCE" && <p className="text-[10px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>}
+            </div>
+
+            {/* قیمت قبل */}
             <div className="space-y-2">
               <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-gray-400"/> قیمت قبل (تومان)
               </label>
-              <input type="number" name="oldPrice" className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
-            </div>
-            <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-green-500"/> قیمت جدید فروش (تومان) <span className="text-red-500">*</span>
-              </label>
-              <input type="number" name="newPrice" required className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-green-500" placeholder="0" />
+              {/* 🟢 فیلد مدیریت شده با استیت */}
+              <input 
+                type="number" 
+                name="oldPrice" 
+                readOnly={productType === "FREE_RESOURCE"}
+                value={productType === "FREE_RESOURCE" ? 0 : oldPrice}
+                onChange={(e) => setOldPrice(e.target.value)}
+                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-gray-400 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`} 
+                placeholder="0" 
+              />
             </div>
           </div>
 
@@ -307,7 +348,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                   selectedCategories.map((cat, index) => (
                     <span key={index} className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg tabsDataUserPanel animate-in fade-in zoom-in duration-200">
                       {cat.name}
-                      <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 bg-white rounded-full p-0.5">
+                      <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 bg-white rounded-full p-0.5 cursor-pointer">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -335,7 +376,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                   className="flex-1 px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 tabsDataUserPanel"
                   placeholder="مثال: دارای پاسخنامه (Enter بزنید)"
                 />
-                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded-xl hover:bg-emerald-200 transition-colors font-medium">
+                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded-xl hover:bg-emerald-200 transition-colors font-medium cursor-pointer">
                   افزودن
                 </button>
               </div>
@@ -347,7 +388,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                   features.map((f, index) => (
                     <div key={index} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg tabsDataUserPanel animate-in fade-in zoom-in duration-200">
                       <span>{f}</span>
-                      <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded-full p-0.5">
+                      <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded-full p-0.5 cursor-pointer">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
@@ -358,7 +399,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           </section>
         </div>
 
-        {/* 3. فیلد مخفی برای ارسال محتوای ادیتور به اکشن سمت سرور */}
+        {/* 3. فیلد مخفی برای ارسال محتوای ادیتور */}
         <input type="hidden" name="description" value={description} />
 
         {/* 4. استفاده از کامپوننت ادیتور در بخش توضیحات */}
@@ -381,7 +422,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
+              className="px-6 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors cursor-pointer"
             >
               انصراف
             </button>

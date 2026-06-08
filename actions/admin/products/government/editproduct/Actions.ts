@@ -1,6 +1,7 @@
 "use server";
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ProductType } from "@prisma/client"; // 🟢 ایمپورت از Prisma
 import { revalidatePath } from "next/cache";
 import path from "path";
 import fs from "fs/promises";
@@ -20,26 +21,32 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
       id = "",
       name = "",
       slug: rawSlug = "",
+      type = "MAIN", // 🟢 دریافت فیلد type
       oldPrice: oldPriceStr = "",
       newPrice: newPriceStr = "",
       description = "",
-      existingImageUrl = "", // عکس قبلی
-      isActive: isActiveStr = "true", // ✅ دریافت فیلد isActive
+      existingImageUrl = "", 
+      isActive: isActiveStr = "true", 
     } = rawData as Record<string, string>;
 
     if (!id) {
       return { success: false, message: "آیدی محصول یافت نشد" };
     }
 
+    const productType = type as ProductType;
+
+    // 🟢 اعتبارسنجی مجدد برای نوع رایگان و پولی
+    if (productType === "MAIN" && !newPriceStr) {
+        return { success: false, message: "برای محصولات اصلی وارد کردن قیمت جدید الزامی است." };
+    }
+
     const imageFile = formData.get("imageFile") as File | null;
     const externalImageUrl = formData.get("externalImageUrl") as string | null;
     let finalImageUrl = existingImageUrl;
 
-    // اولویت با لینک خارجی
     if (externalImageUrl && externalImageUrl.trim() !== "") {
       finalImageUrl = externalImageUrl.trim();
     }
-    // در صورت نبود لینک مستقیم، فایل آپلود شده را بررسی می‌کنیم
     else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
@@ -69,22 +76,25 @@ export async function editDataProductAction(prevState: any, formData: FormData) 
     const categoryIds = formData.getAll("categoryIds") as string[];
     const features = formData.getAll("features") as string[];
 
-    const newPrice = newPriceStr ? parseInt(newPriceStr, 10) : 0;
-    const oldPrice = oldPriceStr ? parseInt(oldPriceStr, 10) : 0;
+    // 🟢 تعیین قیمت‌ها بر اساس نوع محصول
+    const newPrice = productType === "FREE_RESOURCE" ? 0 : (newPriceStr ? parseInt(newPriceStr, 10) : 0);
+    const oldPrice = productType === "FREE_RESOURCE" ? 0 : (oldPriceStr ? parseInt(oldPriceStr, 10) : 0);
+    
     const slug = rawSlug.trim().replace(/\s+/g, "-").toLowerCase();
-    const isActive = isActiveStr === "true"; // ✅ تبدیل string به boolean
+    const isActive = isActiveStr === "true"; 
 
     await db.product.update({
       where: { id: id },
       data: {
         name,
         slug,
+        type: productType, // 🟢 آپدیت نوع در دیتابیس
         newPrice,
         oldPrice,
         imageUrl: finalImageUrl,
         description,
         features: features,
-        isActive, // ✅ اضافه کردن به دیتابیس
+        isActive, 
 
         categories: {
           set: categoryIds.map((catId) => ({ id: catId })),
