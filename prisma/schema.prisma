@@ -193,6 +193,15 @@ model Product {
   // فیلد جدید برای تعیین نوع محصول
   type        ProductType @default(MAIN)
 
+  // 🟢 فیلدهای جدید
+  downloadUrl String?     // لینک دانلود (اختیاری)
+  downloadCount Int       @default(0) // تعداد دانلود (پیش‌فرض صفر)
+
+// 🟢 فیلد جدید برای تعداد خرید
+  purchaseCount Int      @default(0)
+
+
+
   oldPrice    Int?
   newPrice    Int?
   description String?

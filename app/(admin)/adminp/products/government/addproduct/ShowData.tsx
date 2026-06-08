@@ -4,13 +4,11 @@ import addProductAction from "@/actions/admin/products/government/addproduct/Act
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import { 
   ArrowLeft, UploadCloud, X, LayoutList, Tag, 
-  DollarSign, ListChecks, Type, Link as LinkIcon, PackageOpen 
+  DollarSign, ListChecks, Type, Link as LinkIcon, PackageOpen, Download
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
-
-// آدرس ایمپورت را بر اساس ساختار پوشه‌های خود تنظیم کنید
 
 type Category = {
   id: string;
@@ -29,24 +27,17 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
 
   const [state, formAction, isPending] = useActionState(addProductAction, initialState);
 
-  // استیت‌های مقادیر فرم
   const [productName, setProductName] = useState("");
   const [productSlug, setProductSlug] = useState("");
   const [productType, setProductType] = useState<"MAIN" | "FREE_RESOURCE">("MAIN");
-  
-  // 🟢 استیت‌های جدید برای کنترل اصولی فیلدهای قیمت
   const [newPrice, setNewPrice] = useState<string | number>("");
   const [oldPrice, setOldPrice] = useState<string | number>("");
-
+  const [downloadUrl, setDownloadUrl] = useState(""); // 🟢 استیت جدید
   const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
   const [features, setFeatures] = useState<string[]>([]);
   const [featureInput, setFeatureInput] = useState("");
-  
-  // استیت‌های مربوط به تصویر
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [externalImageUrl, setExternalImageUrl] = useState("");
-  
-  // استیت برای توضیحات ادیتور
   const [description, setDescription] = useState("");
 
   useEffect(() => {
@@ -59,8 +50,9 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
         setProductName("");
         setProductSlug("");
         setProductType("MAIN");
-        setNewPrice(""); // 🟢 ریست کردن قیمت جدید
-        setOldPrice(""); // 🟢 ریست کردن قیمت قدیم
+        setNewPrice("");
+        setOldPrice("");
+        setDownloadUrl(""); // 🟢 ریست
         clearImage();
         setDescription(""); 
       } else {
@@ -90,8 +82,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
     const file = e.target.files?.[0];
     if (file) {
       setExternalImageUrl(""); 
-      setPreviewImage(URL.createObjectURL(file));
-    }
+      setPreviewImage(URL.createObjectURL(file));}
   };
 
   const clearImage = () => {
@@ -136,7 +127,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6 text-xs md:text-sm" dir="rtl">
       
-      {/* هدر */}
       <div className="flex flex-wrap items-center justify-between mb-8">
         <div>
           <h1 className="tabsDataUserPanel text-gray-800 font-bold text-xl">افزودن محصول جدید</h1>
@@ -154,7 +144,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
 
       <form ref={formRef} action={formAction} className="space-y-8">
         
-        {/* فیلدهای مخفی */}
         {selectedCategories.map((cat, index) => (
           <input key={`cat-${index}`} type="hidden" name="categories" value={cat.id} />
         ))}
@@ -185,7 +174,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
               />
             </div>
             <div className="space-y-2">
-               <label className="tabsDataUserPanel text-gray-700 flex justify-between">
+              <label className="tabsDataUserPanel text-gray-700 flex justify-between">
                 <span>اسلاگ (شناسه URL) <span className="text-red-500">*</span></span>
                 <span className="text-xs text-gray-400 font-normal">تولید خودکار</span>
               </label>
@@ -202,9 +191,8 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </div>
           </div>
 
-          {/* انتخاب نوع محصول و قیمت‌گذاری */}
+          {/* نوع محصول و قیمت‌گذاری */}
           <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
-            {/* نوع محصول */}
             <div className="space-y-2">
               <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
                 <PackageOpen className="w-4 h-4 text-blue-500"/> نوع محصول <span className="text-red-500">*</span>
@@ -220,12 +208,10 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
               </select>
             </div>
 
-            {/* قیمت جدید */}
             <div className="space-y-2">
               <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-green-500"/> قیمت فروش (تومان) <span className="text-red-500">*</span>
               </label>
-              {/* 🟢 فیلد مدیریت شده با استیت */}
               <input 
                 type="number" 
                 name="newPrice" 
@@ -233,18 +219,14 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                 readOnly={productType === "FREE_RESOURCE"}
                 value={productType === "FREE_RESOURCE" ? 0 : newPrice}
                 onChange={(e) => setNewPrice(e.target.value)}
-                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`} 
-                placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"} 
+                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`}placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"} 
               />
               {productType === "FREE_RESOURCE" && <p className="text-[10px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>}
             </div>
 
-            {/* قیمت قبل */}
             <div className="space-y-2">
               <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-gray-400"/> قیمت قبل (تومان)
-              </label>
-              {/* 🟢 فیلد مدیریت شده با استیت */}
+                <DollarSign className="w-4 h-4 text-gray-400"/> قیمت قبل (تومان)</label>
               <input 
                 type="number" 
                 name="oldPrice" 
@@ -257,11 +239,33 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </div>
           </div>
 
-          {/* بخش تصویر (آپلود یا لینک) */}
+          {/* 🟢 فیلد آدرس دانلود - فقط برای FREE_RESOURCE */}
+          {productType === "FREE_RESOURCE" && (
+            <div className="space-y-2 pt-4 border-t border-gray-100">
+              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+                <Download className="w-4 h-4 text-orange-500"/> آدرس فایل دانلودی <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <LinkIcon className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="url"
+                  name="downloadUrl"
+                  value={downloadUrl}
+                  onChange={(e) => setDownloadUrl(e.target.value)}
+                  required
+                  placeholder="https://example.com/file.pdf"
+                  className="w-full pr-10 pl-4 py-3.5 border border-orange-200 rounded-xl bg-orange-50/30 outline-none focus:ring-2 focus:ring-orange-400 text-left"dir="ltr"
+                />
+              </div>
+              <p className="text-[11px] text-gray-400">آدرس مستقیم فایل دانلودی را وارد کنید (PDF، ZIP و ...)</p>
+            </div>
+          )}
+
+          {/* بخش تصویر */}
           <div className="space-y-4 pt-4 border-t border-gray-100">
             <label className="tabsDataUserPanel text-gray-700">تصویر محصول (آپلود یا لینک) <span className="text-red-500">*</span></label>
-            
-            {/* فیلد لینک عکس */}
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                 <LinkIcon className="h-4 w-4 text-gray-400" />
@@ -284,7 +288,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
               <span className="h-[1px] w-full bg-gray-200"></span>
             </div>
 
-            {/* آپلود فایل */}
             <div className={`relative border-2 border-dashed rounded-2xl transition-all overflow-hidden group ${externalImageUrl ? 'border-gray-200 bg-gray-100 opacity-50' : 'border-gray-300 hover:border-blue-400 bg-gray-50/50'}`}>
               <input
                 ref={fileInputRef}
@@ -295,7 +298,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                 disabled={!!externalImageUrl}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
               />
-              
               {!previewImage ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <div className="w-14 h-14 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-500 group-hover:text-blue-500 transition-colors">
@@ -359,7 +361,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           </section>
 
           <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
-             <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
                 <ListChecks className="w-5 h-5" />
               </div>
@@ -399,24 +401,18 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           </section>
         </div>
 
-        {/* 3. فیلد مخفی برای ارسال محتوای ادیتور */}
+        {/* 3. توضیحات */}
         <input type="hidden" name="description" value={description} />
-
-        {/* 4. استفاده از کامپوننت ادیتور در بخش توضیحات */}
         <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
           <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2 mb-2 font-bold">
             <Tag className="w-4 h-4 text-blue-500"/> توضیحات محصول
           </label>
-          
           <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-            <RichTextEditor 
-              value={description} 
-              onChange={setDescription} 
-            />
+            <RichTextEditor value={description} onChange={setDescription} />
           </div>
         </section>
 
-        {/* نوار دکمه شناور در پایین */}
+        {/* نوار دکمه شناور */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
           <div className="w-full max-w-5xl flex justify-end gap-4 px-4 sm:px-6 lg:px-8">
             <button
@@ -442,7 +438,6 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </button>
           </div>
         </div>
-
       </form>
     </div>
   );

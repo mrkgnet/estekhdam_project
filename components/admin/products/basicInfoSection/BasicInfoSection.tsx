@@ -1,21 +1,23 @@
-import { Type, DollarSign, PackageOpen } from "lucide-react";
+import { Type, DollarSign, PackageOpen, Download, Link as LinkIcon } from "lucide-react";
 import ImageUpload from "../imageUpload/ImageUpload";
 import ActiveToggle from "../activeToggle/ActiveToggle";
 
 interface BasicInfoSectionProps {
     productName: string;
     productSlug: string;
-    productType: "MAIN" | "FREE_RESOURCE"; // 🟢 اضافه شدن پراپ نوع محصول
-    oldPrice: string | number; // 🟢 تغییر به استیت کنترل شده
-    newPrice: string | number; // 🟢 تغییر به استیت کنترل شده
+    productType: "MAIN" | "FREE_RESOURCE";
+    oldPrice: string | number;
+    newPrice: string | number;
+    downloadUrl: string;
     isActive: boolean;
     previewImage: string | null;
     externalImageUrl: string;
     onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSlugChange: (slug: string) => void;
-    onTypeChange: (type: "MAIN" | "FREE_RESOURCE") => void; // 🟢 اضافه شدن هندلر نوع محصول
-    onNewPriceChange: (price: string) => void; // 🟢 اضافه شدن هندلر قیمت جدید
-    onOldPriceChange: (price: string) => void; // 🟢 اضافه شدن هندلر قیمت قدیم
+    onTypeChange: (type: "MAIN" | "FREE_RESOURCE") => void;
+    onNewPriceChange: (price: string) => void;
+    onOldPriceChange: (price: string) => void;
+    onDownloadUrlChange: (url: string) => void;
     onActiveChange: (active: boolean) => void;
     onImageChange: (image: string | null) => void;
     onExternalImageUrlChange: (url: string) => void;
@@ -27,6 +29,7 @@ export default function BasicInfoSection({
     productType,
     oldPrice,
     newPrice,
+    downloadUrl,
     isActive,
     previewImage,
     externalImageUrl,
@@ -35,6 +38,7 @@ export default function BasicInfoSection({
     onTypeChange,
     onNewPriceChange,
     onOldPriceChange,
+    onDownloadUrlChange,
     onActiveChange,
     onImageChange,
     onExternalImageUrlChange,
@@ -59,10 +63,8 @@ export default function BasicInfoSection({
                         name="name"
                         value={productName}
                         required
-                        className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                        className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500"/>
                 </div>
-
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">
                         اسلاگ (شناسه URL) <span className="text-red-500">*</span>
@@ -79,9 +81,7 @@ export default function BasicInfoSection({
                 </div>
             </div>
 
-            {/* 🟢 بخش جدید: انتخاب نوع محصول و قیمت‌گذاری (۳ ستونه) */}
             <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
-                {/* انتخاب نوع محصول */}
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                         <PackageOpen className="w-4 h-4 text-blue-500" /> نوع محصول <span className="text-red-500">*</span>
@@ -96,8 +96,6 @@ export default function BasicInfoSection({
                         <option value="FREE_RESOURCE">منابع رایگان / دانلودی</option>
                     </select>
                 </div>
-
-                {/* قیمت جدید فروش */}
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-green-500" />
@@ -113,10 +111,10 @@ export default function BasicInfoSection({
                         className={`w-full px-4 py-3.5 border border-gray-200 rounded outline-none focus:ring-2 focus:ring-green-500 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`}
                         placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"}
                     />
-                    {productType === "FREE_RESOURCE" && <p className="text-[10px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>}
+                    {productType === "FREE_RESOURCE" && (
+                        <p className="text-[10px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>
+                    )}
                 </div>
-
-                {/* قیمت قبل */}
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-gray-400" />
@@ -133,6 +131,29 @@ export default function BasicInfoSection({
                     />
                 </div>
             </div>
+
+            {productType === "FREE_RESOURCE" && (
+                <div className="space-y-2 pt-4 border-t border-gray-100">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <Download className="w-4 h-4 text-orange-500" />
+                        آدرس فایل دانلودی <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                            <LinkIcon className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <input
+                            type="url"
+                            name="downloadUrl"
+                            value={downloadUrl}
+                            onChange={(e) => onDownloadUrlChange(e.target.value)}
+                            required
+                            placeholder="https://example.com/file.pdf"
+                            className="w-full pr-10 pl-4 py-3.5 border border-orange-200 rounded bg-orange-50/30 outline-none focus:ring-2 focus:ring-orange-400 text-left"dir="ltr"
+                        />
+                    </div><p className="text-[11px] text-gray-400">آدرس مستقیم فایل دانلودی را وارد کنید (PDF، ZIP و ...)</p>
+                </div>
+            )}
 
             <ActiveToggle isActive={isActive} onChange={onActiveChange} />
 

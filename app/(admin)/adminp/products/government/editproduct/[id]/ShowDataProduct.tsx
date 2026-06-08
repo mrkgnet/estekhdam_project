@@ -22,7 +22,7 @@ interface Product {
     id: string;
     name: string;
     slug: string;
-    type?: "MAIN" | "FREE_RESOURCE"; // 🟢 اضافه شدن فیلد تایپ
+    type?: "MAIN" | "FREE_RESOURCE";
     description?: string;
     newPrice: number;
     oldPrice?: number | null;
@@ -31,6 +31,7 @@ interface Product {
     categories?: Category[];
     features?: string[];
     isActive?: boolean;
+    downloadUrl?: string | null;
 }
 
 interface EditProductProps {
@@ -40,17 +41,11 @@ interface EditProductProps {
 
 const initialState = { success: false, message: "" };
 
-export default function ShowDataProduct({
-    productData,
-    allCategories,
-}: EditProductProps) {
+export default function ShowDataProduct({ productData, allCategories }: EditProductProps) {
     const router = useRouter();
     const formRef = useRef<HTMLFormElement>(null);
 
-    const [state, formAction, isPending] = useActionState(
-        editDataProductAction,
-        initialState
-    );
+    const [state, formAction, isPending] = useActionState(editDataProductAction, initialState);
 
     const [isActive, setIsActive] = useState<boolean>(productData?.isActive ?? true);
     const [selectedCategories, setSelectedCategories] = useState<Category[]>(() => {
@@ -59,18 +54,16 @@ export default function ShowDataProduct({
         }
         return [];
     });
-    
     const [features, setFeatures] = useState<string[]>(() => productData?.features || []);
     const [description, setDescription] = useState(productData.description || "");
     const [previewImage, setPreviewImage] = useState<string | null>(productData?.imageUrl || null);
-    const [externalImageUrl, setExternalImageUrl] = useState<string>(""); 
+    const [externalImageUrl, setExternalImageUrl] = useState<string>("");
     const [productName, setProductName] = useState(productData.name || "");
     const [productSlug, setProductSlug] = useState(productData.slug || "");
-    
-    // 🟢 استیت‌های جدید برای نوع محصول و قیمت‌ها
     const [productType, setProductType] = useState<"MAIN" | "FREE_RESOURCE">(productData.type || "MAIN");
     const [newPrice, setNewPrice] = useState<string | number>(productData.newPrice ?? "");
     const [oldPrice, setOldPrice] = useState<string | number>(productData.oldPrice ?? "");
+    const [downloadUrl, setDownloadUrl] = useState<string>(productData.downloadUrl || "");
 
     useEffect(() => {
         if (!state?.message) return;
@@ -93,9 +86,7 @@ export default function ShowDataProduct({
             <div className="flex flex-wrap items-center justify-between mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">ویرایش محصول</h1>
-                    <p className="text-gray-500 text-sm mt-2">
-                        تغییرات مورد نیاز را اعمال کرده و ذخیره کنید
-                    </p>
+                    <p className="text-gray-500 text-sm mt-2">تغییرات مورد نیاز را اعمال کرده و ذخیره کنید</p>
                 </div>
                 <button
                     type="button"
@@ -124,15 +115,14 @@ export default function ShowDataProduct({
                 <BasicInfoSection
                     productName={productName}
                     productSlug={productSlug}
-                    
-                    // 🟢 پاس دادن استیت‌های جدید به کامپوننت پایه
                     productType={productType}
                     onTypeChange={setProductType}
                     newPrice={newPrice}
                     oldPrice={oldPrice}
                     onNewPriceChange={setNewPrice}
                     onOldPriceChange={setOldPrice}
-
+                    downloadUrl={downloadUrl}
+                    onDownloadUrlChange={setDownloadUrl}
                     isActive={isActive}
                     previewImage={previewImage}
                     externalImageUrl={externalImageUrl}
@@ -149,22 +139,12 @@ export default function ShowDataProduct({
                         selectedCategories={selectedCategories}
                         onCategoriesChange={setSelectedCategories}
                     />
-
-                    <FeaturesSection
-                        features={features}
-                        onFeaturesChange={setFeatures}
-                    />
+                    <FeaturesSection features={features} onFeaturesChange={setFeatures} />
                 </div>
 
-                <DescriptionSection
-                    description={description}
-                    onDescriptionChange={setDescription}
-                />
+                <DescriptionSection description={description} onDescriptionChange={setDescription} />
 
-                <FormActions
-                    isPending={isPending}
-                    onCancel={() => router.back()}
-                />
+                <FormActions isPending={isPending} onCancel={() => router.back()} />
             </form>
         </div>
     );
