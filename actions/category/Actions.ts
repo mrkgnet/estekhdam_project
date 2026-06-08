@@ -1,42 +1,34 @@
-import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { success } from "zod";
+import { CategoryType } from "@prisma/client"; // ایمپورت تایپ از پریزما
 
-export async function getDataCategory() {
+// پارامتر type را به صورت اختیاری تعریف می‌کنیم
+export async function getDataCategory(type?: CategoryType) {
   try {
-   
-    // ۲. دریافت داده‌ها از دیتابیس
     const categories = await db.category.findMany({
+      where: type ? { type: type } : undefined, // فیلتر هوشمند سمت دیتابیس
       orderBy: {
         createdAt: "asc",
       },
-     
     });
 
-    if(!categories){
-      return{
-        success:false,
-        message:"Not Data"
-      }
+    if (!categories || categories.length === 0) {
+      return {
+        success: false,
+        message: "داده‌ای یافت نشد",
+        data: []
+      };
     }
 
-    // ۳. تغییر نام فیلدها (Mapping) برای هماهنگی با فرانت‌اند
-   
-
-    // ۴. خروجی موفقیت‌آمیز
     return {
       success: true,
       data: categories,
     };
 
   } catch (error) {
-    // ۵. مدیریت خطای سرور
     console.error("❌ Error fetching categories:", error);
-    
-    // خروجی ساختاریافته در صورت قطعی دیتابیس یا خطای دیگر
     return { 
       success: false, 
-      categories: [], 
+      data: [], 
       error: "خطایی در دریافت دسته‌بندی‌ها رخ داد." 
     };
   }
