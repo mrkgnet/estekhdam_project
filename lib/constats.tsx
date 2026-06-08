@@ -105,6 +105,11 @@ export const tabsDataAdminPanel = [
         title: "مدیریت دسته فصل ها ",
         url: "/adminp/category_chapter",
       },
+      {
+        id: 63,
+        title: "مدیریت دسته منابع رایگان ",
+        url: "/adminp/categories/free-resources-categories",
+      },
     ]
   },
 
