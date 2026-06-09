@@ -52,10 +52,10 @@ interface ExamDetailsProps {
 export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDetailsProps) {
   // مدیریت داده‌ها با ریکت کوئری
   const { data: response, isFetching } = useQuery({
-    queryKey: ['resource-course', slugValue], // کلید یکتا برای هر محصول
+    queryKey: ['resource-course', slugValue],
     queryFn: async () => await fetchDataResource(slugValue),
     initialData: initialResponse,
-    staleTime: 1000 * 60 * 30, // ۳۰ دقیقه کش (چون مشخصات دوره معمولاً ثابت است)
+    staleTime: 1000 * 60 * 30, // ۳۰ دقیقه کش
   });
 
   const product = response?.data;
@@ -73,16 +73,30 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
     );
   }
 
-  const breadcrumbItems = [
-    {
-      label: 'منابع آموزشی',
-      href: '/resources',
-    },
-    {
-      label: product.name,
-      href: `/resources/course/${product.name}`,
-    },
-  ];
+  // 🟢 تعیین آیتم‌های بردکرامب بر اساس نوع محصول
+  const isFreeResource = product.type === 'FREE_RESOURCE';
+  
+  const breadcrumbItems = isFreeResource 
+    ? [
+        {
+          label: 'منابع آموزشی رایگان',
+          href: '/resources/free-resources',
+        },
+        {
+          label: product.name,
+          href: `/resources/course/${product.name}`,
+        },
+      ]
+    : [
+        {
+          label: 'منابع آموزشی',
+          href: '/resources',
+        },
+        {
+          label: product.name,
+          href: `/resources/course/${product.name}`,
+        },
+      ];
 
   return (
     <div className="min-h-screen font-sans  pb-[100px] lg:pb-12" dir="rtl">
@@ -97,21 +111,20 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
 
           {/* ==================== ستون سمت راست ==================== */}
           <ResourceLeft product={product} />
+          
           {/* ==================== ستون سمت وسط ==================== */}
           <div className="lg:col-span-6 w-full flex flex-col gap-3 lg:gap-8">
             {/* تب‌های توضیحات */}
             <div className="bg-white rounded shadow-sm border border-slate-200/60 p-1">
               <TabSectionCR product={product} isLoading={false} />
             </div>
-
-
           </div>
 
-          {/* ==================== ستون سمت راست ==================== */}
+          {/* ==================== ستون سمت چپ (خرید/دانلود) ==================== */}
           <ResourceRight product={product} />
 
-
         </div>
+        
         {/* بخش نظرات */}
         <div className="">
           <CommentManagment targetId={product.id} targetType="product" />
