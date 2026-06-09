@@ -76,7 +76,7 @@ export default function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50 mt-8 rounded-xl" dir="rtl">
       <div className="text-sm text-gray-600">
         نمایش {startIndex + 1} تا {Math.min(startIndex + itemsPerPage, totalCount)} از {totalCount}{" "}
         {itemName}
@@ -91,7 +91,7 @@ export default function Pagination({
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" dir="ltr">
           {getPageNumbers().map((page, idx) =>
             page === "..." ? (
               <span key={`ellipsis-${idx}`} className="px-3 py-2 text-gray-400">
@@ -103,7 +103,7 @@ export default function Pagination({
                 onClick={() => goToPage(page as number)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   currentPage === page
-                    ? "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                     : "hover:bg-gray-100 text-gray-700"
                 }`}
               >
