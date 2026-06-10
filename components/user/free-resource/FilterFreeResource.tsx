@@ -38,7 +38,7 @@ function FilterList({
           value={filterSearch}
           onChange={(e) => onFilterSearchChange(e.target.value)}
           placeholder="جستجو در دسته‌بندی‌ها..."
-          className="w-full pr-10 pl-3 py-2.5  bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+          className="w-full pr-10 pl-3 py-2.5 text-12 sm:text-13 lg:text-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
         />
         {filterSearch && (
           <button
@@ -50,7 +50,8 @@ function FilterList({
         )}
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      {/* ✅ ارتفاع ثابت فقط روی لیست چک‌باکس‌ها */}
+      <div className="h-72 overflow-y-auto flex flex-col gap-2.5 pl-1">
         {filteredCategories.length > 0 ? (
           filteredCategories.map((category) => {
             const isActive = activeFilters.includes(category.catSlug);
@@ -63,7 +64,7 @@ function FilterList({
                     : "bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                 } ${isPending ? "opacity-60 cursor-not-allowed" : ""}`}
               >
-                <span className={` transition-colors duration-200 ${isActive ? "text-blue-700" : "text-gray-600 group-hover:text-gray-900"}`}>
+                <span className={`transition-colors duration-200 ${isActive ? "text-blue-700" : "text-gray-600 group-hover:text-gray-900"}`}>
                   {category.catName}
                 </span>
                 <div className="relative flex items-center justify-center">
@@ -86,8 +87,7 @@ function FilterList({
             <div className="bg-gray-50 p-3 rounded-full inline-flex mb-3">
               <Search className="w-5 h-5 text-gray-300" />
             </div>
-            <p className=" text-gray-500 font-medium">نتیجه‌ای یافت نشد</p>
-            <p className=" text-gray-400 mt-1">عبارت دیگری را جستجو کنید</p>
+            <p className="text-gray-500 font-medium">نتیجه‌ای یافت نشد</p><p className="text-gray-400 mt-1">عبارت دیگری را جستجو کنید</p>
           </div>
         )}
       </div>
@@ -137,14 +137,14 @@ export default function FilterFreeResource({
   return (
     <>
       {/* دکمه موبایل */}
-      <div className="lg:hidden w-full mb-4">
+      <div className="lg:hidden w-full mb-4 text-12 sm:text-13 lg:text-12">
         <button
           onClick={() => setIsMobileFilterOpen(true)}
           className="w-full flex items-center justify-between bg-white px-5 py-3.5 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-5 h-5 text-gray-500" />
-            <span className=" font-bold text-gray-700">فیلتر منابع و دسته‌بندی‌ها</span>
+            <span className="font-bold text-12 sm:text-13 lg:text-12 text-gray-700">فیلتر منابع و دسته‌بندی‌ها</span>
           </div>
           {activeFilters.length > 0 && (
             <span className="text-[11px] font-bold text-white bg-blue-600 px-2.5 py-1 rounded-full">
@@ -166,7 +166,7 @@ export default function FilterFreeResource({
           <div className="w-12 h-1.5 bg-gray-300 rounded-full cursor-pointer" />
         </div>
         <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 shrink-0">
-          <h2 className="text-base font-bold text-gray-800">فیلتر منابع</h2>
+          <h2 className="text-12 sm:text-13 lg:text-12 font-bold text-gray-800">فیلتر منابع</h2>
           <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-gray-100 text-gray-500 hover:text-gray-800 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -177,7 +177,7 @@ export default function FilterFreeResource({
             <button
               onClick={onClearFilters}
               disabled={isPending}
-              className="mt-6 w-full  font-bold text-gray-500 hover:text-red-600 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 py-3.5 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50"
+              className="mt-6 w-full text-12 sm:text-13 lg:text-12 font-bold text-gray-500 hover:text-red-600 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 py-3.5 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50"
             >
               پاک کردن همه فیلترها
             </button>
@@ -186,7 +186,7 @@ export default function FilterFreeResource({
         <div className="p-4 bg-white border-t border-gray-100 shrink-0">
           <button
             onClick={() => setIsMobileFilterOpen(false)}
-            className="w-full bg-blue-600 text-white font-bold  py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-200"
+            className="w-full text-12 sm:text-13 lg:text-12 bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-200"
           >
             مشاهده نتایج
           </button>
@@ -196,7 +196,7 @@ export default function FilterFreeResource({
       {/* سایدبار دسکتاپ */}
       <aside className="hidden lg:block w-full lg:w-1/4 bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit sticky top-6">
         <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
-          <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="font-bold text-gray-800 flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-500" />
             فیلتر منابع
           </h2>
@@ -211,7 +211,7 @@ export default function FilterFreeResource({
           <button
             onClick={onClearFilters}
             disabled={isPending}
-            className="mt-6 w-full  font-bold text-gray-500 hover:text-red-600 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 py-3 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50"
+            className="mt-6 w-full font-bold text-gray-500 hover:text-red-600 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 py-3 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50"
           >
             پاک کردن همه فیلترها
           </button>

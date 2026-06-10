@@ -9,8 +9,10 @@ import BrandTopSlider from "@/components/user/home/BrandTopSlider";
 import HeroSearch from "@/components/HeroSearch";
 import FetchDataMainSlider from "../components/user/home/mainslider/FetchDataMainSlider";
 
+// 🟢 فقط کامپوننت فچ‌کننده را ایمپورت می‌کنیم (فایل‌های اضافی حذف شدند)
+import FetchDataFRC from "@/components/user/freeResourceComponent/FetchDataFRC";
+
 // 2. کامپوننت‌های پایین صفحه (Lazy Load با next/dynamic)
-// با این کار حجم فایل جاوا اسکریپت اولیه صفحه به شدت کاهش می‌یابد
 const SliderTopLeftComponent = dynamic(() => import("@/components/user/home/sliderTopLeft/page"), {
   loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-xl min-h-[220px]"></div>,
 });
@@ -38,12 +40,12 @@ export default function HomePage() {
 
         <main className="min-w-0 max-w-7xl m-auto flex-1 flex flex-col py-4 md:py-4 overflow-x-hidden">
           <div className="w-full mx-auto px-2 sm:px-6 lg:px-8 space-y-4 md:space-y-6 lg:space-y-8">
-            
+
             {/* بخش‌های بالای صفحه - لود فوری */}
             <section className="w-full">
               <BrandTopSlider />
             </section>
-            
+
             <section className="w-full bg-white">
               <HeroSearch />
             </section>
@@ -51,7 +53,6 @@ export default function HomePage() {
             <section className="w-full grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
               <div className="lg:col-span-4">
                 <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
-                  {/* اگر این کامپوننت دیتای سنگین از سرور میگیرد، آن را در Suspense قرار میدهیم */}
                   <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse"></div>}>
                     <FetchDataMainSlider />
                   </Suspense>
@@ -75,6 +76,14 @@ export default function HomePage() {
               <TabProductCat />
             </section>
 
+            {/* 🟢 بخش منابع رایگان با اضافه شدن Suspense برای لودینگ اسکلتونی */}
+            <section className="w-full mb-8">
+              <Suspense fallback={<div className="h-64 w-full bg-slate-100 animate-pulse rounded-2xl"></div>}>
+                <FetchDataFRC />
+              </Suspense>
+            </section>
+            
+         
           </div>
         </main>
       </div>

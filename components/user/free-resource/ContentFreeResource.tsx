@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FileText, X } from "lucide-react";
@@ -28,8 +29,55 @@ export default function ContentFreeResource({
   onClearFilters,
   pagination,
 }: Props) {
+  // 🟢 استیت برای بررسی مانت شدن کامپوننت
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 🟢 نمایش لودر اسکلتونی پیش از مانت شدن کامل
+  if (!mounted) {
+    return (
+      <main className="flex-1 flex flex-col relative min-h-[400px]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 content-start flex-1">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden flex flex-col animate-pulse"
+            >
+              {/* اسکلتون تصویر */}
+              <div className="relative w-full h-40 bg-gray-200/60 border-b border-gray-100" />
+              
+              <div className="p-2.5 flex flex-col flex-1">
+                {/* اسکلتون دسته‌بندی‌ها */}
+                <div className="mb-1.5 flex flex-wrap gap-1">
+                  <div className="w-12 h-3.5 bg-gray-200/60 rounded" />
+                  <div className="w-16 h-3.5 bg-gray-200/60 rounded" />
+                </div>
+
+                {/* اسکلتون عنوان */}
+                <div className="w-full h-3 bg-gray-200/80 rounded mb-1.5 mt-2" />
+                <div className="w-2/3 h-3 bg-gray-200/80 rounded mb-4" />
+
+                {/* اسکلتون بخش فوتر (تعداد دانلود) */}
+                <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="w-10 h-2 bg-gray-200/60 rounded" />
+                    <div className="w-8 h-2.5 bg-gray-200/80 rounded" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex-1 flex flex-col relative min-h-[400px]">
+      {/* تگ فیلترهای فعال */}
       {activeCategoryObjects.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4 bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm">
           <span className="text-xs font-bold text-gray-500 ml-2">فیلترهای فعال:</span>
@@ -51,15 +99,17 @@ export default function ContentFreeResource({
         </div>
       )}
 
+      {/* روکش لودینگ (مربوط به فیلترها) */}
       {isPending && (
-        <div className="absolute inset-0 z-10 bg-gray-50/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
-          <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-xl shadow-lg border border-gray-100">
+        <div className="absolute  inset-0 z-10 bg-gray-50/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
+          <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-xl shadow-lg border border-gray-300">
             <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-            <span className="text-xs font-bold text-gray-700">در حال بروزرسانی لیست...</span>
+            <span className="text-xs font-bold text-gray-700">در حال دریافت اطلاعات لطفا صبر کنید...</span>
           </div>
         </div>
       )}
 
+      {/* لیست محصولات */}
       {products.length > 0 ? (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 content-start flex-1">

@@ -12,13 +12,20 @@ export async function productByCatAction() {
       },
       include: {
         products: {
-          // 🟢 اضافه شدن واکشی محصولات مستقیمِ دسته اصلی
+          // 🟢 اعمال شرط برای واکشی فقط محصولات از نوع MAIN
+          where: {
+            type: "MAIN", 
+          },
           take: 10,
           orderBy: { createdAt: "desc" },
         },
         children: {
           include: {
             products: {
+              // 🟢 اعمال شرط برای محصولاتِ زیردسته‌ها
+              where: {
+                type: "MAIN", 
+              },
               take: 10,
               orderBy: { createdAt: "desc" },
             },
@@ -34,7 +41,7 @@ export async function productByCatAction() {
       return { success: true, data: [] };
     }
 
-    // ۲. 🟢 مهم‌ترین بخش: تبدیل خروجی پریزما به JSON ساده برای رفع خطای Date در کلاینت Next.js
+    // ۲. تبدیل خروجی پریزما به JSON ساده برای رفع خطای Date در کلاینت Next.js
     const safeData = JSON.parse(JSON.stringify(categoriesWithProducts));
 
     return {
