@@ -1,63 +1,67 @@
+"use server";
+
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
 export async function fetchAllProductDataAction(
-  page: number = 1,
-  limit: number = 10,
-  searchQuery: string = "",
-  categoryQuery: string = "",
+  page = 1,
+  limit = 10,
+  searchQuery = "",
+  categoryQuery = "",
 ) {
   try {
     const skip = (page - 1) * limit;
-    const whereClause: Prisma.ProductWhereInput = {};
+
+    const whereClause: Prisma.ProductWhereInput = { type: "MAIN" };
 
     if (searchQuery) {
-      whereClause.name = { contains: searchQuery };
+      whereClause.name = { contains: decodeURIComponent(searchQuery) };
     }
 
     if (categoryQuery) {
-      // ۱. دیکد کردن حروف فارسی از URL
-      const decodedCategory = decodeURIComponent(categoryQuery);
+      const slugs = categoryQuery
+        .split(",")
+        .map((s) => decodeURIComponent(s.trim()))
+        .filter(Boolean);
 
-      // ۲. پیدا کردن دسته مورد نظر به همراه فرزندانش
-      const category = await db.category.findFirst({
-        where: { catSlug: decodedCategory },
+      const cats = await db.category.findMany({
+        where: { catSlug: { in: slugs } },
         include: { children: true },
       });
 
-      if (category) {
-        // ۳. گرفتن آیدی خود دسته + آیدی تمام زیردسته‌هایش
-        const allCategoryIds = [category.id, ...category.children.map((child) => child.id)];
+      if (!cats.length) return { success: true, data: [], totalPages: 0, totalCount: 0 };
 
-        // ۴. جستجوی محصولاتی که حداقل یکی از این آیدی‌ها را دارند (سینتکس صحیح PostgreSQL)
-        whereClause.categories = {
-          some: {
-            id: {
-              in: allCategoryIds
-            }
-          }
-        };
-      } else {
-        // اگر دسته اصلا پیدا نشد، کوئری را طوری تنظیم کن که چیزی برنگرداند
-        return { success: true, data: [], totalPages: 0 };
-      }
+      whereClause.categories = {
+        some: {
+          id: {
+            in: cats.flatMap((c) => [c.id, ...c.children.map((ch) => ch.id)]),
+          },
+        },
+      };
     }
 
-    const [result, totalCount] = await Promise.all([
-      db.product.findMany({
-        where: whereClause,
-        orderBy: { createdAt: "desc" },
-        skip: skip,
-        take: limit,
-      }),
+    const [data, totalCount] = await Promise.all([
+      db.product.findMany({ where: whereClause, orderBy: { createdAt: "desc" }, skip, take: limit }),
       db.product.count({ where: whereClause }),
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return { success: true, data: result, totalPages,totalCount  };
+    return { success: true, data, totalPages: Math.ceil(totalCount / limit), totalCount };
   } catch (error) {
-    console.error(error);
-    return { success: false, data: [], totalPages: 0 , totalCount :0};
+    console.error("Error fetching products:", error);
+    return { success: false, data: [], totalPages: 0, totalCount: 0 };
+  }
+}
+
+export async function fetchMainCategoriesAction() {
+  try {
+    const data = await db.category.findMany({
+      where: { type: "MAIN" },
+      select: { id: true, catName: true, catSlug: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching main categories:", error);
+    return { success: false, data: [], message: "خطا در دریافت دسته‌بندی‌ها" };
   }
 }

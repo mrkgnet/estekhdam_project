@@ -9,7 +9,7 @@ export default async function FetchDataCAT() {
     // اصلاح شده: ساختار آبجکت را حفظ می‌کنیم تا با تایپ ShowDataCAT همخوانی داشته باشد
     const response = {
       success: responseData?.success ?? false,
-      data: responseData?.data?.slice(0, 20) || []
+      data: responseData?.data?.slice(0, 12) || []
     };
 
     return (

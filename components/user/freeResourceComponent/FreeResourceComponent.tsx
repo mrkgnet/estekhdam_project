@@ -59,13 +59,14 @@ export default function FreeResourceComponent({
                         return (
                             <Link
                                 key={cat.id}
+                                target="_blank"
                                 href={`/resources/free-resources?category=${categorySlug}`}
-                                className="
+                                className=" border border-slate-300
                   group
                   min-h-[118px]
                   rounded-2xl
                   bg-white
-                  border border-slate-100
+                  
                   shadow-sm
                   hover:shadow-lg
                   hover:-translate-y-1
@@ -81,7 +82,7 @@ export default function FreeResourceComponent({
                     w-14 h-14
                     sm:w-16 sm:h-16
                     rounded-full
-                    bg-blue-50
+                    
                     border border-blue-100
                     overflow-hidden
                     shadow-inner
@@ -97,7 +98,7 @@ export default function FreeResourceComponent({
                                             alt={categoryName}
                                             fill
                                             sizes="64px"
-                                            className="object-contain p-2"
+                                            className="object-contain p-2.5"
                                         />
                                     ) : (
                                         <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
