@@ -88,7 +88,7 @@ export default function ShowDataFreeResource({
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
-        <HeaderFreeResource />
+        {/* <HeaderFreeResource /> */}
         
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 mt-4">
           <FilterFreeResource

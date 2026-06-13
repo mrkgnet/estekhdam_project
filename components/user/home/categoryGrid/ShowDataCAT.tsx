@@ -56,7 +56,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
           <Link
             href="/resources/main-resource"
             target="_blank"
-            className="group text-sm md:text-base font-medium text-white flex items-center gap-1.5 hover:border hover:rounded-full hover:px-3 hover:border-amber-50  transition-all duration-200"
+            className="group text-sm md:text-base font-medium text-white flex items-center gap-1.5 border-2 border-dashed px-3 rounded-full hover:border-amber-50  transition-all duration-200"
           >
             <span>مشاهده همه</span>
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -76,7 +76,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
             key={category.id}
             target="_blank"
             rel="noopener noreferrer"
-            href={`/category/${category.catSlug}`}
+            href={`/resources/main-resource?category=${category.catSlug}`}
             className="group flex bg-white flex-col items-center gap-3 text-center border p-2 border-slate-400 rounded-2xl"
           >
             <div className="w-18 aspect-square border border-slate-200 rounded-full flex items-center justify-center p-2 transition-all duration-300 group-hover:bg-slate-200 group-hover:-translate-y-1 group-hover:shadow-md">

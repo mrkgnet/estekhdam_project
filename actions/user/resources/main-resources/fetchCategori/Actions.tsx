@@ -1,14 +1,13 @@
 import { db } from "@/lib/db";
+import { CategoryType } from "@prisma/client";
 
-import { CategoryType } from "@prisma/client"; // ایمپورت تایپ از پریزما
-
-// پارامتر type را به صورت اختیاری تعریف می‌کنیم
-
-export async function getDataCategory(type?: CategoryType) {
+export async function getDataCategoriMainResource(type?: CategoryType) {
   try {
     const categories = await db.category.findMany({
-      where: type ? { type: type } : undefined, // فیلتر هوشمند سمت دیتابیس
-
+      where: {
+        ...(type ? { type: type } : {}), 
+        // ❌ فیلتر parentId حذف شد تا هم والدها و هم فرزندان با یک درخواست واکشی شوند
+      },
       orderBy: {
         createdAt: "asc",
       },
@@ -17,16 +16,13 @@ export async function getDataCategory(type?: CategoryType) {
     if (!categories || categories.length === 0) {
       return {
         success: false,
-
         message: "داده‌ای یافت نشد",
-
         data: [],
       };
     }
 
     return {
       success: true,
-
       data: categories,
     };
   } catch (error) {

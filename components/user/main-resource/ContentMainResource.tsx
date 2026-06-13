@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FileText, X } from "lucide-react";
+import { FileText, X, BookOpen, ArrowLeft, SearchX, Loader2 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import type { Category, Product } from "@/types/free-resource";
 
@@ -21,7 +21,7 @@ interface Props {
   };
 }
 
-export default function ContentMainResource({
+export default function ContentFreeResource({
   products,
   activeCategoryObjects,
   isPending,
@@ -29,14 +29,12 @@ export default function ContentMainResource({
   onClearFilters,
   pagination,
 }: Props) {
-  // 🟢 استیت برای بررسی مانت شدن کامپوننت
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 🟢 نمایش لودر اسکلتونی پیش از مانت شدن کامل
   if (!mounted) {
     return (
       <main className="flex-1 flex flex-col relative min-h-[400px]">
@@ -46,26 +44,16 @@ export default function ContentMainResource({
               key={index}
               className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden flex flex-col animate-pulse"
             >
-              {/* اسکلتون تصویر */}
               <div className="relative w-full h-40 bg-gray-200/60 border-b border-gray-100" />
-              
               <div className="p-2.5 flex flex-col flex-1">
-                {/* اسکلتون دسته‌بندی‌ها */}
                 <div className="mb-1.5 flex flex-wrap gap-1">
                   <div className="w-12 h-3.5 bg-gray-200/60 rounded" />
                   <div className="w-16 h-3.5 bg-gray-200/60 rounded" />
                 </div>
-
-                {/* اسکلتون عنوان */}
                 <div className="w-full h-3 bg-gray-200/80 rounded mb-1.5 mt-2" />
                 <div className="w-2/3 h-3 bg-gray-200/80 rounded mb-4" />
-
-                {/* اسکلتون بخش فوتر (تعداد دانلود) */}
-                <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="w-10 h-2 bg-gray-200/60 rounded" />
-                    <div className="w-8 h-2.5 bg-gray-200/80 rounded" />
-                  </div>
+                <div className="flex items-center justify-end mt-auto pt-3 border-t border-gray-100">
+                  <div className="w-24 h-6 bg-gray-200/80 rounded-lg" />
                 </div>
               </div>
             </div>
@@ -77,10 +65,22 @@ export default function ContentMainResource({
 
   return (
     <main className="flex-1 flex flex-col relative min-h-[400px]">
+
+      {/* نوار لودینگ */}
+      {isPending && (
+        <div className="absolute inset-0 z-20 bg-gray-50/40 backdrop-blur-[2px] rounded-2xl">
+          <div className="sticky top-10 mt-6 mx-auto w-max flex items-center gap-3 bg-white px-6 py-3.5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-blue-100">
+            <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+            <span className="text-xs font-bold text-blue-800">در حال دریافت اطلاعات، لطفاً صبر کنید...</span>
+          </div>
+        </div>
+      )}
+
       {/* تگ فیلترهای فعال */}
       {activeCategoryObjects.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4 bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm">
           <span className="text-xs font-bold text-gray-500 ml-2">فیلترهای فعال:</span>
+          
           {activeCategoryObjects.map((cat) => (
             <span
               key={cat.id}
@@ -96,23 +96,25 @@ export default function ContentMainResource({
               </button>
             </span>
           ))}
-        </div>
-      )}
 
-      {/* روکش لودینگ (مربوط به فیلترها) */}
-      {isPending && (
-        <div className="absolute  inset-0 z-10 bg-gray-50/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
-          <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-xl shadow-lg border border-gray-300">
-            <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-            <span className="text-xs font-bold text-gray-700">در حال دریافت اطلاعات لطفا صبر کنید...</span>
-          </div>
+          <button
+            onClick={onClearFilters}
+            disabled={isPending}
+            className="flex items-center gap-1 text-[11px] font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50 mr-auto border border-transparent hover:border-red-100"
+          >
+            حذف همه فیلترها
+          </button>
         </div>
       )}
 
       {/* لیست محصولات */}
       {products.length > 0 ? (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 content-start flex-1">
+          <div
+            className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 content-start flex-1 transition-opacity duration-200 ${
+              isPending ? "opacity-50 pointer-events-none" : "opacity-100"
+            }`}
+          >
             {products.map((product) => (
               <Link
                 key={product.id}
@@ -126,6 +128,7 @@ export default function ContentMainResource({
                       src={product.imageUrl}
                       alt={product.name}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain p-2.5 transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
@@ -149,12 +152,21 @@ export default function ContentMainResource({
                     {product.name}
                   </h3>
 
-                  <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-medium text-gray-400">تعداد دانلود</span>
-                      <span className="text-[11px] font-bold text-gray-800 mt-0.5">
-                        {product.downloadCount || 0} بار
-                      </span>
+                  {/* 🟢 افکت خط جداکننده با آیکون در وسط که انتهای آن محو می‌شود */}
+                  <div className="flex items-center justify-center mt-auto mb-2 w-full opacity-60">
+                    <div className="flex-1 h-1 bg-gradient-to-l from-transparent to-gray-300"></div>
+                    <div className="mx-2 text-gray-400">
+                      <BookOpen className="w-5 h-5" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-transparent to-gray-300"></div>
+                  </div>
+
+                  {/* بخش دکمه شروع یادگیری */}
+                  <div className="flex items-center justify-end pt-1">
+                    <div className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span className="text-[11px] font-bold">شروع یادگیری رایگان</span>
+                      <ArrowLeft className="w-3.5 h-3.5 opacity-70 group-hover:-translate-x-1 transition-transform duration-300 mr-0.5" />
                     </div>
                   </div>
                 </div>
@@ -172,8 +184,8 @@ export default function ContentMainResource({
         </>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
-          <div className="bg-gray-50 p-3 rounded-full mb-3">
-            <FileText className="w-8 h-8 text-gray-300" />
+          <div className="bg-gray-50 p-4 rounded-full mb-3">
+            <SearchX className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-sm font-bold text-gray-800 mb-1.5">موردی یافت نشد</h3>
           <p className="text-xs text-gray-500 max-w-sm leading-relaxed">

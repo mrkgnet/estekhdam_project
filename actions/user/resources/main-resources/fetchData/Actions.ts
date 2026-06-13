@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 
 // 🟢 اضافه شدن پارامترهای صفحه‌بندی
-export async function fetchMainResources(categorySlugs?: string[], page: number = 1, limit: number = 12) {
+export async function fetchDataMainResources(categorySlugs?: string[], page: number = 1, limit: number = 12) {
   try {
     const skip = (page - 1) * limit;
 

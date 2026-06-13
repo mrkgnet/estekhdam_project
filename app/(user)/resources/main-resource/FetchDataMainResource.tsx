@@ -1,9 +1,7 @@
 import React, { Suspense } from 'react';
-
-import { getDataCategory } from '@/actions/category/Actions';
-import { fetchFreeResources } from '@/actions/user/resources/free-resources/fetch/Actions';
+import { getDataCategoriMainResource } from '@/actions/user/resources/main-resources/fetchCategori/Actions';
+import { fetchDataMainResources } from '@/actions/user/resources/main-resources/fetchData/Actions';
 import ShowDataMainResource from './ShowDataMainResource';
-import { fetchMainResources } from '@/actions/user/resources/main-resources/fetch/Actions';
 
 interface Props {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -13,12 +11,10 @@ export default async function FetchDataMainResource({ searchParams }: Props) {
   const categoryParam = searchParams.category;
   const pageParam = searchParams.page;
 
-  // 🟢 استخراج شماره صفحه از URL (پیش‌فرض: ۱)
   const currentPage = typeof pageParam === 'string' && !isNaN(Number(pageParam)) 
     ? Math.max(1, Number(pageParam)) 
     : 1;
 
-  // 🟢 دیکد کردن اسلاگ‌های دسته‌بندی
   const activeSlugs = (
     Array.isArray(categoryParam) 
       ? categoryParam 
@@ -29,10 +25,9 @@ export default async function FetchDataMainResource({ searchParams }: Props) {
 
   const itemsPerPage = 12;
 
-  // 🟢 دریافت موازی دسته‌بندی‌ها و محصولات (با شماره صفحه)
   const [categoryResponse, productsResponse] = await Promise.all([
-    getDataCategory("MAIN"),
-    fetchMainResources(activeSlugs, currentPage, itemsPerPage)
+    getDataCategoriMainResource("MAIN"),
+    fetchDataMainResources(activeSlugs, currentPage, itemsPerPage)
   ]);
 
   const categories = categoryResponse.success ? categoryResponse.data : [];

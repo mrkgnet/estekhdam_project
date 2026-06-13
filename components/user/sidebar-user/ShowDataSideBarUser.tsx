@@ -40,7 +40,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
       menuMap[menu.id] = {
         id: menu.id,
         title: menu.name,
-        url: menu.customUrl ? menu.customUrl : `/category/${menu.slug}`,
+        url: menu.customUrl ? menu.customUrl : `/resources/main-resource?category=${menu.slug}`,
         icon: ListCollapse,
         imageUrl: menu.imageUrl,
         subItems: [],
@@ -180,6 +180,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
         `}
       >
         <div className="p-5 border-b border-gray-200 flex justify-between items-center z-20 bg-white border-t">
+          {/* لینک خانه معمولا نیازی به باز شدن در تب جدید ندارد */}
           <Link href="/" onClick={close} className="flex items-center gap-3 text-gray-800">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
               <LayoutDashboard className="h-5 w-5 text-white" />
@@ -231,9 +232,14 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
           <div className="w-2/3 md:hidden flex flex-col overflow-y-auto bg-white p-3">
             {hasLevel2 && activeTab && (
               <>
-                <Link href={activeTab.url} onClick={close} className=" text-blue-600 mb-4 flex items-center gap-1">
+                <Link 
+                  href={activeTab.url} 
+                  onClick={close} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className=" text-blue-600 mb-4 flex items-center gap-1"
+                >
                   {activeTab.title}
-
                   <ChevronLeft className="w-4 h-4" />
                 </Link>
 
@@ -261,9 +267,14 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
 
                       return (
                         <div key={sub.id} className="bg-gray-50 rounded-xl p-3">
-                          {/* ... بقیه کدهای داخل map بدون تغییر ... */}
                           <div className="flex justify-between items-center">
-                            <Link href={sub.url} onClick={close} className="text-gray-800 flex-1">
+                            <Link 
+                              href={sub.url} 
+                              onClick={close} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-gray-800 flex-1"
+                            >
                               {sub.title}
                             </Link>
                             {hasLvl3 && (
@@ -279,7 +290,14 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                           {isSubOpen && hasLvl3 && (
                             <div className="space-y-2 mt-3 border-t border-gray-200 pt-3">
                               {sub.subItems.map((lvl3: any) => (
-                                <Link key={lvl3.id} href={lvl3.url} onClick={close} className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100">
+                                <Link 
+                                  key={lvl3.id} 
+                                  href={lvl3.url} 
+                                  onClick={close} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100"
+                                >
                                   {lvl3.title}
                                 </Link>
                               ))}
@@ -290,9 +308,6 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                     })
                   )}
                 </div>
-
-
-
 
               </>
             )}
@@ -314,8 +329,6 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                   {activeTab.title}
                 </span>
 
-                {/* 🟢 قرار دادن کامپوننت SearchInput */}
-                {/* 🔍 سرچ ساده و خوش‌ظاهر */}
                 <div className="relative">
                   <input
                     type="search"
@@ -342,6 +355,8 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                       <Link
                         key={sub.id}
                         href={sub.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onMouseEnter={() => handleInteraction(sub.id, 2)}
                         className={`px-4 py-3 rounded-xl flex items-center justify-between
                           ${isSubActive ? "bg-blue-50 text-blue-700 " : "text-gray-600 hover:bg-blue-50/50"}
@@ -373,7 +388,13 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
               </div>
               <div className="flex-1 p-4 space-y-1 overflow-y-auto">
                 {activeSubTab.subItems.map((lvl3: any) => (
-                  <Link key={lvl3.id} href={lvl3.url} className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl">
+                  <Link 
+                    key={lvl3.id} 
+                    href={lvl3.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="block px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl"
+                  >
                     {lvl3.title}
                   </Link>
                 ))}

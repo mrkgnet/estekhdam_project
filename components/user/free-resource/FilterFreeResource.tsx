@@ -64,7 +64,7 @@ function FilterList({
                     : "bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                 } ${isPending ? "opacity-60 cursor-not-allowed" : ""}`}
               >
-                <span className={`transition-colors duration-200 ${isActive ? "text-blue-700" : "text-gray-600 group-hover:text-gray-900"}`}>
+                <span className={`transition-colors text-12 sm:text-13 lg:text-12 duration-200 ${isActive ? "text-blue-700" : "text-gray-600 group-hover:text-gray-900"}`}>
                   {category.catName}
                 </span>
                 <div className="relative flex items-center justify-center">
@@ -75,7 +75,7 @@ function FilterList({
                     onChange={() => onToggleFilter(category.catSlug)}
                     disabled={isPending}
                   />
-                  <div className={`w-5 h-5 rounded-[6px] flex items-center justify-center transition-all duration-200 ${isActive ? "bg-blue-600 border-blue-600 shadow-sm" : "bg-white border-2 border-gray-300 group-hover:border-blue-400"}`}>
+                  <div className={`w-4.5 h-4.5 rounded-[6px] flex items-center justify-center transition-all duration-200 ${isActive ? "bg-blue-600 border-blue-600 shadow-sm" : "bg-white border-2 border-gray-300 group-hover:border-blue-400"}`}>
                     {isActive && <Check className="w-3.5 h-3.5 text-white animate-in zoom-in duration-200" strokeWidth={3} />}
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function FilterFreeResource({
       </div>
 
       {/* سایدبار دسکتاپ */}
-      <aside className="hidden lg:block w-full lg:w-1/4 bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 h-fit sticky top-6">
+      <aside className="hidden lg:block w-full lg:w-[240px] bg-white p-3 md:p-3 rounded-2xl shadow-sm border border-gray-100 h-fit sticky top-6">
         <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
           <h2 className="font-bold text-gray-800 flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-500" />

@@ -18,9 +18,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { checkUserPurchaseStatus } from "@/actions/user/resources/course/checkUserPurchaseStatus/Actions";
 import AuthModal from "@/components/modals/AuthModal";
-
-// 👇 حتماً مسیر ایمپورت کامپوننت AuthModal رو بررسی کن که درست باشه
-
+import { incrementDownloadCountAction } from "@/actions/user/resources/course/counterDownload/Actions";
+// 👇 آدرس این ایمپورت را بر اساس پروژه‌ی خود تنظیم کنید
 
 const PriceDisplay = ({
   oldPrice,
@@ -69,7 +68,7 @@ type Props = { product: any };
 
 export default function ResourceRight({ product }: Props) {
   const [mounted, setMounted] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // 🟢 استیت کنترل مدال لاگین
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   const { user, isLoggedIn, isLoading: authLoading } = useAuth();
 
@@ -78,7 +77,6 @@ export default function ResourceRight({ product }: Props) {
   const isFreeResource = product?.type === 'FREE_RESOURCE';
   const isProductActive = product?.isActive !== false;
 
-  // اگر محصول رایگان باشد، نیازی به چک کردن وضعیت خرید در دیتابیس نیست
   const { data: hasPurchased, isLoading: purchaseLoading } = useQuery({
     queryKey: ['purchase-status', product?.id, user?.id],
     queryFn: () => checkUserPurchaseStatus(product?.id, user?.id),
@@ -86,13 +84,21 @@ export default function ResourceRight({ product }: Props) {
     staleTime: 0,
   });
 
+  // 🟢 هندلر برای ثبت آمار دانلود
+  const handleDownloadClick = () => {
+    if (product?.id) {
+      incrementDownloadCountAction(product.id).catch((err) => {
+        console.error("Failed to increment download count:", err);
+      });
+    }
+  };
+
   if (!mounted) return <Skeleton />;
 
   const isLoading = authLoading || purchaseLoading;
 
   return (
     <>
-      {/* 🟢 قرار دادن کامپوننت مدال ورود */}
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
@@ -103,12 +109,8 @@ export default function ResourceRight({ product }: Props) {
         <div className={`lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${!isProductActive ? 'opacity-60 pointer-events-none' : ''}`}>
           <div className="p-3 pb-36 lg:pb-3 space-y-6">
 
-            {/* =======================================================
-                بخش مربوط به محصولات رایگان
-            ======================================================== */}
             {isFreeResource ? (
               <>
-                {/* پیام بالای باکس برای وضعیت محصول و کاربر */}
                 {!isProductActive ? (
                   <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold text-sm">
                     <XCircle className="w-5 h-5" />
@@ -128,7 +130,6 @@ export default function ResourceRight({ product }: Props) {
                   </div>
                 )}
 
-                {/* قیمت (رایگان) */}
                 <div className="bg-slate-50 border font-bold border-slate-200 rounded-xl p-4 flex items-center justify-between">
                   <div className="text-slate-500">قیمت محصول</div>
                   <div className="flex items-center gap-1">
@@ -136,7 +137,6 @@ export default function ResourceRight({ product }: Props) {
                   </div>
                 </div>
 
-                {/* دکمه دانلود */}
                 <div className="fixed bottom-0 text-14 md:text-12 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
                   {!isProductActive ? (
                     <div className="w-full h-12 bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl flex items-center justify-center gap-2">
@@ -146,7 +146,6 @@ export default function ResourceRight({ product }: Props) {
                   ) : authLoading ? (
                     <div className="w-full h-12 bg-slate-100 animate-pulse rounded-xl"></div>
                   ) : !isLoggedIn ? (
-                    // 🟢 کاربر لاگین نیست: نمایش دکمه اصلی اما باز کردن مدال
                     <button
                       onClick={() => setIsAuthModalOpen(true)}
                       className="w-full h-12 bg-blue-600 font-bold hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-md shadow-blue-200 cursor-pointer"
@@ -155,18 +154,18 @@ export default function ResourceRight({ product }: Props) {
                       دریافت فایل
                     </button>
                   ) : product?.downloadUrl ? (
-                    // 🟢 کاربر لاگین است: لینک دانلود مستقیم
+                    // 🟢 کلیک روی لینک دانلود
                     <a
                       href={product.downloadUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={handleDownloadClick} // فراخوانی اکشن شمارنده
                       className="w-full h-12 bg-blue-600 font-bold hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-md shadow-blue-200"
                     >
                       <DownloadCloud className="w-5 h-5" />
                       دریافت فایل
                     </a>
                   ) : (
-                    // 🟢 کاربر لاگین است اما لینکی وجود ندارد
                     <div className="w-full h-12 bg-slate-100 text-slate-500 border border-slate-200 font-bold rounded-xl flex items-center justify-center gap-2">
                       <Info className="w-5 h-5" />
                       پیوستی برای دانلود موجود نیست
@@ -175,11 +174,8 @@ export default function ResourceRight({ product }: Props) {
                 </div>
               </>
             ) : (
-              /* =======================================================
-                  بخش مربوط به محصولات پولی (حالت پیش‌فرض)
-              ======================================================== */
               <>
-                {/* پیام وضعیت (خریداری شده، وارد شده، متوقف شده و ...) */}
+                {/* بخش محصولات پولی بدون تغییر... */}
                 {!isProductActive ? (
                   <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold">
                     <XCircle className="w-5 h-5" />
@@ -204,7 +200,6 @@ export default function ResourceRight({ product }: Props) {
                   </div>
                 )}
 
-                {/* آمار محصول */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-slate-50 rounded-lg p-3 text-center">
                     <FileText className="w-4 h-4 text-blue-600 mx-auto mb-1" />
@@ -225,13 +220,11 @@ export default function ResourceRight({ product }: Props) {
                   </div>
                 </div>
 
-                {/* قیمت محصول */}
                 <div className="bg-slate-50 border font-bold border-slate-200 rounded-xl p-4 flex items-center justify-between">
                   <div className="text-slate-500">قیمت محصول</div>
                   <PriceDisplay oldPrice={product?.oldPrice} newPrice={product?.newPrice} />
                 </div>
 
-                {/* دکمه‌های اقدام (CTA) */}
                 <div className="fixed bottom-0 text-14 md:text-12 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
                   {!isProductActive ? (
                     <div className="w-full h-12 bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl flex items-center justify-center gap-2">
@@ -261,7 +254,6 @@ export default function ResourceRight({ product }: Props) {
                       </div>
                     </>
                   ) : !isLoggedIn ? (
-                    // 🟢 کاربر لاگین نیست: نمایش دکمه‌های اصلی، باز کردن مدال با کلیک
                     <>
                       <button
                         onClick={() => setIsAuthModalOpen(true)}
@@ -280,7 +272,6 @@ export default function ResourceRight({ product }: Props) {
                       </button>
                     </>
                   ) : (
-                    // 🟢 کاربر لاگین است ولی محصول را نخریده: عملکردهای اصلی
                     <>
                       <Link
                         href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}

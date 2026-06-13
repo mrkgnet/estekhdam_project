@@ -90,7 +90,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
     : [
         {
           label: 'منابع آموزشی',
-          href: '/resources',
+          href: '/resources/main-resource',
         },
         {
           label: product.name,

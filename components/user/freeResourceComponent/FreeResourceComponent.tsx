@@ -38,7 +38,8 @@ export default function FreeResourceComponent({
 
                         <Link
                             href="/resources/free-resources"
-                            className="text-14  text-white hover:text-white transition-colors whitespace-nowrap border border-white/20 hover:border-white/50 rounded-full px-2.5 py-0.5"
+                            target="_blank"
+                            className="text-14  text-white hover:text-white transition-colors whitespace-nowrap border-3 border-dashed  border-white/20 hover:border-white/50 rounded-full px-2.5 py-0.5"
                         >
                             مشاهده همه
                         </Link>
