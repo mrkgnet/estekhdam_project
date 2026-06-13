@@ -56,7 +56,7 @@ export default function ShowDataCAT({ response }: ShowDataCATProps) {
           <Link
             href="/resources/main-resource"
             target="_blank"
-            className="group text-sm md:text-base font-medium text-white flex items-center gap-1.5 border-2 border-dashed px-3 rounded-full hover:border-amber-50  transition-all duration-200"
+            className="group text-sm md:text-base font-medium  text-white flex items-center gap-1.5 border-2 border-dashed px-3 rounded-full hover:border-amber-50  transition-all duration-200"
           >
             <span>مشاهده همه</span>
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />

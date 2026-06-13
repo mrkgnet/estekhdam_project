@@ -31,19 +31,28 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   const isPhoneValid = phone.startsWith("09") && phone.length === 11;
 
+  // مدیریت قفل شدن اسکرول پس‌زمینه
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // پاک‌سازی در زمان Unmount شدن کامپوننت
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       setStep(0);
       setOtp("");
       setTimer(0);
-      
       if (typeof window !== "undefined") {
         const savedPhone = window.localStorage.getItem("savedUserPhone");
-        if (savedPhone) {
-          setPhone(savedPhone);
-        } else {
-          setPhone("");
-        }
+        setPhone(savedPhone || "");
       } else {
         setPhone("");
       }
@@ -69,9 +78,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   }, [timer]);
 
   const formatTime = (t: number) =>
-    `${Math.floor(t / 60).toString().padStart(2, "0")}:${(t % 60)
-      .toString()
-      .padStart(2, "0")}`;
+    `${Math.floor(t / 60).toString().padStart(2, "0")}:${(t % 60).toString().padStart(2, "0")}`;
 
   const handleSendOTP = async () => {
     if (!isPhoneValid) return toast.error("شماره موبایل معتبر نیست");
@@ -118,7 +125,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
       toast.success("ورود موفقیت‌آمیز بود");
       setStep(2);
-
       await checkAuth();
       setTimeout(() => {
         onSuccess?.();
@@ -178,8 +184,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             exit={{ opacity: 0, y: -40, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 220, damping: 22 }}
           >
-            {/* کارت اصلی بدون سایه */}
-            <div className="relative rounded-3xl border border-slate-100 bg-white">
+            <div className="relative rounded-3xl border border-slate-100 bg-white overflow-hidden">
+
+              {/* ربان قرمز بالا */}
+              <div className="w-full bg-red-600 px-4 py-2.5 flex items-center justify-center gap-2">
+                <span className="text-white text-xs font-bold text-center leading-relaxed" dir="rtl">
+                  برای استفاده از خدمات سایت ابتدا باید عضو شوید
+                </span>
+              </div>
+
               <div className="relative p-6">
                 <button
                   onClick={onClose}
@@ -189,7 +202,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   <X className="w-5 h-5" />
                 </button>
 
-                {/* استپر بالای مدال */}
+                {/* استپر */}
                 <div className="w-full max-w-[370px] mx-auto mb-6">
                   <div className="flex items-center justify-center gap-2">
                     {steps.map((label, i) => {
@@ -218,7 +231,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                               {label}
                             </span>
                           </div>
-
                           {i < steps.length - 1 && (
                             <div
                               className={`h-[2px] flex-1 -mt-3 ${
@@ -242,7 +254,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   <p className="text-xs text-slate-500 mt-1">ورود سریع و امن با شماره موبایل</p>
                 </div>
 
-                {/* مرحله صفر: وارد کردن شماره موبایل */}
+                {/* مرحله صفر */}
                 {step === 0 && (
                   <div className="space-y-5">
                     <div className="space-y-1">
@@ -277,13 +289,20 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   </div>
                 )}
 
-                {/* مرحله یک: وارد کردن کد OTP */}
+                {/* مرحله یک */}
                 {step === 1 && (
                   <div className="space-y-6">
-                    <div className="bg-[#3b5998]/5 border border-[#3b5998]/15 rounded-xl p-3 text-center text-xs text-slate-600 flex items-center justify-between" dir="rtl">
-                      <span>کد تایید به شماره <strong className="text-[#3b5998] tracking-wider font-bold mx-1">{phone}</strong> ارسال شد.</span>
-                      <button 
-                        onClick={() => setStep(0)} 
+                    <div
+                      className="bg-[#3b5998]/5 border border-[#3b5998]/15 rounded-xl p-3 text-center text-xs text-slate-600 flex items-center justify-between"
+                      dir="rtl"
+                    >
+                      <span>
+                        کد تایید به شماره{" "}
+                        <strong className="text-[#3b5998] tracking-wider font-bold mx-1">{phone}</strong>{" "}
+                        ارسال شد.
+                      </span>
+                      <button
+                        onClick={() => setStep(0)}
                         className="text-[#3b5998] hover:text-[#2d4373] font-bold underline transition"
                       >
                         ویرایش
@@ -334,11 +353,18 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       <button
                         onClick={handleResend}
                         disabled={timer > 0}
-                        className={timer > 0 ? "text-slate-400" : "text-[#3b5998] font-bold hover:text-[#2d4373] transition-colors"}
+                        className={
+                          timer > 0
+                            ? "text-slate-400"
+                            : "text-[#3b5998] font-bold hover:text-[#2d4373] transition-colors"
+                        }
                       >
                         {timer > 0 ? formatTime(timer) : "ارسال مجدد کد"}
                       </button>
-                      <button onClick={() => setStep(0)} className="hover:text-[#3b5998] text-slate-500 transition-colors">
+                      <button
+                        onClick={() => setStep(0)}
+                        className="hover:text-[#3b5998] text-slate-500 transition-colors"
+                      >
                         ویرایش شماره
                       </button>
                     </div>
@@ -353,7 +379,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   </div>
                 )}
 
-                {/* مرحله دو: موفقیت‌آمیز بودن */}
+                {/* مرحله دو */}
                 {step === 2 && (
                   <div className="text-center space-y-4 py-4">
                     <CheckCircle className="mx-auto text-emerald-500 w-16 h-16" />

@@ -105,26 +105,26 @@ export default function ResourceRight({ product }: Props) {
         onSuccess={() => setIsAuthModalOpen(false)} 
       />
 
-      <div className="lg:col-span-3 w-full">
+      <div className="lg:col-span-3 w-full text-12 sm:text-13">
         <div className={`lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden ${!isProductActive ? 'opacity-60 pointer-events-none' : ''}`}>
           <div className="p-3 pb-36 lg:pb-3 space-y-6">
 
             {isFreeResource ? (
               <>
                 {!isProductActive ? (
-                  <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold text-sm">
+                  <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold ">
                     <XCircle className="w-5 h-5" />
                     لینک دانلود غیرفعال شده است
                   </div>
                 ) : authLoading ? (
                   <div className="w-full h-12 bg-slate-100 animate-pulse rounded-xl"></div>
                 ) : isLoggedIn ? (
-                  <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold text-sm">
+                  <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold ">
                     <CheckCircle2 className="w-5 h-5" />
                     شما وارد حساب کاربری شده‌اید
                   </div>
                 ) : (
-                  <div className="bg-slate-50 border border-slate-200 text-slate-500 rounded-xl p-3 flex items-center justify-center gap-2 font-medium text-sm">
+                  <div className="bg-slate-50 border border-slate-200 text-slate-500 rounded-xl p-3 flex items-center justify-center gap-2 font-medium ">
                     <Info className="w-5 h-5" />
                     برای دانلود فایل، عضو سایت شوید
                   </div>
@@ -133,7 +133,7 @@ export default function ResourceRight({ product }: Props) {
                 <div className="bg-slate-50 border font-bold border-slate-200 rounded-xl p-4 flex items-center justify-between">
                   <div className="text-slate-500">قیمت محصول</div>
                   <div className="flex items-center gap-1">
-                    <span className="font-black text-emerald-600 text-lg">رایگان</span>
+                    <span className="font-black text-emerald-600 ">رایگان</span>
                   </div>
                 </div>
 

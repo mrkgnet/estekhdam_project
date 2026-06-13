@@ -22,8 +22,8 @@ interface Props {
 }
 
 export default function ContentFreeResource({
-  products,
-  activeCategoryObjects,
+  products = [], // جلوگیری از خطای undefined
+  activeCategoryObjects = [], // جلوگیری از خطای undefined
   isPending,
   onToggleFilter,
   onClearFilters,
@@ -77,7 +77,7 @@ export default function ContentFreeResource({
       )}
 
       {/* تگ فیلترهای فعال */}
-      {activeCategoryObjects.length > 0 && (
+      {activeCategoryObjects?.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4 bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm">
           <span className="text-xs font-bold text-gray-500 ml-2">فیلترهای فعال:</span>
           
@@ -108,7 +108,7 @@ export default function ContentFreeResource({
       )}
 
       {/* لیست محصولات */}
-      {products.length > 0 ? (
+      {products?.length > 0 ? (
         <>
           <div
             className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 content-start flex-1 transition-opacity duration-200 ${
@@ -120,8 +120,21 @@ export default function ContentFreeResource({
                 key={product.id}
                 href={`/resources/course/${product.slug}?price=free`}
                 target="_blank"
-                className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer"
+                // کلاس relative در خط پایین اضافه شد تا روبان در جای درست قرار بگیرد
+                className="relative bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer"
               >
+
+                {/* ربان آنلاین */}
+                <div className="absolute top-3 left-0 z-10">
+                  <div className="relative flex items-center">
+                    <span className="bg-emerald-500 text-white text-[9px] font-black px-2.5 py-0.5 shadow-sm tracking-wide">
+                      آنلاین
+                    </span>
+                    {/* دنباله مثلثی ربان */}
+                    <div className="w-0 h-0 border-t-[9px] border-b-[9px] border-l-[7px] border-t-emerald-500 border-b-emerald-500 border-l-transparent" />
+                  </div>
+                </div>
+
                 <div className="relative w-full h-40 bg-gray-50/50 flex items-center justify-center border-b border-gray-100 overflow-hidden">
                   {product.imageUrl ? (
                     <Image
@@ -138,7 +151,7 @@ export default function ContentFreeResource({
 
                 <div className="p-2.5 flex flex-col flex-1">
                   <div className="mb-1.5 flex flex-wrap gap-1">
-                    {product.categories.slice(0, 2).map((cat) => (
+                    {product.categories?.slice(0, 2).map((cat) => (
                       <span
                         key={cat.id}
                         className="text-[9px] font-bold text-gray-500 bg-gray-100/80 px-1.5 py-0.5 rounded"
@@ -148,7 +161,7 @@ export default function ContentFreeResource({
                     ))}
                   </div>
 
-                  <h3 className="text-[11px] font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-12 sm:text-13  font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
 
@@ -175,10 +188,10 @@ export default function ContentFreeResource({
           </div>
 
           <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            totalCount={pagination.totalCount}
-            itemsPerPage={pagination.itemsPerPage}
+            currentPage={pagination?.currentPage || 1}
+            totalPages={pagination?.totalPages || 1}
+            totalCount={pagination?.totalCount || 0}
+            itemsPerPage={pagination?.itemsPerPage || 10}
             itemName="ردیف اطلاعاتی"
           />
         </>

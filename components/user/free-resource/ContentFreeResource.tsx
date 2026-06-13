@@ -81,7 +81,7 @@ export default function ContentFreeResource({
       {activeCategoryObjects.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4 bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm">
           <span className="text-xs font-bold text-gray-500 ml-2">فیلترهای فعال:</span>
-          
+
           {activeCategoryObjects.map((cat) => (
             <span
               key={cat.id}
@@ -120,8 +120,19 @@ export default function ContentFreeResource({
                 key={product.id}
                 href={`/resources/course/${product.slug}?price=free`}
                 target="_blank"
-                className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer"
+                className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer relative"
               >
+                {/* ربان رایگان */}
+                <div className="absolute top-3 left-0 z-10">
+                  <div className="relative flex items-center">
+                    <span className="bg-emerald-500 text-white text-[9px] font-black px-2.5 py-0.5 shadow-sm tracking-wide">
+                      رایگان
+                    </span>
+                    {/* دنباله مثلثی ربان */}
+                    <div className="w-0 h-0 border-t-[9px] border-b-[9px] border-l-[7px] border-t-emerald-500 border-b-emerald-500 border-l-transparent" />
+                  </div>
+                </div>
+
                 <div className="relative w-full h-40 bg-gray-50/50 flex items-center justify-center border-b border-gray-100 overflow-hidden">
                   {product.imageUrl ? (
                     <Image
@@ -147,7 +158,7 @@ export default function ContentFreeResource({
                     ))}
                   </div>
 
-                  <h3 className="text-[11px] font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-12 md:text-13 font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
 

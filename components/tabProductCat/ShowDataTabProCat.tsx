@@ -169,7 +169,7 @@ export default function ShowDataTabProCat({ mainCategory, isLoading = false }: S
           <h2 className="font-bold text-sm md:text-base text-slate-800">مجموعه {categoryName}</h2>
         </div>
         <div className="z-10">
-          <Link href={`/resources?category=${categorySlug}`} className="group flex text-sm md:text-base items-center gap-1 font-semibold text-orange-600 hover:text-orange-700 transition-colors">
+          <Link href={`/resources?category=${categorySlug}`} className="group flex text-sm md:text-base items-center gap-1 font-semibold text-orange-600 border-2 border-dashed border-orange-600 px-2 rounded-full hover:text-orange-700 transition-colors">
             <span className="hidden sm:block ">مشاهده همه</span>
             <span className="md:hidden sm:block "> همه</span>
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />

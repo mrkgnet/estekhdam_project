@@ -43,7 +43,7 @@ export default function ResourceLeft({ product }: Props) {
           {/* CONTENT */}
           <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 flex-1">
             <div className="space-y-2">
-              <h1 className="text-lg font-semibold text-slate-800 leading-7">
+              <h1 className="text-13 md:text-14 font-semibold text-slate-800 leading-7">
                 {product?.name}
               </h1>
 
@@ -61,7 +61,7 @@ export default function ResourceLeft({ product }: Props) {
               )}
             </div>
 
-            <div className="border-t border-slate-100 pt-4 space-y-3 text-sm text-slate-600">
+            <div className="border-t border-slate-100 pt-4 space-y-3 text-12 md:text-13 text-slate-600">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-blue-600" />
                 دسترسی فوری بعد از خرید
