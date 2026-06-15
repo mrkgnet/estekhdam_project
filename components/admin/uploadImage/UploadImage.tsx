@@ -18,7 +18,7 @@ export default function UploadImage() {
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
   // اضافه شدن فرمت PDF به فرمت‌های مجاز
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
@@ -33,7 +33,7 @@ export default function UploadImage() {
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      setError('حجم فایل نباید بیشتر از 5 مگابایت باشد');
+      setError('حجم فایل نباید بیشتر از 500 مگابایت باشد');
       return;
     }
 
@@ -187,7 +187,7 @@ export default function UploadImage() {
                   فایل را اینجا بکشید یا کلیک کنید
                 </p>
                 <p className="text-sm text-gray-500">
-                  تصویر یا PDF (حداکثر 5MB)
+                  تصویر یا PDF (حداکثر 500MB)
                 </p>
               </div>
             </div>

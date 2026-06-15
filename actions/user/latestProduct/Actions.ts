@@ -5,18 +5,21 @@ import { db } from "@/lib/db";
 export async function fetchLatestProductAction() {
   try {
     const result = await db.product.findMany({
-      // ۱. فقط اسلایدرهای فعال واکشی شوند
-    
-      // ۲. مرتب‌سازی بر اساس فیلد order (صعودی: ۱، ۲، ۳...)
+      // شرط اول: فقط محصولاتی که نوع‌شان MAIN است
+      where: {
+        type: "MAIN"
+      },
+      // مرتب‌سازی: جدیدترین‌ها اول
       orderBy: {
         createdAt: "desc" 
       },
-  
+      // شرط دوم: گرفتن حداکثر ۱۰ رکورد
+      take: 10,
     });
 
     return { success: true, data: result };
   } catch (error) {
-    console.error("❌ Error fetching user main slider:", error);
+    console.error("❌ Error fetching latest products:", error);
     return { success: false, data: [] };
   }
 }

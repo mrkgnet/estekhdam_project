@@ -129,7 +129,7 @@ export default function ContentFreeResource({
                       رایگان
                     </span>
                     {/* دنباله مثلثی ربان */}
-                    <div className="w-0 h-0 border-t-[9px] border-b-[9px] border-l-[7px] border-t-emerald-500 border-b-emerald-500 border-l-transparent" />
+                    <div className="w-0 h-0 border-t-[15px] border-b-[9px] border-l-[9px] border-t-emerald-500 border-b-emerald-500 border-l-transparent" />
                   </div>
                 </div>
 

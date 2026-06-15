@@ -104,7 +104,7 @@ export default function ShowDataSLTL({
           modules={[Navigation, Autoplay, Pagination]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
           autoplay={{
-            delay: 4000,
+            delay: 40000000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -130,13 +130,17 @@ export default function ShowDataSLTL({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
-                    {/* Image */}
-                    <div className="relative w-full h-[130px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
-                      {/* ✅ Label */}
-                      <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">
-                        آنلاین  
-                      </span>
+                  <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white relative">
+                    
+                    {/* Image Section */}
+                    <div className="relative w-full h-[130px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden bg-gray-50/40">
+                      
+                      {/* ✅ طراحی کاملاً استاندارد، فلت و شرکتی */}
+                      <div className="absolute top-0 left-0 z-20">
+                        <div className="bg-emerald-500 text-white text-[11px] font-bold px-3 py-1 rounded-br-xl shadow-sm">
+                          آنلاین
+                        </div>
+                      </div>
 
                       <div className="relative w-full h-full">
                         <SafeImage
@@ -148,29 +152,30 @@ export default function ShowDataSLTL({
                           blurDataURL={blurDataURL}
                           priority={isPriority}
                           fetchPriority={isPriority ? "high" : "auto"}
-                          className="object-contain mix-blend-multiply transition-opacity duration-300"
+                          className="object-contain mix-blend-multiply transition-transform duration-500 group-hover/card:scale-105"
                         />
                       </div>
                     </div>
 
-                    {/* Content */}
+                    {/* Content Section */}
                     <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
-                      <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-emerald-600 transition-colors duration-200">
+                      <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-blue-600 transition-colors duration-200">
                         {p.name}
                       </h3>
                       <div className="mt-auto">
-                        <ul className="space-y-2 text-[11px]">
-                          <li className="flex items-center gap-2 text-slate-600">
-                            <ClipboardList className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <ul className="space-y-2 text-[11px] mt-3">
+                          <li className="flex items-center gap-2 text-slate-500">
+                            <ClipboardList className="w-4 h-4 text-blue-500 shrink-0" />
                             <span>سوالات طبقه‌بندی شده</span>
                           </li>
-                          <li className="flex items-center gap-2 text-slate-600">
-                            <BookOpen className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <li className="flex items-center gap-2 text-slate-500">
+                            <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />
                             <span>فصل‌بندی استاندارد</span>
                           </li>
                         </ul>
                       </div>
                     </div>
+                    
                   </div>
                 </Link>
               </SwiperSlide>
@@ -181,14 +186,14 @@ export default function ShowDataSLTL({
         {/* Navigation buttons */}
         <button
           ref={setNextBtn}
-          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
+          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-blue-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
         <button
           ref={setPrevBtn}
-          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
+          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-blue-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

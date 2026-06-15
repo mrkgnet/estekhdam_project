@@ -19,8 +19,8 @@ import {
 } from "lucide-react";
 
 // TODO: لطفا اطلاعات تماس واقعی خود را جایگزین کنید
-const TELEGRAM_URL = "https://t.me/YourTelegramID";
-const WHATSAPP_URL = "https://wa.me/989123456789"; // فرمت صحیح: 989...
+const TELEGRAM_URL = "https://t.me/estekhdampro_ir";
+const WHATSAPP_URL = "https://eitaa.com/estekhdampro"; // فرمت صحیح: 989...
 const SUPPORT_PHONE = "09123456789";
 const SUPPORT_EMAIL = "support@estekhdampro.ir"; // ایمیل با دامنه جدید
 
@@ -64,7 +64,7 @@ export default function Footer() {
               </Link>
 
               <Link
-                href="/resources"
+                href="/resources/main-resource"
                 className="inline-flex font-bold items-center text-12 sm:text-13 lg:text-13 bg-blue-800 justify-center gap-2 rounded-2xl border border-slate-200  px-5 py-3   text-white transition "
               >
                 <BookOpen className="h-4 w-4" />
@@ -230,15 +230,15 @@ export default function Footer() {
                 <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">چت کن</span>
               </a>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              {/* <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Phone className="h-4 w-4" />
                   تماس تلفنی
                 </div>
                 <div className="mt-1 text-sm  text-slate-900">{SUPPORT_PHONE}</div>
-              </div>
+              </div> */}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              {/* <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <MapPin className="h-4 w-4" />
                   مرکز کمک
@@ -249,7 +249,7 @@ export default function Footer() {
                 <Link href="/help" className="mt-2 inline-flex text-sm  text-slate-900 hover:underline">
                   مشاهده راهنما
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

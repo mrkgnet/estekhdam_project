@@ -214,7 +214,12 @@ export default function ShowDataTabProCat({ mainCategory, isLoading = false }: S
               <Link href={`/resources/course/${product.slug}`} target="_blank" rel="noopener noreferrer" className="block h-full">
                 <article className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white">
                   <div className="relative w-full h-[150px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden">
-                    <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">آنلاین</span>
+                    {/* ✅ طراحی کاملاً استاندارد، فلت و شرکتی */}
+                      <div className="absolute top-0 left-0 z-20">
+                        <div className="bg-emerald-500 text-white text-[11px] font-bold px-3 py-1 rounded-br-xl shadow-sm">
+                          آنلاین
+                        </div>
+                      </div>
                     <div className="relative w-full h-full">
                       <SafeImage
                         src={product.imageUrl || "/images/products/bookExample.jpg"}

@@ -99,7 +99,7 @@ export default function FreeResourceComponent({
                                             alt={categoryName}
                                             fill
                                             sizes="64px"
-                                            className="object-contain p-2.5"
+                                            className="object-contain p-1.5"
                                         />
                                     ) : (
                                         <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
