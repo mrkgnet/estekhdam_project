@@ -175,7 +175,7 @@ export default function ResourceRight({ product }: Props) {
               </>
             ) : (
               <>
-                {/* بخش محصولات پولی بدون تغییر... */}
+                {/* بخش محصولات پولی / دوره‌ها */}
                 {!isProductActive ? (
                   <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 flex items-center justify-center gap-2 font-bold">
                     <XCircle className="w-5 h-5" />
@@ -252,24 +252,6 @@ export default function ResourceRight({ product }: Props) {
                         <CheckCircle2 className="w-5 h-5" />
                         شما قبلا دوره را خریداری کردید
                       </div>
-                    </>
-                  ) : !isLoggedIn ? (
-                    <>
-                      <button
-                        onClick={() => setIsAuthModalOpen(true)}
-                        className="w-full h-12 border-2 font-bold border-slate-200 hover:bg-slate-50 rounded-xl flex items-center justify-center gap-2 transition bg-slate-100 cursor-pointer"
-                      >
-                        <PlayCircle className="w-5 h-5 text-blue-600" />
-                        رایگان شروع کن
-                      </button>
-
-                      <button
-                        onClick={() => setIsAuthModalOpen(true)}
-                        className="w-full h-12 bg-rose-500 font-bold hover:bg-rose-700 text-white rounded-xl flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
-                      >
-                        <ShoppingBasket className="w-5 h-5" />
-                        خرید محصول
-                      </button>
                     </>
                   ) : (
                     <>

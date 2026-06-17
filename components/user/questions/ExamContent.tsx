@@ -109,7 +109,7 @@ export default function ExamContent({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-white dark:bg-slate-800 rounded shadow-sm border border-slate-200/60 dark:border-slate-700/60 p-5 sm:p-8 transition-colors"
+              className="bg-white dark:bg-slate-800 rounded shadow-sm border border-slate-200/60 dark:border-slate-700/60  sm:p-8 transition-colors"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
                 <h2 dangerouslySetInnerHTML={{ __html: q.text }} className="text-slate-800 dark:text-slate-100 leading-relaxed flex-1"></h2>
