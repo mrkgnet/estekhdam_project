@@ -149,8 +149,9 @@ function VerifyComponent() {
       <div className={containerClasses}>
         <ResultCard
           icon={<FaCheckCircle className="text-green-500 text-6xl" />}
-          title="پرداخت با موفقیت انجام شد"
-          message="از خرید شما متشکریم! سفارش شما با موفقیت ثبت شد."
+          title="پرداخت با موفقیت انجام شد
+          دسترسی شما به محصول خریداری شده ایجاد شد 
+          "
         >
           {refId && (
             <div className="bg-gray-100 p-3 rounded-lg text-center my-6 border border-gray-200">
@@ -158,7 +159,7 @@ function VerifyComponent() {
               <p className="text-lg font-bold text-gray-800 tracking-widest select-all">{refId}</p>
             </div>
           )}
-          <Link href="/dashboard/orders" className="w-full block bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3">
+          <Link href="/ddashboard" className="w-full block bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3">
             مشاهده سفارش‌ها
           </Link>
           <Link href="/" className="w-full block text-blue-600 py-2 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
