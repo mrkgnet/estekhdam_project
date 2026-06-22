@@ -45,7 +45,7 @@ export default async function page() {
 
           <div className="mt-4 pt-4 border-t border-gray-50">
             <Link href={"/adminp/user-managment"} className="text-xs text-blue-600 font-semibold hover:underline">
-           111   مشاهده جزئیات بیشتر
+           111 23  مشاهده جزئیات بیشتر
             </Link>
           </div>
         </div>
