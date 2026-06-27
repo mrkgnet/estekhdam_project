@@ -28,7 +28,7 @@ export default function AdminLayout({
         </aside>
         
         {/* محتوای اصلی که بقیه فضای باقیمانده را پر می‌کند */}
-        <main className=" min-w-0 container m-auto flex-1 flex flex-col ">
+        <main className=" min-w-0  m-auto flex-1 flex flex-col ">
           {children}
         </main>
 

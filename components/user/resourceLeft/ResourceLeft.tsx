@@ -62,14 +62,7 @@ export default function ResourceLeft({ product }: Props) {
             </div>
 
             <div className="border-t border-slate-100 pt-4 space-y-3 text-12 md:text-13 text-slate-600">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                دسترسی فوری بعد از خرید
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                پرداخت امن
-              </div>
+             
               <div className="flex items-center gap-2">
                 <RefreshCcw className="w-4 h-4 text-blue-600" />
                 بروزرسانی رایگان سوالات

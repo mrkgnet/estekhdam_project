@@ -34,6 +34,7 @@ export async function POST(request: Request) {
 
     if (response.ok) {
       console.log("OTP sent successfully.......");
+      
       const existingUser = await db.user.findUnique({
         where: { phoneNumber: phone },
       });
