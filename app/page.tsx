@@ -40,7 +40,7 @@ export default function HomePage() {
 
         <main className="min-w-0 max-w-7xl m-auto flex-1 flex flex-col py-4 md:py-4 overflow-x-hidden">
           <div className="w-full mx-auto px-2 sm:px-6 lg:px-8 space-y-4 md:space-y-6 lg:space-y-8">
-
+dsds
             {/* بخش‌های بالای صفحه - لود فوری */}
             <section className="w-full">
               <BrandTopSlider />
