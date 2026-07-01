@@ -40,9 +40,7 @@ export default function Footer() {
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-base font-bold text-blue-700 text-right">
-                  فرصت‌های استخدامی + منابع آزمون‌ها، یکجا و همیشه به‌روز
-                </div>
+                
                 <div className="mt-1 text-sm text-slate-600 text-right">
                   آگهی‌های جدید، زمان‌بندی آزمون‌ها، دفترچه‌ها و منابع مطالعاتی را سریع پیدا کن.
                 </div>
@@ -50,14 +48,7 @@ export default function Footer() {
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row shrink-0">
-              <Link
-                href="/jobnews/government"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-900"
-              >
-                <BriefcaseBusiness className="h-4 w-4" />
-                مشاهده فرصت‌های شغلی
-                <ArrowUpLeft className="h-4 w-4 opacity-80" />
-              </Link>
+             
 
               <Link
                 href="/resources/main-resource"
