@@ -91,15 +91,11 @@ export default function Footer() {
                 </div>
                 <div>
                   <div className="text-lg font-black text-slate-900">استخدام‌پرو</div>
-                  <div className="text-xs text-slate-500 font-medium">مرجع تخصصی آزمون‌ها و فرصت‌های شغلی</div>
+                  <div className="text-xs text-slate-500 font-medium">آمادگی برای آزمون های  استخدامی با شیوه نوین   </div>
                 </div>
               </div>
 
-              <p className="mt-4 text-xs md:text-sm leading-7 text-slate-600">
-                استخدام‌پرو، مرجع تخصصی شما برای موفقیت در آزمون‌های استخدامی و یافتن بهترین
-                فرصت‌های شغلی است. ما به‌روزترین آگهی‌ها و معتبرترین منابع را در اختیار شما
-                قرار می‌دهیم.
-              </p>
+          
 
               {/* آدرس رسمی */}
               <div className="mt-4 flex items-start gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -141,19 +137,7 @@ export default function Footer() {
                 </Link>
               </li>
 
-              <li>
-                <Link
-                  href="/jobnews/government"
-                  className="group inline-flex w-full items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-slate-700 transition hover:bg-slate-50"
-                >
-                  <span className="inline-flex items-center gap-2 font-medium text-xs md:text-sm">
-                    <BriefcaseBusiness className="h-4 w-4 text-slate-400" />
-                    فرصت‌های شغلی
-                  </span>
-                  <ArrowUpLeft className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
-                </Link>
-              </li>
-
+              
               <li>
                 <Link
                   href="/resources"
