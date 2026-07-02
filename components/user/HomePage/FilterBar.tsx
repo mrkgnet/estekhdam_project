@@ -59,7 +59,7 @@ const filtersByCategory: Record<TabCategory, FilterField[]> = {
             label: "بانک سوالات استخدامی",
             description: "بیش از ۵۰۰۰ سوال آزمون",
             icon: <BookIcon />,
-            href: "/question-bank",
+            href: "/user",
             badge: "آنلاین",
             subBadges: [
                 { label: "دولتی", color: "blue" },
@@ -70,7 +70,7 @@ const filtersByCategory: Record<TabCategory, FilterField[]> = {
             label: "دفترچه‌های استخدامی",
             description: "دفترچه‌های رسمی آزمون‌ها",
             icon: <FolderIcon />,
-            href: "/booklets",
+            href: "/user",
             badge: "آنلاین",
             subBadges: [
                 { label: "دولتی", color: "blue" },
@@ -81,7 +81,7 @@ const filtersByCategory: Record<TabCategory, FilterField[]> = {
             label: "منابع رایگان",
             description: "جزوه و نمونه سوال رایگان",
             icon: <GiftIcon />,
-            href: "/free-resources",
+            href: "/resources/free-resources",
             variant: "featured",
         },
     ],
@@ -126,7 +126,7 @@ function DefaultCard({ field }: { field: FilterField }) {
     return (
         <Link
             href={field.href}
-            className={`group relative flex flex-col gap-3 md:gap-4 overflow-hidden rounded-2xl border p-4 md:p-6 transition-all duration-300 ${focusRing} ${
+            className={`group relative flex flex-col gap-3 md:gap-4 overflow-hidden rounded-2xl  border-3 border-slate-300 p-4 md:p-6 transition-all duration-300 ${focusRing} ${
                 isFeatured
                     ? "bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 hover:shadow-xl hover:shadow-teal-100/50 dark:from-teal-900/20 dark:to-cyan-900/20 dark:border-teal-700/50"
                     : "bg-white border-slate-200 hover:border-teal-200 hover:shadow-lg dark:bg-slate-800/50 dark:border-slate-700 dark:hover:border-teal-700/50"
