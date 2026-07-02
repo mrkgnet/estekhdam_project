@@ -82,11 +82,11 @@ export default function Footer() {
                   <Home className="h-3.5 w-3.5" /> خانه
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/jobnews/government" className="hover:text-emerald-400 transition flex items-center gap-1.5">
                   <BriefcaseBusiness className="h-3.5 w-3.5" /> فرصت‌های شغلی
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/resources" className="hover:text-emerald-400 transition flex items-center gap-1.5">
                   <BookOpen className="h-3.5 w-3.5" /> آزمون‌ها و منابع

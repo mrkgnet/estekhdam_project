@@ -195,12 +195,10 @@ export default function FilterBar() {
         <section className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8" aria-label="دسترسی سریع">
             {/* هدر */}
             <div className="mb-4 md:mb-6 text-center">
-                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1">
-                    دسترسی سریع
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1 border">
+                   منابع آموزشی ویژه آزمون‌های استخدامی
                 </h2>
-                <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
-                    منابع آموزشی و آزمون‌های استخدامی
-                </p>
+               
             </div>
 
             {/* گرید کارت‌ها */}
