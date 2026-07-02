@@ -7,13 +7,14 @@ import {
   Home,
   BookOpen,
   BriefcaseBusiness,
-  ShieldCheck,
-  Sparkles,
-  MessageCircle,
+  Mail,
   Phone,
   MapPin,
-  ArrowUpLeft,
-  Rss,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Facebook,
+  Send, // برای تلگرام
 } from "lucide-react";
 
 const WHATSAPP_URL = "https://eitaa.com/estekhdampro"; 
@@ -22,193 +23,115 @@ const ADDRESS = "چهارمحال و بختیاری - شهرستان فارسا�
 
 export default function Footer() {
   return (
-    <footer dir="rtl" className="relative overflow-hidden border-t bg-white font-sans">
-      {/* soft background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.04),transparent_55%)]" />
+    <footer dir="rtl" className="relative w-full bg-[#3A4D56] text-white font-sans mt-12">
+      
+      {/* بخش موج‌دار بالای فوتر */}
+      <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform -translate-y-[99%]">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-[60px] fill-[#3A4D56]">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C26.9,4.75,55.05,12.72,83.93,20.26,179.91,45.4,228.4,66.82,321.39,56.44Z"></path>
+        </svg>
       </div>
 
-      {/* Top CTA */}
-      <div className="relative flex flex-col md:flex-row justify-between gap-6 mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
-        <div className="flex-1 border border-slate-200 bg-white/80 p-5 backdrop-blur sm:p-6 rounded-2xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-            <div className="flex items-start gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-900 text-white shadow-sm shrink-0">
-                <Sparkles className="h-5 w-5" />
-              </div>
+      {/* محتوای اصلی فوتر */}
+      <div className="mx-auto max-w-7xl px-6 pt-12 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 text-right items-start">
+          
+          {/* ستون اول (راست): لوگو و معرفی برند */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              {/* <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#3A4D56] shadow-md font-black text-xl">
+                <span>پرو</span>
+              </div> */}
               <div>
-                
-                <div className="mt-1 text-sm text-slate-600 text-right">
-                  آگهی‌های جدید، زمان‌بندی آزمون‌ها، دفترچه‌ها و منابع مطالعاتی را سریع پیدا کن.
-                </div>
+                <h3 className="text-xl font-black text-white">استخدام‌پرو</h3>
+                {/* <p className="text-xs text-slate-300 font-medium mt-1">مرجع تخصصی آزمون‌ها و فرصت‌های شغلی</p> */}
               </div>
             </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row shrink-0">
-             
-
-              <Link
-                href="/resources/main-resource"
-                className="inline-flex font-bold items-center bg-blue-600 justify-center gap-2 rounded-2xl border border-transparent px-5 py-3 text-sm text-white transition hover:bg-blue-700"
-              >
-                <BookOpen className="h-4 w-4" />
-                آزمون‌ها و منابع بروز
-              </Link>
-            </div>
-
-          </div>
-          
-          {/* quick chips */}
-          <div className="mt-4 flex flex-wrap gap-2 justify-start">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
-              <Rss className="h-3.5 w-3.5 text-slate-400" /> آپدیت روزانه
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
-              <ShieldCheck className="h-3.5 w-3.5 text-slate-400" /> منابع معتبر
-            </span>
-          </div>
-        </div>
-
-        {/* zarinpal and image */}
-        <div className="shrink-0">
-          <FooterTrustBadges />
-        </div>
-      </div>
-
-      {/* Main */}
-      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-12 text-right">
-          
-          {/* Brand */}
-          <div className="lg:col-span-4 flex flex-col justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-900 text-white shadow-sm font-black">
-                  <span>پرو</span>
-                </div>
-                <div>
-                  <div className="text-lg font-black text-slate-900">استخدام‌پرو</div>
-                  <div className="text-xs text-slate-500 font-medium">آمادگی برای آزمون های  استخدامی با شیوه نوین   </div>
-                </div>
-              </div>
-
-          
-
-              {/* آدرس رسمی */}
-              <div className="mt-4 flex items-start gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-                <span className="leading-6">{ADDRESS}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-2xl border border-slate-200 bg-white p-2.5 text-center shadow-sm">
-                <div className="text-[11px] text-slate-400 font-medium">ویژگی</div>
-                <div className="mt-0.5 text-xs font-bold text-slate-800">به‌روز</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-2.5 text-center shadow-sm">
-                <div className="text-[11px] text-slate-400 font-medium">تمرکز</div>
-                <div className="mt-0.5 text-xs font-bold text-slate-800">تخصصی</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-2.5 text-center shadow-sm">
-                <div className="text-[11px] text-slate-400 font-medium">منابع</div>
-                <div className="mt-0.5 text-xs font-bold text-slate-800">معتبر</div>
-              </div>
-            </div>
+            <p className="text-sm leading-7 text-slate-200 max-w-sm">
+              شیوه نوین برای مطالعه دروس استخدامی 
+            </p>
           </div>
 
-          {/* Quick Links */}
-          <div className="lg:col-span-4">
-            <div className="text-sm font-bold text-slate-900 mb-4">دسترسی سریع</div>
-            <ul className="space-y-2.5 text-sm">
+          {/* ستون دوم: ارتباط با ما */}
+          <div className="lg:col-span-3 flex flex-col gap-4">
+            <h4 className="text-base font-bold text-white border-r-4 border-emerald-400 pr-2">ارتباط با ما</h4>
+            <ul className="space-y-3 text-sm text-slate-200">
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-emerald-400 shrink-0" />
+                <a href={`tel:${SUPPORT_PHONE}`} className="dir-ltr font-mono hover:text-white transition">
+                  {SUPPORT_PHONE}
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span className="hover:text-white transition">info@estekhdam.pro</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-emerald-400 shrink-0 mt-1" />
+                <span className="leading-6 text-xs">{ADDRESS}</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* ستون سوم: دسترسی سریع / پیوندها */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <h4 className="text-base font-bold text-white border-r-4 border-emerald-400 pr-2">پیوندها</h4>
+            <ul className="grid grid-cols-1 gap-2.5 text-sm text-slate-200">
               <li>
-                <Link
-                  href="/"
-                  className="group inline-flex w-full items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-slate-700 transition hover:bg-slate-50"
-                >
-                  <span className="inline-flex items-center gap-2 font-medium text-xs md:text-sm">
-                    <Home className="h-4 w-4 text-slate-400" />
-                    خانه
-                  </span>
-                  <ArrowUpLeft className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                <Link href="/" className="hover:text-emerald-400 transition flex items-center gap-1.5">
+                  <Home className="h-3.5 w-3.5" /> خانه
                 </Link>
               </li>
-
-              
               <li>
-                <Link
-                  href="/resources"
-                  className="group inline-flex w-full items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-slate-700 transition hover:bg-slate-50"
-                >
-                  <span className="inline-flex items-center gap-2 font-medium text-xs md:text-sm">
-                    <BookOpen className="h-4 w-4 text-slate-400" />
-                    آزمون‌ها و منابع
-                  </span>
-                  <ArrowUpLeft className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                <Link href="/jobnews/government" className="hover:text-emerald-400 transition flex items-center gap-1.5">
+                  <BriefcaseBusiness className="h-3.5 w-3.5" /> فرصت‌های شغلی
+                </Link>
+              </li>
+              <li>
+                <Link href="/resources" className="hover:text-emerald-400 transition flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" /> آزمون‌ها و منابع
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
-          <div className="lg:col-span-4">
-            <div className="text-sm font-bold text-slate-900 mb-4">پشتیبانی و ارتباط</div>
-
-            <div className="space-y-3">
-              {/* دکمه تماس مستقیم تلفنی */}
-              <a
-                href={`tel:${SUPPORT_PHONE}`}
-                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:bg-slate-50"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white shadow-sm shrink-0">
-                    <Phone className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900">تماس تلفنی مستقیم</div>
-                    <div className="text-xs text-slate-500 font-mono mt-0.5">{SUPPORT_PHONE}</div>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-blue-600 group-hover:text-blue-700 transition-colors">تماس بگیر</span>
-              </a>
-
-              {/* دکمه پیام‌رسان ایتا */}
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:bg-slate-50"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-600 text-white shrink-0">
-                    <MessageCircle className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900">پشتیبانی ایتا</div>
-                    <div className="text-xs text-slate-500 mt-0.5">پاسخگویی سریع و آنلاین</div>
-                  </div>
-                </div>
-                <span className="text-xs font-bold text-emerald-600 group-hover:text-emerald-700 transition-colors">چت کن</span>
-              </a>
-            </div>
+          {/* ستون چهارم (چپ): اینماد و مجوزها */}
+          <div className="lg:col-span-3 flex justify-center lg:justify-end">
+            <FooterTrustBadges />
           </div>
 
         </div>
-      </div>
 
-      {/* Bottom */}
-      <div className="relative border-t bg-slate-50">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <div>© {new Date().getFullYear()} استخدام‌پرو — تمام حقوق محفوظ است.</div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-500">به‌روز</span>
-            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-500">منابع معتبر</span>
-            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-500">پشتیبانی سریع</span>
+        {/* نوار پایین کپسولی (مشابه تصویر الگو) */}
+        <div className="mt-12 rounded-2xl bg-[#24333A] p-4 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700/30 shadow-inner">
+          
+          {/* متن کپی رایت */}
+          <div className="text-xs text-slate-300 text-center md:text-right">
+            © {new Date().getFullYear()} کپی‌رایت، کلیه حقوق برای سایت <span className="text-white font-bold">استخدام‌پرو</span> محفوظ است.
           </div>
+
+          {/* شبکه‌های اجتماعی پیاده‌سازی شده بر اساس آیکون‌های گرد در تصویر */}
+          <div className="flex flex-wrap items-center gap-2">
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-emerald-500 hover:text-white transition-all shadow-sm">
+              <span className="text-xs font-bold">ایتا</span>
+            </a>
+            <a href="#" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-sky-500 hover:text-white transition-all shadow-sm">
+              <Send className="h-4 w-4" />
+            </a>
+            <a href="#" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-pink-600 hover:text-white transition-all shadow-sm">
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a href="#" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-blue-700 hover:text-white transition-all shadow-sm">
+              <Linkedin className="h-4 w-4" />
+            </a>
+            <a href="#" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-sky-400 hover:text-white transition-all shadow-sm">
+              <Twitter className="h-4 w-4" />
+            </a>
+            <a href="#" className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+              <Facebook className="h-4 w-4" />
+            </a>
+          </div>
+
         </div>
       </div>
     </footer>
@@ -217,32 +140,32 @@ export default function Footer() {
 
 export function FooterTrustBadges() {
   return (
-    <div className="font-bold bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm w-full md:w-auto">
-      <h4 className="text-xs md:text-sm text-slate-700 mb-3 text-right">با خیال راحت خرید کنید</h4>
+    <div className="bg-white/95 rounded-2xl p-4 border border-slate-200/20 shadow-lg w-full max-w-[260px]">
+      <h4 className="text-xs font-bold text-slate-800 mb-3 text-center">با خیال راحت خرید کنید</h4>
 
-      <div className="flex sm:grid sm:grid-cols-2 gap-4 max-w-xs justify-center items-center">
+      <div className="grid grid-cols-2 gap-3 justify-center items-center">
         <a
           referrerPolicy="origin"
           target="_blank"
           rel="noreferrer"
           href="https://trustseal.enamad.ir/?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-          className="border border-slate-100 rounded-xl p-1 bg-slate-50/50 hover:bg-white transition-colors"
+          className="border border-slate-100 rounded-xl p-1 bg-slate-50 hover:bg-white transition-all shadow-sm flex items-center justify-center"
         >
           <img
             referrerPolicy="origin"
             src="https://trustseal.enamad.ir/logo.aspx?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
             alt="اینماد"
-            className="w-20 h-20 object-contain mx-auto"
+            className="w-16 h-16 object-contain mx-auto"
             style={{ cursor: "pointer" }}
           />
         </a>
 
-        <div className="border border-slate-100 rounded-xl p-1 bg-slate-50/50 hover:bg-white transition-colors flex items-center justify-center">
+        <div className="border border-slate-100 rounded-xl p-1 bg-slate-50 hover:bg-white transition-all shadow-sm flex items-center justify-center h-18">
           <Image
             src="/images/footer/zrinpal.png"
             alt="زرین‌پال"
-            width={80}
-            height={80}
+            width={64}
+            height={64}
             className="object-contain"
           />
         </div>
