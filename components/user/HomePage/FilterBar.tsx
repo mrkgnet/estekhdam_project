@@ -6,19 +6,19 @@ import React, { useState, useMemo } from "react";
 // ===============================
 // Icons
 // ===============================
-const BookIcon = ({ className = "w-5 h-5 md:w-6 md:h-6" }: { className?: string }) => (
+const BookIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
 );
 
-const FolderIcon = ({ className = "w-5 h-5 md:w-6 md:h-6" }: { className?: string }) => (
+const FolderIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
     </svg>
 );
 
-const GiftIcon = ({ className = "w-5 h-5 md:w-6 md:h-6" }: { className?: string }) => (
+const GiftIcon = ({ className = "w-4 h-4 md:w-5 md:h-5" }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1010.5 7.5h1.5m0-2.625A2.625 2.625 0 1113.5 7.5H12m0-2.625V21m-6-13.5V21m0-13.5a2.25 2.25 0 00-2.25 2.25v.75m2.25-3H5.25A2.25 2.25 0 003 9v.75m15.75-3.75H18.75A2.25 2.25 0 0121 9v.75" />
     </svg>
@@ -102,11 +102,11 @@ const subBadgeStyles: Record<SubBadge["color"], string> = {
 
 function SubBadgeList({ items }: { items: SubBadge[] }) {
     return (
-        <div className="flex flex-wrap gap-1.5 md:gap-2">
+        <div className="flex flex-wrap gap-1 md:gap-1.5">
             {items.map((item) => (
                 <span
                     key={item.label}
-                    className={`inline-flex items-center rounded-lg border px-2 md:px-2.5 py-0.5 md:py-1 text-[10px] md:text-xs font-semibold transition-colors ${subBadgeStyles[item.color]}`}
+                    className={`inline-flex items-center rounded-md border px-1.5 md:px-2 py-0.5 text-[9px] md:text-[10px] font-semibold transition-colors ${subBadgeStyles[item.color]}`}
                 >
                     {item.label}
                 </span>
@@ -118,7 +118,7 @@ function SubBadgeList({ items }: { items: SubBadge[] }) {
 // ===============================
 // Card
 // ===============================
-const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
+const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3b5998] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
 
 function DefaultCard({ field }: { field: FilterField }) {
     const isFeatured = field.variant === "featured";
@@ -126,44 +126,44 @@ function DefaultCard({ field }: { field: FilterField }) {
     return (
         <Link
             href={field.href}
-            className={`group relative flex flex-col gap-3 md:gap-4 overflow-hidden rounded-2xl  border-3 border-slate-300 p-4 md:p-6 transition-all duration-300 ${focusRing} ${
+            className={`group relative flex flex-col gap-2 md:gap-2.5 overflow-hidden rounded border-2 border-slate-300 p-3 md:p-4 transition-all duration-300 ${focusRing} ${
                 isFeatured
-                    ? "bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 hover:shadow-xl hover:shadow-teal-100/50 dark:from-teal-900/20 dark:to-cyan-900/20 dark:border-teal-700/50"
-                    : "bg-white border-slate-200 hover:border-teal-200 hover:shadow-lg dark:bg-slate-800/50 dark:border-slate-700 dark:hover:border-teal-700/50"
+                    ? "bg-gradient-to-br from-[#3b5998]/5 to-[#3b5998]/10 border-[#3b5998]/30 hover:shadow-lg hover:shadow-[#3b5998]/20 hover:bg-[#3b5998] hover:border-[#3b5998] dark:from-[#3b5998]/20 dark:to-[#3b5998]/30 dark:border-[#3b5998]/50"
+                    : "bg-white border-slate-200 hover:border-[#3b5998] hover:shadow-md hover:bg-[#3b5998] dark:bg-slate-800/50 dark:border-slate-700 dark:hover:border-[#3b5998]"
             }`}
         >
             {/* آیکون و بج */}
             <div className="flex items-start justify-between gap-2">
-                <div className={`flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+                <div className={`flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ${
                     isFeatured
-                        ? "bg-gradient-to-br from-teal-400 to-cyan-500 text-white shadow-lg shadow-teal-200 group-hover:shadow-xl group-hover:scale-110 dark:shadow-teal-900/50"
-                        : "bg-slate-100 text-slate-600 group-hover:bg-teal-50 group-hover:text-teal-600 group-hover:scale-110 dark:bg-slate-700 dark:text-slate-300"
+                        ? "bg-[#3b5998] text-white shadow-md shadow-[#3b5998]/30 group-hover:shadow-lg group-hover:scale-105 group-hover:bg-white group-hover:text-[#3b5998]"
+                        : "bg-slate-100 text-slate-600 group-hover:bg-white group-hover:text-[#3b5998] group-hover:scale-105 dark:bg-slate-700 dark:text-slate-300"
                 }`}>
                     {field.icon}
                 </div>
 
                 {field.badge && (
-                    <span className="inline-flex items-center gap-1 md:gap-1.5 rounded-full border border-teal-300 bg-teal-100 px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold text-teal-700 shadow-sm dark:border-teal-700/40 dark:bg-teal-900/40 dark:text-teal-300">
-                        <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-teal-500 animate-pulse" />
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[#3b5998]/30 bg-[#3b5998]/10 px-1.5 md:px-2 py-0.5 text-[9px] md:text-[10px] font-bold text-[#3b5998] shadow-sm group-hover:bg-white group-hover:border-white dark:border-[#3b5998]/40 dark:bg-[#3b5998]/40 dark:text-[#3b5998]">
+                        <span className="h-1 w-1 md:h-1.5 md:w-1.5 rounded-full bg-red-500 animate-pulse group-hover:bg-red-600" />
                         {field.badge}
                     </span>
                 )}
 
                 {isFeatured && (
-                    <div className="absolute -top-1 -right-1 text-yellow-400 animate-pulse">
-                        <SparklesIcon className="w-5 h-5 md:w-6 md:h-6" />
+                    <div className="absolute -top-0.5 -right-0.5 text-yellow-400 animate-pulse group-hover:text-yellow-300">
+                        <SparklesIcon className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
                 )}
             </div>
 
             {/* متن */}
-            <div className="flex flex-col gap-1.5 md:gap-2">
-                <h3 className="text-sm md:text-base lg:text-lg font-bold text-slate-800 transition-colors duration-200 group-hover:text-teal-600 dark:text-slate-100 dark:group-hover:text-teal-400">
+            <div className="flex flex-col gap-1">
+                <h3 className="text-xs md:text-sm font-bold text-slate-800 transition-colors duration-200 group-hover:text-white dark:text-slate-100 dark:group-hover:text-white">
                     {field.label}
                 </h3>
 
                 {field.description && (
-                    <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                    <p className="text-[10px] md:text-xs text-slate-600 dark:text-slate-400 line-clamp-1 group-hover:text-white/90">
                         {field.description}
                     </p>
                 )}
@@ -172,14 +172,14 @@ function DefaultCard({ field }: { field: FilterField }) {
             </div>
 
             {/* فلش نشانگر */}
-            <div className="absolute bottom-3 left-3 text-slate-400 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute bottom-2 left-2 text-slate-400 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1 group-hover:text-white">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
             </div>
 
             {/* خط پایین */}
-            <span className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-teal-400 to-cyan-400 transition-all duration-300 group-hover:w-full rounded-b-2xl" />
+            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-white transition-all duration-300 group-hover:w-full rounded-b" />
         </Link>
     );
 }
@@ -192,19 +192,19 @@ export default function FilterBar() {
     const fields = useMemo(() => filtersByCategory[activeCategory], [activeCategory]);
 
     return (
-        <section className="mx-auto w-full max-w-6xl px-4 py-8 md:py-12" aria-label="دسترسی سریع">
+        <section className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8" aria-label="دسترسی سریع">
             {/* هدر */}
-            <div className="mb-6 md:mb-8 text-center">
-                <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white mb-2">
+            <div className="mb-4 md:mb-6 text-center">
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1">
                     دسترسی سریع
                 </h2>
-                <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">
+                <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
                     منابع آموزشی و آزمون‌های استخدامی
                 </p>
             </div>
 
             {/* گرید کارت‌ها */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 {fields.map((field, idx) => (
                     <DefaultCard key={`${field.href}-${idx}`} field={field} />
                 ))}

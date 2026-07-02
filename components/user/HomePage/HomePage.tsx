@@ -6,17 +6,17 @@ import NavbarUser from "@/components/navbar/Navbar";
 import SideBarUserComponent from "../sidebar-user/SideBarUserComponent";
 import dynamic from "next/dynamic";
 
-
-
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
 });
 
+interface HomePageProps {
+    questionsCount: number;
+}
 
-export default function HomePage() {
+export default function HomePage({ questionsCount }: HomePageProps) {
     return (
         <div className="min-h-screen bg-gray-50 text-slate-800" dir="rtl">
-
 
             <div className="pointer-events-none absolute -top-8 left-0 opacity-30">
                 <svg width="856" height="655" viewBox="0 0 856 655" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,27 +37,21 @@ export default function HomePage() {
                 </svg>
             </div>
 
-
-
-
-
             {/* بخش هدر و ناوبری */}
             <HeaderTopComponnet />
             <NavbarUser />
             <SideBarUserComponent />
 
-            <main className="container mx-auto  py-12">
-              
-              
-
+            <main className="container mx-auto py-12">
+                
                 {/* کامپوننت فیلتربار */}
                 <div className="mb-12">
                     <FilterBar />
                 </div>
 
-                {/* هیرو سکشن و اسلایدر */}
+                {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
                 <section className="mb-16">
-                    <HeroSection />
+                    <HeroSection questionsCount={questionsCount} />
                 </section>
 
                 {/* بخش اخبار فوری */}
