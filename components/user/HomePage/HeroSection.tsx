@@ -67,7 +67,7 @@ export default function HeroSection({ questionsCount }: HeroSectionProps) {
         },
         {
             icon: <CalendarIcon className="w-5 h-5" />,
-            count: "+55",
+            count: "+25",
             label: "دفترچه استخدامی",
             color: "blue"
         }

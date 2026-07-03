@@ -126,7 +126,7 @@ function DefaultCard({ field }: { field: FilterField }) {
     return (
         <Link
             href={field.href}
-            className={`group relative flex flex-col gap-2 md:gap-2.5 overflow-hidden rounded border-2 border-slate-300 p-3 md:p-4 transition-all duration-300 ${focusRing} ${
+            className={`group relative flex flex-col gap-2 md:gap-2.5 overflow-hidden rounded border-3 border-slate-300 p-3 md:p-4 transition-all duration-300 ${focusRing} ${
                 isFeatured
                     ? "bg-gradient-to-br from-[#3b5998]/5 to-[#3b5998]/10 border-[#3b5998]/30 hover:shadow-lg hover:shadow-[#3b5998]/20 hover:bg-[#3b5998] hover:border-[#3b5998] dark:from-[#3b5998]/20 dark:to-[#3b5998]/30 dark:border-[#3b5998]/50"
                     : "bg-white border-slate-200 hover:border-[#3b5998] hover:shadow-md hover:bg-[#3b5998] dark:bg-slate-800/50 dark:border-slate-700 dark:hover:border-[#3b5998]"
@@ -158,7 +158,7 @@ function DefaultCard({ field }: { field: FilterField }) {
 
             {/* متن */}
             <div className="flex flex-col gap-1">
-                <h3 className="text-xs md:text-sm font-bold text-slate-800 transition-colors duration-200 group-hover:text-white dark:text-slate-100 dark:group-hover:text-white">
+                <h3 className="text-sm md:text-base font-bold text-slate-800 transition-colors duration-200 group-hover:text-white dark:text-slate-100 dark:group-hover:text-white">
                     {field.label}
                 </h3>
 
@@ -195,7 +195,7 @@ export default function FilterBar() {
         <section className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8" aria-label="دسترسی سریع">
             {/* هدر */}
             <div className="mb-4 md:mb-6 text-center">
-                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1 border">
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1 ">
                    منابع آموزشی ویژه آزمون‌های استخدامی
                 </h2>
                

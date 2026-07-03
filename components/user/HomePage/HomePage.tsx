@@ -44,6 +44,11 @@ export default function HomePage({ questionsCount }: HomePageProps) {
 
             <main className="container mx-auto py-12">
                 
+
+                 {/* اسلایدر برندها */}
+                <section className="pb-10">
+                    <BrandTopSlider />
+                </section>
                 {/* کامپوننت فیلتربار */}
                 <div className="mb-12">
                     <FilterBar />
@@ -59,10 +64,7 @@ export default function HomePage({ questionsCount }: HomePageProps) {
                     <BreakingNewsComponent />
                 </section>
 
-                {/* اسلایدر برندها */}
-                <section className="pb-10">
-                    <BrandTopSlider />
-                </section>
+               
             </main>
         </div>
     );
