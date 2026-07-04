@@ -57,7 +57,7 @@ const filtersByCategory: Record<TabCategory, FilterField[]> = {
     "real-estate-domestic": [
         {
             label: "بانک سوالات استخدامی",
-            description: "بیش از ۵۰۰۰ سوال آزمون",
+            description: "بیش از ۵۰۰ سوال آزمون",
             icon: <BookIcon />,
             href: "/user",
             badge: "آنلاین",
@@ -194,13 +194,16 @@ export default function FilterBar() {
     return (
         <section className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8" aria-label="دسترسی سریع">
             {/* هدر */}
-            <div className="mb-4 md:mb-6 text-center">
-                <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-1 ">
-                   منابع آموزشی ویژه آزمون‌های استخدامی
+             {/* هدر کامپوننت */}
+            <div className="mb-8 text-center relative">
+                <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+                    منابع آموزشی ویژه آزمون‌های استخدامی
                 </h2>
-               
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                    دسترسی سریع به برترین جزوات، بانک سوالات و منابع رسمی آزمون‌ها
+                </p>
+                <div className="absolute -bottom-3 right-1/2 translate-x-1/2 h-1 w-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
             </div>
-
             {/* گرید کارت‌ها */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 {fields.map((field, idx) => (

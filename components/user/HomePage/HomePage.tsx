@@ -42,7 +42,7 @@ export default function HomePage({ questionsCount }: HomePageProps) {
             <NavbarUser />
             <SideBarUserComponent />
 
-            <main className="container mx-auto py-12">
+            <main className=" mx-auto py-12">
                 
 
                  {/* اسلایدر برندها */}

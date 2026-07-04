@@ -66,7 +66,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
         <AlertCircle className="w-16 h-16 text-slate-300 mb-2" />
         <p className="font-medium text-slate-700">محصولی یافت نشد</p>
         <p className="text-slate-500 max-w-md">ممکن است لینک اشتباه باشد یا محصول از سایت حذف شده باشد.</p>
-        <Link href="/resources" className="mt-6 px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl transition-colors shadow-sm font-medium">
+        <Link href="/user" className="mt-6 px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl transition-colors shadow-sm font-medium">
           بازگشت به منابع
         </Link>
       </div>

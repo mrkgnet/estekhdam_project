@@ -3,14 +3,13 @@ import ShowData from './ShowData';
 import { fetchDataProduct } from '@/actions/admin/products/government/Actions';
 
 type Props = {
-  currentPage: number;
-  searchQuery: string;
-  limit: number;
+    currentPage: number;
+    searchQuery: string;
+    limit: number;
 }
 
 export default async function FetchData({ currentPage, searchQuery, limit }: Props) {
-    // دریافت خروجی جدید که شامل اطلاعات صفحه‌بندی هم هست
-    // دقت کنید که جای پارامترها با امضای تابع در اکشن همخوانی داشته باشد
+    // دریافت خروجی از Server Action
     const { products, totalPages } = await fetchDataProduct(currentPage, limit, searchQuery);
 
     return (
@@ -23,4 +22,4 @@ export default async function FetchData({ currentPage, searchQuery, limit }: Pro
             />
         </div>
     );
-}
+}   

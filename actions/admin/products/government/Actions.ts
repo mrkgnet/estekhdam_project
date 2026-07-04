@@ -12,23 +12,21 @@ export async function fetchDataProduct(page: number = 1, limit: number = 10, sea
 
     const skip = (page - 1) * limit;
 
-    // 🟢 ۱. ساخت شرط جستجو بر اساس روابط پستگرس
+    // ساخت شرط جستجو مدرن و بهینه برای واکشی فیلتر شده
     const whereClause = searchQuery
       ? {
           OR: [
-            // جستجو در نام محصول
-            { name: { contains: searchQuery, mode: "insensitive" } }, 
-            // جستجو در نام دسته‌بندی‌های متصل به این محصول
+            { name: { contains: searchQuery, mode: "insensitive" as const } }, 
             { 
               categories: { 
-                some: { catName: { contains: searchQuery, mode: "insensitive" } } 
+                some: { catName: { contains: searchQuery, mode: "insensitive" as const } } 
               } 
             }, 
           ],
         }
       : {};
 
-    // 🟢 ۲. واکشی اطلاعات و دسته‌بندی‌ها به صورت همزمان
+    // انجام عملیات همزمان در دیتابیس برای بهینه‌سازی سرعت
     const [totalCount, products] = await db.$transaction([
       db.product.count({ where: whereClause }),
       db.product.findMany({
@@ -36,8 +34,6 @@ export async function fetchDataProduct(page: number = 1, limit: number = 10, sea
         skip: skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        // جادوی پریزما برای دیتابیس‌های رابطه‌ای: 
-        // به جای واکشی دستی، دسته‌بندی‌های هر محصول را خودکار Join و ضمیمه می‌کند
         include: {
           categories: {
             select: { id: true, catName: true, catSlug: true }
