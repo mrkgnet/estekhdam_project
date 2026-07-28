@@ -162,7 +162,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           transition={{ duration: 0.2 }}
         >
           <motion.div
-            className="w-full max-w-md"
+            className="w-full max-w-sm"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -172,7 +172,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
               {/* هدر کوچک */}
               <div className="relative bg-slate-50 border-b border-slate-200 px-6 py-3">
                 <p className="text-sm text-slate-600 text-center" dir="rtl">
-برای استفاده از خدمات سایت ابتدا ثبت نام/ ورود کنید                </p>
+                  برای استفاده از خدمات سایت ابتدا ثبت نام/ ورود کنید                </p>
                 <button
                   onClick={onClose}
                   className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition"
@@ -196,13 +196,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       </h2>
                       <p className="text-sm text-slate-500 mt-1">
                         شماره موبایل خود را وارد کنید
-                </p>
+                      </p>
                     </div>
 
                     <div className="space-y-2">
                       <label className="block text-slate-700 text-sm font-medium">
                         شماره موبایل
-                </label>
+                      </label>
                       <div className="relative">
                         <Smartphone className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <input
@@ -211,7 +211,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                           inputMode="numeric"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value.trim())}
-                onKeyDown={(e) =>
+                          onKeyDown={(e) =>
                             e.key === "Enter" && handleSendOTP()
                           }
                           placeholder="09123456789"
@@ -237,7 +237,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                         <>
                           دریافت کد تأیید
                           <ArrowRight className="w-4 h-4" />
-                </>
+                        </>
                       )}
                     </button>
                   </motion.div>
@@ -252,13 +252,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   >
                     <div className="text-center mb-6">
                       <h2 className="text-xl font-bold text-slate-800">
-                کد تأیید
+                        کد تأیید
                       </h2>
-                <p className="text-sm text-slate-500 mt-1" dir="rtl">
+                      <p className="text-sm text-slate-500 mt-1" dir="rtl">
                         کد ارسال شده به{" "}
                         <span className="font-bold text-slate-700">{phone}</span>{" "}
                         را وارد کنید
-                </p>
+                      </p>
                       <button
                         onClick={() => setStep(0)}
                         className="text-xs text-[#3b5998] hover:text-[#2d4373] font-medium mt-2"
@@ -267,24 +267,23 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                       </button>
                     </div>
 
-                {/* باکس‌های OTP با کرسر چشمک‌زن */}
+                    {/* باکس‌های OTP با کرسر چشمک‌زن */}
                     <div className="relative flex justify-center gap-2" dir="ltr">
                       {[...Array(OTP_LENGTH)].map((_, i) => {
                         const isActive = otp.length === i;
-                const isFilled = !!otp[i];
+                        const isFilled = !!otp[i];
 
                         return (
                           <div
                             key={i}
                             onClick={() => otpRef.current?.focus()}
-                            className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-lg transition cursor-text select-none ${
-                              isActive
+                            className={`w-12 h-12 flex items-center justify-center text-lg font-bold border-2 rounded-lg transition cursor-text select-none ${isActive
                                 ? "border-[#3b5998] ring-2 ring-[#3b5998]/20 bg-blue-50"
                                 : isFilled
-                                ? "border-[#3b5998] bg-white text-slate-900"
-                                : "border-slate-300 bg-slate-50"
-                            }`}
-                >
+                                  ? "border-[#3b5998] bg-white text-slate-900"
+                                  : "border-slate-300 bg-slate-50"
+                              }`}
+                          >
                             {isFilled ? (
                               otp[i]
                             ) : isActive ? (
@@ -302,12 +301,12 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                         inputMode="numeric"
                         value={otp}
                         disabled={loading}
-                onChange={(e) => {
+                        onChange={(e) => {
                           const val = e.target.value
                             .replace(/\D/g, "")
                             .slice(0, OTP_LENGTH);
                           setOtp(val);
-                if (val.length === OTP_LENGTH) handleVerifyOTP(val);
+                          if (val.length === OTP_LENGTH) handleVerifyOTP(val);
                         }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-text"
                         autoComplete="one-time-code"
@@ -317,11 +316,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     <button
                       onClick={handleResend}
                       disabled={timer > 0 || loading}
-                      className={`w-full text-sm font-medium transition ${
-                        timer > 0
+                      className={`w-full text-sm font-medium transition ${timer > 0
                           ? "text-slate-400"
                           : "text-[#3b5998] hover:text-[#2d4373]"
-                      }`}
+                        }`}
                     >
                       {timer > 0
                         ? `ارسال مجدد کد (${formatTime(timer)})`
@@ -330,7 +328,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
                     <button
                       onClick={() => handleVerifyOTP()}
-                disabled={loading || otp.length < OTP_LENGTH}
+                      disabled={loading || otp.length < OTP_LENGTH}
                       className="w-full py-3 bg-[#3b5998] hover:bg-[#2d4373] text-white font-medium rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
                       {loading ? (

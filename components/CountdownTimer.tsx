@@ -15,7 +15,7 @@ function useHasMounted() {
 
 function getCountdown(endAt?: string | null) {
   if (!endAt) return { done: true, days: 0, h: 0, m: 0, s: 0 };
-  
+
   const now = Date.now();
   const end = new Date(endAt).getTime();
   const diff = end - now;
@@ -74,18 +74,25 @@ export default function CountdownTimer({ endAt, active = true }: CountdownTimerP
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs opacity-80">تا پایان:</span>
           <div className="flex items-center gap-1.5">
+
+
+
+            <span className="border rounded-2xl border-gray-200 bg-gray-50 text-emerald-600">
+              <TimeBox label="ثانیه" value={pad2(t.s)} />
+            </span>
+
             <span className="border rounded-2xl border-gray-200 bg-gray-50">
-              <TimeBox label="روز" value={t.days.toLocaleString("fa-IR")} />
+              <TimeBox label="دقیقه" value={pad2(t.m)} />
             </span>
             <span className="border rounded-2xl border-gray-200 bg-gray-50">
               <TimeBox label="ساعت" value={pad2(t.h)} />
             </span>
+
             <span className="border rounded-2xl border-gray-200 bg-gray-50">
-              <TimeBox label="دقیقه" value={pad2(t.m)} />
+              <TimeBox label="روز" value={t.days.toLocaleString("fa-IR")} />
             </span>
-            <span className="border rounded-2xl border-gray-200 bg-gray-50 text-emerald-600">
-              <TimeBox label="ثانیه" value={pad2(t.s)} />
-            </span>
+
+
           </div>
         </div>
       )}

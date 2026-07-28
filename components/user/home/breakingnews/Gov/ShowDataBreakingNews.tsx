@@ -151,7 +151,7 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
 
                 <div className="flex flex-col gap-4 min-w-0">
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h3 className="font-semibold text-13 md:text-14 lg:text-13 text-slate-600 group-hover:text-sky-700 transition-colors">
+                    <h3 className="font-semibold text-13 md:text-14 lg:text-14 text-slate-600 group-hover:text-sky-700 transition-colors">
                       {it.title}
                     </h3>
                     <StatusBadge status={it.status || "NEWS"} />
