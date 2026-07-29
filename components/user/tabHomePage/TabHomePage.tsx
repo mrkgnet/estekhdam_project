@@ -23,23 +23,15 @@ interface TabHomePageProps {
   initialData?: any
 }
 
-function CategorySkeleton() {
+function DotsLoader() {
   return (
-    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex flex-col items-center justify-between p-2.5 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white/70 rounded-xl border border-rose-200/50 shadow-sm relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shimmer" />
-          <div className="w-full flex-1 bg-rose-100/40 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-200/50 rounded-lg animate-pulse" />
-          </div>
-          <div className="w-full flex flex-col items-center gap-1.5 mt-1">
-            <div className="w-4/5 h-3 bg-rose-200/60 rounded-full animate-pulse" />
-            <div className="w-1/2 h-2.5 bg-rose-200/40 rounded-full animate-pulse" />
-          </div>
-        </div>
+    <div className="flex items-center gap-1.5">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.6s' }}
+        />
       ))}
     </div>
   )
@@ -50,11 +42,11 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const swiperRef = useRef<SwiperType | null>(null)
-  const [isMounted, setIsMounted] = useState(false)
+  const [isSwiperMounted, setIsSwiperMounted] = useState(false)
 
-  // کنترل Mount شدن کلاینت جهت جلوگیری از FOUC و پرش سوئیپر
+  // جلوگیری از FOUC و پرش تک‌آیتمی Swiper پس از Mount شدن در کلاینت
   useEffect(() => {
-    setIsMounted(true)
+    setIsSwiperMounted(true)
   }, [])
 
   const tabToCategoryMap: Record<MainTab, string> = {
@@ -71,7 +63,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  // به‌روزرسانی ابعاد Swiper هنگام تغییر تب
   useEffect(() => {
     if (swiperRef.current) {
       swiperRef.current.update()
@@ -227,55 +218,82 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
         ))}
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content Box */}
       <div
-        className={`bg-[#FCE3E8] border border-[#AF0F12] p-3 sm:p-6 shadow-sm relative z-0 ${
+        className={`bg-[#FCE3E8] border border-[#AF0F12] p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden ${
           activeTab === 'questions' ? 'rounded-b-xl ' : ''
         }`}
       >
-        {isPending || !isMounted ? (
-          <CategorySkeleton />
-        ) : (
-          <div className="relative min-h-[100px]">
-            {/* Prev / Next Arrows */}
-            {showArrows && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => swiperRef.current?.slidePrev()}
-                  aria-label="قبلی"
-                  className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 text-rose-700" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => swiperRef.current?.slideNext()}
-                  aria-label="بعدی"
-                  className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5 text-rose-700" />
-                </button>
+        {/* Dots Loading Overlay هنگام تعویض تب */}
+        {isPending && (
+          <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
+            <DotsLoader />
+            <span className="text-xs font-semibold text-rose-950">
+              در حال دریافت اطلاعات...
+            </span>
+          </div>
+        )}
 
-                <button
-                  type="button"
-                  onClick={() => swiperRef.current?.slidePrev()}
-                  aria-label="قبلی"
-                  className="md:hidden absolute top-1/2 -translate-y-1/2 -right-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
-                >
-                  <ChevronRight className="w-4 h-4 text-rose-700" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => swiperRef.current?.slideNext()}
-                  aria-label="بعدی"
-                  className="md:hidden absolute top-1/2 -translate-y-1/2 -left-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
-                >
-                  <ChevronLeft className="w-4 h-4 text-rose-700" />
-                </button>
-              </>
-            )}
+        <div className="relative min-h-[100px]">
+          {/* فلش‌های ناوبری سوئیپر */}
+          {showArrows && (
+            <>
+              <button
+                type="button"
+                onClick={() => swiperRef.current?.slidePrev()}
+                aria-label="قبلی"
+                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 text-rose-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => swiperRef.current?.slideNext()}
+                aria-label="بعدی"
+                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-rose-700" />
+              </button>
 
+              <button
+                type="button"
+                onClick={() => swiperRef.current?.slidePrev()}
+                aria-label="قبلی"
+                className="md:hidden absolute top-1/2 -translate-y-1/2 -right-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
+              >
+                <ChevronRight className="w-4 h-4 text-rose-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => swiperRef.current?.slideNext()}
+                aria-label="بعدی"
+                className="md:hidden absolute top-1/2 -translate-y-1/2 -left-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
+              >
+                <ChevronLeft className="w-4 h-4 text-rose-700" />
+              </button>
+            </>
+          )}
+
+          {/* اگر هنوز کلاینت Mount نشده باشد، جهت جلوگیرى از پرش تک‌آیتمى یک Grid چیدمان‌پذیر نمایش داده می‌شود */}
+          {!isSwiperMounted ? (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
+              {currentCategories.slice(0, 6).map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`flex flex-col items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border border-[#FCE3E8] ${
+                    index >= 3 ? 'hidden md:flex' : 'flex'
+                  }`}
+                >
+                  <div className="flex-1 flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-rose-50/60 w-full mb-1.5 sm:mb-2">
+                    {item.icon}
+                  </div>
+                  <span className="text-[10px] sm:text-sm font-medium text-gray-800 text-center leading-tight line-clamp-2">
+                    {item.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
             <Swiper
               modules={[FreeMode, Navigation]}
               freeMode
@@ -319,11 +337,9 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
                 )
               })}
             </Swiper>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
 }
-
-export { CategorySkeleton }
