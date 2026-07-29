@@ -50,7 +50,12 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const swiperRef = useRef<SwiperType | null>(null)
-  const [isSwiperReady, setIsSwiperReady] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // کنترل Mount شدن کلاینت جهت جلوگیری از FOUC و پرش سوئیپر
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const tabToCategoryMap: Record<MainTab, string> = {
     questions: 'بانک-سوالات',
@@ -65,6 +70,13 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
     ) || 'questions'
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  // به‌روزرسانی ابعاد Swiper هنگام تغییر تب
+  useEffect(() => {
+    if (swiperRef.current) {
+      swiperRef.current.update()
+    }
+  }, [activeTab])
 
   const categoriesData: Record<MainTab, Category[]> = {
     questions: [
@@ -221,7 +233,7 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
           activeTab === 'questions' ? 'rounded-b-xl ' : ''
         }`}
       >
-        {isPending ? (
+        {isPending || !isMounted ? (
           <CategorySkeleton />
         ) : (
           <div className="relative min-h-[100px]">
@@ -264,7 +276,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
               </>
             )}
 
-            {/* Swiper با کنترل‌های اصلاح ابعاد اولیه */}
             <Swiper
               modules={[FreeMode, Navigation]}
               freeMode
@@ -273,11 +284,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
               observeParents={true}
               onSwiper={(swiper) => {
                 swiperRef.current = swiper
-                // محاسبه مجدد ابعاد بلافاصله پس از اینیت
-                setTimeout(() => {
-                  swiper.update()
-                  setIsSwiperReady(true)
-                }, 50)
               }}
               slidesPerView={3}
               spaceBetween={8}
@@ -288,9 +294,7 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
                   spaceBetween: 12,
                 },
               }}
-              className={`w-full !px-1 transition-opacity duration-300 ${
-                isSwiperReady ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="w-full !px-1"
             >
               {currentCategories.map((item) => {
                 const isSelected = selectedCategory === item.id
@@ -315,13 +319,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
                 )
               })}
             </Swiper>
-
-            {/* نشان دادن اسکلتون موقت تا زمانی که Swiper آماده شود */}
-            {!isSwiperReady && (
-              <div className="absolute inset-0 z-10 bg-[#FCE3E8]">
-                <CategorySkeleton />
-              </div>
-            )}
           </div>
         )}
       </div>

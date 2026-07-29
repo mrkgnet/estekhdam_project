@@ -6,6 +6,7 @@ import SideBarUserComponent from "@/components/user/sidebar-user/SideBarUserComp
 import HeroSection from "@/components/user/HomePage/HeroSection";
 import FilterBar from "@/components/user/HomePage/FilterBar";
 import TabHomePage from "@/components/user/tabHomePage/TabHomePage";
+import TabHomeComponent from "@/components/user/tabHomePage/TabHomeComponent";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -53,7 +54,7 @@ export default function page() {
                 </div> */}
 
                 <div className="mb-12">
-                    <TabHomePage />
+                    <TabHomeComponent />
                 </div>
 
 

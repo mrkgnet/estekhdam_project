@@ -3,20 +3,17 @@ import TabHomePage, { CategorySkeleton } from './TabHomePage'
 import { GetCategoriDataAction } from '@/actions/category/Actions'
 
 type Props = {
-  searchParams: Promise<{ category?: string }>
+  category: string
 }
 
-async function DataFetcher({ searchParams }: Props) {
-  const resolvedParams = await searchParams
-  const category = resolvedParams.category || 'BuyDeposit'
-
-  // فراخوانی اکشن سروری
+async function DataFetcher({ category }: Props) {
+  // فراخوانی اکشن سروری جهت واکشی اطلاعات
   const data = await GetCategoriDataAction(category)
 
   return <TabHomePage initialData={data} />
 }
 
-export default function TabHomeFetchData(props: Props) {
+export default function TabHomeFetchData({ category }: Props) {
   return (
     <Suspense
       fallback={
@@ -27,7 +24,7 @@ export default function TabHomeFetchData(props: Props) {
         </div>
       }
     >
-      <DataFetcher {...props} />
+      <DataFetcher category={category} />
     </Suspense>
   )
 }
