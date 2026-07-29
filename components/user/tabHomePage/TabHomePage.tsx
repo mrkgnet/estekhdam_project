@@ -19,10 +19,6 @@ type Category = {
 
 type MainTab = 'questions' | 'booklets' | 'free'
 
-interface TabHomePageProps {
-  initialData?: any
-}
-
 function DotsLoader() {
   return (
     <div className="flex items-center gap-1.5">
@@ -37,14 +33,13 @@ function DotsLoader() {
   )
 }
 
-export default function TabHomePage({ initialData }: TabHomePageProps) {
+export default function TabHomePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const swiperRef = useRef<SwiperType | null>(null)
   const [isSwiperMounted, setIsSwiperMounted] = useState(false)
 
-  // جلوگیری از FOUC و پرش تک‌آیتمی Swiper پس از Mount شدن در کلاینت
   useEffect(() => {
     setIsSwiperMounted(true)
   }, [])
@@ -206,14 +201,14 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto px-2 sm:px-5 py-2 sm:py-3 text-[11px] xs:text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border truncate ${
+            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-4 py-3 sm:py-2 text-[11px] xs:text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border truncate ${
               activeTab === key
                 ? 'bg-[#FCE3E8] text-rose-950 border-[#AF0F12] border-b-[#FCE3E8] relative z-20'
                 : 'bg-white/80 text-gray-800 border-[#BEBABA] border-b-[#AF0F12] hover:text-gray-900 hover:bg-gray-100/70'
             }`}
           >
-            <span className="whitespace-nowrap">{label}</span>
-            {sub && <span className="hidden sm:inline"> {sub}</span>}
+            <span className="whitespace-nowrap text-12 sm:text-14">{label}</span>
+            {sub && <span className="hidden sm:inline text-[10px] sm:text-xs opacity-80 mt-0.5">{sub}</span>}
           </button>
         ))}
       </div>
@@ -224,7 +219,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
           activeTab === 'questions' ? 'rounded-b-xl ' : ''
         }`}
       >
-        {/* Dots Loading Overlay هنگام تعویض تب */}
         {isPending && (
           <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
             <DotsLoader />
@@ -235,7 +229,6 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
         )}
 
         <div className="relative min-h-[100px]">
-          {/* فلش‌های ناوبری سوئیپر */}
           {showArrows && (
             <>
               <button
@@ -274,13 +267,12 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
             </>
           )}
 
-          {/* اگر هنوز کلاینت Mount نشده باشد، جهت جلوگیرى از پرش تک‌آیتمى یک Grid چیدمان‌پذیر نمایش داده می‌شود */}
           {!isSwiperMounted ? (
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
               {currentCategories.slice(0, 6).map((item, index) => (
                 <div
                   key={item.id}
-                  className={`flex flex-col items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border border-[#FCE3E8] ${
+                  className={`flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${
                     index >= 3 ? 'hidden md:flex' : 'flex'
                   }`}
                 >
@@ -320,16 +312,16 @@ export default function TabHomePage({ initialData }: TabHomePageProps) {
                   <SwiperSlide key={item.id}>
                     <button
                       onClick={() => setSelectedCategory(item.id)}
-                      className={`w-full flex flex-col items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${
+                      className={`w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${
                         isSelected
                           ? 'border-rose-600 ring-2 ring-rose-600/20 shadow-md'
-                          : 'border-[#FCE3E8] hover:border-rose-300'
+                          : 'border-[#AF0F12]'
                       }`}
                     >
                       <div className="flex-1 flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-rose-50/60 w-full mb-1.5 sm:mb-2">
                         {item.icon}
                       </div>
-                      <span className="text-[10px] sm:text-sm font-medium text-gray-800 text-center leading-tight line-clamp-2">
+                      <span className=" text-12 sm:text-14 font-medium text-gray-800 text-center leading-tight line-clamp-2">
                         {item.title}
                       </span>
                     </button>
