@@ -209,7 +209,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
                     className="relative cursor-pointer font-bold "
                   >
                     <div
-                      className={`relative  flex flex-col md:flex-row items-center justify-center md:justify-between p-3 md:px-4 md:py-3.5 rounded-xl md:rounded-none md:border-b font-medium
+                      className={`relative  flex flex-col md:flex-row items-center justify-center md:justify-between p-1.5 md:px-4 md:py-1.5 rounded-xl md:rounded-none md:border-b font-medium
                                 ${isActive || isSelected ? "md:bg-blue-50 text-blue-700 border-2 md:border-1 " : "text-gray-600 hover:bg-blue-50/50"}
                                 `}
                     >

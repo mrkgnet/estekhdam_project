@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useTransition, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Navigation } from 'swiper/modules'
@@ -49,13 +50,16 @@ function DotsLoader() {
 }
 
 function CategoryBadges({ badges }: { badges?: string[] }) {
-  if (!badges?.length) return null
+  if (!badges?.length) return (
+    <div className="min-h-[16px] sm:min-h-[20px] mb-1 w-full" />
+  )
+  
   const colors: Record<string, string> = {
     'درسنامه': 'bg-rose-100 text-rose-700 border-rose-200',
     'تست': 'bg-blue-50 text-blue-600 border-blue-200',
   }
   return (
-    <div className="flex gap-1 justify-center flex-wrap mb-1">
+    <div className="flex gap-1 justify-center flex-wrap mb-1 min-h-[16px] sm:min-h-[20px]">
       {badges.map((b) => (
         <span
           key={b}
@@ -66,6 +70,28 @@ function CategoryBadges({ badges }: { badges?: string[] }) {
           {b}
         </span>
       ))}
+    </div>
+  )
+}
+
+// کامپوننت اسکلتون دقیقاً منطبق با کارت‌های اصلی
+function SkeletonCard() {
+  return (
+    <div className="relative w-full flex flex-col border-[#AF0F12]/20 items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border animate-pulse">
+      {/* برچسب درسنامه/تست گوشه بالا */}
+      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 bg-gray-200 rounded-bl"></div>
+      
+   
+      {/* فضای تصویر ثابت مشابه کارت اصلی */}
+      <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
+        <div className="w-7 h-7 sm:w-10 sm:h-10 bg-gray-200 rounded-md"></div>
+      </div>
+      
+      {/* فضای متن (دو خط) */}
+      <div className="w-full flex flex-col items-center gap-1.5 mt-auto">
+        <div className="w-10/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm"></div>
+        <div className="w-7/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm"></div>
+      </div>
     </div>
   )
 }
@@ -93,8 +119,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       (key) => tabToCategoryMap[key] === currentCategoryQuery
     ) || 'questions'
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-
   useEffect(() => {
     if (swiperRef.current) swiperRef.current.update()
   }, [activeTab])
@@ -112,7 +136,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
     params.set('category', tabToCategoryMap[tab])
     startTransition(() => {
       router.push(`?${params.toString()}`, { scroll: false })
-      setSelectedCategory(null)
     })
   }
 
@@ -124,21 +147,20 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
     { key: 'free', label: 'منابع رایگان' },
   ]
 
-  // کارت کوچک‌تر: h-28 sm:h-32 md:h-36 به جای h-36 sm:h-40 md:h-44
   const cardClass = (extra = '') =>
     `relative w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${extra}`
 
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
       {/* Tab Bar */}
-      <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1px]">
+      <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1.4px]">
         {tabConfig.map(({ key, label, sub }) => (
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-3 text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border truncate ${
+            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-3 text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border-2 truncate ${
               activeTab === key
-                ? 'bg-[#FCE3E8] text-rose-950 border-[#AF0F12] border-b-[#FCE3E8] relative z-20'
+                ? 'bg-[#FCE3E8] text-rose-950 border-[#AF0F12] !border-b-[#FCE3E8] relative z-20'
                 : 'bg-white/80 text-gray-800 border-[#BEBABA] border-b-[#AF0F12] hover:text-gray-900 hover:bg-gray-100/70'
             }`}
           >
@@ -150,8 +172,8 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
 
       {/* Tab Content Box */}
       <div
-        className={`bg-[#FCE3E8] border border-[#AF0F12] p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden ${
-          activeTab === 'questions' ? 'rounded-b-xl' : ''
+        className={`bg-[#FCE3E8] border-[#AF0F12] border-2 p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden ${
+          activeTab === 'questions' ? 'rounded-b-xl' : 'rounded-b-xl'
         }`}
       >
         {isPending && (
@@ -162,39 +184,24 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
         )}
 
         <div className="relative min-h-[110px]">
+          {/* دکمه‌های ناوبری */}
           {showArrows && (
             <>
               <button
                 type="button"
                 onClick={() => swiperRef.current?.slidePrev()}
                 aria-label="قبلی"
-                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
+                className="flex absolute top-1/2 -translate-y-1/2 -right-2 sm:-right-4 z-20 w-7 h-9 sm:w-9 sm:h-12 items-center justify-center rounded bg-white border border-slate-400 shadow-md hover:bg-rose-50 transition-colors"
               >
-                <ChevronRight className="w-5 h-5 text-rose-700" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-rose-700" />
               </button>
               <button
                 type="button"
                 onClick={() => swiperRef.current?.slideNext()}
                 aria-label="بعدی"
-                className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-4 z-20 w-9 h-9 items-center justify-center rounded-full bg-white border border-rose-300 shadow-md hover:bg-rose-50 transition-colors"
+                className="flex absolute top-1/2 -translate-y-1/2 -left-2 sm:-left-4 z-20 w-7 h-9 sm:w-9 sm:h-12 items-center justify-center rounded bg-white border border-slate-400 shadow-md hover:bg-rose-50 transition-colors"
               >
-                <ChevronLeft className="w-5 h-5 text-rose-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => swiperRef.current?.slidePrev()}
-                aria-label="قبلی"
-                className="md:hidden absolute top-1/2 -translate-y-1/2 -right-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
-              >
-                <ChevronRight className="w-4 h-4 text-rose-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => swiperRef.current?.slideNext()}
-                aria-label="بعدی"
-                className="md:hidden absolute top-1/2 -translate-y-1/2 -left-1 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 border border-rose-300 shadow-sm active:scale-95 transition-transform"
-              >
-                <ChevronLeft className="w-4 h-4 text-rose-700" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-rose-700" />
               </button>
             </>
           )}
@@ -203,89 +210,72 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
             <div className="flex items-center justify-center py-8 text-rose-900 text-sm font-medium">
               هیچ زیر‌دسته‌ای برای این بخش یافت نشد.
             </div>
-          ) : !isSwiperMounted ? (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-3 w-full">
-              {currentCategories.slice(0, 6).map((item, index) => (
-                <div key={item.id} className={cardClass(index >= 2 ? 'hidden md:flex' : 'flex')}>
-                  <span className="absolute top-1.5 left-1.5 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
-                    درسنامه تست
-                  </span>
-                  <CategoryBadges badges={item.badges} />
-                  <div className="flex-1 relative flex items-center justify-center p-1.5 rounded-lg bg-rose-50/60 w-full my-1 overflow-hidden">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.catName}
-                        fill
-                        className="object-contain p-1"
-                        sizes="(max-width: 768px) 50vw, 16vw"
-                      />
-                    ) : (
-                      <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
-                    )}
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-medium text-gray-800 text-center leading-tight line-clamp-2">
-                    {item.catName}
-                  </span>
-                </div>
-              ))}
-            </div>
           ) : (
-            <Swiper
-              modules={[FreeMode, Navigation]}
-              freeMode
-              dir="rtl"
-              observer
-              observeParents
-              onSwiper={(swiper) => {
-                swiperRef.current = swiper
-              }}
-              slidesPerView={3}
-              spaceBetween={8}
-              breakpoints={{
-                480: { slidesPerView: 2.5, spaceBetween: 10 },
-                640: { slidesPerView: 3.5, spaceBetween: 12 },
-                768: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
-              }}
-              className="w-full !px-1"
-            >
-              {currentCategories.map((item) => {
-                const isSelected = selectedCategory === item.id
-                return (
-                  <SwiperSlide key={item.id}>
-                    <button
-                      onClick={() => setSelectedCategory(item.id)}
-                      className={cardClass(
-                        isSelected
-                          ? 'border-rose-600 ring-2 ring-rose-600/20 shadow-md'
-                          : 'border-[#AF0F12]'
-                      )}
-                    >
-                      <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
-                        درسنامه / تست
-                      </span>
-                      <CategoryBadges badges={item.badges} />
-                      <div className="flex-1 relative flex items-center justify-center p-1.5 rounded-lg w-full my-1 overflow-hidden">
-                        {item.imageUrl ? (
-                          <Image
-                            src={item.imageUrl}
-                            alt={item.catName}
-                            fill
-                            className="object-contain p-1"
-                            sizes="(max-width: 768px) 50vw, 16vw"
-                          />
-                        ) : (
-                          <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
-                        )}
-                      </div>
-                      <span className="text-[10px] sm:text-xs font-medium text-gray-800 text-center leading-tight line-clamp-2">
-                        {item.catName}
-                      </span>
-                    </button>
-                  </SwiperSlide>
-                )
-              })}
-            </Swiper>
+            <div className="w-full">
+              {!isSwiperMounted ? (
+                /* اسکلتون لودر - اضافه شدن py-1 برای مطابقت با سوایپر */
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 w-full !px-1 py-1">
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <SkeletonCard key={index} />
+                  ))}
+                </div>
+              ) : (
+                <Swiper
+                  modules={[FreeMode, Navigation]}
+                  freeMode
+                  dir="rtl"
+                  observer
+                  observeParents
+                  onSwiper={(swiper) => {
+                    swiperRef.current = swiper
+                  }}
+                  slidesPerView={2}
+                  spaceBetween={8}
+                  breakpoints={{
+                    768: { slidesPerView: 4, spaceBetween: 12 },
+                    1024: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
+                  }}
+                  className="w-full !px-1 py-1"
+                >
+                  {currentCategories.map((item) => {
+                    const categorySlug = item.catSlug || item.catName
+                    return (
+                      <SwiperSlide key={item.id}>
+                        <Link
+                          href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
+                          className={cardClass()}
+                        >
+                          <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+                            درسنامه / تست
+                          </span>
+                          
+                          <CategoryBadges badges={item.badges} />
+                          
+                          {/* کانتینر تصویر با ابعاد ثابت و بدون بک‌گراند */}
+                          <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
+                            {item.imageUrl ? (
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.catName}
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 768px) 40px, 56px"
+                              />
+                            ) : (
+                              <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
+                            )}
+                          </div>
+                          
+                          <span className="text-[10px] sm:text-xs font-bold text-gray-800 text-center leading-tight line-clamp-2 mt-auto w-full">
+                            {item.catName}
+                          </span>
+                        </Link>
+                      </SwiperSlide>
+                    )
+                  })}
+                </Swiper>
+              )}
+            </div>
           )}
         </div>
       </div>
