@@ -1,23 +1,38 @@
 'use client'
 
 import React, { useRef, useState, useTransition, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Navigation } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react'
 
 import 'swiper/css'
 import 'swiper/css/free-mode'
 import 'swiper/css/navigation'
 
-type Category = {
+export type CategoryChild = {
   id: string
-  title: string
-  icon: React.ReactNode
+  catName: string
+  catSlug: string
+  imageUrl?: string | null
+  badges?: string[]
+}
+
+export type ParentCategory = {
+  id: string
+  catName: string
+  catSlug: string
+  imageUrl?: string | null
+  children: CategoryChild[]
 }
 
 type MainTab = 'questions' | 'booklets' | 'free'
+
+type TabHomePageProps = {
+  initialData?: ParentCategory[]
+}
 
 function DotsLoader() {
   return (
@@ -33,7 +48,29 @@ function DotsLoader() {
   )
 }
 
-export default function TabHomePage() {
+function CategoryBadges({ badges }: { badges?: string[] }) {
+  if (!badges?.length) return null
+  const colors: Record<string, string> = {
+    'درسنامه': 'bg-rose-100 text-rose-700 border-rose-200',
+    'تست': 'bg-blue-50 text-blue-600 border-blue-200',
+  }
+  return (
+    <div className="flex gap-1 justify-center flex-wrap mb-1">
+      {badges.map((b) => (
+        <span
+          key={b}
+          className={`text-[8px] font-bold px-1 py-0.5 rounded-full border ${
+            colors[b] ?? 'bg-gray-100 text-gray-600 border-gray-200'
+          }`}
+        >
+          {b}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -59,121 +96,16 @@ export default function TabHomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   useEffect(() => {
-    if (swiperRef.current) {
-      swiperRef.current.update()
-    }
+    if (swiperRef.current) swiperRef.current.update()
   }, [activeTab])
 
-  const categoriesData: Record<MainTab, Category[]> = {
-    questions: [
-      {
-        id: 'q-banks',
-        title: 'بانک سوالات بانک‌ها',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 21h18" /><path d="M3 10h18" /><path d="M5 6l7-3 7 3" />
-            <path d="M4 10v11" /><path d="M20 10v11" />
-            <path d="M8 14v3" /><path d="M12 14v3" /><path d="M16 14v3" />
-          </svg>
-        ),
-      },
-      {
-        id: 'q-med',
-        title: 'بانک سوالات وزارت بهداشت',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-3.05 11a22.35 22.35 0 0 1-3.95 2z" />
-            <path d="M9 12l-5 5" /><path d="M12 9l5-5" />
-          </svg>
-        ),
-      },
-      {
-        id: 'q-edu',
-        title: 'بانک سوالات آموزش و پرورش',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            <path d="M8 7h8" /><path d="M8 11h8" />
-          </svg>
-        ),
-      },
-      {
-        id: 'q-gov',
-        title: 'بانک سوالات دستگاه‌های دولتی',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-        ),
-      },
-      {
-        id: 'q-army',
-        title: 'بانک سوالات نیروهای مسلح',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          </svg>
-        ),
-      },
-      {
-        id: 'q-oil',
-        title: 'بانک سوالات نفت و پتروشیمی',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-            <path d="M12 8v8M8 12h8" />
-          </svg>
-        ),
-      },
-    ],
-    booklets: [
-      {
-        id: 'b-banks',
-        title: 'دفترچه‌های استخدامی بانک‌ها',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-          </svg>
-        ),
-      },
-      {
-        id: 'b-edu',
-        title: 'دفترچه‌های استخدامی آموزش و پرورش',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-            <path d="M6 12v5c3 3 9 3 12 0v-5" />
-          </svg>
-        ),
-      },
-    ],
-    free: [
-      {
-        id: 'f-banks',
-        title: 'منابع رایگان بانک‌ها',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-          </svg>
-        ),
-      },
-      {
-        id: 'f-edu',
-        title: 'منابع رایگان آموزش و پرورش',
-        icon: (
-          <svg className="w-6 h-6 stroke-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-            <path d="m9 12 2 2 4-4" />
-          </svg>
-        ),
-      },
-    ],
-  }
+  const activeParent = initialData.find(
+    (parent) =>
+      parent.catSlug === tabToCategoryMap[activeTab] ||
+      parent.catName === tabToCategoryMap[activeTab]
+  )
+
+  const currentCategories = activeParent?.children || []
 
   const handleTabChange = (tab: MainTab) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -184,14 +116,17 @@ export default function TabHomePage() {
     })
   }
 
-  const currentCategories = categoriesData[activeTab]
-  const showArrows = currentCategories.length > 3
+  const showArrows = currentCategories.length > 2
 
   const tabConfig: { key: MainTab; label: string; sub?: string }[] = [
     { key: 'questions', label: 'بانک سوالات', sub: '(درسنامه/تست)' },
     { key: 'booklets', label: 'دفترچه‌های استخدامی', sub: '(درسنامه/تست)' },
     { key: 'free', label: 'منابع رایگان' },
   ]
+
+  // کارت کوچک‌تر: h-28 sm:h-32 md:h-36 به جای h-36 sm:h-40 md:h-44
+  const cardClass = (extra = '') =>
+    `relative w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${extra}`
 
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
@@ -201,13 +136,13 @@ export default function TabHomePage() {
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-4 py-3 sm:py-2 text-[11px] xs:text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border truncate ${
+            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-3 text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border truncate ${
               activeTab === key
                 ? 'bg-[#FCE3E8] text-rose-950 border-[#AF0F12] border-b-[#FCE3E8] relative z-20'
                 : 'bg-white/80 text-gray-800 border-[#BEBABA] border-b-[#AF0F12] hover:text-gray-900 hover:bg-gray-100/70'
             }`}
           >
-            <span className="whitespace-nowrap text-12 sm:text-14">{label}</span>
+            <span className="whitespace-nowrap text-xs sm:text-sm">{label}</span>
             {sub && <span className="hidden sm:inline text-[10px] sm:text-xs opacity-80 mt-0.5">{sub}</span>}
           </button>
         ))}
@@ -216,19 +151,17 @@ export default function TabHomePage() {
       {/* Tab Content Box */}
       <div
         className={`bg-[#FCE3E8] border border-[#AF0F12] p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden ${
-          activeTab === 'questions' ? 'rounded-b-xl ' : ''
+          activeTab === 'questions' ? 'rounded-b-xl' : ''
         }`}
       >
         {isPending && (
           <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
             <DotsLoader />
-            <span className="text-xs font-semibold text-rose-950">
-              در حال دریافت اطلاعات...
-            </span>
+            <span className="text-xs font-semibold text-rose-950">در حال دریافت اطلاعات...</span>
           </div>
         )}
 
-        <div className="relative min-h-[100px]">
+        <div className="relative min-h-[110px]">
           {showArrows && (
             <>
               <button
@@ -247,7 +180,6 @@ export default function TabHomePage() {
               >
                 <ChevronLeft className="w-5 h-5 text-rose-700" />
               </button>
-
               <button
                 type="button"
                 onClick={() => swiperRef.current?.slidePrev()}
@@ -267,20 +199,33 @@ export default function TabHomePage() {
             </>
           )}
 
-          {!isSwiperMounted ? (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
+          {currentCategories.length === 0 ? (
+            <div className="flex items-center justify-center py-8 text-rose-900 text-sm font-medium">
+              هیچ زیر‌دسته‌ای برای این بخش یافت نشد.
+            </div>
+          ) : !isSwiperMounted ? (
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-3 w-full">
               {currentCategories.slice(0, 6).map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${
-                    index >= 3 ? 'hidden md:flex' : 'flex'
-                  }`}
-                >
-                  <div className="flex-1 flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-rose-50/60 w-full mb-1.5 sm:mb-2">
-                    {item.icon}
+                <div key={item.id} className={cardClass(index >= 2 ? 'hidden md:flex' : 'flex')}>
+                  <span className="absolute top-1.5 left-1.5 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+                    درسنامه تست
+                  </span>
+                  <CategoryBadges badges={item.badges} />
+                  <div className="flex-1 relative flex items-center justify-center p-1.5 rounded-lg bg-rose-50/60 w-full my-1 overflow-hidden">
+                    {item.imageUrl ? (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.catName}
+                        fill
+                        className="object-contain p-1"
+                        sizes="(max-width: 768px) 50vw, 16vw"
+                      />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
+                    )}
                   </div>
-                  <span className="text-[10px] sm:text-sm font-medium text-gray-800 text-center leading-tight line-clamp-2">
-                    {item.title}
+                  <span className="text-[10px] sm:text-xs font-medium text-gray-800 text-center leading-tight line-clamp-2">
+                    {item.catName}
                   </span>
                 </div>
               ))}
@@ -290,19 +235,17 @@ export default function TabHomePage() {
               modules={[FreeMode, Navigation]}
               freeMode
               dir="rtl"
-              observer={true}
-              observeParents={true}
+              observer
+              observeParents
               onSwiper={(swiper) => {
                 swiperRef.current = swiper
               }}
               slidesPerView={3}
               spaceBetween={8}
               breakpoints={{
-                480: { slidesPerView: 3.2, spaceBetween: 10 },
-                768: {
-                  slidesPerView: Math.min(currentCategories.length, 6),
-                  spaceBetween: 12,
-                },
+                480: { slidesPerView: 2.5, spaceBetween: 10 },
+                640: { slidesPerView: 3.5, spaceBetween: 12 },
+                768: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
               }}
               className="w-full !px-1"
             >
@@ -312,17 +255,31 @@ export default function TabHomePage() {
                   <SwiperSlide key={item.id}>
                     <button
                       onClick={() => setSelectedCategory(item.id)}
-                      className={`w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${
+                      className={cardClass(
                         isSelected
                           ? 'border-rose-600 ring-2 ring-rose-600/20 shadow-md'
                           : 'border-[#AF0F12]'
-                      }`}
+                      )}
                     >
-                      <div className="flex-1 flex items-center justify-center p-1.5 sm:p-2 rounded-lg bg-rose-50/60 w-full mb-1.5 sm:mb-2">
-                        {item.icon}
+                      <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+                        درسنامه / تست
+                      </span>
+                      <CategoryBadges badges={item.badges} />
+                      <div className="flex-1 relative flex items-center justify-center p-1.5 rounded-lg w-full my-1 overflow-hidden">
+                        {item.imageUrl ? (
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.catName}
+                            fill
+                            className="object-contain p-1"
+                            sizes="(max-width: 768px) 50vw, 16vw"
+                          />
+                        ) : (
+                          <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
+                        )}
                       </div>
-                      <span className=" text-12 sm:text-14 font-medium text-gray-800 text-center leading-tight line-clamp-2">
-                        {item.title}
+                      <span className="text-[10px] sm:text-xs font-medium text-gray-800 text-center leading-tight line-clamp-2">
+                        {item.catName}
                       </span>
                     </button>
                   </SwiperSlide>

@@ -6,7 +6,6 @@ type Props = {
   category: string
 }
 
-// اسکلتون سروری با تطابق ۱۰۰٪ دقیق با ظاهر و ساختار TabHomePage
 function TabHomeSkeleton() {
   const tabs = [
     { label: 'بانک سوالات', sub: '(درسنامه/تست)' },
@@ -16,7 +15,6 @@ function TabHomeSkeleton() {
 
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
-      {/* نوار تب‌های اسکلتون دقیقا مشابه تب‌های واقعی */}
       <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1px]">
         {tabs.map((tab, index) => (
           <div
@@ -33,25 +31,21 @@ function TabHomeSkeleton() {
         ))}
       </div>
 
-      {/* باکس کارت‌های اسکلتونی (۳ عدد در موبایل، ۶ عدد در دسکتاپ) */}
       <div className="bg-[#FCE3E8] border border-[#AF0F12] p-3 sm:p-6 shadow-sm rounded-b-xl">
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className={`flex flex-col items-center justify-between p-2 sm:p-3.5 h-24 sm:h-28 md:h-32 bg-white/80 rounded-xl border border-rose-200/60 shadow-sm relative overflow-hidden ${
+              className={`flex flex-col items-center justify-between p-3 sm:p-4 h-36 sm:h-40 md:h-44 bg-white/80 rounded-xl border border-rose-200/60 shadow-sm relative overflow-hidden ${
                 index >= 3 ? 'hidden md:flex' : 'flex'
               }`}
             >
-              {/* افکت درخشش شیب‌دار (Shimmer) */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent animate-shimmer" />
 
-              {/* اسکلتون جایگاه آیکون */}
               <div className="w-full flex-1 bg-rose-100/50 rounded-lg mb-1.5 sm:mb-2 flex items-center justify-center animate-pulse">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-rose-200/60 rounded-lg" />
+                <div className="w-12 h-12 bg-rose-200/60 rounded-lg" />
               </div>
 
-              {/* اسکلتون عنوان متنی */}
               <div className="w-full flex flex-col items-center gap-1 mt-0.5 animate-pulse">
                 <div className="w-4/5 h-2.5 sm:h-3 bg-rose-200/70 rounded-full" />
                 <div className="w-1/2 h-2 sm:h-2.5 bg-rose-200/50 rounded-full" />
@@ -65,8 +59,8 @@ function TabHomeSkeleton() {
 }
 
 async function DataFetcher({ category }: Props) {
-  const data = await GetCategoriDataAction(category)
-  return <TabHomePage initialData={data} />
+  const result = await GetCategoriDataAction(category)
+  return <TabHomePage initialData={result?.data || []} />
 }
 
 export default function TabHomeFetchData({ category }: Props) {

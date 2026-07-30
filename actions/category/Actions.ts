@@ -77,10 +77,18 @@ export async function GetCategoriDataAction(typeInput?: string | CategoryType) {
     const categoriesWithChildren = await db.category.findMany({
       where: {
         ...(validCategoryType ? { type: validCategoryType } : {}),
-        parentId: null, // فقط دسته‌های والد/اصلی واکشی می‌شوند
+        parentId: null, // فقط دسته‌های اصلی
       },
       include: {
         children: {
+          select: {
+            id: true,
+            catName: true,
+            catSlug: true,
+            imageUrl: true, // دریافت صریح تصویر زیر دسته‌بندی
+            parentId: true,
+            createdAt: true,
+          },
           orderBy: {
             createdAt: "asc",
           },
