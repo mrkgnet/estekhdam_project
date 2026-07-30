@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query'
 import 'swiper/css'
 import 'swiper/css/free-mode'
 import 'swiper/css/navigation'
+import SearchBox from '../search/SearchBox'
 
 export type CategoryChild = {
   id: string
@@ -91,8 +92,7 @@ function SkeletonCard() {
   )
 }
 
-// تعداد اسکلتون‌ها بر اساس breakpoint
-const SKELETON_COUNTS = { default: 2, md: 2, lg: 2 }
+const SKELETON_COUNTS = { lg: 6 }
 
 function TabSkeletonGrid() {
   return (
@@ -118,7 +118,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const tabToCategoryMap: Record<MainTab, string> = {
     questions: 'بانک-سوالات',
     booklets: 'دفترچه-های-استخدامی',
-    free: 'free-resources',
+    free: 'منابع-رایگان',
   }
 
   const currentCategoryQuery = searchParams.get('category') || 'بانک-سوالات'
@@ -135,12 +135,10 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
     gcTime: 1000 * 60 * 30,
   })
 
-  // تشخیص تغییر تب برای نمایش اسکلتون
   const isTabChanging = activeTabKey !== null && activeTabKey !== activeTab
 
   useEffect(() => {
     if (swiperRef.current) swiperRef.current.update()
-    // پس از رندر جدید، وضعیت تغییر تب را پاک می‌کنیم
     setActiveTabKey(null)
   }, [activeTab])
 
@@ -152,9 +150,12 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
 
   const currentCategories = activeParent?.children || []
 
+  // استخراج ۵ دسته‌بندی محبوب برای نمایش در باکس جستجو
+  const popularCategories = categories.slice(0, 5)
+
   const handleTabChange = (tab: MainTab) => {
     if (tab === activeTab) return
-    setActiveTabKey(tab) // شروع حالت loading اسکلتون
+    setActiveTabKey(tab)
     const params = new URLSearchParams(searchParams.toString())
     params.set('category', tabToCategoryMap[tab])
     router.push(`?${params.toString()}`, { scroll: false })
@@ -175,6 +176,28 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
 
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
+      {/* هدر متنی جدید */}
+      <div className="text-center mb-6 flex flex-col items-center gap-1.5">
+        <h1 className="text-lg sm:text-3xl font-medium text-gray-900 tracking-tight">
+          اولین وب سایت تخصصی در زمینه استخدامی های دولتی
+        </h1>
+        <p className="text-sm sm:text-base font-semibold text-blue-700 bg-blue-100/70 px-3 py-0.5 rounded-full border border-rose-200/80">
+          درسنامه و تست به صورت آنلاین
+        </p>
+      </div>
+
+      {/* باکس جستجو */}
+      <div className="relative mx-2 w-full flex justify-center mb-10 z-50">
+        {/* کدهای CSS درون خطی زیر باعث می‌شوند حالت Dropdown موبایل غیرفعال شده و به صورت یک کادر عادی در صفحه نمایش داده شود */}
+        <div className="w-full  max-w-[650px] [&>div]:!static [&>div]:!p-0 [&>div]:!shadow-none [&>div]:!bg-transparent [&>div]:!border-none">
+          <SearchBox
+            popularCategories={popularCategories}
+            isMobileSearchOpen={true} // همیشه در حالت موبایل باز باشد
+            onCloseMobile={() => {}} // در این صفحه نیازی به بسته شدن کل کادر نیست
+          />
+        </div>
+      </div>
+
       {/* Tab Bar */}
       <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1.4px]">
         {tabConfig.map(({ key, label, sub }) => (
@@ -233,29 +256,32 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
           ) : (
             <div className="w-full">
               <Swiper
+                key={activeTab}
                 modules={[FreeMode, Navigation]}
                 freeMode
                 dir="rtl"
                 observer
                 observeParents
+                resizeObserver
                 onSwiper={(swiper) => { swiperRef.current = swiper }}
                 slidesPerView={2}
                 spaceBetween={8}
                 breakpoints={{
+                  640: { slidesPerView: 3, spaceBetween: 10 },
                   768: { slidesPerView: 4, spaceBetween: 12 },
-                  1024: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
+                  1024: { slidesPerView: 6, spaceBetween: 12 },
                 }}
                 className="w-full !px-1 py-1"
               >
                 {currentCategories.map((item) => {
                   const categorySlug = item.catSlug || item.catName
                   return (
-                    <SwiperSlide key={item.id}>
+                    <SwiperSlide key={item.id} className="!h-auto">
                       <Link
                         href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
                         className={cardClass()}
                       >
-                        <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+                        <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[10px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
                           درسنامه / تست
                         </span>
                         <CategoryBadges badges={item.badges} />

@@ -42,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} dark:bg-slate-900 text-13 sm:text-13 md:text-13`} suppressHydrationWarning>
+      <body className={`${iransans.className} !bg-white dark:bg-slate-900 text-13 sm:text-13 md:text-13`} suppressHydrationWarning>
         <Providers>
           <NextTopLoader color="#ef4444" height={2} showSpinner={true} />
 
@@ -62,7 +62,7 @@ export default function RootLayout({
               <TopBanner />
 
               <LoadingProvider>
-                <main className="bg-[#F8FAFC] flex-1 dark:bg-slate-900">{children}</main>
+                <main className="bg-white flex-1 dark:bg-slate-900">{children}</main>
                
               </LoadingProvider>
               <Footer />
