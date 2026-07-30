@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useTransition, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { FreeMode, Navigation } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 
 import 'swiper/css'
 import 'swiper/css/free-mode'
@@ -35,6 +36,12 @@ type TabHomePageProps = {
   initialData?: ParentCategory[]
 }
 
+async function fetchCategories(): Promise<ParentCategory[]> {
+  const res = await fetch('/api/categories')
+  if (!res.ok) throw new Error('خطا در دریافت اطلاعات')
+  return res.json()
+}
+
 function DotsLoader() {
   return (
     <div className="flex items-center gap-1.5">
@@ -50,10 +57,7 @@ function DotsLoader() {
 }
 
 function CategoryBadges({ badges }: { badges?: string[] }) {
-  if (!badges?.length) return (
-    <div className="min-h-[16px] sm:min-h-[20px] mb-1 w-full" />
-  )
-  
+  if (!badges?.length) return <div className="min-h-[16px] sm:min-h-[20px] mb-1 w-full" />
   const colors: Record<string, string> = {
     'درسنامه': 'bg-rose-100 text-rose-700 border-rose-200',
     'تست': 'bg-blue-50 text-blue-600 border-blue-200',
@@ -63,9 +67,7 @@ function CategoryBadges({ badges }: { badges?: string[] }) {
       {badges.map((b) => (
         <span
           key={b}
-          className={`text-[8px] font-bold px-1 py-0.5 rounded-full border ${
-            colors[b] ?? 'bg-gray-100 text-gray-600 border-gray-200'
-          }`}
+          className={`text-[8px] font-bold px-1 py-0.5 rounded-full border ${colors[b] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}
         >
           {b}
         </span>
@@ -74,24 +76,30 @@ function CategoryBadges({ badges }: { badges?: string[] }) {
   )
 }
 
-// کامپوننت اسکلتون دقیقاً منطبق با کارت‌های اصلی
 function SkeletonCard() {
   return (
     <div className="relative w-full flex flex-col border-[#AF0F12]/20 items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border animate-pulse">
-      {/* برچسب درسنامه/تست گوشه بالا */}
-      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 bg-gray-200 rounded-bl"></div>
-      
-   
-      {/* فضای تصویر ثابت مشابه کارت اصلی */}
+      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 bg-gray-200 rounded-bl" />
       <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
-        <div className="w-7 h-7 sm:w-10 sm:h-10 bg-gray-200 rounded-md"></div>
+        <div className="w-7 h-7 sm:w-10 sm:h-10 bg-gray-200 rounded-md" />
       </div>
-      
-      {/* فضای متن (دو خط) */}
       <div className="w-full flex flex-col items-center gap-1.5 mt-auto">
-        <div className="w-10/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm"></div>
-        <div className="w-7/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm"></div>
+        <div className="w-10/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm" />
+        <div className="w-7/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm" />
       </div>
+    </div>
+  )
+}
+
+// تعداد اسکلتون‌ها بر اساس breakpoint
+const SKELETON_COUNTS = { default: 2, md: 2, lg: 2 }
+
+function TabSkeletonGrid() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 w-full !px-1 py-1">
+      {Array.from({ length: SKELETON_COUNTS.lg }).map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
     </div>
   )
 }
@@ -99,9 +107,9 @@ function SkeletonCard() {
 export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
   const swiperRef = useRef<SwiperType | null>(null)
   const [isSwiperMounted, setIsSwiperMounted] = useState(false)
+  const [activeTabKey, setActiveTabKey] = useState<MainTab | null>(null)
 
   useEffect(() => {
     setIsSwiperMounted(true)
@@ -119,11 +127,24 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       (key) => tabToCategoryMap[key] === currentCategoryQuery
     ) || 'questions'
 
+  const { data: categories = initialData, isFetching } = useQuery<ParentCategory[]>({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    initialData: initialData.length > 0 ? initialData : undefined,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  })
+
+  // تشخیص تغییر تب برای نمایش اسکلتون
+  const isTabChanging = activeTabKey !== null && activeTabKey !== activeTab
+
   useEffect(() => {
     if (swiperRef.current) swiperRef.current.update()
+    // پس از رندر جدید، وضعیت تغییر تب را پاک می‌کنیم
+    setActiveTabKey(null)
   }, [activeTab])
 
-  const activeParent = initialData.find(
+  const activeParent = categories.find(
     (parent) =>
       parent.catSlug === tabToCategoryMap[activeTab] ||
       parent.catName === tabToCategoryMap[activeTab]
@@ -132,11 +153,11 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const currentCategories = activeParent?.children || []
 
   const handleTabChange = (tab: MainTab) => {
+    if (tab === activeTab) return
+    setActiveTabKey(tab) // شروع حالت loading اسکلتون
     const params = new URLSearchParams(searchParams.toString())
     params.set('category', tabToCategoryMap[tab])
-    startTransition(() => {
-      router.push(`?${params.toString()}`, { scroll: false })
-    })
+    router.push(`?${params.toString()}`, { scroll: false })
   }
 
   const showArrows = currentCategories.length > 2
@@ -149,6 +170,8 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
 
   const cardClass = (extra = '') =>
     `relative w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${extra}`
+
+  const showSkeleton = !isSwiperMounted || isTabChanging
 
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
@@ -171,12 +194,8 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       </div>
 
       {/* Tab Content Box */}
-      <div
-        className={`bg-[#FCE3E8] border-[#AF0F12] border-2 p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden ${
-          activeTab === 'questions' ? 'rounded-b-xl' : 'rounded-b-xl'
-        }`}
-      >
-        {isPending && (
+      <div className="bg-[#FCE3E8] border-[#AF0F12] border-2 p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden rounded-b-xl">
+        {isFetching && !isTabChanging && (
           <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
             <DotsLoader />
             <span className="text-xs font-semibold text-rose-950">در حال دریافت اطلاعات...</span>
@@ -184,8 +203,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
         )}
 
         <div className="relative min-h-[110px]">
-          {/* دکمه‌های ناوبری */}
-          {showArrows && (
+          {showArrows && !showSkeleton && (
             <>
               <button
                 type="button"
@@ -206,75 +224,62 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
             </>
           )}
 
-          {currentCategories.length === 0 ? (
+          {showSkeleton ? (
+            <TabSkeletonGrid />
+          ) : currentCategories.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-rose-900 text-sm font-medium">
               هیچ زیر‌دسته‌ای برای این بخش یافت نشد.
             </div>
           ) : (
             <div className="w-full">
-              {!isSwiperMounted ? (
-                /* اسکلتون لودر - اضافه شدن py-1 برای مطابقت با سوایپر */
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 w-full !px-1 py-1">
-                  {Array.from({ length: 2 }).map((_, index) => (
-                    <SkeletonCard key={index} />
-                  ))}
-                </div>
-              ) : (
-                <Swiper
-                  modules={[FreeMode, Navigation]}
-                  freeMode
-                  dir="rtl"
-                  observer
-                  observeParents
-                  onSwiper={(swiper) => {
-                    swiperRef.current = swiper
-                  }}
-                  slidesPerView={2}
-                  spaceBetween={8}
-                  breakpoints={{
-                    768: { slidesPerView: 4, spaceBetween: 12 },
-                    1024: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
-                  }}
-                  className="w-full !px-1 py-1"
-                >
-                  {currentCategories.map((item) => {
-                    const categorySlug = item.catSlug || item.catName
-                    return (
-                      <SwiperSlide key={item.id}>
-                        <Link
-                          href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
-                          className={cardClass()}
-                        >
-                          <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
-                            درسنامه / تست
-                          </span>
-                          
-                          <CategoryBadges badges={item.badges} />
-                          
-                          {/* کانتینر تصویر با ابعاد ثابت و بدون بک‌گراند */}
-                          <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
-                            {item.imageUrl ? (
-                              <Image
-                                src={item.imageUrl}
-                                alt={item.catName}
-                                fill
-                                className="object-contain"
-                                sizes="(max-width: 768px) 40px, 56px"
-                              />
-                            ) : (
-                              <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
-                            )}
-                          </div>
-                          
-                          <span className="text-[10px] sm:text-xs font-bold text-gray-800 text-center leading-tight line-clamp-2 mt-auto w-full">
-                            {item.catName}
-                          </span>
-                        </Link>
-                      </SwiperSlide>
-                    )
-                  })}
-                </Swiper>
-              )}
+              <Swiper
+                modules={[FreeMode, Navigation]}
+                freeMode
+                dir="rtl"
+                observer
+                observeParents
+                onSwiper={(swiper) => { swiperRef.current = swiper }}
+                slidesPerView={2}
+                spaceBetween={8}
+                breakpoints={{
+                  768: { slidesPerView: 4, spaceBetween: 12 },
+                  1024: { slidesPerView: Math.min(currentCategories.length, 6), spaceBetween: 12 },
+                }}
+                className="w-full !px-1 py-1"
+              >
+                {currentCategories.map((item) => {
+                  const categorySlug = item.catSlug || item.catName
+                  return (
+                    <SwiperSlide key={item.id}>
+                      <Link
+                        href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
+                        className={cardClass()}
+                      >
+                        <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[7px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+                          درسنامه / تست
+                        </span>
+                        <CategoryBadges badges={item.badges} />
+                        <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
+                          {item.imageUrl ? (
+                            <Image
+                              src={item.imageUrl}
+                              alt={item.catName}
+                              fill
+                              className="object-contain"
+                              sizes="(max-width: 768px) 40px, 56px"
+                            />
+                          ) : (
+                            <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
+                          )}
+                        </div>
+                        <span className="text-12 sm:text-13 font-bold text-gray-800 text-center leading-tight line-clamp-2 mt-auto w-full">
+                          {item.catName}
+                        </span>
+                      </Link>
+                    </SwiperSlide>
+                  )
+                })}
+              </Swiper>
             </div>
           )}
         </div>
