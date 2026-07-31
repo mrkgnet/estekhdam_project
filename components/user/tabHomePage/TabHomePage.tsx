@@ -79,20 +79,20 @@ function CategoryBadges({ badges }: { badges?: string[] }) {
 
 function SkeletonCard() {
   return (
-    <div className="relative w-full flex flex-col border-[#AF0F12]/20 items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border animate-pulse">
-      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 bg-gray-200 rounded-bl" />
+    <div className="relative w-full flex flex-col border-[#AF0F12]/20 items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border">
+      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 skeleton-wave rounded-bl" />
       <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
-        <div className="w-7 h-7 sm:w-10 sm:h-10 bg-gray-200 rounded-md" />
+        <div className="w-7 h-7 sm:w-10 sm:h-10 skeleton-wave rounded-md" />
       </div>
       <div className="w-full flex flex-col items-center gap-1.5 mt-auto">
-        <div className="w-10/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm" />
-        <div className="w-7/12 h-2 sm:h-2.5 bg-gray-200 rounded-sm" />
+        <div className="w-10/12 h-2 sm:h-2.5 skeleton-wave rounded-sm" />
+        <div className="w-7/12 h-2 sm:h-2.5 skeleton-wave rounded-sm" />
       </div>
     </div>
   )
 }
 
-const SKELETON_COUNTS = { lg: 6 }
+const SKELETON_COUNTS = { lg: 2 }
 
 function TabSkeletonGrid() {
   return (
@@ -108,11 +108,12 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const swiperRef = useRef<SwiperType | null>(null)
-  const [isSwiperMounted, setIsSwiperMounted] = useState(false)
+  
+  const [isMounted, setIsMounted] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState<MainTab | null>(null)
 
   useEffect(() => {
-    setIsSwiperMounted(true)
+    setIsMounted(true)
   }, [])
 
   const tabToCategoryMap: Record<MainTab, string> = {
@@ -149,8 +150,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   )
 
   const currentCategories = activeParent?.children || []
-
-  // استخراج ۵ دسته‌بندی محبوب برای نمایش در باکس جستجو
   const popularCategories = categories.slice(0, 5)
 
   const handleTabChange = (tab: MainTab) => {
@@ -162,6 +161,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   }
 
   const showArrows = currentCategories.length > 2
+  const showSkeleton = !isMounted || isTabChanging
 
   const tabConfig: { key: MainTab; label: string; sub?: string }[] = [
     { key: 'questions', label: 'بانک سوالات', sub: '(درسنامه/تست)' },
@@ -172,33 +172,57 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const cardClass = (extra = '') =>
     `relative w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${extra}`
 
-  const showSkeleton = !isSwiperMounted || isTabChanging
-
   return (
     <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
-      {/* هدر متنی جدید */}
+      {/* تعریف انیمیشن موجی در بالاترین سطح کامپوننت تا همه جا اعمال شود */}
+      <style>{`
+        @keyframes skeleton-wave {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .skeleton-wave {
+          background-color: #e5e7eb;
+          background-image: linear-gradient(90deg, #e5e7eb 25%, #f9fafb 50%, #e5e7eb 75%);
+          background-size: 200% 100%;
+          animation: skeleton-wave 1.5s infinite linear;
+        }
+      `}</style>
+
+      {/* هدر متنی با قابلیت نمایش اسکلتون */}
       <div className="text-center mb-6 flex flex-col items-center gap-1.5">
-        <h1 className="text-lg sm:text-3xl font-medium text-gray-900 tracking-tight">
-          اولین وب سایت تخصصی در زمینه استخدامی های دولتی
-        </h1>
-        <p className="text-sm sm:text-base font-semibold text-blue-700 bg-blue-100/70 px-3 py-0.5 rounded-full border border-rose-200/80">
-          درسنامه و تست به صورت آنلاین
-        </p>
+        {!isMounted ? (
+          <>
+            <div className="h-7 sm:h-9 w-10/12 sm:w-2/3 md:w-1/2 skeleton-wave rounded-lg mb-1"></div>
+            <div className="h-6 sm:h-7 w-48 sm:w-56 skeleton-wave rounded-full mt-1"></div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-lg sm:text-3xl font-medium text-gray-900 tracking-tight">
+              اولین وب سایت تخصصی در زمینه استخدامی های دولتی
+            </h1>
+            <p className="text-sm sm:text-base font-semibold text-blue-700 bg-blue-100/70 px-3 py-0.5 rounded-full border border-rose-200/80">
+              درسنامه و تست به صورت آنلاین
+            </p>
+          </>
+        )}
       </div>
 
-      {/* باکس جستجو */}
-      <div className="relative mx-2 w-full flex justify-center mb-10 z-50">
-        {/* کدهای CSS درون خطی زیر باعث می‌شوند حالت Dropdown موبایل غیرفعال شده و به صورت یک کادر عادی در صفحه نمایش داده شود */}
-        <div className="w-full  max-w-[650px] [&>div]:!static [&>div]:!p-0 [&>div]:!shadow-none [&>div]:!bg-transparent [&>div]:!border-none">
-          <SearchBox
-            popularCategories={popularCategories}
-            isMobileSearchOpen={true} // همیشه در حالت موبایل باز باشد
-            onCloseMobile={() => {}} // در این صفحه نیازی به بسته شدن کل کادر نیست
-          />
+      {/* باکس جستجو با اسکلتون اختصاصی تا قبل از لود کامل */}
+      <div className="relative mx-2 w-full flex justify-center mb-10 z-50 px-4">
+        <div className="w-full max-w-[650px] [&>div]:!static [&>div]:!p-0 [&>div]:!shadow-none [&>div]:!bg-transparent [&>div]:!border-none">
+          {!isMounted ? (
+            <div className="w-full h-14 skeleton-wave rounded-xl border border-gray-200"></div>
+          ) : (
+            <SearchBox
+              popularCategories={popularCategories}
+              isMobileSearchOpen={true}
+              onCloseMobile={() => {}}
+            />
+          )}
         </div>
       </div>
 
-      {/* Tab Bar */}
+      {/* تب‌ها: نمایش ثابت تب‌ها بدون لودر/اسکلتون از همان لحظه اول */}
       <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1.4px]">
         {tabConfig.map(({ key, label, sub }) => (
           <button
@@ -216,7 +240,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
         ))}
       </div>
 
-      {/* Tab Content Box */}
+      {/* کانتنت اصلی (باکس صورتی رنگ) */}
       <div className="bg-[#FCE3E8] border-[#AF0F12] border-2 p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden rounded-b-xl">
         {isFetching && !isTabChanging && (
           <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
