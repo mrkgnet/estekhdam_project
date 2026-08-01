@@ -1,8 +1,7 @@
-// NotificationBell.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Bell, BellRing, Check, Trash2, Lock } from "lucide-react";
+import { Bell, BellRing, Check, Trash2, Lock, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext"; 
 import { 
   getDataGlobalNotificationUserAction, 
@@ -87,7 +86,7 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center justify-center w-10 h-10 rounded-xl border border-gray-400 text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition relative cursor-pointer ${
+        className={`flex items-center justify-center w-12 h-12 rounded-xl border border-gray-400 text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition relative cursor-pointer ${
           isOpen ? "bg-blue-50 border-blue-200 text-blue-600" : ""
         }`}
       >
@@ -98,7 +97,7 @@ export default function NotificationBell() {
         )}
 
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+          <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white ring-2 ring-white">
             {unreadCount}
           </span>
         )}
@@ -106,48 +105,54 @@ export default function NotificationBell() {
 
       {/* منوی بازشوی اعلان‌ها */}
       <div
-        className={`z-50 bg-white rounded shadow-xl border border-gray-300 overflow-hidden transition-all duration-200 
-          fixed top-[76px] left-1/2 w-[92vw] max-w-[360px] -translate-x-1/2 origin-top
-          sm:absolute sm:top-[calc(100%+8px)] sm:left-0 sm:right-auto sm:w-96 sm:translate-x-0 sm:origin-top-left
+        className={`z-50 bg-white rounded-xl shadow-xl border border-gray-300 overflow-hidden transition-all duration-200 
+          fixed top-[98px] left-1/2 w-[92vw] max-w-[360px] -translate-x-1/2 origin-top
+          sm:absolute sm:top-full sm:mt-3 sm:left-0 sm:right-auto sm:w-96 sm:translate-x-0 sm:origin-top-left
           ${isOpen ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-95 sm:-translate-y-2 pointer-events-none"}
         `}
       >
         {/* هدر منو */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
-          <span className="font-bold text-sm text-gray-800">اعلان‌های سایت</span>
-          {isLoggedIn && unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllAsRead}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer"
-            >
-              <Check size={14} /> همه خوانده شد
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-800">اعلان‌های سایت</span>
+            {isLoggedIn && unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="text-xs text-blue-600 hover:text-blue-700 font-normal flex items-center gap-1 cursor-pointer"
+              >
+                <Check size={14} /> همه خوانده شد
+              </button>
+            )}
+          </div>
+
+          {/* دکمه بستن (ضربدر) */}
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 p-1 rounded-lg transition-colors cursor-pointer"
+            title="بستن"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* بدنه منو */}
         <div className="max-h-[320px] overflow-y-auto divide-y divide-gray-50">
           
-          {/* ۱. حالت لودینگ اسکلتونی (افزایش زیبایی بصری) ✨ */}
+          {/* ۱. حالت لودینگ اسکلتونی ✨ */}
           {(isAuthLoading || isNotifLoading) ? (
             <div className="divide-y divide-gray-100">
               {[1, 2, 3].map((index) => (
                 <div key={index} className="p-4 flex items-start gap-3 animate-pulse">
-                  {/* جایگاه نقطه آبی (وضعیت ناخوانده) */}
                   <div className="h-2 w-2 rounded-full bg-gray-200 mt-2 shrink-0" />
                   
                   <div className="flex-1 space-y-2 pr-2">
-                    {/* جایگاه عنوان اعلان */}
                     <div className="h-3 bg-gray-200 rounded w-1/3" />
-                    {/* جایگاه متن پیام */}
                     <div className="space-y-1.5">
                       <div className="h-2 bg-gray-200 rounded w-full" />
                       <div className="h-2 bg-gray-200 rounded w-5/6" />
                     </div>
-                    {/* جایگاه تاریخ */}
                     <div className="h-2 bg-gray-200 rounded w-1/4 pt-1" />
                   </div>
-                  {/* جایگاه دکمه سطل زباله */}
                   <div className="h-4 w-4 bg-gray-200 rounded shrink-0 self-center" />
                 </div>
               ))}
@@ -158,7 +163,7 @@ export default function NotificationBell() {
           !isLoggedIn ? (
             <div className="p-8 text-center flex flex-col items-center justify-center gap-2 text-gray-500">
               <Lock size={24} className="text-gray-400 mb-1" />
-              <span className="text-xs font-bold text-gray-700">ابتدا وارد حساب کاربری خود شوید</span>
+              <span className="text-xs font-semibold text-gray-700">ابتدا وارد حساب کاربری خود شوید</span>
               <p className="text-[10px] text-gray-400">برای مشاهده و مدیریت اعلان‌ها، نیاز به لاگین دارید.</p>
             </div>
           ) : 
@@ -185,7 +190,7 @@ export default function NotificationBell() {
                 )}
 
                 <div className="flex-1 space-y-1 pr-2">
-                  <h4 className={`text-xs text-gray-900 ${!notif.isRead ? "font-bold" : "font-medium"}`}>
+                  <h4 className="text-xs text-gray-900 font-medium">
                     {notif.title}
                   </h4>
                   <p className="text-[11px] leading-relaxed text-gray-500 line-clamp-2">

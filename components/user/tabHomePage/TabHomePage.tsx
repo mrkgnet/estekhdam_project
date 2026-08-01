@@ -208,7 +208,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       </div>
 
       {/* باکس جستجو با اسکلتون اختصاصی تا قبل از لود کامل */}
-      <div className="relative mx-2 w-full flex justify-center mb-10 z-50 px-4">
+      <div className="relative mx-2 w-full flex justify-center mb-10 z-50 px-2">
         <div className="w-full max-w-[650px] [&>div]:!static [&>div]:!p-0 [&>div]:!shadow-none [&>div]:!bg-transparent [&>div]:!border-none">
           {!isMounted ? (
             <div className="w-full h-14 skeleton-wave rounded-xl border border-gray-200"></div>

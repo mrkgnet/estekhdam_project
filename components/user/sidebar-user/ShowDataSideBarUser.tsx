@@ -173,7 +173,7 @@ export default function ShowDataSideBarUser({ response }: ShowDataSideBarUserPro
       <aside
         onMouseLeave={handleMouseLeaveDesktop}
         onMouseEnter={() => handleInteraction(null, 0)}
-        className={`fixed right-0 z-50 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
+        className={`fixed right-0 z-70 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
           transition-all duration-50
           ${isScrolled ? "top-14 h-[calc(100vh-3.5rem)]" : "top-32 h-[calc(100vh-8rem)]"}
           ${isOpen ? "translate-x-0" : "translate-x-full"} 

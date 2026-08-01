@@ -11,8 +11,6 @@ import NotificationBell from "../notification/notificationBell/NotificationBell"
 import Image from "next/image";
 import SearchBox from "../user/search/SearchBox";
 
-// ایمپورت کردن کامپوننت سرچ جدید (مسیر را بر اساس پوشه بندی خود تنظیم کنید)
-
 interface NavbarProps {
   response?: any[];
   initialCategories?: any[];
@@ -33,8 +31,6 @@ function HeaderContent({ initialCategories }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // استیت‌های مربوط به باز/بسته شدن سرچ در موبایل در هدر باقی می‌ماند
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -49,11 +45,11 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
   return (
     <>
-      <header className="relative z-50 w-full border-b border-gray-300 bg-white font-sans transition-all duration-300">
-        <div className="mx-auto pl-6 h-[72px] px-6 flex items-center justify-between gap-4">
+      <header className="relative z-50 w-full border-b border-gray-200 bg-white font-sans transition-all duration-300">
+        <div className="mx-auto h-[72px] px-4 md:px-6 flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
-          <div className="relative inline-flex items-center">
+          <div className="relative inline-flex items-center shrink-0">
             <Link href="/" aria-label="خانه">
               <Image
                 src="/images/newLgog .svg"
@@ -74,43 +70,44 @@ function HeaderContent({ initialCategories }: NavbarProps) {
           />
 
           {/* Left Section */}
-          <div className="flex items-center gap-4 md:gap-4 whitespace-nowrap">
+          <div className="flex items-center gap-3 shrink-0 whitespace-nowrap">
             {/* دکمه باز و بسته کردن سرچ در موبایل */}
             <button
               type="button"
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-              className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-gray-700 hover:bg-gray-100 transition-all"
+              className="md:hidden flex items-center justify-center w-12 h-12 rounded-xl text-gray-700 hover:bg-gray-100 transition-all"
               aria-label="Toggle Search"
             >
               {isMobileSearchOpen ? <X size={20} /> : <Search size={20} strokeWidth={2.5} />}
             </button>
 
+            {/* فرض بر این است که NotificationBell هم خودش رو با ارتفاع جدید تطبیق بدهد */}
             <NotificationBell />
 
             <div className="relative z-10" ref={wrapperRef}>
               <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-xl border border-slate-400 h-10 px-4 cursor-pointer text-slate-600 hover:text-green-700 hover:bg-green-50 transition"
+                className="flex items-center gap-2 rounded-xl border border-slate-300 h-12 px-4 cursor-pointer text-slate-600 hover:border-slate-400 hover:text-green-700 hover:bg-green-50 transition-all duration-200 bg-white"
                 aria-haspopup="menu"
                 aria-expanded={open}
               >
                 <User size={18} />
-                <span className="hidden sm:inline text-xs">حساب کاربری</span>
+                <span className="hidden sm:inline text-sm font-medium">حساب کاربری</span>
               </button>
 
               <div
                 className={[
-                  "absolute left-0 top-[calc(100%+10px)] z-50 w-46 rounded bg-white shadow-lg border border-slate-200 overflow-hidden",
-                  "transition-all duration-200 origin-top",
+                  "absolute left-0 top-[calc(100%+8px)] z-50 w-52 rounded-xl bg-white shadow-xl border border-slate-100 overflow-hidden",
+                  "transition-all duration-200 origin-top-left",
                   open
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 scale-95 -translate-y-1 pointer-events-none",
+                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none",
                 ].join(" ")}
                 role="menu"
               >
                 {isLoading ? (
-                  <div className="flex justify-center py-3 text-gray-400">
+                  <div className="flex justify-center py-4 text-sm text-gray-400">
                     در حال بررسی...
                   </div>
                 ) : !isLoggedIn ? (
@@ -119,30 +116,30 @@ function HeaderContent({ initialCategories }: NavbarProps) {
                       setOpen(false);
                       setIsAuthModalOpen(true);
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 text-slate-700 hover:bg-slate-50 transition border-b border-slate-100"
+                    className="w-full flex items-center justify-between px-4 py-3.5 text-sm text-slate-700 hover:bg-slate-50 transition font-medium"
                     role="menuitem"
                   >
-                    <span>ورود/ثبت‌نام</span>
+                    <span>ورود / ثبت‌نام</span>
                     <LogIn size={18} className="text-slate-500" />
                   </button>
                 ) : (
-                  <div>
+                  <div className="flex flex-col">
                     <Link
-                      href="/ddashboard"
+                      href="/dashboard"
                       onClick={() => setOpen(false)}
-                      className="flex items-center justify-between px-4 py-3 text-green-600 bg-green-50 hover:bg-green-100 transition border-b border-red-100"
+                      className="flex items-center justify-between px-4 py-3.5 text-sm text-green-700 bg-green-50 hover:bg-green-100 transition font-medium"
                       role="menuitem"
                     >
                       <span>ورود به پنل</span>
-                      <User size={18} className="text-green-600" />
+                      <User size={18} className="text-green-700" />
                     </Link>
-                    <hr />
+                    <div className="h-[1px] bg-gray-100 w-full" />
                     <button
                       onClick={() => {
                         setOpen(false);
                         logOut();
                       }}
-                      className="w-full flex items-center justify-between px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 transition"
+                      className="w-full flex items-center justify-between px-4 py-3.5 text-sm text-red-600 hover:bg-red-50 transition font-medium"
                       role="menuitem"
                     >
                       <span>خروج از حساب</span>
@@ -163,7 +160,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
 export default function HeaderTop(props: NavbarProps) {
   return (
-    <Suspense fallback={<div className="h-[72px] w-full border-b border-gray-300 bg-white"></div>}>
+    <Suspense fallback={<div className="h-[72px] w-full border-b border-gray-200 bg-white"></div>}>
       <HeaderContent {...props} />
     </Suspense>
   );
