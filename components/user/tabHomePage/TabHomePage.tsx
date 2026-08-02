@@ -5,14 +5,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { FreeMode, Navigation } from 'swiper/modules'
+import { FreeMode, Navigation, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
-import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, BookOpen, Layers, Sparkles, Folder } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 
 import 'swiper/css'
 import 'swiper/css/free-mode'
 import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 import SearchBox from '../search/SearchBox'
 
 export type CategoryChild = {
@@ -20,6 +21,7 @@ export type CategoryChild = {
   catName: string
   catSlug: string
   imageUrl?: string | null
+  description?: string | null
   badges?: string[]
 }
 
@@ -43,61 +45,25 @@ async function fetchCategories(): Promise<ParentCategory[]> {
   return res.json()
 }
 
-function DotsLoader() {
-  return (
-    <div className="flex items-center gap-1.5">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-bounce"
-          style={{ animationDelay: `${i * 0.15}s`, animationDuration: '0.6s' }}
-        />
-      ))}
-    </div>
-  )
-}
-
-function CategoryBadges({ badges }: { badges?: string[] }) {
-  if (!badges?.length) return <div className="min-h-[16px] sm:min-h-[20px] mb-1 w-full" />
-  const colors: Record<string, string> = {
-    'درسنامه': 'bg-rose-100 text-rose-700 border-rose-200',
-    'تست': 'bg-blue-50 text-blue-600 border-blue-200',
-  }
-  return (
-    <div className="flex gap-1 justify-center flex-wrap mb-1 min-h-[16px] sm:min-h-[20px]">
-      {badges.map((b) => (
-        <span
-          key={b}
-          className={`text-[8px] font-bold px-1 py-0.5 rounded-full border ${colors[b] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}
-        >
-          {b}
-        </span>
-      ))}
-    </div>
-  )
-}
-
 function SkeletonCard() {
   return (
-    <div className="relative w-full flex flex-col border-[#AF0F12]/20 items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border">
-      <div className="absolute top-1.5 left-1.5 z-20 w-12 sm:w-14 h-3.5 sm:h-4 skeleton-wave rounded-bl" />
-      <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
-        <div className="w-7 h-7 sm:w-10 sm:h-10 skeleton-wave rounded-md" />
+    <div className="w-full flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white rounded-2xl border border-gray-200/80 shadow-xs">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 skeleton-wave rounded-xl shrink-0" />
+        <div className="w-1/2 h-4 skeleton-wave rounded-md" />
       </div>
-      <div className="w-full flex flex-col items-center gap-1.5 mt-auto">
-        <div className="w-10/12 h-2 sm:h-2.5 skeleton-wave rounded-sm" />
-        <div className="w-7/12 h-2 sm:h-2.5 skeleton-wave rounded-sm" />
+      <div className="space-y-2 mt-4">
+        <div className="w-full h-3 skeleton-wave rounded-sm" />
+        <div className="w-3/4 h-3 skeleton-wave rounded-sm" />
       </div>
     </div>
   )
 }
-
-const SKELETON_COUNTS = { lg: 2 }
 
 function TabSkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 w-full !px-1 py-1">
-      {Array.from({ length: SKELETON_COUNTS.lg }).map((_, i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
+      {Array.from({ length: 3 }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}
     </div>
@@ -108,7 +74,8 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const swiperRef = useRef<SwiperType | null>(null)
-  
+  const tabSwiperRef = useRef<SwiperType | null>(null)
+
   const [isMounted, setIsMounted] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState<MainTab | null>(null)
 
@@ -128,7 +95,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       (key) => tabToCategoryMap[key] === currentCategoryQuery
     ) || 'questions'
 
-  const { data: categories = initialData, isFetching } = useQuery<ParentCategory[]>({
+  const { data: categories = initialData } = useQuery<ParentCategory[]>({
     queryKey: ['categories'],
     queryFn: fetchCategories,
     initialData: initialData.length > 0 ? initialData : undefined,
@@ -139,7 +106,10 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const isTabChanging = activeTabKey !== null && activeTabKey !== activeTab
 
   useEffect(() => {
-    if (swiperRef.current) swiperRef.current.update()
+    if (swiperRef.current) {
+      swiperRef.current.update()
+      swiperRef.current.slideTo(0)
+    }
     setActiveTabKey(null)
   }, [activeTab])
 
@@ -160,179 +130,254 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
     router.push(`?${params.toString()}`, { scroll: false })
   }
 
-  const showArrows = currentCategories.length > 2
   const showSkeleton = !isMounted || isTabChanging
 
-  const tabConfig: { key: MainTab; label: string; sub?: string }[] = [
-    { key: 'questions', label: 'بانک سوالات', sub: '(درسنامه/تست)' },
-    { key: 'booklets', label: 'دفترچه‌های استخدامی', sub: '(درسنامه/تست)' },
-    { key: 'free', label: 'منابع رایگان' },
+  const tabConfig: { key: MainTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'questions', label: 'بانک سوالات تخصصی', icon: <BookOpen className="w-4 h-4 shrink-0" /> },
+    { key: 'booklets', label: 'دفترچه‌های استخدامی', icon: <Layers className="w-4 h-4 shrink-0" /> },
+    { key: 'free', label: 'منابع و جزوات رایگان', icon: <Sparkles className="w-4 h-4 shrink-0" /> },
   ]
 
-  const cardClass = (extra = '') =>
-    `relative w-full flex flex-col border-[#AF0F12] items-center justify-between p-2 sm:p-3 h-28 sm:h-32 md:h-36 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:shadow-gray-400/50 ${extra}`
+  const bgColors = [
+    { bg: 'bg-amber-50 text-amber-600' },
+    { bg: 'bg-blue-50 text-blue-600' },
+    { bg: 'bg-purple-50 text-purple-600' },
+    { bg: 'bg-emerald-50 text-emerald-600' },
+    { bg: 'bg-rose-50 text-rose-600' },
+    { bg: 'bg-indigo-50 text-indigo-600' },
+  ]
 
   return (
-    <div dir="rtl" className="w-full max-w-6xl mx-auto p-2.5 sm:p-4 font-sans">
-      {/* تعریف انیمیشن موجی در بالاترین سطح کامپوننت تا همه جا اعمال شود */}
+    <div dir="rtl" className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 font-sans overflow-hidden">
       <style>{`
         @keyframes skeleton-wave {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
         .skeleton-wave {
-          background-color: #e5e7eb;
-          background-image: linear-gradient(90deg, #e5e7eb 25%, #f9fafb 50%, #e5e7eb 75%);
+          background-color: #f1f5f9;
+          background-image: linear-gradient(90deg, #f1f5f9 25%, #ffffff 50%, #f1f5f9 75%);
           background-size: 200% 100%;
           animation: skeleton-wave 1.5s infinite linear;
         }
+
+        .cards-pagination .swiper-pagination-bullet {
+          width: 7px;
+          height: 7px;
+          border-radius: 9999px;
+          background-color: #cbd5e1;
+          opacity: 1;
+          margin: 0 3px !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+        }
+        .cards-pagination .swiper-pagination-bullet:hover {
+          background-color: #94a3b8;
+        }
+        .cards-pagination .swiper-pagination-bullet-active {
+          width: 22px;
+          border-radius: 9999px;
+          background: linear-gradient(90deg, #0f172a, #334155);
+        }
       `}</style>
 
-      {/* هدر متنی با قابلیت نمایش اسکلتون */}
-      <div className="text-center mb-6 flex flex-col items-center gap-1.5">
-        {!isMounted ? (
-          <>
-            <div className="h-7 sm:h-9 w-10/12 sm:w-2/3 md:w-1/2 skeleton-wave rounded-lg mb-1"></div>
-            <div className="h-6 sm:h-7 w-48 sm:w-56 skeleton-wave rounded-full mt-1"></div>
-          </>
-        ) : (
-          <>
-            <h1 className="text-lg sm:text-3xl font-medium text-gray-900 tracking-tight">
-              اولین وب سایت تخصصی در زمینه استخدامی های دولتی
-            </h1>
-            <p className="text-sm sm:text-base font-semibold text-blue-700 bg-blue-100/70 px-3 py-0.5 rounded-full border border-rose-200/80">
-              درسنامه و تست به صورت آنلاین
-            </p>
-          </>
-        )}
+      {/* Header */}
+      <div className="text-center mb-6 sm:mb-8 flex flex-col items-center gap-1.5 sm:gap-2">
+        <h1 className="text-xl sm:text-4xl font-bold sm:font-semibold text-slate-900 tracking-tight">
+          مرجع آزمون‌های استخدامی کشور
+        </h1>
+        <p className="text-xs sm:text-base text-slate-500 max-w-xl px-2">
+          دسترسی به جامع‌ترین بانک سوالات، دفترچه‌های آزمون و درسنامه‌های تفکیک‌شده
+        </p>
       </div>
 
-      {/* باکس جستجو با اسکلتون اختصاصی تا قبل از لود کامل */}
-      <div className="relative mx-2 w-full flex justify-center mb-10 z-50 px-2">
-        <div className="w-full max-w-[650px] [&>div]:!static [&>div]:!p-0 [&>div]:!shadow-none [&>div]:!bg-transparent [&>div]:!border-none">
-          {!isMounted ? (
-            <div className="w-full h-14 skeleton-wave rounded-xl border border-gray-200"></div>
-          ) : (
+      {/* Search Box Container */}
+      {/* <div className="w-full max-w-2xl mx-auto mb-8 sm:mb-10 px-1">
+        {!isMounted ? (
+          <div className="w-full h-12 sm:h-14 skeleton-wave rounded-2xl border border-gray-200"></div>
+        ) : (
+          <div className="w-full relative z-30">
             <SearchBox
               popularCategories={popularCategories}
               isMobileSearchOpen={true}
               onCloseMobile={() => {}}
             />
-          )}
-        </div>
-      </div>
-
-      {/* تب‌ها: نمایش ثابت تب‌ها بدون لودر/اسکلتون از همان لحظه اول */}
-      <div className="flex flex-wrap items-stretch justify-start gap-1.5 sm:gap-2 relative z-10 -mb-[1.4px]">
-        {tabConfig.map(({ key, label, sub }) => (
-          <button
-            key={key}
-            onClick={() => handleTabChange(key)}
-            className={`flex-1 sm:flex-none min-w-0 basis-[30%] sm:basis-auto min-h-[56px] sm:min-h-[34px] flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-3 text-xs sm:text-sm font-semibold rounded-t transition-all duration-200 border-2 truncate ${
-              activeTab === key
-                ? 'bg-[#FCE3E8] text-rose-950 border-[#AF0F12] !border-b-[#FCE3E8] relative z-20'
-                : 'bg-white/80 text-gray-800 border-[#BEBABA] border-b-[#AF0F12] hover:text-gray-900 hover:bg-gray-100/70'
-            }`}
-          >
-            <span className="whitespace-nowrap text-xs sm:text-sm">{label}</span>
-            {sub && <span className="hidden sm:inline text-[10px] sm:text-xs opacity-80 mt-0.5">{sub}</span>}
-          </button>
-        ))}
-      </div>
-
-      {/* کانتنت اصلی (باکس صورتی رنگ) */}
-      <div className="bg-[#FCE3E8] border-[#AF0F12] border-2 p-3 sm:p-6 shadow-sm relative z-0 overflow-hidden rounded-b-xl">
-        {isFetching && !isTabChanging && (
-          <div className="absolute inset-0 z-30 bg-[#FCE3E8]/85 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
-            <DotsLoader />
-            <span className="text-xs font-semibold text-rose-950">در حال دریافت اطلاعات...</span>
           </div>
         )}
+      </div> */}
 
-        <div className="relative min-h-[110px]">
-          {showArrows && !showSkeleton && (
-            <>
+      {/* Navigation Tabs (Swiper for Mobile & Desktop) */}
+      <div className="relative mb-6 sm:mb-8 border-b border-gray-200/80 pb-3 sm:pb-4 px-6 sm:px-8">
+        {/* Tab Swiper Navigation Buttons */}
+        <button
+          type="button"
+          onClick={() => tabSwiperRef.current?.slidePrev()}
+          aria-label="تب قبلی"
+          className="flex absolute top-1/2 -translate-y-1/2 right-0 sm:right-1 z-20 w-7 h-7 sm:w-8 sm:h-8 items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 text-slate-600 transition-all sm:hidden"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => tabSwiperRef.current?.slideNext()}
+          aria-label="تب بعدی"
+          className="flex absolute top-1/2 -translate-y-1/2 left-0 sm:left-1 z-20 w-7 h-7 sm:w-8 sm:h-8 items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 text-slate-600 transition-all sm:hidden"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <Swiper
+          modules={[FreeMode, Navigation]}
+          freeMode={{ enabled: true, momentumBounce: false }}
+          dir="rtl"
+          slidesPerView="auto"
+          spaceBetween={8}
+          wrapperClass="sm:!justify-center"
+          onSwiper={(swiper) => {
+            tabSwiperRef.current = swiper
+          }}
+          className="w-full"
+        >
+          {tabConfig.map(({ key, label, icon }) => (
+            <SwiperSlide key={key} className="!w-auto">
               <button
                 type="button"
-                onClick={() => swiperRef.current?.slidePrev()}
-                aria-label="قبلی"
-                className="flex absolute top-1/2 -translate-y-1/2 -right-2 sm:-right-4 z-20 w-7 h-9 sm:w-9 sm:h-12 items-center justify-center rounded bg-white border border-slate-400 shadow-md hover:bg-rose-50 transition-colors"
+                onClick={() => handleTabChange(key)}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  activeTab === key
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-gray-100/80 text-slate-600 hover:bg-gray-200/70 hover:text-slate-900'
+                }`}
               >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-rose-700" />
+                {icon}
+                <span>{label}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => swiperRef.current?.slideNext()}
-                aria-label="بعدی"
-                className="flex absolute top-1/2 -translate-y-1/2 -left-2 sm:-left-4 z-20 w-7 h-9 sm:w-9 sm:h-12 items-center justify-center rounded bg-white border border-slate-400 shadow-md hover:bg-rose-50 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-rose-700" />
-              </button>
-            </>
-          )}
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
 
-          {showSkeleton ? (
-            <TabSkeletonGrid />
-          ) : currentCategories.length === 0 ? (
-            <div className="flex items-center justify-center py-8 text-rose-900 text-sm font-medium">
-              هیچ زیر‌دسته‌ای برای این بخش یافت نشد.
-            </div>
-          ) : (
-            <div className="w-full">
-              <Swiper
-                key={activeTab}
-                modules={[FreeMode, Navigation]}
-                freeMode
-                dir="rtl"
-                observer
-                observeParents
-                resizeObserver
-                onSwiper={(swiper) => { swiperRef.current = swiper }}
-                slidesPerView={2}
-                spaceBetween={8}
-                breakpoints={{
-                  640: { slidesPerView: 3, spaceBetween: 10 },
-                  768: { slidesPerView: 4, spaceBetween: 12 },
-                  1024: { slidesPerView: 6, spaceBetween: 12 },
-                }}
-                className="w-full !px-1 py-1"
-              >
-                {currentCategories.map((item) => {
-                  const categorySlug = item.catSlug || item.catName
-                  return (
-                    <SwiperSlide key={item.id} className="!h-auto">
-                      <Link
-                        href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
-                        className={cardClass()}
-                      >
-                        <span className="absolute top-1.5 left-1.5 z-20 bg-rose-600 text-white text-[10px] sm:text-[8px] font-bold px-1 py-0.5 rounded-bl">
+      {/* Cards Swiper Area */}
+      <div className="relative min-h-[180px] sm:min-h-[200px]">
+        {showSkeleton ? (
+          <TabSkeletonGrid />
+        ) : currentCategories.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 sm:py-12 text-slate-400 text-xs sm:text-sm">
+            <Folder className="w-8 h-8 sm:w-10 sm:h-10 stroke-[1.5] mb-2" />
+            <span>هیچ زیر‌دسته‌ای در این بخش یافت نشد.</span>
+          </div>
+        ) : (
+          <div className="relative px-2 sm:px-4">
+            {/* Custom Navigation Buttons for Cards (Mobile + Desktop) */}
+            {currentCategories.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => swiperRef.current?.slidePrev()}
+                  aria-label="قبلی"
+                  className="flex absolute top-1/2 -translate-y-1/2 -right-1 sm:-right-3 z-20 w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-full bg-white border border-gray-200 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => swiperRef.current?.slideNext()}
+                  aria-label="بعدی"
+                  className="flex absolute top-1/2 -translate-y-1/2 -left-1 sm:-left-3 z-20 w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-full bg-white border border-gray-200 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </>
+            )}
+
+            <Swiper
+              key={activeTab}
+              modules={[FreeMode, Navigation, Pagination]}
+              freeMode={{ enabled: true, momentumBounce: false }}
+              dir="rtl"
+              observer
+              observeParents
+              resizeObserver
+              onSwiper={(swiper) => {
+                swiperRef.current = swiper
+              }}
+              slidesPerView={1}
+              spaceBetween={10}
+              pagination={
+                currentCategories.length > 1
+                  ? { clickable: true, el: '.cards-pagination' }
+                  : false
+              }
+              breakpoints={{
+                640: { slidesPerView: 2, spaceBetween: 14 },
+                1024: { slidesPerView: 3, spaceBetween: 16 },
+                1280: { slidesPerView: 3, spaceBetween: 16 },
+              }}
+              className="w-full !py-2"
+            >
+              {currentCategories.map((item, index) => {
+                const categorySlug = item.catSlug || item.catName
+                const colorTheme = bgColors[index % bgColors.length]
+
+                return (
+                  <SwiperSlide key={item.id} className="!h-auto">
+                    <Link
+                      href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
+                      className="group flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white border border-gray-200/100 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
+                    >
+                      <div>
+                        {/* Header: Icon + Title */}
+                        <div className="flex items-center gap-2.5 sm:gap-3.5 mb-2.5 sm:mb-3">
+                          <div className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl shrink-0 ${colorTheme.bg}`}>
+                            {item.imageUrl ? (
+                              <Image
+                                src={item.imageUrl}
+                                alt={item.catName}
+                                fill
+                                className="object-contain p-2"
+                                sizes="44px"
+                              />
+                            ) : (
+                              <Folder className="w-4 h-4 sm:w-5 sm:h-5" />
+                            )}
+                          </div>
+                          <h3 className="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                            {item.catName}
+                          </h3>
+                        </div>
+
+                        {/* Body Description */}
+                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">
+                          {item.description || 'مجموعه سوالات و درسنامه‌های اختصاصی آزمون‌های استخدامی مربوطه.'}
+                        </p>
+                      </div>
+
+                      {/* Footer Badges */}
+                      <div className="flex items-center gap-1.5 pt-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium bg-slate-100 text-slate-600">
                           درسنامه / تست
                         </span>
-                        <CategoryBadges badges={item.badges} />
-                        <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 my-auto flex-shrink-0">
-                          {item.imageUrl ? (
-                            <Image
-                              src={item.imageUrl}
-                              alt={item.catName}
-                              fill
-                              className="object-contain"
-                              sizes="(max-width: 768px) 40px, 56px"
-                            />
-                          ) : (
-                            <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-rose-400" />
-                          )}
-                        </div>
-                        <span className="text-12 sm:text-13 font-bold text-gray-800 text-center leading-tight line-clamp-2 mt-auto w-full">
-                          {item.catName}
-                        </span>
-                      </Link>
-                    </SwiperSlide>
-                  )
-                })}
-              </Swiper>
-            </div>
-          )}
-        </div>
+                        {item.badges?.map((badge) => (
+                          <span
+                            key={badge}
+                            className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium bg-blue-50 text-blue-700"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    </Link>
+                  </SwiperSlide>
+                )
+              })}
+            </Swiper>
+
+            {/* Modern Pagination Bullets */}
+            {currentCategories.length > 1 && (
+              <div className="cards-pagination flex items-center justify-center gap-1 mt-4 sm:mt-5" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

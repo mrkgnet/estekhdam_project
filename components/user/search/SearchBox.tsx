@@ -64,7 +64,7 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
   return (
     <div
       ref={searchContainerRef}
-      className={`z-30 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${
+      className={`z-20 md:flex-1 md:flex md:justify-center md:static md:w-auto md:bg-transparent md:p-0 md:shadow-none ${
         isMobileSearchOpen
           ? "absolute top-full left-0 w-full bg-white px-4 pb-4 pt-2 shadow-md flex border-b border-gray-100 animate-in slide-in-from-top-2"
           : "hidden md:flex"
@@ -78,7 +78,7 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
           />
         ) : (
           <Search
-            size={20}
+            size={22}
             className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
               isSearchOpen ? "text-green-600" : "text-gray-400"
             }`}

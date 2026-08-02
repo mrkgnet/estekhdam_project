@@ -101,6 +101,7 @@ model User {
   ticketMessages   TicketMessage[]        @relation("UserMessages")
   contacts         Contact[]
   readGlobalNotifs UserNotificationRead[]
+  subscriptions UserSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -373,8 +374,16 @@ model Order {
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  productId String
+  // 🟢 خرید محصول (اختیاری)
+  productId String?
   product   Product? @relation(fields: [productId], references: [id])
+
+  // 🟢 خرید پلن اشتراک (اختیاری)
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+
+  // 🟢 رابطه با اشتراک ایجاد شده
+  subscription UserSubscription?
 
   pricePaid Int
   status    OrderStatus @default(PENDING)
@@ -390,6 +399,7 @@ model Order {
 
   @@index([userId])
   @@index([productId])
+  @@index([subscriptionPlanId])
 }
 
 model Ticket {
@@ -456,5 +466,57 @@ model TopBanner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([isActive])
+}
+
+
+
+
+// ==========================================
+// 🟢 مدل‌های جدید برای سیستم پلن اشتراک
+// ==========================================
+
+model SubscriptionPlan {
+  id            String   @id @default(uuid())
+  title         String   // عنوان پلن (مثلاً: اشتراک سه ماهه)
+  slug          String   @unique // اسلاگ یکتا برای آدرس‌دهی یا شناسه
+  durationDays  Int      // مدت زمان به روز (مثلاً 30, 90, 180)
+  price         Int      // قیمت اصلی (تومان)
+  discountPrice Int?     // قیمت با تخفیف (اختیاری)
+  description   String?  // توضیحات کوتاه پلن
+  features      String[] // لیست امکانات پلن
+  isPopular     Boolean  @default(false) // نشان پلن محبوب/پیشنهاد ویژه
+  isActive      Boolean  @default(true)  // فعال/غیرفعال بودن نمایش پلن
+
+  // روابط
+  subscriptions UserSubscription[]
+  orders        Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model UserSubscription {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planId String
+  plan   SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  orderId String? @unique // ارتباط با سفارشی که بابت آن پرداخت انجام شده
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  startDate DateTime @default(now()) // تاریخ شروع
+  endDate   DateTime // تاریخ انقضا (بر اساس durationDays محاسبه می‌شود)
+  isActive  Boolean  @default(true) // وضعیت فعال بودن
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([endDate])
   @@index([isActive])
 }
