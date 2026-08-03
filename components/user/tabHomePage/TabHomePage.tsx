@@ -45,9 +45,9 @@ async function fetchCategories(): Promise<ParentCategory[]> {
   return res.json()
 }
 
-function SkeletonCard() {
+function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className="w-full flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white rounded-2xl border border-gray-200/100 shadow-xs">
+    <div className={`w-full flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white rounded-2xl border border-gray-200/100 shadow-xs ${className}`}>
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 sm:w-10 sm:h-10 skeleton-wave rounded-xl shrink-0" />
         <div className="w-1/2 h-4 skeleton-wave rounded-md" />
@@ -60,15 +60,17 @@ function SkeletonCard() {
   )
 }
 
+
 function TabSkeletonGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
       {Array.from({ length: 3 }).map((_, i) => (
-        <SkeletonCard key={i} />
+        <SkeletonCard key={i} className={i > 0 ? 'hidden sm:flex' : ''} />
       ))}
     </div>
   )
 }
+
 
 export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
@@ -192,7 +194,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       </div>
 
       {/* Search Box Container */}
-      {/* <div className="w-full max-w-2xl mx-auto mb-8 sm:mb-10 px-1">
+      <div className="w-full max-w-2xl mx-auto mb-8 sm:mb-10 px-1">
         {!isMounted ? (
           <div className="w-full h-12 sm:h-14 skeleton-wave rounded-2xl border border-gray-200"></div>
         ) : (
@@ -204,10 +206,11 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
             />
           </div>
         )}
-      </div> */}
+      </div>
 
+        
       {/* Navigation Tabs (Swiper for Mobile & Desktop) */}
-      <div className="relative mb-6 sm:mb-8 border-b border-gray-200/100 px-7  sm:pb-4 px-6 sm:px-8">
+      <div className="relative mb-6 sm:mb-8 border-b border-gray-200/100 px-7  sm:pb-4  sm:px-8">
         {/* Tab Swiper Navigation Buttons */}
         <button
           type="button"
