@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Loader2, LayoutGrid } from "lucide-react";
+import { Search, Loader2, LayoutGrid, X } from "lucide-react";
 import { getDataSearchMany } from "@/actions/search/Actions";
 
 interface SearchBoxProps {
@@ -27,20 +27,23 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
     if (onCloseMobile) onCloseMobile();
   };
 
+  const clearQuery = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
       setIsSearching(false);
       return;
     }
-
     setIsSearching(true);
     const delayDebounceFn = setTimeout(async () => {
       const results = await getDataSearchMany(searchQuery);
       setSearchResults(results);
       setIsSearching(false);
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
@@ -72,20 +75,11 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
     >
       <div className="relative w-full max-w-[550px]">
         {isSearching ? (
-          <Loader2
-            size={20}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin"
-          />
+          <Loader2 size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin z-10" />
         ) : (
-          <Search
-            size={22}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
-              isSearchOpen ? "text-green-600" : "text-gray-400"
-            }`}
-          />
+          <Search size={22} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors z-10 ${isSearchOpen ? "text-green-600" : "text-gray-400"}`} />
         )}
 
-        {/* فیلد جستجو تنظیم شده روی ارتفاع 44px (h-11) */}
         <input
           type="text"
           value={searchQuery}
@@ -93,12 +87,23 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
           onFocus={() => setIsSearchOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-          className={`w-full h-12 rounded-xl border bg-gray-50 pr-11 pl-4 text-sm outline-none transition-all duration-200 placeholder:text-gray-400 ${
+          className={`w-full h-12 rounded-xl border bg-gray-50 pr-11 pl-10 text-sm outline-none transition-all duration-200 placeholder:text-gray-400 ${
             isSearchOpen
               ? "bg-white border-green-500 ring-4 ring-green-50 shadow-sm"
               : "border-gray-300 hover:border-gray-400 focus:bg-white"
           }`}
         />
+
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={clearQuery}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="پاک کردن جستجو"
+          >
+            <X size={18} />
+          </button>
+        )}
 
         <div
           className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${
@@ -111,7 +116,6 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
                 <LayoutGrid size={18} className="text-gray-400" />
                 <span className="font-medium text-sm">جستجوهای محبوب</span>
               </div>
-              
               {popularCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {popularCategories.map((cat: any, index: number) => (
@@ -132,11 +136,7 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
               {searchResults.length > 0 ? (
                 <div className="mb-2">
                   {searchResults.map((item) => {
-                    const linkHref =
-                      item.type === "product"
-                        ? `/resources/course/${item.slug}`
-                        : `/news/${item.slug}`;
-
+                    const linkHref = item.type === "product" ? `/resources/course/${item.slug}` : `/news/${item.slug}`;
                     return (
                       <Link
                         key={`${item.type}-${item.slug}`}
@@ -153,11 +153,8 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
                   })}
                 </div>
               ) : (
-                !isSearching && (
-                  <div className="p-6 text-center text-sm text-gray-500">موردی یافت نشد.</div>
-                )
+                !isSearching && <div className="p-6 text-center text-sm text-gray-500">موردی یافت نشد.</div>
               )}
-
               {searchResults.length > 0 && (
                 <Link
                   href={`/search?q=${encodeURIComponent(searchQuery)}`}
@@ -165,9 +162,7 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
                   className="w-full flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium hover:bg-green-100 text-green-700 transition-colors bg-green-50 mt-1"
                 >
                   <Search size={16} />
-                  <span>
-                    مشاهده همه نتایج برای <strong className="mx-1">"{searchQuery}"</strong>
-                  </span>
+                  <span>مشاهده همه نتایج برای <strong className="mx-1">"{searchQuery}"</strong></span>
                 </Link>
               )}
             </div>

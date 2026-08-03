@@ -9,7 +9,7 @@ export default function NavbarUser() {
   const toggleSidebar = useSidebarStore((state) => state.toggle);
 
   return (
-    <header className="sticky text-13 sm:text-14 top-0 z-30 flex items-center w-full px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm sm:px-6 transition-colors duration-300">
+    <header className="sticky text-13 sm:text-14 top-0 z-50 flex items-center w-full px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm sm:px-6 transition-colors duration-300">
       {/* ================= سمت راست: دکمه منو ================= */}
       <div className="flex items-center bg-blue-50 dark:bg-blue-900/30 rounded-sm transition-colors duration-300">
         <button

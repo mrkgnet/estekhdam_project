@@ -15,6 +15,7 @@ import 'swiper/css/free-mode'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import SearchBox from '../search/SearchBox'
+import SearchBoxInPage from '../search/SearchBoxInPage'
 
 export type CategoryChild = {
   id: string
@@ -199,7 +200,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
           <div className="w-full h-12 sm:h-14 skeleton-wave rounded-2xl border border-gray-200"></div>
         ) : (
           <div className="w-full relative z-30">
-            <SearchBox
+            <SearchBoxInPage
               popularCategories={popularCategories}
               isMobileSearchOpen={true}
               onCloseMobile={() => {}}
@@ -208,7 +209,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
         )}
       </div>
 
-        
       {/* Navigation Tabs (Swiper for Mobile & Desktop) */}
       <div className="relative mb-6 sm:mb-8 border-b border-gray-200/100 px-7  sm:pb-4  sm:px-8">
         {/* Tab Swiper Navigation Buttons */}

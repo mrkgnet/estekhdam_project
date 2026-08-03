@@ -202,6 +202,19 @@ export const tabsDataAdminPanel = [
       },
     ]
   },
+  {
+    id: "14",
+    title: "مدیریت پلن ها",
+    icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
+    url: "/adminp/planss",
+    subItems: [
+      {
+        id: 121,
+        title: "پلن‌های کاربران ",
+        url: "/adminp/plans",
+      },
+    ]
+  },
 
 ];
 

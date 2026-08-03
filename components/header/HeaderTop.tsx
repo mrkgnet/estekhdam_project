@@ -45,7 +45,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
   return (
     <>
-      <header className="relative z-50 w-full border-b border-gray-200 bg-white font-sans transition-all duration-300">
+      <header className="relative z-80 w-full border-b border-gray-200 bg-white font-sans transition-all duration-300">
         <div className="mx-auto h-[72px] px-4 md:px-6 flex items-center justify-between gap-4">
 
           {/* Right Section - برند */}
@@ -98,7 +98,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
               <div
                 className={[
-                  "absolute left-0 top-[calc(100%+8px)] z-50 w-52 rounded-xl bg-white shadow-xl border border-slate-100 overflow-hidden",
+                  "absolute left-0 top-[calc(100%+8px)] z-60 w-52 rounded-xl bg-white shadow-xl border border-slate-300/100 overflow-hidden",
                   "transition-all duration-200 origin-top-left",
                   open
                     ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
@@ -116,16 +116,16 @@ function HeaderContent({ initialCategories }: NavbarProps) {
                       setOpen(false);
                       setIsAuthModalOpen(true);
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3.5 text-sm text-slate-700 hover:bg-slate-50 transition font-medium"
+                    className="w-full flex items-center justify-between px-4 py-3.5 text-sm text-slate-700  hover:bg-slate-50 transition font-medium"
                     role="menuitem"
                   >
                     <span>ورود / ثبت‌نام</span>
                     <LogIn size={18} className="text-slate-500" />
                   </button>
                 ) : (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col ">
                     <Link
-                      href="/dashboard"
+                      href="/ddashboard"
                       onClick={() => setOpen(false)}
                       className="flex items-center justify-between px-4 py-3.5 text-sm text-green-700 bg-green-50 hover:bg-green-100 transition font-medium"
                       role="menuitem"
