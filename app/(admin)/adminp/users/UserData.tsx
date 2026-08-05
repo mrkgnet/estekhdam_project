@@ -77,7 +77,7 @@ export default function InfoUserData({ dataUsers, dataProducts }: { dataUsers: a
   return (
     <>
       <div className='min-h-screen mt-6'>
-        <div dir="rtl" className="w-full text-xs md:text-sm bg-white rounded max-w-6xl mx-auto border border-gray-100 shadow-sm overflow-hidden">
+        <div dir="rtl" className="w-full text-12 sm:text-14  bg-white rounded max-w-6xl mx-auto border border-gray-100 shadow-sm overflow-hidden">
           
           <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
