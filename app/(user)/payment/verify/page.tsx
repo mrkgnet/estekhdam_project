@@ -115,10 +115,10 @@ function VerifyComponent() {
           message="شما از ادامه فرآیند پرداخت انصراف دادید."
         >
           <button
-            onClick={() => router.push('/cart')}
+            onClick={() => router.push('/plans')}
             className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
           >
-            بازگشت به سبد خرید
+          بازگشت به صحفه خرید اشتراک 
           </button>
         </ResultCard>
       </div>
