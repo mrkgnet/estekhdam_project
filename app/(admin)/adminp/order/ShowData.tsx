@@ -96,7 +96,7 @@ export default function ShowData({ orders, totalPages, currentPage, limit }: Sho
 
     if (orders.length === 0 && !currentUrlQuery) {
         return (
-            <div className="text-center py-10 bg-white rounded-xl border border-gray-200 text-gray-500">
+            <div className="text-center py-10 bg-white rounded border border-gray-200 text-gray-500">
                 هیچ سفارشی برای نمایش وجود ندارد.
             </div>
         );
@@ -111,7 +111,7 @@ export default function ShowData({ orders, totalPages, currentPage, limit }: Sho
                 className="md:w-1/3"
             />
 
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="bg-white rounded border border-gray-400 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-right text-sm text-gray-600">
                         <thead className="bg-gray-50 text-gray-700 text-xs uppercase border-b border-gray-200">
@@ -188,7 +188,7 @@ export default function ShowData({ orders, totalPages, currentPage, limit }: Sho
                                                 id={order.id}
                                                 action={deleteOrderAction}
                                                 itemName="این سفارش"
-                                                className="p-1.5 text-red-600 cursor-pointer flex bg-red-50 gap-1 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-1.5 text-red-600 cursor-pointer flex bg-red-50 gap-1 hover:bg-red-50 rounded transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </DeleteButton>

@@ -126,10 +126,10 @@ export default function ShowDataCart({ productData, productId }: Props) {
 
       <div className="mx-auto max-w-3xl p-4 md:py-10 pb-28 md:pb-10">
         {/* Page Header */}
-        <header className="mb-6 flex items-center gap-4 border border-slate-200 p-3 rounded-sm bg-white">
+        <header className="mb-6 flex items-center gap-4 border border-slate-400 p-3 rounded-sm bg-white">
           <button
             onClick={() => router.back()}
-            className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all"
+            className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-slate-400 text-slate-600 hover:bg-slate-100 transition-all"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -157,7 +157,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
         )}
 
         {/* Invoice Card */}
-        <div className="bg-white rounded-sm shadow-md border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-sm shadow-md border border-slate-400 overflow-hidden">
           <div className="p-5 grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 border-b border-slate-200">
             <div>
               <span className="block text-slate-500 text-sm">شماره فاکتور</span>
@@ -185,7 +185,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                <tr className="border border-b-0 border-t-0 border-l-0 border-r-0 border-slate-200">
+                <tr className="border border-b-0 border-t-0 border-l-0 border-r-0 border-slate-400">
                   <td className="px-6 py-4 text-slate-800 text-base">{productData.name}</td>
                   <td className="px-6 py-4 text-center font-medium text-base">۱</td>
                   <td className="px-6 py-4 text-left font-medium text-base">{productData.oldPrice.toLocaleString()}</td>
@@ -216,8 +216,8 @@ export default function ShowDataCart({ productData, productId }: Props) {
         </div>
 
         {/* Action Button */}
-        <footer className="bg-white border-t border-slate-200 p-3 md:p-0 md:bg-transparent md:border-none mt-6">
-          <div className="mx-auto bg-white flex items-center justify-between p-3 border border-gray-200 rounded-sm">
+        <footer className="bg-white border-t border-slate-400 p-3 md:p-0 md:bg-transparent md:border-none mt-6">
+          <div className="mx-auto bg-white flex items-center justify-between p-3 border border-gray-400 rounded-sm">
             <div>
               <span className="text-slate-500 text-sm">مبلغ قابل پرداخت</span>
               <p className="font-bold text-lg text-slate-800">{productData.newPrice.toLocaleString()} تومان</p>

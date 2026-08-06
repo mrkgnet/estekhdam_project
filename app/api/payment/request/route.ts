@@ -16,10 +16,7 @@ export async function POST(req: Request) {
     }
 
     if (!currentUser || !currentUser.userId) {
-      return NextResponse.json(
-        { ok: false, message: "لطفا ابتدا وارد حساب کاربری خود شوید." },
-        { status: 401 }
-      );
+      return NextResponse.json({ ok: false, message: "لطفا ابتدا وارد حساب کاربری خود شوید." }, { status: 401 });
     }
 
     const userId = currentUser.userId;
@@ -27,18 +24,12 @@ export async function POST(req: Request) {
     // ۲. اعتبارسنجی ورودی‌ها
     const body = await req.json().catch(() => null);
     if (!body || !body.items || !Array.isArray(body.items) || body.items.length === 0) {
-      return NextResponse.json(
-        { ok: false, message: "سبد خرید نامعتبر است." },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, message: "سبد خرید نامعتبر است." }, { status: 400 });
     }
 
     const firstItem = body.items[0];
     if (!firstItem || !firstItem.productId) {
-      return NextResponse.json(
-        { ok: false, message: "شناسه آیتم مورد نظر ارسال نشده است." },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, message: "شناسه آیتم مورد نظر ارسال نشده است." }, { status: 400 });
     }
 
     const itemId = firstItem.productId;
@@ -79,10 +70,7 @@ export async function POST(req: Request) {
       });
 
       if (!product) {
-        return NextResponse.json(
-          { ok: false, message: "محصول یا پلن مورد نظر یافت نشد." },
-          { status: 404 }
-        );
+        return NextResponse.json({ ok: false, message: "محصول یا پلن مورد نظر یافت نشد." }, { status: 404 });
       }
 
       const currentPrice = product.newPrice || product.oldPrice || 0;
@@ -92,10 +80,7 @@ export async function POST(req: Request) {
     }
 
     if (pricePaid <= 0) {
-      return NextResponse.json(
-        { ok: false, message: "مبلغ سفارش معتبر نمی‌باشد." },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: false, message: "مبلغ سفارش معتبر نمی‌باشد." }, { status: 400 });
     }
 
     // ۴. بررسی متغیرهای محیلی (ENV)
@@ -105,7 +90,7 @@ export async function POST(req: Request) {
     if (!merchant_id || !callbackBase) {
       return NextResponse.json(
         { ok: false, message: "تنظیمات درگاه (Merchant ID یا Callback) در فایل .env تعریف نشده است." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -120,7 +105,7 @@ export async function POST(req: Request) {
       console.error("Prisma Order Creation Failed:", dbErr);
       return NextResponse.json(
         { ok: false, message: "خطا در ایجاد سفارش در دیتابیس", error: String(dbErr) },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -145,7 +130,7 @@ export async function POST(req: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           merchant_id,
@@ -156,37 +141,33 @@ export async function POST(req: Request) {
       });
     } catch (netErr) {
       console.error("Zarinpal Network Exception:", netErr);
-      return NextResponse.json(
-        { ok: false, message: "خطای شبکه در ارتباط با سرور زرین‌پال" },
-        { status: 502 }
-      );
+      return NextResponse.json({ ok: false, message: "خطای شبکه در ارتباط با سرور زرین‌پال" }, { status: 502 });
     }
 
     const zp = await zpRes.json().catch(() => null);
 
     if (!zp || !zp.data) {
       console.error("Invalid Response from Zarinpal:", zp);
-      return NextResponse.json(
-        { ok: false, message: "پاسخ نامعتبر از درگاه زرین‌پال دریافت شد." },
-        { status: 502 }
-      );
+      return NextResponse.json({ ok: false, message: "پاسخ نامعتبر از درگاه زرین‌پال دریافت شد." }, { status: 502 });
     }
 
     const code = zp.data.code;
     const authority = zp.data.authority as string | undefined;
 
     if (code !== 100 || !authority) {
-      await db.order.update({
-        where: { id: order.id },
-        data: { status: "FAILED" },
-      }).catch(() => {});
+      await db.order
+        .update({
+          where: { id: order.id },
+          data: { status: "FAILED" },
+        })
+        .catch(() => {});
 
       return NextResponse.json(
         {
           ok: false,
           message: zp?.errors?.message || `کد خطای زرین‌پال: ${code}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -202,7 +183,6 @@ export async function POST(req: Request) {
       orderId: order.id,
       payUrl: `${STARTPAY_BASE}${authority}`,
     });
-
   } catch (err: any) {
     console.error("Unhandled Payment Request Error:", err);
     return NextResponse.json(
@@ -211,7 +191,7 @@ export async function POST(req: Request) {
         message: "خطای غیرمنتظره سرور",
         details: err?.message || String(err),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
