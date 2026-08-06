@@ -38,7 +38,7 @@ const ResultCard = ({
   message,
   children,
 }: ResultCardProps) => (
-  <div className="w-full max-w-md transform rounded-xl bg-white p-6 text-center shadow-lg transition-all duration-300 hover:shadow-2xl sm:p-8">
+  <div className="w-full max-w-md transform rounded bg-white p-6 text-center shadow-lg transition-all duration-300 hover:shadow-2xl sm:p-8">
     <div className="mb-5 flex justify-center">{icon}</div>
 
     <h1 className="mb-3 text-2xl font-bold text-gray-800">{title}</h1>
@@ -157,7 +157,7 @@ function VerifyComponent() {
       <div className={containerClasses}>
         <ResultCard
           icon={
-            <FaExclamationTriangle className="text-6xl text-yellow-500" />
+            <FaExclamationTriangle className="text-base text-yellow-500" />
           }
           title="پرداخت لغو شد"
           message="شما از ادامه فرآیند پرداخت انصراف دادید."
@@ -179,7 +179,7 @@ function VerifyComponent() {
     return (
       <div className={containerClasses}>
         <ResultCard
-          icon={<FaTimesCircle className="text-6xl text-red-500" />}
+          icon={<FaTimesCircle className="text-base text-red-500" />}
           title="پرداخت ناموفق"
           message={error}
         >
@@ -200,7 +200,7 @@ function VerifyComponent() {
     return (
       <div className={containerClasses}>
         <ResultCard
-          icon={<FaCheckCircle className="text-6xl text-green-500" />}
+          icon={<FaCheckCircle className="text-base text-green-500" />}
           title="پرداخت با موفقیت انجام شد"
           message="دسترسی شما به محصول خریداری‌شده ایجاد شد."
         >
