@@ -142,7 +142,7 @@ function BrandItem({
         />
       </div>
 
-      <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1 text-xs sm:text-sm">
+      <span className="font-medium text-slate-600 group-hover:text-green-700 transition-colors text-center line-clamp-1 w-full px-1 text-13 sm:text-14">
         {bank.name}
       </span>
     </Link>

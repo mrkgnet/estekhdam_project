@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Menu, Home, HeadphonesIcon } from "lucide-react";
+import { Menu, Home, HeadphonesIcon, Star } from "lucide-react";
 import { useSidebarStore } from "@/store/sideBarStoreAdmin";
 import Link from "next/link";
 
@@ -10,7 +10,6 @@ export default function NavbarUser() {
 
   return (
     <header className="sticky text-13 sm:text-14 top-0 z-50 flex items-center w-full px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm sm:px-6 transition-colors duration-300">
-      {/* ================= سمت راست: دکمه منو ================= */}
       <div className="flex items-center bg-blue-50 dark:bg-blue-900/30 rounded-sm transition-colors duration-300">
         <button
           onClick={toggleSidebar}
@@ -22,9 +21,7 @@ export default function NavbarUser() {
         </button>
       </div>
 
-      {/* ================= سمت چپ: لینک‌ها و اکشن‌ها ================= */}
       <div className="flex items-center gap-2 sm:gap-4 mx-2">
-        {/* گروه لینک‌های دسترسی سریع */}
         <div className="flex items-center gap-1 border-l border-gray-200 dark:border-slate-700 transition-colors duration-300">
           <Link
             href={"/"}
@@ -34,9 +31,7 @@ export default function NavbarUser() {
             <span className="sm:inline-block">خانه</span>
           </Link>
 
-          {/* لینک با بج جدید */}
           <div className="relative bg-slate-100 dark:bg-slate-800 rounded-md transition-colors duration-300">
-            {/* بج آبی */}
             <span className="absolute -top-3 left-0 px-2 py-0.5 text-[10px] font-bold text-white bg-blue-500 dark:bg-blue-600 rounded-full shadow-sm">
               جدید
             </span>
@@ -49,6 +44,14 @@ export default function NavbarUser() {
               <span className="sm:inline-block">استخدامی‌های دولتی</span>
             </Link>
           </div>
+
+          <Link
+            href={"/plans"}
+            className="hidden sm:flex items-center gap-2 px-3 py-2 font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 transition-colors duration-200 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-800 dark:hover:text-amber-300"
+          >
+            <Star className="w-4 h-4 fill-current" />
+            <span>خرید اشتراک</span>
+          </Link>
         </div>
       </div>
     </header>

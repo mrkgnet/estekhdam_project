@@ -7,6 +7,7 @@ import HeroSection from "@/components/user/HomePage/HeroSection";
 import FilterBar from "@/components/user/HomePage/FilterBar";
 import TabHomePage from "@/components/user/tabHomePage/TabHomePage";
 import TabHomeComponent from "@/components/user/tabHomePage/TabHomeComponent";
+import PlansOffer from "@/components/user/plansTimer/page";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -41,8 +42,10 @@ export default function page() {
             <NavbarUser />
             <SideBarUserComponent />
 
-            <main className=" mx-auto py-12">
-                
+            <main className=" mx-auto ">
+                <section className="pb-10">
+                    <PlansOffer />
+                </section>
 
                  {/* اسلایدر برندها */}
                 <section className="pb-10">
