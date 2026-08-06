@@ -125,20 +125,6 @@ export default function ShowDataCart({ productData, productId }: Props) {
       />
 
       <div className="mx-auto max-w-3xl p-4 md:py-10 pb-28 md:pb-10">
-        {/* Page Header */}
-        <header className="mb-6 flex items-center gap-4 border border-slate-400 p-3 rounded-sm bg-white">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-slate-400 text-slate-600 hover:bg-slate-100 transition-all"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="font-bold text-lg text-slate-800">تایید و پرداخت</h1>
-            <p className="text-slate-500 mt-1 text-sm">لطفا جزئیات فاکتور را بررسی و پرداخت را نهایی کنید.</p>
-          </div>
-        </header>
-
         {/* Auth Alert Banner */}
         {!isLoggedIn && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-800">
@@ -155,6 +141,22 @@ export default function ShowDataCart({ productData, productId }: Props) {
             </button>
           </div>
         )}
+
+        {/* Page Header */}
+        <header className="mb-6 flex items-center gap-4 border border-slate-400 p-3 rounded-sm bg-white">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-sm border border-slate-400 text-slate-600 hover:bg-slate-100 transition-all"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="font-bold text-lg text-slate-800">تایید و پرداخت</h1>
+            <p className="text-slate-500 mt-1 text-sm">لطفا جزئیات فاکتور را بررسی و پرداخت را نهایی کنید.</p>
+          </div>
+        </header>
+
+
 
         {/* Invoice Card */}
         <div className="bg-white rounded-sm shadow-md border border-slate-400 overflow-hidden">

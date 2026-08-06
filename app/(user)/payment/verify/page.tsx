@@ -1,10 +1,9 @@
 // file: app/payment/verify/page.tsx
+'use client';
 
-"use client";
-
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState, Suspense, type ReactNode } from "react";
-import Link from "next/link";
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import Link from 'next/link';
 import {
   FaCheckCircle,
   FaTimesCircle,
@@ -12,53 +11,43 @@ import {
   FaExclamationTriangle,
   FaCopy,
   FaCheck,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 // ====================================================================
-// Reusable UI Components
+//  Reusable UI Components
 // ====================================================================
 
 const LoadingState = ({ message }: { message: string }) => (
   <div className="flex flex-col items-center justify-center text-center text-gray-700">
-    <FaSpinner className="mb-4 animate-spin text-5xl text-blue-500" />
-    <p className="text-lg font-semibold">{message}</p>
+    <FaSpinner className="animate-spin text-blue-500 text-4xl mb-3" />
+    <p className="text-sm sm:text-base font-semibold">{message}</p>
   </div>
 );
 
 interface ResultCardProps {
-  icon: ReactNode;
+  icon: React.ReactNode;
   title: string;
-  message: string;
-  children?: ReactNode;
+  message?: string;
+  children?: React.ReactNode;
 }
 
-const ResultCard = ({
-  icon,
-  title,
-  message,
-  children,
-}: ResultCardProps) => (
-  <div className="w-full max-w-md transform rounded bg-white p-6 text-center shadow-lg transition-all duration-300 hover:shadow-2xl sm:p-8">
-    <div className="mb-5 flex justify-center">{icon}</div>
-
-    <h1 className="mb-3 text-2xl font-bold text-gray-800">{title}</h1>
-
-    <p className="mb-6 min-h-[40px] whitespace-pre-line text-gray-600">
-      {message}
-    </p>
-
-    <div className="mt-8">{children}</div>
+const ResultCard = ({ icon, title, message, children }: ResultCardProps) => (
+  <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 max-w-sm w-full text-center transform transition-all hover:shadow-2xl duration-300">
+    <div className="flex justify-center mb-4 animate-pulse-once">{icon}</div>
+    <h1 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{title}</h1>
+    {message && <p className="text-xs sm:text-sm text-gray-600 mb-4 leading-relaxed">{message}</p>}
+    <div className="mt-4">{children}</div>
   </div>
 );
 
 // ====================================================================
-// Main Verification Component
+//  Main Verification Component (Uses useSearchParams)
 // ====================================================================
-
 function VerifyComponent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // State Management
   const [isLoading, setIsLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,36 +56,32 @@ function VerifyComponent() {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
-    const authority = searchParams.get("Authority");
-    const status = searchParams.get("Status");
-    const orderId =
-      searchParams.get("orderId") || localStorage.getItem("orderId");
+    // --- Get data from URL and localStorage ---
+    const authority = searchParams.get('Authority');
+    const status = searchParams.get('Status');
+    const orderId = searchParams.get('orderId') || localStorage.getItem('orderId');
 
-    // لغو پرداخت توسط کاربر
-    if (status && status !== "OK") {
+    // --- Handle User Cancellation ---
+    if (status && status !== 'OK') {
       setIsCancelled(true);
       setIsLoading(false);
       return;
     }
 
-    // بررسی اطلاعات ضروری
+    // --- Validate inputs ---
     if (!authority || !orderId) {
-      setError("اطلاعات پرداخت ناقص است. لطفا مجددا تلاش کنید.");
+      setError('اطلاعات پرداخت ناقص است. لطفا مجددا تلاش کنید.');
       setIsLoading(false);
       return;
     }
 
+    // --- Call verification API ---
     const verifyPayment = async () => {
       try {
-        const response = await fetch("/api/payment/verify", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            authority,
-            orderId,
-          }),
+        const response = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ authority, orderId }),
         });
 
         const data = await response.json();
@@ -104,17 +89,14 @@ function VerifyComponent() {
         if (response.ok) {
           setIsSuccess(true);
           setRefId(data.refId);
-          localStorage.removeItem("orderId");
+          localStorage.removeItem('orderId'); // Clean up
         } else {
           setError(
-            data.message ||
-              "خطا در تایید پرداخت. لطفا با پشتیبانی تماس بگیرید."
+            data.message || 'خطا در تایید پرداخت. لطفا با پشتیبانی تماس بگیرید.'
           );
         }
-      } catch {
-        setError(
-          "خطای ارتباط با سرور. لطفا اتصال اینترنت خود را بررسی کنید."
-        );
+      } catch (err) {
+        setError('خطای ارتباط با سرور. لطفا اتصال اینترنت خود را بررسی کنید.');
       } finally {
         setIsLoading(false);
       }
@@ -123,26 +105,19 @@ function VerifyComponent() {
     verifyPayment();
   }, [searchParams]);
 
-  // کپی شماره پیگیری
-  const handleCopyRefId = async () => {
-    if (!refId) return;
-
-    try {
-      await navigator.clipboard.writeText(refId);
+  // اکشن کپی کردن شماره پیگیری در حافظه
+  const handleCopyRefId = () => {
+    if (refId) {
+      navigator.clipboard.writeText(refId);
       setIsCopied(true);
-
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    } catch {
-      setIsCopied(false);
+      setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
+  // --- Render UI based on state ---
   const containerClasses =
-    "min-h-screen flex items-center justify-center bg-gray-100 p-4";
+    'min-h-screen flex items-center justify-center bg-gray-100 p-4';
 
-  // حالت بارگذاری
   if (isLoading) {
     return (
       <div className={containerClasses}>
@@ -151,21 +126,17 @@ function VerifyComponent() {
     );
   }
 
-  // حالت لغو پرداخت
   if (isCancelled) {
     return (
       <div className={containerClasses}>
         <ResultCard
-          icon={
-            <FaExclamationTriangle className="text-base text-yellow-500" />
-          }
+          icon={<FaExclamationTriangle className="text-yellow-500 text-5xl" />}
           title="پرداخت لغو شد"
           message="شما از ادامه فرآیند پرداخت انصراف دادید."
         >
           <button
-            type="button"
-            onClick={() => router.push("/plans")}
-            className="w-full rounded-lg bg-gray-600 py-3 font-semibold text-white transition-colors hover:bg-gray-700"
+            onClick={() => router.push('/plans')}
+            className="w-full bg-gray-600 text-white py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-700 transition-colors cursor-pointer"
           >
             بازگشت به صفحه خرید اشتراک
           </button>
@@ -174,19 +145,17 @@ function VerifyComponent() {
     );
   }
 
-  // حالت خطا
   if (error) {
     return (
       <div className={containerClasses}>
         <ResultCard
-          icon={<FaTimesCircle className="text-base text-red-500" />}
+          icon={<FaTimesCircle className="text-red-500 text-5xl" />}
           title="پرداخت ناموفق"
           message={error}
         >
           <button
-            type="button"
-            onClick={() => router.push("/cart")}
-            className="w-full rounded-lg bg-red-600 py-3 font-semibold text-white transition-colors hover:bg-red-700"
+            onClick={() => router.push('/cart')}
+            className="w-full bg-red-600 text-white py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors cursor-pointer"
           >
             تلاش مجدد و بازگشت به سبد خرید
           </button>
@@ -195,44 +164,37 @@ function VerifyComponent() {
     );
   }
 
-  // حالت موفقیت پرداخت
   if (isSuccess) {
     return (
       <div className={containerClasses}>
         <ResultCard
-          icon={<FaCheckCircle className="text-base text-green-500" />}
+          icon={<FaCheckCircle className="text-green-500 text-5xl" />}
           title="پرداخت با موفقیت انجام شد"
-          message="دسترسی شما به محصول خریداری‌شده ایجاد شد."
+          message="دسترسی شما به محصول خریداری شده ایجاد شد."
         >
           {refId && (
-            <div className="my-6 rounded-lg border border-gray-200 bg-gray-100 p-4">
-              <p className="mb-2 text-sm text-gray-600">
+            <div className="bg-gray-50 p-3 rounded-lg text-center my-4 border border-gray-200">
+              <span className="text-[11px] text-gray-500 block mb-1">
                 شماره پیگیری تراکنش:
-              </p>
-
-              <div className="flex items-center justify-center gap-2">
-                <p
-                  dir="ltr"
-                  className="select-all break-all text-lg font-bold tracking-widest text-gray-800"
-                >
+              </span>
+              <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded border border-gray-200 shadow-sm">
+                <span className="text-sm font-bold text-gray-800 tracking-wider font-mono select-all">
                   {refId}
-                </p>
-
+                </span>
                 <button
                   type="button"
                   onClick={handleCopyRefId}
-                  title={isCopied ? "کپی شد" : "کپی شماره پیگیری"}
-                  aria-label={isCopied ? "شماره پیگیری کپی شد" : "کپی شماره پیگیری"}
-                  className="flex shrink-0 items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded transition-colors cursor-pointer shrink-0"
+                  title="کپی شماره پیگیری"
                 >
                   {isCopied ? (
                     <>
-                      <FaCheck />
-                      <span>کپی شد</span>
+                      <FaCheck className="text-green-600 text-[10px]" />
+                      <span className="text-green-600">کپی شد</span>
                     </>
                   ) : (
                     <>
-                      <FaCopy />
+                      <FaCopy className="text-[10px]" />
                       <span>کپی</span>
                     </>
                   )}
@@ -240,17 +202,15 @@ function VerifyComponent() {
               </div>
             </div>
           )}
-
           <Link
-            href="/ddashboard"
-            className="mb-3 block w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
+            href="/dashboard"
+            className="w-full block bg-blue-600 text-white py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 transition-colors mb-2"
           >
             مشاهده سفارش‌ها
           </Link>
-
           <Link
             href="/"
-            className="block w-full rounded-lg py-2 font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+            className="w-full block text-blue-600 py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-50 transition-colors"
           >
             بازگشت به صفحه اصلی
           </Link>
@@ -263,14 +223,13 @@ function VerifyComponent() {
 }
 
 // ====================================================================
-// Wrapper for Suspense
+//  Wrapper for Suspense (Required for useSearchParams in App Router)
 // ====================================================================
-
 export default function PaymentVerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
           <LoadingState message="در حال بارگذاری صفحه..." />
         </div>
       }
