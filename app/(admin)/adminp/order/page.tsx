@@ -12,9 +12,9 @@ export default async function page({ searchParams }: { searchParams: Promise<{ p
 
   return (
     <div>
-      <Suspense fallback={<SpinerLoader />}>
+      
         <FetchData currentPage={currentPage} searchQuery={searchQuery} limit={limit} />
-      </Suspense>
+      
     </div>
   )
 }

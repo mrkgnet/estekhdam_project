@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ۱. دریافت کامل اطلاعات سفارش
+    // ۱. دریافت اطلاعات کامل سفارش و پلن مربوطه
     const order = await db.order.findUnique({
       where: { id: orderId },
       include: {
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "سفارش یافت نشد." }, { status: 404 });
     }
 
-    // اگر قبلاً موفقیت‌آمیز بوده
+    // جلوگیری از اجرای دوباره برای سفارش‌های از قبل موفق شده
     if (order.status === "SUCCESS") {
       return NextResponse.json({ ok: true, refId: order.refId });
     }
@@ -39,13 +39,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // ۲. تایید از زرین‌پال
+    // ۲. استعلام تایید از درگاه زرین‌پال
     const zpRes = await fetch(VERIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
         merchant_id,
-        amount: order.pricePaid * 10,
+        amount: order.pricePaid * 10, // تبدیل تومان به ریال
         authority: authority,
       }),
     });
@@ -55,13 +55,13 @@ export async function POST(req: Request) {
     const refId = zp?.data?.ref_id;
 
     if (code === 100 || code === 101) {
-      const finalRefId = refId ? String(refId) : order.refId || null;
+      const finalRefId = refId ? String(refId) : order.refId || authority;
 
       try {
-        // ۳. استفاده از تراکنش ایمن پریزما
+        // ۳. اجرای عملیات دیتابیس در قالب Transaction
         await db.$transaction(async (tx) => {
-          // الف: آپدیت وضعیت سفارش
-          await tx.order.update({
+          // الف) آپدیت وضعیت سفارش به SUCCESS
+          const updatedOrder = await tx.order.update({
             where: { id: orderId },
             data: {
               status: "SUCCESS",
@@ -69,61 +69,83 @@ export async function POST(req: Request) {
             },
           });
 
-          const targetPlanId = order.subscriptionPlanId;
-          const targetUserId = order.userId;
+          const targetPlanId = updatedOrder.subscriptionPlanId;
+          const targetUserId = updatedOrder.userId;
 
-          // ب: بررسی پلن و کاربر
-          if (targetPlanId && targetUserId) {
-            const plan = order.subscriptionPlan || (await tx.subscriptionPlan.findUnique({ where: { id: targetPlanId } }));
-
-            if (!plan) {
-              throw new Error("اطلاعات پلن اشتراک در دیتابیس یافت نشد.");
-            }
-
-            // چک کردن اشتراک فعال برای تمدید
-            const existingSub = await tx.userSubscription.findFirst({
-              where: {
-                userId: targetUserId,
-                isActive: true,
-                endDate: { gte: new Date() },
-              },
-              orderBy: { endDate: "desc" },
-            });
-
-            const startDate = existingSub ? new Date(existingSub.endDate) : new Date();
-            const endDate = new Date(startDate);
-            const daysToAdd = Number(plan.durationDays) || 30;
-            endDate.setDate(endDate.getDate() + daysToAdd);
-
-            // ج: ساخت سابسکریپشن
-            await tx.userSubscription.create({
-              data: {
-                startDate: startDate,
-                endDate: endDate,
-                isActive: true,
-                user: { connect: { id: targetUserId } },
-                plan: { connect: { id: targetPlanId } },
-                order: { connect: { id: orderId } },
-              },
-            });
-          } else {
-             // اگر خرید اشتراک نبوده (مثلا محصول عادی بوده) می‌تونید این ارور رو نادیده بگیرید
-             // اما چون فوکوس شما روی اشتراک هست، لاگ می‌اندازیم:
-             console.log("This order is missing planId or userId", { targetPlanId, targetUserId });
+          if (!targetPlanId || !targetUserId) {
+            console.warn("این سفارش فاقد userId یا subscriptionPlanId است:", updatedOrder.id);
+            return;
           }
+
+          // ب) دریافت اطلاعات کامل پلن
+          const plan =
+            order.subscriptionPlan ||
+            (await tx.subscriptionPlan.findUnique({ where: { id: targetPlanId } }));
+
+          if (!plan) {
+            throw new Error(`پلن اشتراک با شناسه ${targetPlanId} در دیتابیس یافت نشد.`);
+          }
+
+          // ج) جلوگیری از ثبت تکراری برای همین سفارش
+          const existingOrderSub = await tx.userSubscription.findUnique({
+            where: { orderId: updatedOrder.id },
+          });
+
+          if (existingOrderSub) {
+            return; // قبلاً برای این سفارش اشتراک ثبت شده است
+          }
+
+          // د) محاسبه تاریخ شروع و انقضا با الگوی اضافه کردن به انتهای اشتراک فعلی
+          const lastActiveSub = await tx.userSubscription.findFirst({
+            where: {
+              userId: targetUserId,
+              isActive: true,
+              endDate: { gte: new Date() },
+            },
+            orderBy: { endDate: "desc" },
+          });
+
+          const now = new Date();
+          // اگر اشتراک فعال دارد، تاریخ شروع از انقضای قبلی است؛ در غیر این صورت از الان
+          const startTimestamp =
+            lastActiveSub && new Date(lastActiveSub.endDate).getTime() > now.getTime()
+              ? new Date(lastActiveSub.endDate).getTime()
+              : now.getTime();
+
+          const daysToAdd = Number(plan.durationDays) || 30;
+          const durationInMs = daysToAdd * 24 * 60 * 60 * 1000;
+
+          const startDate = new Date(startTimestamp);
+          const endDate = new Date(startTimestamp + durationInMs);
+
+          // هـ) ثبت اشتراک در جدول UserSubscription
+          await tx.userSubscription.create({
+            data: {
+              userId: targetUserId,
+              planId: targetPlanId,
+              orderId: updatedOrder.id,
+              startDate: startDate,
+              endDate: endDate,
+              isActive: true,
+            },
+          });
         });
 
         return NextResponse.json({ ok: true, refId: finalRefId });
       } catch (txError: any) {
-        console.error("Transaction Error:", txError);
+        console.error("خطا در ترانزاکشن ثبت اشتراک:", txError);
         return NextResponse.json(
-          { ok: false, message: "پرداخت تایید شد اما خطا در ثبت اشتراک رخ داد.", details: txError.message },
+          {
+            ok: false,
+            message: "پرداخت موفق بود اما خطایی در فعال‌سازی اشتراک رخ داد.",
+            details: txError?.message || String(txError),
+          },
           { status: 500 }
         );
       }
     }
 
-    // ۴. در صورت عدم موفقیت زرین پال
+    // ۴. در صورت ناموفق بودن پرداخت در بانک
     await db.order.update({
       where: { id: orderId },
       data: { status: "FAILED" },
@@ -131,8 +153,12 @@ export async function POST(req: Request) {
 
     const errorMessage = zp?.errors?.message || "تایید پرداخت توسط بانک انجام نشد.";
     return NextResponse.json({ ok: false, message: errorMessage }, { status: 400 });
+
   } catch (e: any) {
     console.error("Payment verify error:", e);
-    return NextResponse.json({ ok: false, message: "خطای داخلی سرور" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, message: "خطای داخلی سرور", details: e?.message },
+      { status: 500 }
+    );
   }
 }

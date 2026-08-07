@@ -1,4 +1,4 @@
-// actions/admin/products/government/Actions.ts
+// actions/admin/orders/Actions.ts (یا مسیر دلخواه شما)
 'use server'
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -27,8 +27,9 @@ export async function getAllOrders(page: number = 1, limit: number = 10, searchQ
         OR: [
             { user: { phoneNumber: { contains: searchQuery } } },
             { user: { email: { contains: searchQuery, mode: 'insensitive' as const } } },
-            { product: { name: { contains: searchQuery, mode: 'insensitive' as const } } },
-            ...(statusFilter ? [{ status: statusFilter as any }] : []) // جستجوی وضعیت در صورت تطابق
+            { refId: { contains: searchQuery } }, // امکان سرچ با کد رهگیری
+            { subscriptionPlan: { title: { contains: searchQuery, mode: 'insensitive' as const } } }, // جستجو در عنوان پلن
+            ...(statusFilter ? [{ status: statusFilter as any }] : [])
         ]
     } : {};
 
@@ -45,8 +46,8 @@ export async function getAllOrders(page: number = 1, limit: number = 10, searchQ
                 user: {
                     select: { phoneNumber: true, email: true }
                 },
-                product: {
-                    select: { name: true, newPrice: true }
+                subscriptionPlan: { // تغییر از product به subscriptionPlan
+                    select: { title: true, price: true }
                 }
             },
             orderBy: { createdAt: 'desc' }
