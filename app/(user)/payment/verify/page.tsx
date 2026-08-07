@@ -173,7 +173,7 @@ function VerifyComponent() {
           message="دسترسی شما به محصول خریداری شده ایجاد شد."
         >
           {refId && (
-            <div className="bg-gray-50 p-3 rounded-lg text-center my-4 border border-gray-200">
+            <div className="bg-gray-50 p-3 rounded-lg text-center  border border-gray-200">
               <span className="text-[11px] text-gray-500 block mb-1">
                 شماره پیگیری تراکنش:
               </span>
@@ -203,7 +203,7 @@ function VerifyComponent() {
             </div>
           )}
           <Link
-            href="/dashboard"
+            href="/ddashboard"
             className="w-full block bg-blue-600 text-white py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 transition-colors mb-2"
           >
             مشاهده سفارش‌ها

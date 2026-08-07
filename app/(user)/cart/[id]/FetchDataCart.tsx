@@ -8,8 +8,8 @@ export default async function FetchDataCart({ pid }: { pid: string }) {
 
   return (
     <div>
-      {/* پاس دادن دیتا و آیدی به کامپوننت نمایش */}
-      <ShowDataCart productData={response.data} productId={pid} />
+      {/* پاس دادن دیتا و آیدی پلن به کامپوننت نمایش */}
+      <ShowDataCart planData={response.data} planId={pid} />
     </div>
   );
 }

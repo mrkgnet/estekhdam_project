@@ -175,7 +175,7 @@ export async function GetDataFactorPlansUser(id: string) {
     }
 
     // نگاشت داده به ساختار مورد نیاز فاکتور
-    const productData = {
+    const planData = {
       id: plan.id,
       name: plan.title,
       oldPrice: plan.price,
@@ -184,7 +184,7 @@ export async function GetDataFactorPlansUser(id: string) {
       durationDays: plan.durationDays,
     };
 
-    return { success: true, data: productData };
+    return { success: true, data: planData };
   } catch (error) {
     console.error("Error fetching plan factor data:", error);
     return { success: false, error: "خطا در دریافت اطلاعات فاکتور", data: null };

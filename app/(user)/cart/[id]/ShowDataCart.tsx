@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, CreditCard, ChevronRight, Loader2, AlertCircle, LogIn } from "lucide-react";
+import { ShoppingBag, CreditCard, ChevronRight, Loader2, AlertCircle, LogIn } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/modals/AuthModal";
 import toast from "react-hot-toast";
 import DotsLoader from "@/components/ui/Loading/DotsLoader";
 
 // --- Type Definitions ---
-type Product = {
+type Plan = {
   id: string;
   name: string;
   newPrice: number;
@@ -18,8 +18,8 @@ type Product = {
 };
 
 type Props = {
-  productData: Product | null;
-  productId: string;
+  planData: Plan | null;
+  planId: string;
 };
 
 // --- Helper for Date/Time ---
@@ -31,7 +31,7 @@ const faDate = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
 }).format(now);
 
 // --- Component ---
-export default function ShowDataCart({ productData, productId }: Props) {
+export default function ShowDataCart({ planData, planId }: Props) {
   const router = useRouter();
   const { isLoading: isAuthLoading, isLoggedIn } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -45,7 +45,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: [{ productId: productId, quantity: 1 }],
+          items: [{ planId: planId, quantity: 1 }],
         }),
       });
 
@@ -94,12 +94,12 @@ export default function ShowDataCart({ productData, productId }: Props) {
   }
 
   // --- Not Found State ---
-  if (!productData) {
+  if (!planData) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-500 p-4" dir="rtl">
-        <ShoppingCart className="w-16 h-16 text-slate-300 mb-4" />
-        <h2 className="text-slate-800 text-xl font-bold">محصول یافت نشد</h2>
-        <p className="text-slate-500 mt-2 text-base">متاسفانه محصولی با این مشخصات وجود ندارد.</p>
+        <ShoppingBag className="w-16 h-16 text-slate-300 mb-4" />
+        <h2 className="text-slate-800 text-xl font-bold">پلن یافت نشد</h2>
+        <p className="text-slate-500 mt-2 text-base">متاسفانه پلنی با این مشخصات وجود ندارد.</p>
         <button onClick={() => router.back()} className="text-green-600 mt-6 hover:underline transition-all text-base">
           بازگشت به صفحه قبل
         </button>
@@ -107,8 +107,8 @@ export default function ShowDataCart({ productData, productId }: Props) {
     );
   }
 
-  const discountAmount = productData.oldPrice > productData.newPrice
-    ? productData.oldPrice - productData.newPrice
+  const discountAmount = planData.oldPrice > planData.newPrice
+    ? planData.oldPrice - planData.newPrice
     : 0;
 
   const isButtonDisabled = isProcessing || isAuthLoading;
@@ -130,7 +130,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-              <p className="text-sm">شما هنوز وارد حساب کاربری خود نشده‌اید. برای نهایی‌سازی خرید، ثبت‌نام کنید یا وارد شوید.</p>
+              <p className="text-sm">شما هنوز وارد حساب کاربری خود نشده‌اید. برای نهایی‌سازی خرید اشتراک، ثبت‌نام کنید یا وارد شوید.</p>
             </div>
             <button
               onClick={() => setIsAuthModalOpen(true)}
@@ -151,19 +151,17 @@ export default function ShowDataCart({ productData, productId }: Props) {
             <ChevronRight className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-bold text-lg text-slate-800">تایید و پرداخت</h1>
-            <p className="text-slate-500 mt-1 text-sm">لطفا جزئیات فاکتور را بررسی و پرداخت را نهایی کنید.</p>
+            <h1 className="font-bold text-lg text-slate-800">تایید و پرداخت اشتراک</h1>
+            <p className="text-slate-500 mt-1 text-sm">لطفا جزئیات فاکتور اشتراک را بررسی و پرداخت را نهایی کنید.</p>
           </div>
         </header>
-
-
 
         {/* Invoice Card */}
         <div className="bg-white rounded-sm shadow-md border border-slate-400 overflow-hidden">
           <div className="p-5 grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 border-b border-slate-200">
             <div>
               <span className="block text-slate-500 text-sm">شماره فاکتور</span>
-              <span className="block tracking-wider mt-1 text-base font-medium">INV-{productId.slice(0, 8).toUpperCase()}</span>
+              <span className="block tracking-wider mt-1 text-base font-medium">INV-{planId.slice(0, 8).toUpperCase()}</span>
             </div>
             <div>
               <span className="block text-slate-500 text-sm">تاریخ</span>
@@ -181,16 +179,16 @@ export default function ShowDataCart({ productData, productId }: Props) {
             <table className="min-w-full">
               <thead className="text-slate-500 uppercase text-xs">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-right font-medium">شرح محصول</th>
+                  <th scope="col" className="px-6 py-3 text-right font-medium">عنوان اشتراک / پلن</th>
                   <th scope="col" className="px-6 py-3 text-center font-medium">تعداد</th>
                   <th scope="col" className="px-6 py-3 text-left font-medium">مبلغ (تومان)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 <tr className="border border-b-0 border-t-0 border-l-0 border-r-0 border-slate-400">
-                  <td className="px-6 py-4 text-slate-800 text-base">{productData.name}</td>
+                  <td className="px-6 py-4 text-slate-800 text-base">{planData.name}</td>
                   <td className="px-6 py-4 text-center font-medium text-base">۱</td>
-                  <td className="px-6 py-4 text-left font-medium text-base">{productData.oldPrice.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-left font-medium text-base">{planData.oldPrice.toLocaleString()}</td>
                 </tr>
               </tbody>
             </table>
@@ -200,7 +198,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
             <div className="ml-auto space-y-3">
               <div className="flex items-center justify-between text-base">
                 <span className="text-slate-600">جمع کل:</span>
-                <span className="font-medium">{productData.oldPrice.toLocaleString()} تومان</span>
+                <span className="font-medium">{planData.oldPrice.toLocaleString()} تومان</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex items-center justify-between text-red-600 text-base">
@@ -211,7 +209,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
               <div className="border-t border-slate-200 my-2"></div>
               <div className="flex items-center justify-between text-base">
                 <span className="text-slate-800 font-medium">مبلغ نهایی:</span>
-                <span className="font-bold text-lg text-slate-800">{productData.newPrice.toLocaleString()} تومان</span>
+                <span className="font-bold text-lg text-slate-800">{planData.newPrice.toLocaleString()} تومان</span>
               </div>
             </div>
           </div>
@@ -222,7 +220,7 @@ export default function ShowDataCart({ productData, productId }: Props) {
           <div className="mx-auto bg-white flex items-center justify-between p-3 border border-gray-400 rounded-sm">
             <div>
               <span className="text-slate-500 text-sm">مبلغ قابل پرداخت</span>
-              <p className="font-bold text-lg text-slate-800">{productData.newPrice.toLocaleString()} تومان</p>
+              <p className="font-bold text-lg text-slate-800">{planData.newPrice.toLocaleString()} تومان</p>
             </div>
             <button
               onClick={handlePayment}
