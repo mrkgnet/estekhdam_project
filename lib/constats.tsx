@@ -8,7 +8,7 @@ import { LuUser, LuShoppingCart, LuRefreshCcw, LuWallet } from "react-icons/lu";
 export const tabsDataAdminPanel = [
   {
     id: "1",
-    title: " کاربران",
+    title: " مدیریت کاربران",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
     url: "/",
     subItems: [
@@ -51,7 +51,7 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "4",
-    title: " سفارشات ",
+    title: " مدیریت سفارشات ",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
     url: "/",
     subItems: [
@@ -64,7 +64,7 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "11",
-    title: " منوها ",
+    title: " مدیریت منوها ",
     icon: LuUser, // آیکون کاربر برای حساب‌های کاربری
     url: "/",
     subItems: [
@@ -91,7 +91,7 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "6",
-    title: " دسته ها ",
+    title: "مدیریت دسته‌ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/categories",
     subItems: [
@@ -115,7 +115,7 @@ export const tabsDataAdminPanel = [
 
   {
     id: "7",
-    title: " کامنت ها ",
+    title: "مدیریت کامنت‌ها ",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/comments",
     subItems: [
@@ -128,7 +128,7 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "8",
-    title: " تیکت ها ",
+    title: "مدیریت تیکت‌ها",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/support/tickets",
     subItems: [
@@ -157,7 +157,7 @@ export const tabsDataAdminPanel = [
   },
   {
     id: "10",
-    title: " پیغام ها ",
+    title: "مدیریت پیغام‌ها",
     icon: CassetteTapeIcon, // آیکون کاربر برای حساب‌های کاربری
     url: "/adminp/notifications",
     subItems: [

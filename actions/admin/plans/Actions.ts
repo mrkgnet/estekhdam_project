@@ -190,3 +190,50 @@ export async function GetDataFactorPlansUser(id: string) {
     return { success: false, error: "خطا در دریافت اطلاعات فاکتور", data: null };
   }
 }
+
+
+// ------------------------------------------
+export async function GetDataPlansUserUniqe(id: string) {
+  try {
+    if (!id) {
+      return { success: false, error: "شناسه پلن معتبر نیست", data: null };
+    }
+
+    const plan = await db.userSubscription.findUnique({
+      where: {
+        id: id,
+        isActive: true, // فقط پلن‌های فعال قابل فاکتور شدن هستند
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        price: true,
+        discountPrice: true,
+        durationDays: true,
+        description: true,
+      },
+    });
+
+    if (!plan) {
+      return { success: false, error: "پلن مورد نظر یافت نشد یا غیرفعال است", data: null };
+    }
+
+    // نگاشت داده به ساختار مورد نیاز فاکتور
+    const planData = {
+      id: plan.id,
+      name: plan.title,
+      oldPrice: plan.price,
+      newPrice: plan.discountPrice && plan.discountPrice < plan.price ? plan.discountPrice : plan.price,
+      description: plan.description,
+      durationDays: plan.durationDays,
+    };
+
+    return { success: true, data: planData };
+  } catch (error) {
+    console.error("Error fetching plan factor data:", error);
+    return { success: false, error: "خطا در دریافت اطلاعات فاکتور", data: null };
+  }
+}
+
+

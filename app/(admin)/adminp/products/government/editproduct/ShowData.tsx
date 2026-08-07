@@ -11,8 +11,7 @@ import {
     ImageOff,
     Inbox,
     FileQuestion,
-    FileEdit,
-    Loader2
+    FileEdit
 } from 'lucide-react';
 import { ROUTES } from '@/lib/constats';
 import SearchBar from '@/components/ui/SearchBar';
@@ -62,7 +61,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
                 } else {
                     params.delete('query');
                 }
-                
+
                 params.set('page', '1');
 
                 // اعمال تغییر روت در قالب Transition برای فعال شدن isPending
@@ -78,15 +77,6 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
     if (!products || products.length === 0) {
         return (
             <div className="flex flex-col max-w-5xl mx-auto items-center text-xs md:text-sm justify-center py-20 bg-white border border-dashed border-slate-300 rounded-2xl shadow-sm relative">
-                
-                {/* 🟢 لودینگ وسط صفحه برای حالت لیست خالی */}
-                {isPending && (
-                    <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-4 animate-fade-in">
-                        <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-                        <span className="text-xl font-bold text-slate-800 animate-pulse">در حال جستجو...</span>
-                    </div>
-                )}
-
                 <div className="bg-slate-50 p-6 rounded mb-4">
                     <Inbox className="w-12 h-12 text-slate-400" />
                 </div>
@@ -94,8 +84,8 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
                     {searchTerm ? 'نتیجه‌ای برای جستجوی شما یافت نشد' : 'هیچ آگهی یافت نشد'}
                 </h3>
                 {searchTerm && (
-                    <button 
-                        onClick={() => setSearchTerm('')} 
+                    <button
+                        onClick={() => setSearchTerm('')}
                         disabled={isPending}
                         className="text-blue-600 mt-2 underline disabled:opacity-50"
                     >
@@ -115,19 +105,6 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
 
     return (
         <div className="space-y-6 text-xs md:text-sm max-w-7xl mx-auto relative">
-            
-            {/* 🟢 المان لودینگ بزرگ و تمام‌صفحه در وسط (فقط زمانی که isPending چرخشی فعال است) */}
-            {isPending && (
-                <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4 transition-all duration-300">
-                    <div className="bg-white p-8 rounded-2xl shadow-2xl border border-slate-100 flex flex-col items-center justify-center gap-4 min-w-[240px]">
-                        <Loader2 className="w-14 h-14 text-blue-600 animate-spin" />
-                        <span className="text-xl font-extrabold text-slate-800 tracking-wide">
-                            در حال جستجو...
-                        </span>
-                    </div>
-                </div>
-            )}
-
             {/* هدر */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded shadow-sm border border-slate-200">
                 <div className="flex items-center gap-4">
@@ -187,7 +164,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {product.imageUrl && product.imageUrl !== "###" ? (
+                                        {product.imageUrl && product.imageUrl !== '###' ? (
                                             <img
                                                 src={product.imageUrl}
                                                 alt={product.name}
@@ -207,7 +184,7 @@ export default function ShowData({ products, totalPages, currentPage, limit }: S
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col">
                                             <span className="text-emerald-600">
-                                                {product.newPrice ? product.newPrice.toLocaleString() : "رایگان"}
+                                                {product.newPrice ? product.newPrice.toLocaleString() : 'رایگان'}
                                             </span>
                                             {product.oldPrice && product.oldPrice > product.newPrice && (
                                                 <span className="text-slate-400 line-through mt-0.5">

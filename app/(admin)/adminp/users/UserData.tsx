@@ -76,7 +76,7 @@ export default function InfoUserData({ dataUsers, dataProducts }: { dataUsers: a
 
   return (
     <>
-      <div className='min-h-screen mt-6'>
+      <div className='min-h-screen my-12'>
         <div dir="rtl" className="w-full text-12 sm:text-14  bg-white rounded max-w-6xl mx-auto border border-gray-100 shadow-sm overflow-hidden">
           
           <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -112,7 +112,7 @@ export default function InfoUserData({ dataUsers, dataProducts }: { dataUsers: a
                   <th className="px-6 py-4 font-semibold text-gray-600">ایمیل</th>
                   <th className="px-6 py-4 font-semibold text-gray-600">نقش</th>
                   <th className="px-6 py-4 font-semibold text-gray-600">تاریخ ثبت نام</th>
-                  <th className="px-6 py-4 font-semibold text-gray-600">مدیریت محصولات کاربر</th>
+                  <th className="px-6 py-4 font-semibold text-gray-600">مدیریت پلن‌های کاربر</th>
                   <th className="px-6 py-4 font-semibold text-gray-600">عملیات</th>
                 </tr>
               </thead>
