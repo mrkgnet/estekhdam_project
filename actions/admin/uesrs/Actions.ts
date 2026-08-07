@@ -1,75 +1,86 @@
+// actions/admin/uesrs/Actions.ts
 "use server";
 
-import { infoCurentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db"; // مسیر فایل Prisma Client پروژه شما
 
-// 👇 پارامترهای صفحه، تعداد در صفحه و متن جستجو را دریافت می‌کنیم
 export async function fetchDataUserAction(
-  page: number = 1,
+  currentPage: number = 1,
   limit: number = 10,
   searchQuery: string = ""
 ) {
   try {
-    const currentUser = await infoCurentUser();
+    const skip = (currentPage - 1) * limit;
 
-    if (!currentUser || currentUser.role !== "admin") {
-      return {
-        success: false,
-        message: "دسترسی غیرمجاز. فقط ادمین می‌تواند لیست کاربران را مشاهده کند.",
-      };
-    }
+    const where = searchQuery
+      ? {
+          OR: [
+            { phoneNumber: { contains: searchQuery } },
+            { email: { contains: searchQuery } },
+            { firstName: { contains: searchQuery } },
+            { lastName: { contains: searchQuery } },
+          ],
+        }
+      : {};
 
-    // محاسبه نقطه‌ی شروع (Skip)
-    const skip = (page - 1) * limit;
-
-    // ساخت شروط جستجو برای دیتابیس (اگر متنی سرچ شده باشد)
-    const whereCondition: any = {};
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      // تبدیل کلمات فارسی به نقش‌های دیتابیس
-      let roleSearch = undefined;
-      if (query.includes("مدیر")) roleSearch = "admin";
-      else if (query.includes("کاربر")) roleSearch = "user";
-
-      whereCondition.OR = [
-        { phoneNumber: { contains: query } },
-        { email: { contains: query } },
-        ...(roleSearch ? [{ role: roleSearch }] : []),
-      ];
-    }
-
-    // 👇 اجرای همزمان دو کوئری: 1. گرفتن تعداد کل کاربران (برای دکمه‌های صفحه‌بندی) 2. گرفتن 10 کاربر این صفحه
-    const [totalUsersCount, result] = await db.$transaction([
-      db.user.count({ where: whereCondition }),
+    const [data, totalCount] = await Promise.all([
       db.user.findMany({
-        where: whereCondition,
+        where,
+        skip,
+        take: limit,
         orderBy: { createdAt: "desc" },
-        skip: skip, // رد کردن رکوردهای صفحات قبل
-        take: limit, // گرفتن فقط به تعداد مشخص شده (مثلا 10 تا)
         select: {
           id: true,
           phoneNumber: true,
           email: true,
+          firstName: true,
+          lastName: true,
           role: true,
           createdAt: true,
+          // 🟢 واکشی همزمان اشتراک‌های کاربر
+          subscriptions: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              startDate: true,
+              endDate: true,
+              isActive: true,
+              createdAt: true,
+              plan: {
+                select: {
+                  title: true,
+                  durationDays: true,
+                  price: true,
+                },
+              },
+              order: {
+                select: {
+                  pricePaid: true,
+                  refId: true,
+                  status: true,
+                },
+              },
+            },
+          },
         },
       }),
+      db.user.count({ where }),
     ]);
 
-    // محاسبه تعداد کل صفحات
-    const totalPages = Math.ceil(totalUsersCount / limit);
+    const totalPages = Math.ceil(totalCount / limit);
 
     return {
       success: true,
-      data: result,
-      totalCount: totalUsersCount,
-      totalPages: totalPages,
+      data,
+      totalCount,
+      totalPages,
     };
   } catch (error) {
-    console.error("❌ Error in fetchDataUserAction:", error);
+    console.error("Error fetching users:", error);
     return {
       success: false,
-      message: "خطایی در برقراری ارتباط با پایگاه داده رخ داد.",
+      data: [],
+      totalCount: 0,
+      totalPages: 0,
     };
   }
 }

@@ -193,47 +193,48 @@ export async function GetDataFactorPlansUser(id: string) {
 
 
 // ------------------------------------------
-export async function GetDataPlansUserUniqe(id: string) {
+
+export async function getUserSubscriptionsAction(userId: string) {
   try {
-    if (!id) {
-      return { success: false, error: "شناسه پلن معتبر نیست", data: null };
+    if (!userId) {
+      return { success: false, message: "شناسه کاربر ارسال نشده است", data: [] };
     }
 
-    const plan = await db.userSubscription.findUnique({
+    const subscriptions = await db.userSubscription.findMany({
       where: {
-        id: id,
-        isActive: true, // فقط پلن‌های فعال قابل فاکتور شدن هستند
+        userId: userId,
       },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        price: true,
-        discountPrice: true,
-        durationDays: true,
-        description: true,
+      include: {
+        plan: {
+          select: {
+            title: true,
+            durationDays: true,
+            price: true,
+          },
+        },
+        order: {
+          select: {
+            pricePaid: true,
+            refId: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
-    if (!plan) {
-      return { success: false, error: "پلن مورد نظر یافت نشد یا غیرفعال است", data: null };
-    }
-
-    // نگاشت داده به ساختار مورد نیاز فاکتور
-    const planData = {
-      id: plan.id,
-      name: plan.title,
-      oldPrice: plan.price,
-      newPrice: plan.discountPrice && plan.discountPrice < plan.price ? plan.discountPrice : plan.price,
-      description: plan.description,
-      durationDays: plan.durationDays,
+    return {
+      success: true,
+      data: subscriptions,
     };
-
-    return { success: true, data: planData };
   } catch (error) {
-    console.error("Error fetching plan factor data:", error);
-    return { success: false, error: "خطا در دریافت اطلاعات فاکتور", data: null };
+    console.error("Error fetching user subscriptions:", error);
+    return {
+      success: false,
+      message: "خطا در دریافت لیست اشتراک‌های کاربر",
+      data: [],
+    };
   }
 }
-
-

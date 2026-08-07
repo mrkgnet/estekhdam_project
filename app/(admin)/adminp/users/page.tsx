@@ -24,8 +24,8 @@ export default async function page({
   const limit = 10; 
 
   return (
-    <Suspense fallback={<SpinerLoader />}>
+    
       <FetchDataUser currentPage={currentPage} searchQuery={searchQuery} limit={limit} />
-    </Suspense>
+    
   )
 }
