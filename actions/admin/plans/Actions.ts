@@ -238,3 +238,38 @@ export async function getUserSubscriptionsAction(userId: string) {
     };
   }
 }
+
+
+export async function deleteUserSubscriptionAction(id: string) {
+  try {
+    if (!id) {
+      return { success: false, error: "شناسه اشتراک معتبر نیست" };
+    }
+
+    await db.userSubscription.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user subscription:", error);
+    return { success: false, error: "خطا در حذف اشتراک کاربر" };
+  }
+}
+
+
+export async function toggleSubscriptionStatusAction(subscriptionId: string, currentStatus: boolean) {
+  try {
+    await db.userSubscription.update({
+      where: { id: subscriptionId },
+      data: { isActive: !currentStatus },
+    });
+
+    revalidatePath("/adminp/users"); // مسیر صفحه‌ای که لیست در آن است را جایگزین کنید
+    return { success: true, message: "وضعیت اشتراک با موفقیت تغییر کرد." };
+  } catch (error) {
+    console.error("Error toggling subscription:", error);
+    return { success: false, message: "خطا در تغییر وضعیت اشتراک." };
+  }
+}
