@@ -47,7 +47,7 @@ export default function page() {
                     <PlansOffer />
                 </section>
 
-                 {/* اسلایدر برندها */}
+                {/* اسلایدر برندها */}
                 <section className="pb-10">
                     <BrandTopSlider />
                 </section>
@@ -71,7 +71,7 @@ export default function page() {
                     <BreakingNewsComponent />
                 </section>
 
-               
+
             </main>
         </div>
     );

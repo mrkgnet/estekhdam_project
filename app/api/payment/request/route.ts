@@ -45,13 +45,13 @@ export async function POST(req: Request) {
 
     // ۳. یافتن پلن اشتراک از دیتابیس
     const subPlan = await db.subscriptionPlan.findUnique({
-      where: { id: itemId },
+      where: { id: itemId, isActive: true },
       select: { id: true, price: true, discountPrice: true },
     });
 
     if (!subPlan) {
       return NextResponse.json(
-        { ok: false, message: "پلن اشتراک مورد نظر یافت نشد." },
+        { ok: false, message: "پلن اشتراک مورد نظر یافت نشد یا غیرفعال است." },
         { status: 404 }
       );
     }
@@ -77,18 +77,18 @@ export async function POST(req: Request) {
 
     if (!merchant_id || !callbackBase) {
       return NextResponse.json(
-        { ok: false, message: "تنظیمات درگاه (Merchant ID یا Callback) در فایل .env تعریف نشده است." },
+        { ok: false, message: "تنظیمات درگاه (Merchant ID یا Callback) تعریف نشده است." },
         { status: 500 }
       );
     }
 
-    // ۵. ثبت سفارش در دیتابیس با ارتباط صحیح با subscriptionPlan
+    // ۵. ثبت سفارش در دیتابیس
     let order;
     try {
       order = await db.order.create({
         data: {
           userId: userId,
-          subscriptionPlanId: subPlan.id, // اتصال به پلن اشتراک
+          subscriptionPlanId: subPlan.id,
           pricePaid: pricePaid,
           status: "PENDING",
         },

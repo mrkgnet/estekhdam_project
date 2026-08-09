@@ -240,23 +240,68 @@ export async function getUserSubscriptionsAction(userId: string) {
 }
 
 
-export async function deleteUserSubscriptionAction(id: string) {
+
+
+
+
+
+
+export async function getUserSubscriptionsActiveAction(userId: string) {
   try {
-    if (!id) {
-      return { success: false, error: "شناسه اشتراک معتبر نیست" };
+    if (!userId) {
+      return { success: false, message: "شناسه کاربر ارسال نشده است", data: [] };
     }
 
-    await db.userSubscription.delete({
-      where: { id },
+    const now = new Date();
+
+    const subscriptions = await db.userSubscription.findMany({
+      where: {
+        userId: userId,
+        isActive: true,
+        endDate: { gte: now }, // فقط اشتراک‌هایی که تاریخ انقضای آن‌ها نگذشته است
+      },
+      include: {
+        plan: {
+          select: {
+            title: true,
+            durationDays: true,
+            price: true,
+          },
+        },
+        order: {
+          select: {
+            pricePaid: true,
+            refId: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        endDate: "desc",
+      },
     });
 
-    revalidatePath("/admin/users");
-    return { success: true };
+    return {
+      success: true,
+      data: subscriptions,
+    };
   } catch (error) {
-    console.error("Error deleting user subscription:", error);
-    return { success: false, error: "خطا در حذف اشتراک کاربر" };
+    console.error("Error fetching active user subscriptions:", error);
+    return {
+      success: false,
+      message: "خطا در دریافت لیست اشتراک‌های فعال کاربر",
+      data: [],
+    };
   }
 }
+
+
+
+
+
+
+
+
 
 
 export async function toggleSubscriptionStatusAction(subscriptionId: string, currentStatus: boolean) {
@@ -271,5 +316,144 @@ export async function toggleSubscriptionStatusAction(subscriptionId: string, cur
   } catch (error) {
     console.error("Error toggling subscription:", error);
     return { success: false, message: "خطا در تغییر وضعیت اشتراک." };
+  }
+}
+
+
+export async function deleteUserSubscriptionAction(id: string) {
+  try {
+    if (!id) {
+      return { success: false, message: "شناسه اشتراک معتبر نیست", error: "شناسه اشتراک معتبر نیست" };
+    }
+
+    await db.userSubscription.delete({
+      where: { id },
+    });
+
+    revalidatePath("/adminp/users");
+    return { success: true, message: "اشتراک کاربر با موفقیت حذف شد" };
+  } catch (error) {
+    console.error("Error deleting user subscription:", error);
+    return { success: false, message: "خطا در حذف اشتراک کاربر", error: "خطا در حذف اشتراک کاربر" };
+  }
+}
+
+
+export async function addUserSubscriptionManualAction(userId: string, planId: string) {
+  try {
+    if (!userId || !planId) {
+      return { success: false, message: "اطلاعات ورودی نامعتبر است." };
+    }
+
+    // ۱. دریافت اطلاعات پلن
+    const plan = await db.subscriptionPlan.findUnique({
+      where: { id: planId },
+    });
+
+    if (!plan) {
+      return { success: false, message: "پلن مورد نظر یافت نشد." };
+    }
+
+    const now = new Date();
+
+    // ۲. بررسی آخرین اشتراک فعال کاربر برای اضافه کردن مدت زمان به انتهای آن
+    const activeSub = await db.userSubscription.findFirst({
+      where: {
+        userId: userId,
+        isActive: true,
+        endDate: { gte: now },
+      },
+      orderBy: { endDate: "desc" },
+    });
+
+    // مبنای تاریخ انقضا
+    const baseTime = activeSub && new Date(activeSub.endDate) > now
+      ? new Date(activeSub.endDate)
+      : now;
+
+    const daysToAdd = Number(plan.durationDays) || 30;
+    const calculatedEndDate = new Date(baseTime.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+
+    // ۳. غیرفعال کردن اشتراک‌های قبلی برای جلوگیری از تداخل
+    await db.userSubscription.updateMany({
+      where: {
+        userId: userId,
+        isActive: true,
+      },
+      data: {
+        isActive: false,
+      },
+    });
+
+    // ۴. ایجاد اشتراک دستی جدید
+    await db.userSubscription.create({
+      data: {
+        userId: userId,
+        planId: plan.id,
+        startDate: now,
+        endDate: calculatedEndDate,
+        isActive: true,
+      },
+    });
+
+    revalidatePath("/adminp/users"); // صفحه‌ای که جدول کاربران در آن قرار دارد
+    return { success: true, message: "اشتراک با موفقیت برای کاربر فعال شد." };
+  } catch (error) {
+    console.error("Error adding manual subscription:", error);
+    return { success: false, message: "خطا در ثبت دستی اشتراک." };
+  }
+}
+
+
+
+
+
+export async function reduceUserSubscriptionManualAction(userId: string, daysToReduce: number) {
+  try {
+    if (!userId || !daysToReduce || daysToReduce <= 0) {
+      return { success: false, message: "تعداد روزهای درخواستی معتبر نمی‌باشد." };
+    }
+
+    const now = new Date();
+
+    // ۱. یافتن آخرین اشتراک فعال کاربر
+    const activeSub = await db.userSubscription.findFirst({
+      where: {
+        userId: userId,
+        isActive: true,
+        endDate: { gte: now },
+      },
+      orderBy: { endDate: "desc" },
+    });
+
+    if (!activeSub) {
+      return { success: false, message: "این کاربر هیچ اشتراک فعالی برای کاهش ندارد." };
+    }
+
+    // ۲. محاسبه تاریخ انقضای جدید
+    const currentEndDate = new Date(activeSub.endDate);
+    const newEndDate = new Date(currentEndDate.getTime() - daysToReduce * 24 * 60 * 60 * 1000);
+
+    // ۳. اگر انقضای جدید گذشته باشد، اشتراک غیرفعال می‌شود
+    const shouldDeactivate = newEndDate <= now;
+
+    await db.userSubscription.update({
+      where: { id: activeSub.id },
+      data: {
+        endDate: shouldDeactivate ? now : newEndDate,
+        isActive: !shouldDeactivate,
+      },
+    });
+
+    revalidatePath("/adminp/users");
+    return {
+      success: true,
+      message: shouldDeactivate
+        ? "زمان اشتراک کاهش یافت و به دلیل اتمام مهلت، اشتراک غیرفعال شد."
+        : `زمان اشتراک با موفقیت ${daysToReduce} روز کاهش یافت.`,
+    };
+  } catch (error) {
+    console.error("Error reducing subscription:", error);
+    return { success: false, message: "خطا در کاهش زمان اشتراک." };
   }
 }

@@ -246,10 +246,10 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
               <button
                 type="button"
                 onClick={() => handleTabChange(key)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex items-center mb-3 md:mb-2 gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   activeTab === key
                     ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-gray-100/80 text-slate-600 hover:bg-gray-200/70 hover:text-slate-900'
+                    : 'bg-gray-100/80 border border-slate-500 text-slate-600 hover:bg-gray-200/70 hover:text-slate-900'
                 }`}
               >
                 {icon}

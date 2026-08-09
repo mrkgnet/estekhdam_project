@@ -92,40 +92,49 @@ export async function POST(req: Request) {
           });
 
           if (existingOrderSub) {
-            return; // قبلاً برای این سفارش اشتراک ثبت شده است
+            return;
           }
 
-          // د) محاسبه تاریخ شروع و انقضا با الگوی اضافه کردن به انتهای اشتراک فعلی
-          const lastActiveSub = await tx.userSubscription.findFirst({
+          const now = new Date();
+
+          // د) یافتن آخرین اشتراک فعال کاربر که هنوز منقضی نشده است
+          const activeSub = await tx.userSubscription.findFirst({
             where: {
               userId: targetUserId,
               isActive: true,
-              endDate: { gte: new Date() },
+              endDate: { gte: now },
             },
             orderBy: { endDate: "desc" },
           });
 
-          const now = new Date();
-          // اگر اشتراک فعال دارد، تاریخ شروع از انقضای قبلی است؛ در غیر این صورت از الان
-          const startTimestamp =
-            lastActiveSub && new Date(lastActiveSub.endDate).getTime() > now.getTime()
-              ? new Date(lastActiveSub.endDate).getTime()
-              : now.getTime();
+          // محاسبه مبنای تاریخ شروع و انقضا
+          // اگر کاربر اشتراک فعال دارد، مبنا انقضای قبلی است؛ در غیر این صورت همین لحظه است
+          const baseTime = activeSub && new Date(activeSub.endDate) > now
+            ? new Date(activeSub.endDate)
+            : now;
 
           const daysToAdd = Number(plan.durationDays) || 30;
-          const durationInMs = daysToAdd * 24 * 60 * 60 * 1000;
+          const calculatedEndDate = new Date(baseTime.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
 
-          const startDate = new Date(startTimestamp);
-          const endDate = new Date(startTimestamp + durationInMs);
+          // هـ) غیرفعال کردن تمام اشتراک‌های قبلی کاربر برای جلوگیری از تداخل
+          await tx.userSubscription.updateMany({
+            where: {
+              userId: targetUserId,
+              isActive: true,
+            },
+            data: {
+              isActive: false,
+            },
+          });
 
-          // هـ) ثبت اشتراک در جدول UserSubscription
+          // و) ثبت رکورد جدید اشتراک با مجموع زمان محاسبه‌شده
           await tx.userSubscription.create({
             data: {
               userId: targetUserId,
               planId: targetPlanId,
               orderId: updatedOrder.id,
-              startDate: startDate,
-              endDate: endDate,
+              startDate: now,
+              endDate: calculatedEndDate,
               isActive: true,
             },
           });

@@ -45,13 +45,7 @@ export default function NavbarUser() {
             </Link>
           </div>
 
-          <Link
-            href={"/plans"}
-            className="hidden sm:flex items-center gap-2 px-3 py-2 font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 transition-colors duration-200 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-800 dark:hover:text-amber-300"
-          >
-            <Star className="w-4 h-4 fill-current" />
-            <span>خرید اشتراک</span>
-          </Link>
+         
         </div>
       </div>
     </header>
