@@ -37,8 +37,8 @@ interface ShowMainSliderProps {
 
 const STATUS_MAP: Record<NewsStatus, { label: string; className: string }> = {
   OPEN:               { label: "ثبت‌نام باز",       className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  CARD_RECEIVED:      { label: "کارت دریافت شد",    className: "bg-blue-50 text-blue-700 border-blue-200" },
-  RESULTS_ANNOUNCED:  { label: "نتایج اعلام شد",    className: "bg-violet-50 text-violet-700 border-violet-200" },
+  CARD_RECEIVED:      { label: "دریافت کارت",    className: "bg-blue-50 text-blue-700 border-blue-200" },
+  RESULTS_ANNOUNCED:  { label: "اعلام نتایج",    className: "bg-violet-50 text-violet-700 border-violet-200" },
   NEWS:               { label: "اطلاعیه",            className: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
@@ -213,25 +213,25 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
                     {infoRows.length > 0 && (
                       <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-[11px] md:text-sm">
+                        <table className="w-full border-collapse text-[12px] md:text-sm">
                           <tbody>
                             {infoRows.map(([label, value]) => (
                               <tr key={label} className="leading-tight md:leading-normal">
-                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[10px] md:text-xs">
+                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
                                   {label}
                                 </th>
-                                <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right text-slate-800 text-[10px] md:text-xs">
+                                <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right text-slate-800 text-[12px] md:text-xs">
                                   {value}
                                 </td>
                               </tr>
                             ))}
                             {statusInfo && (
                               <tr className="leading-tight md:leading-normal">
-                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[10px] md:text-xs">
+                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
                                   وضعیت
                                 </th>
                                 <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right">
-                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[11px] font-medium border ${statusInfo.className}`}>
+                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-medium border ${statusInfo.className}`}>
                                     {statusInfo.label}
                                   </span>
                                 </td>
