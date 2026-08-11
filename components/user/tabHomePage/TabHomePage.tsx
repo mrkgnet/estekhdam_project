@@ -48,9 +48,11 @@ async function fetchCategories(): Promise<ParentCategory[]> {
 
 function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`w-full flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white rounded-2xl border border-gray-200/100 shadow-xs ${className}`}>
+    <div
+      className={`w-full flex flex-col justify-between p-4 sm:p-5 h-44 sm:h-48 bg-white rounded-2xl border border-gray-200/100 shadow-xs ${className}`}
+    >
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 skeleton-wave rounded-xl shrink-0" />
+        <div className="w-12 h-12 sm:w-14 sm:h-14 skeleton-wave rounded-xl shrink-0" />
         <div className="w-1/2 h-4 skeleton-wave rounded-md" />
       </div>
       <div className="space-y-2 mt-4">
@@ -61,7 +63,6 @@ function SkeletonCard({ className = '' }: { className?: string }) {
   )
 }
 
-
 function TabSkeletonGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
@@ -71,7 +72,6 @@ function TabSkeletonGrid() {
     </div>
   )
 }
-
 
 export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
   const router = useRouter()
@@ -158,7 +158,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
           100% { background-position: 200% 0; }
         }
         .skeleton-wave {
-         background-color: #cbd5e1;
+          background-color: #cbd5e1;
           background-image: linear-gradient(90deg, #cbd5e1 25%, #e2e8f0 50%, #cbd5e1 75%);
           background-size: 200% 100%;
           animation: skeleton-wave 1.5s infinite linear;
@@ -209,9 +209,8 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
         )}
       </div>
 
-      {/* Navigation Tabs (Swiper for Mobile & Desktop) */}
-      <div className="relative mb-6 sm:mb-8 border-b border-gray-200/100 px-7  sm:pb-4  sm:px-8">
-        {/* Tab Swiper Navigation Buttons */}
+      {/* Navigation Tabs */}
+      <div className="relative mb-6 sm:mb-8 border-b border-gray-200/100 px-7 sm:pb-4 sm:px-8">
         <button
           type="button"
           onClick={() => tabSwiperRef.current?.slidePrev()}
@@ -261,7 +260,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       </div>
 
       {/* Cards Swiper Area */}
-      <div className="relative min-h-[180px] sm:min-h-[200px]">
+      <div className="relative min-h-[190px] sm:min-h-[220px]">
         {showSkeleton ? (
           <TabSkeletonGrid />
         ) : currentCategories.length === 0 ? (
@@ -271,7 +270,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
           </div>
         ) : (
           <div className="relative px-2 sm:px-4">
-            {/* Custom Navigation Buttons for Cards (Mobile + Desktop) */}
             {currentCategories.length > 1 && (
               <>
                 <button
@@ -326,25 +324,33 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                   <SwiperSlide key={item.id} className="!h-auto">
                     <Link
                       href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
-                      className="group flex flex-col justify-between p-4 sm:p-5 h-40 sm:h-44 bg-white border border-gray-200/180 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
+                      className="group relative overflow-hidden flex flex-col justify-between p-4 sm:p-5 pt-8 sm:pt-9 h-44 sm:h-48 bg-white border border-gray-200/180 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
                     >
+                      {/* Ribbon */}
+                      <span className="pointer-events-none absolute top-3 -left-8 z-10 rotate-[-45deg] bg-red-600 text-white text-[9px] sm:text-[10px] font-bold px-8 py-1 shadow-sm">
+                        درسنامه / تست
+                      </span>
+
                       <div>
-                        {/* Header: Icon + Title */}
-                        <div className="flex items-center gap-2.5 sm:gap-3.5 mb-2.5 sm:mb-3">
-                          <div className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-xl shrink-0 ${colorTheme.bg}`}>
+                        {/* Header: Image + Title */}
+                        <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                          <div
+                            className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 ${colorTheme.bg}`}
+                          >
                             {item.imageUrl ? (
                               <Image
                                 src={item.imageUrl}
                                 alt={item.catName}
                                 fill
-                                className="object-contain p-2"
-                                sizes="44px"
+                                className="object-contain p-2.5 sm:p-3"
+                                sizes="(max-width: 640px) 56px, 64px"
                               />
                             ) : (
-                              <Folder className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <Folder className="w-6 h-6 sm:w-7 sm:h-7" />
                             )}
                           </div>
-                          <h3 className="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+
+                          <h3 className="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-6">
                             {item.catName}
                           </h3>
                         </div>
@@ -356,10 +362,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                       </div>
 
                       {/* Footer Badges */}
-                      <div className="flex items-center gap-1.5 pt-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-[12px] font-medium bg-slate-100 text-red-600">
-                          درسنامه / تست
-                        </span>
+                      <div className="flex items-center gap-1.5 pt-3 flex-wrap">
                         {item.badges?.map((badge) => (
                           <span
                             key={badge}
@@ -375,7 +378,6 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
               })}
             </Swiper>
 
-            {/* Modern Pagination Bullets */}
             {currentCategories.length > 1 && (
               <div className="cards-pagination flex items-center justify-center gap-1 mt-4 sm:mt-5" />
             )}

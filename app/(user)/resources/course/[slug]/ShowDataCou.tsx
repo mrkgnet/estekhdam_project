@@ -59,6 +59,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
   });
 
   const product = response?.data;
+  
 
   if (!response?.success || !product) {
     return (

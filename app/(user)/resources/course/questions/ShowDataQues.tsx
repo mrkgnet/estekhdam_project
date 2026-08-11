@@ -155,7 +155,7 @@ export default function ExamPage({
         return;
       }
       if (!hasPurchased) {
-        startTransition(() => router.push(`/cart/${courseId}`));
+        startTransition(() => router.push(`/plans`));
         return;
       }
     }

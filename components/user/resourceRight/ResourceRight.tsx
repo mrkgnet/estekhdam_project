@@ -20,6 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { checkUserPurchaseStatus } from "@/actions/user/resources/course/checkUserPurchaseStatus/Actions";
 import { incrementDownloadCountAction } from "@/actions/user/resources/course/counterDownload/Actions";
 import AuthModal from "@/components/modals/AuthModal";
+import { checkUserSubscriptionAction } from "@/actions/admin/plans/Actions";
 
 /* =========================
    Types
@@ -165,6 +166,7 @@ export default function ResourceRight({ product }: Props) {
   const productId = product?.id;
   const userId = user?.id;
 
+  // 🟢 کوئری ۱: بررسی خرید تکی این دوره
   const {
     data: hasPurchased = false,
     isLoading: purchaseLoading,
@@ -176,7 +178,26 @@ export default function ResourceRight({ product }: Props) {
     refetchOnWindowFocus: false,
   });
 
-  const isLoading = authLoading || (!isFreeResource && purchaseLoading);
+  // 🟢 کوئری ۲: بررسی وضعیت اشتراک کاربر
+  const {
+    data: subscriptionData = { hasActiveSubscription: false, remainingDays: 0 },
+    isLoading: subscriptionLoading,
+  } = useQuery({
+    queryKey: ["subscription-status", userId],
+    queryFn: () => checkUserSubscriptionAction(userId!),
+    enabled: Boolean(isLoggedIn && userId && !isFreeResource),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const { hasActiveSubscription, remainingDays } = subscriptionData;
+
+  // محاسبه لودینگ کلی
+  const isLoading =
+    authLoading || (!isFreeResource && (purchaseLoading || subscriptionLoading));
+
+  // داشتن دسترسی (خرید تکی یا اشتراک فعال)
+  const hasAccess = hasPurchased || hasActiveSubscription;
 
   const topStatus = useMemo(() => {
     if (!isProductActive) {
@@ -209,12 +230,22 @@ export default function ResourceRight({ product }: Props) {
       };
     }
 
-    if (hasPurchased)
+    if (hasActiveSubscription) {
+      return {
+        tone: "success" as const,
+        icon: <CheckCircle2 className="w-5 h-5" />,
+        text: `اشتراک فعال دارید (${remainingDays} روز باقی‌مانده)`,
+      };
+    }
+
+    if (hasPurchased) {
       return {
         tone: "success" as const,
         icon: <CheckCircle2 className="w-5 h-5" />,
         text: "شما دانشجوی این دوره هستید",
       };
+    }
+
     if (isLoggedIn)
       return {
         tone: "info" as const,
@@ -227,7 +258,15 @@ export default function ResourceRight({ product }: Props) {
       icon: <Info className="w-5 h-5" />,
       text: "برای استفاده از دوره، حساب کاربری بسازید",
     };
-  }, [isProductActive, isFreeResource, isLoading, isLoggedIn, hasPurchased]);
+  }, [
+    isProductActive,
+    isFreeResource,
+    isLoading,
+    isLoggedIn,
+    hasPurchased,
+    hasActiveSubscription,
+    remainingDays,
+  ]);
 
   const handleDownloadClick = async () => {
     if (!product?.downloadUrl || !productId || isDownloadLoading) return;
@@ -276,31 +315,23 @@ export default function ResourceRight({ product }: Props) {
                 <span className="font-black text-emerald-600">رایگان</span>
               </div>
             ) : (
-              <>
-                {/* ✅ هر آیتم در یک سطر */}
-                <div className="grid grid-cols-1 gap-3">
-                  <StatBox
-                    icon={<FileText className="w-4 h-4" />}
-                    value={product?._count?.questions || 0}
-                    title="تعداد سوالات"
-                  />
-                  <StatBox
-                    icon={<Clock className="w-4 h-4" />}
-                    value="۴ گزینه‌ای"
-                    title="نوع پرسش"
-                  />
-                  <StatBox
-                    icon={<Text className="w-4 h-4" />}
-                    value="دارد"
-                    title="پاسخ تشریحی"
-                  />
-                </div>
-
-                <div className={`${softCard} p-4 flex items-center justify-between font-bold`}>
-                  <div className="text-slate-500">قیمت محصول</div>
-                  <PriceDisplay oldPrice={product?.oldPrice} newPrice={product?.newPrice} />
-                </div>
-              </>
+              <div className="grid grid-cols-1 gap-3">
+                <StatBox
+                  icon={<FileText className="w-4 h-4" />}
+                  value={product?._count?.questions || 0}
+                  title="تعداد سوالات"
+                />
+                <StatBox
+                  icon={<Clock className="w-4 h-4" />}
+                  value="۴ گزینه‌ای"
+                  title="نوع پرسش"
+                />
+                <StatBox
+                  icon={<Text className="w-4 h-4" />}
+                  value="دارد"
+                  title="پاسخ تشریحی"
+                />
+              </div>
             )}
 
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
@@ -345,7 +376,8 @@ export default function ResourceRight({ product }: Props) {
                     پیوستی برای دانلود موجود نیست
                   </div>
                 )
-              ) : hasPurchased ? (
+              ) : hasAccess ? (
+                /* 🟢 اگر کاربر اشتراک فعال داشته باشد یا دوره را خریده باشد */
                 <>
                   <Link
                     href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
@@ -359,10 +391,13 @@ export default function ResourceRight({ product }: Props) {
 
                   <div className={`${btnBase} bg-emerald-100 text-emerald-700 border border-emerald-200`}>
                     <CheckCircle2 className="w-5 h-5" />
-                    شما قبلاً دوره را خریداری کردید
+                    {hasActiveSubscription
+                      ? "دسترسی فعال با اشتراک"
+                      : "خریداری شده"}
                   </div>
                 </>
               ) : (
+                /* 🔴 اگر کاربر اشتراک نداشته باشد و دوره را نخریده باشد */
                 <>
                   <Link
                     href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
@@ -375,13 +410,13 @@ export default function ResourceRight({ product }: Props) {
                   </Link>
 
                   <Link
-                    href={`/cart/${product?.id}`}
+                    href={`/plans`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`${btnBase} bg-[#3b5998] hover:bg-[#334e88] text-white`}
                   >
                     <ShoppingBasket className="w-5 h-5" />
-                    خرید محصول
+                    خرید اشتراک
                   </Link>
                 </>
               )}

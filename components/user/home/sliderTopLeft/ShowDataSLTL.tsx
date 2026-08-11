@@ -104,7 +104,7 @@ export default function ShowDataSLTL({
           modules={[Navigation, Autoplay, Pagination]}
           navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
           autoplay={{
-            delay: 40000000,
+            delay: 4000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}

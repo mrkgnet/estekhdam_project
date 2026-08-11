@@ -209,7 +209,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
             </div>
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded transition-colors shrink-0"
             >
               <LogIn className="w-4 h-4" />
               <span>ورود / ثبت‌نام</span>
@@ -218,7 +218,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
         )}
 
         {/* Page Header */}
-        <header className="flex items-center gap-4 border border-slate-200 p-3 rounded-xl bg-white shadow-sm">
+        <header className="flex items-center gap-4 border border-slate-300 p-3 rounded bg-white shadow-sm">
           <button
             onClick={() => router.back()}
             className="flex items-center justify-center w-10 h-10 bg-white rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shrink-0"
@@ -233,7 +233,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
 
         {/* --- Subscription Status Card (Google Style) --- */}
         {isLoggedIn && (
-          <div className="w-full rounded-2xl border border-gray-300 bg-white shadow-sm overflow-hidden">
+          <div className="w-full rounded border border-gray-300 bg-white shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-300">
               <div className="flex items-center gap-3">
@@ -264,9 +264,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {/* Current Credit */}
-                    <div className="rounded-xl border border-gray-300 bg-gray-50/60 p-4">
+                    <div className="rounded-xl border border-gray-400 bg-gray-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded bg-blue-50 flex items-center justify-center">
                           <Clock className="w-4 h-4 text-blue-600" />
                         </div>
                         <span className="text-sm text-gray-700">اعتبار فعلی</span>
@@ -277,9 +277,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
                     </div>
 
                     {/* New Plan */}
-                    <div className="rounded-xl border border-gray-300 bg-gray-50/60 p-4">
+                    <div className="rounded-xl border border-gray-400 bg-gray-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded bg-amber-50 flex items-center justify-center">
                           <Plus className="w-4 h-4 text-amber-600" />
                         </div>
                         <span className="text-sm text-gray-700"> پلن جدید در صورت خرید</span>
@@ -290,9 +290,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
                     </div>
 
                     {/* Total Access */}
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                    <div className="rounded-xl border border-emerald-400 bg-emerald-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center">
                           <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                         </div>
                         <span className="text-sm text-emerald-700">مجموع دسترسی</span>
@@ -317,7 +317,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
         )}
 
         {/* Invoice Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded shadow-sm border border-slate-300 overflow-hidden">
           <div className="p-5 grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 border-b border-slate-100">
             <div>
               <span className="block text-slate-500 text-xs sm:text-sm">شماره فاکتور</span>
@@ -380,8 +380,8 @@ export default function ShowDataCart({ planData, planId }: Props) {
         </div>
 
         {/* Action Button */}
-        <footer className="bg-white border-t border-slate-300 p-3 md:p-0 md:bg-transparent md:border-none">
-          <div className="mx-auto bg-white flex items-center justify-between p-3.5 border border-slate-200 rounded-xl shadow-sm">
+        <footer className="bg-white border-t border-slate-400 p-3 md:p-0 md:bg-transparent md:border-none">
+          <div className="mx-auto bg-white flex items-center justify-between p-3.5 border border-slate-300 rounded shadow-sm">
             <div>
               <span className="text-slate-500 text-xs block">مبلغ قابل پرداخت</span>
               <p className="font-black text-base sm:text-lg text-slate-800">{planData.newPrice.toLocaleString()} تومان</p>

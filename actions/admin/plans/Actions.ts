@@ -457,3 +457,51 @@ export async function reduceUserSubscriptionManualAction(userId: string, daysToR
     return { success: false, message: "خطا در کاهش زمان اشتراک." };
   }
 }
+
+
+
+
+
+
+// actions/user/subscription/checkUserSubscription.ts
+
+
+export async function checkUserSubscriptionAction(userId: string) {
+  if (!userId) {
+    return { hasActiveSubscription: false, remainingDays: 0 };
+  }
+
+  try {
+    const activeSubscription = await db.userSubscription.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        endDate: {
+          gt: new Date(), // بررسی اینکه تاریخ انقضا نرسیده باشد
+        },
+      },
+      orderBy: {
+        endDate: "desc",
+      },
+    });
+
+    if (!activeSubscription) {
+      return { hasActiveSubscription: false, remainingDays: 0 };
+    }
+
+    // محاسبه روزهای باقی‌مانده
+    const diffTime = activeSubscription.endDate.getTime() - new Date().getTime();
+    const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return {
+      hasActiveSubscription: true,
+      remainingDays,
+      endDate: activeSubscription.endDate,
+    };
+  } catch (error) {
+    console.error("Error checking subscription:", error);
+    return { hasActiveSubscription: false, remainingDays: 0 };
+  }
+}
+
+

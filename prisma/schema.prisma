@@ -94,7 +94,6 @@ model User {
   gender        Gender         @default(UNKNOWN)
   role          Role           @default(user)
   isActive      Boolean        @default(true)
-
   orders           Order[]
   comments         Comment[]
   tickets          Ticket[]               @relation("UserTickets")
@@ -102,7 +101,6 @@ model User {
   contacts         Contact[]
   readGlobalNotifs UserNotificationRead[]
   subscriptions UserSubscription[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -189,41 +187,30 @@ model MainSlider {
 model Product {
   id          String      @id @default(uuid())
   name        String
-  slug        String      @unique
-  
+  slug        String      @unique  
   // فیلد جدید برای تعیین نوع محصول
   type        ProductType @default(MAIN)
-
   // 🟢 فیلدهای جدید
   downloadUrl String?     // لینک دانلود (اختیاری)
   downloadCount Int       @default(0) // تعداد دانلود (پیش‌فرض صفر)
-
 // 🟢 فیلد جدید برای تعداد خرید
   purchaseCount Int      @default(0)
-
-
-
   oldPrice    Int?
   newPrice    Int?
   description String?
   imageUrl    String?
   features    String[]
   isActive    Boolean     @default(true) 
-
   // رابطه چند به چند با دسته‌بندی
   categories  Category[]  @relation("ProductCategories")
-
   questions   Question[]
   comments    Comment[]
   orders      Order[]
   chapters    Chapter[]
-
   // رابطه چندبه‌چند با خبر
   governmentNews GovernmentNews[] @relation("ProductNews")
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   // اضافه کردن ایندکس برای جستجوی سریع‌تر بر اساس نوع محصول
   @@index([type])
 }

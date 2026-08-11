@@ -8,6 +8,10 @@ import FilterBar from "@/components/user/HomePage/FilterBar";
 import TabHomePage from "@/components/user/tabHomePage/TabHomePage";
 import TabHomeComponent from "@/components/user/tabHomePage/TabHomeComponent";
 import PlansOffer from "@/components/user/plansTimer/page";
+import { Suspense } from "react";
+import FetchDataMainSlider from "@/components/user/home/mainslider/FetchDataMainSlider";
+import SliderTopLeftComponent from "@/components/user/home/sliderTopLeft/page";
+import CategoryGrid from "@/components/user/home/categoryGrid/CategoryGrid";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -56,6 +60,20 @@ export default function page() {
                     <FilterBar />
                 </div> */}
 
+
+                <section className=" px-4 grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
+                    <div className="lg:col-span-4">
+                        <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
+                            <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse"></div>}>
+                                <FetchDataMainSlider />
+                            </Suspense>
+                        </div>
+                    </div>
+                    <div className="lg:col-span-2 min-w-0 overflow-hidden h-full">
+                        <SliderTopLeftComponent />
+                    </div>
+                </section>
+
                 <div className="mb-12">
                     <TabHomeComponent />
                 </div>
@@ -66,10 +84,16 @@ export default function page() {
                     <HeroSection questionsCount={questionsCount} />
                 </section> */}
 
-                {/* بخش اخبار فوری */}
-                <section className="w-full mb-16">
-                    <BreakingNewsComponent />
+
+
+                <section className="w-full bg-white rounded-2xl">
+                    <CategoryGrid />
                 </section>
+
+                {/* بخش اخبار فوری */}
+                {/* <section className="w-full mb-16">
+                    <BreakingNewsComponent />
+                </section> */}
 
 
             </main>

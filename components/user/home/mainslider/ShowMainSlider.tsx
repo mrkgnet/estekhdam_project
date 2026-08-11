@@ -20,8 +20,8 @@ type SliderDBItem = {
   title: string | null;
   description: string | null;
   targetLink: string | null;
-  endAt: string | null; 
-  slugNews :string | null;
+  endAt: string | null;
+  slugNews: string | null;
 };
 
 interface ShowMainSliderProps {
@@ -55,7 +55,7 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
       });
     };
 
-    calculateTimeLeft(); 
+    calculateTimeLeft();
     const interval = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(interval);
@@ -67,9 +67,9 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
     <div className="flex flex-col gap-0.5 md:gap-1 mt-1">
       <span className="text-[10px] md:text-[11px] font-medium text-amber-600">زمان باقی‌مانده جهت ثبت نام:</span>
       <div className="flex items-center gap-1 md:gap-1.5 w-fit bg-amber-50/60 border border-amber-200/50 p-1 md:p-1.5 rounded-lg md:rounded-xl" dir="ltr">
-  
-  
-        
+
+
+
         {/* روز */}
         {timeLeft.days > 0 && (
           <>
@@ -81,29 +81,29 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
           </>
         )}
 
-     {/* ساعت */}
+        {/* ساعت */}
         <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
           <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.hours).padStart(2, "0")}</span>
           <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ساعت</span>
         </div>
 
 
-  {/* دقیقه */}
+        {/* دقیقه */}
         <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
           <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.minutes).padStart(2, "0")}</span>
           <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">دقیقه</span>
         </div>
         <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
-       
 
 
-              {/* ثانیه */}
+
+        {/* ثانیه */}
         <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
           <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(timeLeft.seconds).padStart(2, "0")}</span>
           <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">ثانیه</span>
         </div>
         <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>
-      
+
       </div>
     </div>
   );
@@ -192,7 +192,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
           loop={sliders.length > 1}
           dir="rtl"
           autoplay={{
-            delay: 70000,
+            delay: 10000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
@@ -215,26 +215,57 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
 
                 {/* متن و توضیحات اسلاید */}
                 <div className="order-1 w-full h-full flex flex-col justify-center gap-3 px-3 md:px-6 text-right">
-                  
+
                   {/* بجت مدرن و جذاب "خبر فوری" */}
-                  <div className="flex items-center gap-1.5 w-fit bg-red-50 text-red-600 border border-red-200/60 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide select-none">
+                  {/* <div className="flex items-center gap-1.5 w-fit bg-red-50 text-red-600 border border-red-200/60 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide select-none">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
                     خبر فوری
-                  </div>
+                  </div> */}
 
                   {s.title && (
                     <h2 className="text-sm md:text-lg font-bold text-slate-800 tracking-tight mt-1">
                       {s.title}
                     </h2>
                   )}
-                  
-                  {/* 🕒 تایمر معکوس ریسپانسیو */}
-                  <CountdownTimer targetDate={s.endAt} />
 
-                  <Link
+
+                  {s.description && (
+                    <div className="overflow-x-auto">
+  <table className="text-sm border-collapse">
+    <tbody>
+      {[
+        ["شروع ثبت‌نام", "۱۴۰۵/۰۶/۰۱"],
+        ["پایان ثبت‌نام", "۱۴۰۵/۰۶/۳۰"],
+        ["زمان برگزاری آزمون", "۱۴۰۵/۰۷/۱۵"],
+        ["اعلام نتایج", "۱۴۰۵/۰۸/۰۱"],
+        ["شرط سنی", "۱۸ تا ۳۵ سال"],
+      ].map(([label, value]) => (
+        <tr key={label}>
+          <th className="border border-slate-200 bg-slate-100 px-2 py-1.5 text-bold font-medium text-slate-800 whitespace-nowrap text-xs">
+            {label}
+          </th>
+          <td className="border border-slate-200 px-2 py-1.5 text-right text-slate-800 text-xs">
+            {value}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
+                  )}
+
+
+
+
+                  {/* 🕒 تایمر معکوس ریسپانسیو */}
+                  {/* <CountdownTimer targetDate={s.endAt} /> */}
+
+                  {/* <Link
                     href={`/jobnews/government/${s.slugNews}` ?? "#"}
                     className="inline-flex items-center gap-2 w-fit rounded-md
                       px-4 py-2 text-11 sm:text-12 font-medium text-white bg-blue-600
@@ -243,7 +274,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                       focus-visible:ring-blue-400 focus-visible:ring-offset-2 mt-2"
                   >
                     مشاهده اطلاعات بیشتر
-                  </Link>
+                  </Link> */}
                 </div>
 
                 {/* تصویر اسلاید */}
