@@ -1,4 +1,3 @@
-// ShowMainSlider component
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -26,6 +25,7 @@ type SliderDBItem = {
   slugNews: string | null;
   startAt: string | null;
   endAt: string | null;
+  examAt: string | null;
   maxAge: number | null;
   status: NewsStatus | null;
   price?: string | number | null;
@@ -37,11 +37,12 @@ interface ShowMainSliderProps {
 
 const STATUS_MAP: Record<NewsStatus, { label: string; className: string }> = {
   OPEN:               { label: "ثبت‌نام باز",       className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  CARD_RECEIVED:      { label: "دریافت کارت",    className: "bg-blue-50 text-blue-700 border-blue-200" },
-  RESULTS_ANNOUNCED:  { label: "اعلام نتایج",    className: "bg-violet-50 text-violet-700 border-violet-200" },
-  NEWS:               { label: "اطلاعیه",            className: "bg-amber-50 text-amber-700 border-amber-200" },
+  CARD_RECEIVED:      { label: "دریافت کارت",       className: "bg-blue-50 text-blue-700 border-blue-200" },
+  RESULTS_ANNOUNCED:  { label: "اعلام نتایج",       className: "bg-violet-50 text-violet-700 border-violet-200" },
+  NEWS:               { label: "اطلاعیه",           className: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
+// ✅ تابع برای نمایش فقط تاریخ (بدون ساعت)
 function toJalaliDate(dateStr: string | null): string | null {
   if (!dateStr) return null;
   try {
@@ -121,10 +122,17 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
 function buildInfoRows(s: SliderDBItem): [string, string][] {
   const rows: [string, string][] = [];
   if (s.price) rows.push(["هزینه ثبت نام", formatPrice(s.price)]);
+  
   const startJalali = toJalaliDate(s.startAt);
   if (startJalali) rows.push(["شروع ثبت‌نام", startJalali]);
+  
   const endJalali = toJalaliDate(s.endAt);
   if (endJalali) rows.push(["پایان ثبت‌نام", endJalali]);
+  
+  // ✅ اضافه کردن زمان برگزاری آزمون (فقط تاریخ، بدون ساعت)
+  const examJalali = toJalaliDate(s.examAt);
+  if (examJalali) rows.push(["زمان برگزاری آزمون", examJalali]);
+  
   if (s.maxAge) rows.push(["شرط سنی", `حداکثر ${toPersianDigits(s.maxAge)} سال`]);
   return rows;
 }

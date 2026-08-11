@@ -156,13 +156,13 @@ model GovernmentNews {
   maxAge       Int?
   startAt      DateTime?
   endAt        DateTime?
-  jobs         String[] // پستگرس از آرایه پشتیبانی می‌کند
+  examAt       DateTime?   // تاریخ برگزاری آزمون
+  jobs         String[]
   cities       String[]
   isActive     Boolean     @default(true)
   isMainSlider Boolean     @default(false)
   status       NewsStatus? @default(NEWS)
   comments     Comment[]
-  // رابطه چندبه‌چند استاندارد پستگرس (بدون نیاز به فیلد productIds)
   products     Product[]   @relation("ProductNews")
 
   createdAt DateTime @default(now())
@@ -170,7 +170,9 @@ model GovernmentNews {
 
   @@index([startAt])
   @@index([endAt])
+  @@index([examAt])
 }
+
 
 model MainSlider {
   id          String   @id @default(uuid())

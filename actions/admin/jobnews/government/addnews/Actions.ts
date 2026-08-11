@@ -66,6 +66,7 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
       description = "",
       startAt = "",
       endAt = "",
+      examAt = "",
       price: priceStr = "",
       maxAge: maxAgeStr = "",
       isMainSlider = "false",
@@ -73,8 +74,8 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
     } = rawData as Record<string, string>;
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
-    
-    // پارس کردن آرایه‌ها (داده‌ها به صورت JSON.stringify از کلاینت ارسال شده‌اند)
+
+    // پارس کردن آرایه‌ها
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
     const productIds = JSON.parse((formData.get("productIds") as string) || "[]");
@@ -109,15 +110,16 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         description,
         startAt: startAt ? new Date(startAt) : null,
         endAt: endAt ? new Date(endAt) : null,
+        examAt: examAt ? new Date(examAt) : null,
         price,
         maxAge,
         isMainSlider: isSlider,
         status: finalStatus,
-        jobs,     
-        cities,   
+        jobs,
+        cities,
         products: {
-           connect: productIds.map((id: string) => ({ id: id }))
-        }
+          connect: productIds.map((id: string) => ({ id })),
+        },
       },
     });
 

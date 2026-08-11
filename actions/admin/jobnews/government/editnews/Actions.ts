@@ -1,12 +1,12 @@
 "use server";
 
 import { infoCurentUser } from "@/lib/auth";
-import { db } from "@/lib/db"; 
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
-import crypto from "crypto"; 
+import crypto from "crypto";
 
 export async function updateDataEditGov(prevState: any, formData: FormData) {
   try {
@@ -28,17 +28,17 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
 
     if (externalImageUrl && externalImageUrl.trim() !== "") {
       finalImageUrl = externalImageUrl.trim();
-    } 
+    }
     // 2. در صورت عدم وجود لینک، بررسی فایل آپلود شده
     else if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const hash = crypto.createHash("sha256").update(buffer).digest("hex");
       const extension = path.extname(imageFile.name) || ".jpg";
       const filename = `${hash}${extension}`;
-      
+
       const uploadDir = path.join(process.cwd(), "public", "images", "jobnews", "government");
       const savePath = path.join(uploadDir, filename);
-      
+
       await fs.mkdir(uploadDir, { recursive: true });
 
       let fileExists = false;
@@ -61,35 +61,40 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       slugNews: rawSlugNews = "",
       registerUrl = "",
       organization = "",
-      imageUrl = "", 
+      imageUrl = "",
       description = "",
       startAt = "",
       endAt = "",
+      examAt = "",
       price: priceStr = "",
       maxAge: maxAgeStr = "",
       isMainSlider = "false",
-      status = "NEWS", 
+      isActive = "true",
+      status = "NEWS",
     } = rawData as Record<string, string>;
 
     if (!id) {
-        return { success: false, message: "آیدی خبر یافت نشد!" };
+      return { success: false, message: "آیدی خبر یافت نشد!" };
     }
 
     const slugNews = rawSlugNews.trim().replace(/\s+/g, "-").toLowerCase();
-    
+
     const jobs = JSON.parse((formData.get("jobs") as string) || "[]");
     const cities = JSON.parse((formData.get("cities") as string) || "[]");
     const productIds = JSON.parse((formData.get("productIds") as string) || "[]");
-    
-    const price = priceStr ? parseInt(priceStr) : 0;
+
+    // تبدیل مبلغ تمیز شده بدون کاما به عدد
+    const cleanPriceStr = priceStr ? priceStr.replace(/,/g, "") : "0";
+    const price = cleanPriceStr ? parseInt(cleanPriceStr) : 0;
     const maxAge = maxAgeStr ? parseInt(maxAgeStr) : 0;
     const isSlider = isMainSlider === "true";
+    const activeStatus = isActive === "true";
 
     const validStatuses = ["OPEN", "CARD_RECEIVED", "RESULTS_ANNOUNCED", "NEWS"];
     const finalStatus = validStatuses.includes(status) ? (status as NewsStatus) : "NEWS";
 
     const checkSlug = await db.governmentNews.findFirst({
-      where: { slugNews }
+      where: { slugNews },
     });
 
     if (checkSlug && checkSlug.id !== id) {
@@ -104,24 +109,26 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
         slugNews,
         registerUrl,
         organization,
-        imageUrl: finalImageUrl ? finalImageUrl : imageUrl, 
+        imageUrl: finalImageUrl ? finalImageUrl : imageUrl,
         description,
         startAt: startAt ? new Date(startAt) : null,
         endAt: endAt ? new Date(endAt) : null,
+        examAt: examAt ? new Date(examAt) : null,
         price,
         maxAge,
         isMainSlider: isSlider,
+        isActive: activeStatus,
         status: finalStatus,
-        jobs, 
+        jobs,
         cities,
         products: {
           set: productIds.map((pid: string) => ({ id: pid })),
         },
-      }
+      },
     });
 
     revalidatePath("/adminp/jobnews/government/edit-news");
-    revalidatePath("/adminp/jobnews/government"); 
+    revalidatePath("/adminp/jobnews/government");
 
     return { success: true, message: "آگهی استخدام با موفقیت ویرایش شد." };
   } catch (error) {
@@ -141,19 +148,18 @@ export async function getDataEditNewsGov(id: string) {
       where: { id: id },
       include: {
         products: {
-          select: { id: true }
-        }
-      }
+          select: { id: true },
+        },
+      },
     });
 
     if (!product) {
       return { success: false, message: "آگهی یافت نشد" };
     }
 
-    // اضافه کردن productIds به آبجکت برای استفاده در فرم کلاینت
     const productWithIds = {
       ...product,
-      productIds: product.products.map((p) => p.id)
+      productIds: product.products.map((p) => p.id),
     };
 
     return { success: true, product: productWithIds };

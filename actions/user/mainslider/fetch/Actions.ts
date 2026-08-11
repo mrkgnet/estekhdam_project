@@ -1,4 +1,3 @@
-// fetchMainSliderUserAction
 "use server";
 
 import { db } from "@/lib/db";
@@ -17,6 +16,7 @@ export async function fetchMainSliderUserAction() {
         slugNews: true,
         startAt: true,
         endAt: true,
+        examAt: true,
         price: true,
         maxAge: true,
         status: true,
@@ -32,6 +32,7 @@ export async function fetchMainSliderUserAction() {
       slugNews: item.slugNews,
       startAt: item.startAt ? item.startAt.toISOString() : null,
       endAt: item.endAt ? item.endAt.toISOString() : null,
+      examAt: item.examAt ? item.examAt.toISOString() : null,
       price: item.price ?? null,
       maxAge: item.maxAge ?? null,
       status: item.status ?? null,

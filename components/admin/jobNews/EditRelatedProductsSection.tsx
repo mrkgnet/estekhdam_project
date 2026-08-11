@@ -7,7 +7,7 @@ interface Props {
 
 export default function EditRelatedProductsSection({ selectedCount, openModal }: Props) {
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+    <div className="bg-white p-6 sm:p-8 rounded shadow-sm border border-slate-400 flex items-center justify-between">
       <div>
         <div className="flex items-center gap-2">
           <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
@@ -22,7 +22,7 @@ export default function EditRelatedProductsSection({ selectedCount, openModal }:
       <button
         type="button"
         onClick={openModal}
-        className="flex items-center gap-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-5 py-2.5 rounded-xl transition-colors font-medium"
+        className="flex items-center gap-2 bg-indigo-50 border border-indigo-500 text-indigo-600 hover:bg-indigo-100 px-5 py-2.5 rounded transition-colors font-medium"
       >
         <Plus className="w-4 h-4" />
         انتخاب / ویرایش محصولات
