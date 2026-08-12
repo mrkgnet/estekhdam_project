@@ -36,6 +36,59 @@ interface Props {
 }
 
 /* ---------------------------------- */
+/* ✅ کامپوننت تصویر با اسکلتون شیمر */
+/* ---------------------------------- */
+function ProductImage({
+  src,
+  alt,
+  priority,
+}: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+}) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="relative w-full h-full">
+      {/* ✅ اسکلتون شیمر تا لود کامل تصویر + آیکون BookOpen */}
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
+          <BookOpen
+            className="w-10 h-10 text-slate-400 opacity-60"
+            strokeWidth={1.5}
+          />
+        </div>
+      )}
+
+      {/* ✅ در صورت خطا، آیکون پیش‌فرض */}
+      {hasError && (
+        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
+          <BookOpen className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+        </div>
+      )}
+
+      <SafeImage
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 170px, 400px"
+        placeholder="blur"
+        blurDataURL={blurDataURL}
+        priority={priority}
+        fetchPriority={priority ? "high" : "auto"}
+        className={`object-contain mix-blend-multiply transition-all duration-700 ease-out group-hover/card:scale-105 ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+}
+
+/* ---------------------------------- */
 /* Component */
 /* ---------------------------------- */
 export default function ShowDataSLTL({
@@ -72,7 +125,24 @@ export default function ShowDataSLTL({
 
   return (
     <div className="w-full mx-auto relative  h-full" dir="rtl">
+      {/* ✅ استایل شیمر برای اسکلتون تصاویر */}
       <style jsx global>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .skeleton-shimmer {
+          background: linear-gradient(
+            90deg,
+            #e2e8f0 0%,
+            #f1f5f9 40%,
+            #f8fafc 50%,
+            #f1f5f9 60%,
+            #e2e8f0 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.8s infinite linear;
+        }
         .custom-swiper-progress {
           position: absolute;
           top: 0;
@@ -135,24 +205,19 @@ export default function ShowDataSLTL({
                     {/* Image Section */}
                     <div className="relative w-full h-[130px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden bg-gray-50/40">
                       
-                      {/* ✅ طراحی کاملاً استاندارد، فلت و شرکتی */}
-                      <div className="absolute top-0 left-0 z-20">
-                        <div className="bg-emerald-500 text-white text-[11px] font-bold px-3 py-1 rounded-br-xl shadow-sm">
-                          آنلاین
+                      {/* ✅ Badge با z-30 برای دیده شدن روی شیمر */}
+                      <div className="absolute top-0 left-0 z-30">
+                        <div className="bg-rose-500 text-white text-[11px] font-bold px-3 py-1 rounded-br-xl shadow-sm">
+                          درسنامه/تست
                         </div>
                       </div>
 
+                      {/* ✅ تصویر با اسکلتون شیمر */}
                       <div className="relative w-full h-full">
-                        <SafeImage
+                        <ProductImage
                           src={p.imageUrl || "/images/products/bookExample.jpg"}
                           alt={p.name}
-                          fill
-                          sizes="(max-width: 768px) 170px, 400px"
-                          placeholder="blur"
-                          blurDataURL={blurDataURL}
                           priority={isPriority}
-                          fetchPriority={isPriority ? "high" : "auto"}
-                          className="object-contain mix-blend-multiply transition-transform duration-500 group-hover/card:scale-105"
                         />
                       </div>
                     </div>
@@ -164,11 +229,11 @@ export default function ShowDataSLTL({
                       </h3>
                       <div className="mt-auto">
                         <ul className="space-y-2 text-[11px] mt-3">
-                          <li className="flex items-center gap-2 text-slate-500">
+                          <li className="flex items-center gap-2 text-slate-800">
                             <ClipboardList className="w-4 h-4 text-blue-500 shrink-0" />
                             <span>سوالات طبقه‌بندی شده</span>
                           </li>
-                          <li className="flex items-center gap-2 text-slate-500">
+                          <li className="flex items-center gap-2 text-slate-800">
                             <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />
                             <span>فصل‌بندی استاندارد</span>
                           </li>

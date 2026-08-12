@@ -245,7 +245,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
               <button
                 type="button"
                 onClick={() => handleTabChange(key)}
-                className={`flex items-center mb-3 md:mb-2 gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex items-center mb-3 md:mb-2 gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-13 sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   activeTab === key
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-gray-100/80 border border-slate-500 text-slate-600 hover:bg-gray-200/70 hover:text-slate-900'
@@ -327,7 +327,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                       className="group relative overflow-hidden flex flex-col justify-between p-4 sm:p-5 pt-8 sm:pt-9 h-44 sm:h-48 bg-white border border-gray-200/180 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
                     >
                       {/* Ribbon */}
-                      <span className="pointer-events-none absolute top-3 -left-8 z-10 rotate-[-45deg] bg-red-600 text-white text-[9px] sm:text-[10px] font-bold px-8 py-1 shadow-sm">
+                      <span className="pointer-events-none absolute top-4 -left-8 z-10 rotate-[-45deg] bg-red-600 text-white text-[11px] sm:text-[12px] font-bold px-8 py-1 shadow-sm">
                         درسنامه / تست
                       </span>
 
@@ -350,13 +350,13 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                             )}
                           </div>
 
-                          <h3 className="text-sm sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-6">
+                          <h3 className="text-14 sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-6">
                             {item.catName}
                           </h3>
                         </div>
 
                         {/* Body Description */}
-                        <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">
+                        <p className="text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2">
                           {item.description || 'مجموعه سوالات و درسنامه‌های اختصاصی آزمون‌های استخدامی مربوطه.'}
                         </p>
                       </div>

@@ -21,9 +21,67 @@ interface Props {
   };
 }
 
+/* ---------------------------------- */
+/* ✅ blurDataURL معتبر و سبک */
+/* ---------------------------------- */
+const blurDataURL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
+
+/* ---------------------------------- */
+/* ✅ کامپوننت تصویر محصول با اسکلتون شیمر */
+/* ---------------------------------- */
+function ProductImage({ src, alt }: { src: string | null | undefined; alt: string }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // اگه تصویری نیست، آیکون FileText نمایش بده
+  if (!src) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <FileText className="w-8 h-8 text-gray-300" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full">
+      {/* ✅ اسکلتون شیمر تا لود کامل تصویر + آیکون کتاب */}
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
+          <BookOpen className="w-8 h-8 text-slate-400 opacity-60" strokeWidth={1.5} />
+        </div>
+      )}
+
+      {/* ✅ در صورت خطا، آیکون پیش‌فرض */}
+      {hasError && (
+        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
+          <FileText className="w-8 h-8 text-slate-300" />
+        </div>
+      )}
+
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className={`object-contain p-2.5 transition-all duration-700 ease-out group-hover:scale-105 ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        placeholder="blur"
+        blurDataURL={blurDataURL}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setHasError(true)}
+      />
+    </div>
+  );
+}
+
+/* ---------------------------------- */
+/* Component */
+/* ---------------------------------- */
 export default function ContentFreeResource({
-  products = [], // جلوگیری از خطای undefined
-  activeCategoryObjects = [], // جلوگیری از خطای undefined
+  products = [],
+  activeCategoryObjects = [],
   isPending,
   onToggleFilter,
   onClearFilters,
@@ -65,6 +123,25 @@ export default function ContentFreeResource({
 
   return (
     <main className="flex-1 flex flex-col relative min-h-[400px]">
+      {/* ✅ استایل شیمر برای اسکلتون تصاویر */}
+      <style jsx global>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .skeleton-shimmer {
+          background: linear-gradient(
+            90deg,
+            #e2e8f0 0%,
+            #f1f5f9 40%,
+            #f8fafc 50%,
+            #f1f5f9 60%,
+            #e2e8f0 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.8s infinite linear;
+        }
+      `}</style>
 
       {/* نوار لودینگ */}
       {isPending && (
@@ -120,12 +197,11 @@ export default function ContentFreeResource({
                 key={product.id}
                 href={`/resources/course/${product.slug}?price=free`}
                 target="_blank"
-                // کلاس relative در خط پایین اضافه شد تا روبان در جای درست قرار بگیرد
                 className="relative bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer"
               >
 
                 {/* ربان آنلاین */}
-                <div className="absolute top-3 left-0 z-10">
+                <div className="absolute top-3 left-0 z-20">
                   <div className="relative flex items-center">
                     <span className="bg-emerald-500 text-white text-[9px] font-black px-2.5 py-0.5 shadow-sm tracking-wide">
                       آنلاین
@@ -135,18 +211,12 @@ export default function ContentFreeResource({
                   </div>
                 </div>
 
-                <div className="relative w-full h-40 bg-gray-50/50 flex items-center justify-center border-b border-gray-100 overflow-hidden">
-                  {product.imageUrl ? (
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-contain p-2.5 transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <FileText className="w-8 h-8 text-gray-300" />
-                  )}
+                {/* ✅ بخش تصویر با اسکلتون شیمر */}
+                <div className="relative w-full h-40 bg-gray-50/50 border-b border-gray-100 overflow-hidden">
+                  <ProductImage
+                    src={product.imageUrl}
+                    alt={product.name}
+                  />
                 </div>
 
                 <div className="p-2.5 flex flex-col flex-1">
@@ -161,7 +231,7 @@ export default function ContentFreeResource({
                     ))}
                   </div>
 
-                  <h3 className="text-12 sm:text-13  font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-12 sm:text-13 font-bold text-gray-800 mb-2 line-clamp-2 leading-relaxed group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
 
