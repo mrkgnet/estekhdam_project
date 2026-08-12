@@ -49,15 +49,16 @@ async function fetchCategories(): Promise<ParentCategory[]> {
 function SkeletonCard({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`w-full flex flex-col justify-between p-4 sm:p-5 h-44 sm:h-48 bg-white rounded-2xl border border-gray-200/100 shadow-xs ${className}`}
+      className={`w-full flex flex-col justify-between p-4 sm:p-5  sm:pt-9 sm:h-60 bg-white rounded-2xl border border-gray-200/100 shadow-xs ${className}`}
     >
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 skeleton-wave rounded-xl shrink-0" />
-        <div className="w-1/2 h-4 skeleton-wave rounded-md" />
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* ✅ تصویر بزرگ‌تر در اسکلتون */}
+        <div className="w-20 h-20 sm:w-24 sm:h-24 skeleton-wave rounded-2xl shrink-0" />
+        <div className="w-1/2 h-4 sm:h-5 skeleton-wave rounded-md" />
       </div>
       <div className="space-y-2 mt-4">
-        <div className="w-full h-3 skeleton-wave rounded-sm" />
-        <div className="w-3/4 h-3 skeleton-wave rounded-sm" />
+        <div className="w-full h-3 sm:h-3.5 skeleton-wave rounded-sm" />
+        <div className="w-3/4 h-3 sm:h-3.5 skeleton-wave rounded-sm" />
       </div>
     </div>
   )
@@ -260,7 +261,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       </div>
 
       {/* Cards Swiper Area */}
-      <div className="relative min-h-[190px] sm:min-h-[220px]">
+      <div className="relative min-h-[230px] sm:min-h-[260px]">
         {showSkeleton ? (
           <TabSkeletonGrid />
         ) : currentCategories.length === 0 ? (
@@ -276,7 +277,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                   type="button"
                   onClick={() => swiperRef.current?.slidePrev()}
                   aria-label="قبلی"
-                  className="flex absolute top-1/2 -translate-y-3/4 -right-1 sm:-right-3 z-20 w-8 h-10 sm:w-10 sm:h-12 items-center justify-center rounded bg-white border border-gray-200 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
+                  className="flex absolute top-1/2 -translate-y-3/4 -right-1 sm:-right-3 z-20 w-8 h-10 sm:w-10 sm:h-12 items-center justify-center rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -284,7 +285,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                   type="button"
                   onClick={() => swiperRef.current?.slideNext()}
                   aria-label="بعدی"
-                  className="flex absolute top-1/2 -translate-y-3/4 -left-1 sm:-left-3 z-20 w-8 h-10 sm:w-10 sm:h-12 items-center justify-center rounded bg-white border border-gray-200 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
+                  className="flex absolute top-1/2 -translate-y-3/4 -left-1 sm:-left-3 z-20 w-8 h-10 sm:w-10 sm:h-12 items-center justify-center rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 text-slate-700 transition-all"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -324,7 +325,7 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                   <SwiperSlide key={item.id} className="!h-auto">
                     <Link
                       href={`/resources/main-resource?category=${encodeURIComponent(categorySlug)}`}
-                      className="group relative overflow-hidden flex flex-col justify-between p-4 sm:p-5 pt-8 sm:pt-9 h-44 sm:h-48 bg-white border border-gray-200/180 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
+                      className="group relative overflow-hidden flex flex-col justify-between p-4 sm:p-5 sm:pt-9  sm:h-52 bg-white border border-gray-400 rounded-2xl transition-all duration-200 hover:border-gray-300 hover:shadow-md"
                     >
                       {/* Ribbon */}
                       <span className="pointer-events-none absolute top-4 -left-8 z-10 rotate-[-45deg] bg-red-600 text-white text-[11px] sm:text-[12px] font-bold px-8 py-1 shadow-sm">
@@ -334,29 +335,30 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
                       <div>
                         {/* Header: Image + Title */}
                         <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                          {/* ✅ تصویر بزرگ‌تر */}
                           <div
-                            className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 ${colorTheme.bg}`}
+                            className={`relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shrink-0 ${colorTheme.bg}`}
                           >
                             {item.imageUrl ? (
                               <Image
                                 src={item.imageUrl}
                                 alt={item.catName}
                                 fill
-                                className="object-contain p-2.5 sm:p-3"
-                                sizes="(max-width: 640px) 56px, 64px"
+                                className="object-contain p-3 sm:p-4"
+                                sizes="(max-width: 640px) 80px, 96px"
                               />
                             ) : (
-                              <Folder className="w-6 h-6 sm:w-7 sm:h-7" />
+                              <Folder className="w-9 h-9 sm:w-11 sm:h-11" />
                             )}
                           </div>
 
-                          <h3 className="text-14 sm:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-6">
+                          <h3 className="text-14 md:text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-6 flex-1">
                             {item.catName}
                           </h3>
                         </div>
 
                         {/* Body Description */}
-                        <p className="text-[13px] sm:text-sm text-slate-500 leading-relaxed line-clamp-2">
+                        <p className="text-[13px] sm:text-sm font-bold text-slate-500 leading-relaxed line-clamp-2">
                           {item.description || 'مجموعه سوالات و درسنامه‌های اختصاصی آزمون‌های استخدامی مربوطه.'}
                         </p>
                       </div>

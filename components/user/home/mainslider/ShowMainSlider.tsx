@@ -98,9 +98,9 @@ function SliderImage({
     <div className="relative w-full h-full">
       {/* ✅ اسکلتون شیمر تا لود کامل تصویر + آیکون ImageIcon */}
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
+        <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center rounded">
           <ImageIcon
-            className="w-16 h-16 text-slate-400 opacity-50"
+            className="w-12 h-12 md:w-16 md:h-16 text-slate-400 opacity-50"
             strokeWidth={1.25}
           />
         </div>
@@ -108,9 +108,9 @@ function SliderImage({
 
       {/* ✅ در صورت خطا، آیکون پیش‌فرض با پس‌زمینه */}
       {hasError && (
-        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center rounded">
           <ImageIcon
-            className="w-16 h-16 text-slate-300"
+            className="w-12 h-12 md:w-16 md:h-16 text-slate-300"
             strokeWidth={1.25}
           />
         </div>
@@ -123,8 +123,7 @@ function SliderImage({
         sizes="(max-width: 768px) 40vw, 50vw"
         priority={priority}
         fetchPriority={priority ? "high" : "auto"}
-        className={`object-contain duration-700 ease-out ${isLoaded ? "opacity-100" : "opacity-0"
-          }`}
+        className={`object-contain duration-700 ease-out ${isLoaded ? "opacity-100" : "opacity-0"}`}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
       />
@@ -166,7 +165,7 @@ function SliderSkeleton() {
           {/* بخش متن — دقیقاً همان ابعاد و padding اسلاید واقعی */}
           <div className="order-1 w-[60%] md:w-1/2 h-full flex-shrink-0 flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
             {/* عنوان — h2 با text-base/lg و line-clamp-2 */}
-            <div className="h-[1.5rem] md:h-[1.75rem] w-3/4 skeleton-wave rounded mt-1" />
+            <div className="h-[1.25rem] md:h-[1.75rem] w-3/4 skeleton-wave rounded mt-1" />
 
             {/* جدول — overflow-x-auto wrapper */}
             <div className="overflow-x-auto w-full">
@@ -175,7 +174,7 @@ function SliderSkeleton() {
                   {Array.from({ length: SKELETON_ROW_COUNT }).map((_, i) => (
                     <tr key={i} className="leading-tight md:leading-normal">
                       <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 whitespace-nowrap">
-                        <div className="h-[1rem] md:h-[1.25rem] w-20 md:w-28 skeleton-wave rounded" />
+                        <div className="h-[1rem] md:h-[1.25rem] w-16 md:w-28 skeleton-wave rounded" />
                       </th>
                       <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5">
                         <div className="h-[1rem] md:h-[1.25rem] w-full skeleton-wave rounded" />
@@ -185,10 +184,10 @@ function SliderSkeleton() {
                   {/* ردیف وضعیت */}
                   <tr className="leading-tight md:leading-normal">
                     <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 whitespace-nowrap">
-                      <div className="h-[1rem] md:h-[1.25rem] w-12 md:w-16 skeleton-wave rounded" />
+                      <div className="h-[1rem] md:h-[1.25rem] w-10 md:w-16 skeleton-wave rounded" />
                     </th>
                     <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5">
-                      <div className="h-[1.25rem] md:h-[1.5rem] w-20 md:w-24 skeleton-wave rounded-full" />
+                      <div className="h-[1.25rem] md:h-[1.5rem] w-16 md:w-24 skeleton-wave rounded-full" />
                     </td>
                   </tr>
                 </tbody>
@@ -196,10 +195,10 @@ function SliderSkeleton() {
             </div>
           </div>
 
-          {/* بخش تصویر — دقیقاً همان ابعاد و padding اسلاید واقعی */}
-          <div className="order-2 px-8 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-1 md:p-4">
-            <div className="relative px-8 w-full h-full rounded overflow-hidden border-slate-100 bg-white">
-              <div className="w-full px-8 h-full skeleton-wave" />
+          {/* ✅ بخش تصویر — دقیقاً همان ابعاد و padding اسلاید واقعی + فاصله از بوردر */}
+          <div className="order-2 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-2 md:p-4">
+            <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white m-1 md:m-2">
+              <div className="w-full h-full skeleton-wave" />
             </div>
           </div>
 
@@ -342,9 +341,9 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                     )}
                   </div>
 
-                  {/* ✅ بخش تصویر با اسکلتون شیمر */}
-                  <div className="order-2 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-1 md:p-4">
-                    <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
+                  {/* ✅ بخش تصویر با اسکلتون شیمر + فاصله از بوردر */}
+                  <div className="order-2 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-2 md:p-4">
+                    <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white m-1 md:m-2">
                       {s.imageUrl && (
                         <SliderImage
                           src={s.imageUrl}
