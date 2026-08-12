@@ -103,14 +103,14 @@ function CountdownTimer({ targetDate }: { targetDate: string | null }) {
 
   return (
     <div className="flex flex-col gap-0.5 md:gap-1 mt-1">
-      <span className="text-[10px] md:text-[11px] font-medium text-amber-600">زمان باقی‌مانده جهت ثبت نام:</span>
+      <span className="text-[10px] md:text-[11px] font-bold text-amber-600">زمان باقی‌مانده جهت ثبت نام:</span>
       <div className="flex items-center gap-1 md:gap-1.5 w-fit bg-amber-50/60 border border-amber-200/50 p-1 md:p-1.5 rounded-lg md:rounded-xl" dir="ltr">
         {boxes.map((b, i) => (
           <div key={b.l} className="flex items-center gap-1 md:gap-1.5">
             {i > 0 && <span className="text-amber-400 font-bold animate-pulse text-[10px] md:text-xs">:</span>}
             <div className="flex flex-col items-center min-w-[30px] md:min-w-[36px] bg-white px-1 md:px-1.5 py-0.5 rounded-md md:rounded-lg shadow-sm border border-slate-100">
               <span className="text-[10px] md:text-xs font-bold text-slate-800">{String(b.v).padStart(2, "0")}</span>
-              <span className="text-[8px] md:text-[9px] text-slate-400 font-medium">{b.l}</span>
+              <span className="text-[8px] md:text-[9px] text-slate-400 font-bold">{b.l}</span>
             </div>
           </div>
         ))}
@@ -137,6 +137,59 @@ function buildInfoRows(s: SliderDBItem): [string, string][] {
   return rows;
 }
 
+// ✅ کامپوننت اسکلتون موج‌دار برای اسلایدر
+function SliderSkeleton() {
+  return (
+    <div className="w-full h-full flex flex-col relative group rounded shadow-xl shadow-blue-900/5 border border-white/80 to-blue-50/40">
+      <style jsx global>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .skeleton-wave {
+          background: linear-gradient(
+            90deg,
+            #e2e8f0 0%,
+            #f1f5f9 40%,
+            #f8fafc 50%,
+            #f1f5f9 60%,
+            #e2e8f0 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.8s infinite linear;
+        }
+      `}</style>
+
+      <div className="w-full h-[620px] md:h-[360px] flex-1 pb-8 md:pb-4">
+        <div className="flex h-full items-stretch gap-2 md:gap-8">
+          {/* بخش متن */}
+          <div className="order-1 w-full h-full flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
+            {/* عنوان */}
+            <div className="h-4 md:h-6 w-3/4 skeleton-wave rounded mt-1"></div>
+
+            {/* جدول اطلاعات */}
+            <div className="w-full space-y-2 mt-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex gap-2">
+                  <div className="w-24 md:w-32 h-6 md:h-8 skeleton-wave rounded border border-slate-200"></div>
+                  <div className="flex-1 h-6 md:h-8 skeleton-wave rounded border border-slate-200"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* بخش تصویر */}
+          <div className="order-2 w-full h-full flex items-center justify-center p-1 md:p-4">
+            <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
+              <div className="w-full h-full skeleton-wave"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) {
   const progressRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -157,8 +210,9 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     }
   };
 
-  if (!isMounted) return <DotsLoader />;
-  if (isLoading && sliders.length === 0) return <DotsLoader />;
+  // ✅ نمایش اسکلتون موج‌دار تا زمانی که کامپوننت کامل مانت نشده
+  if (!isMounted) return <SliderSkeleton />;
+  if (isLoading && sliders.length === 0) return <SliderSkeleton />;
   if (!isLoading && sliders.length === 0) return null;
 
   return (
@@ -214,7 +268,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                 <div className="flex h-full items-stretch gap-2 md:gap-8">
                   <div className="order-1 w-full h-full flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
                     {s.title && (
-                      <h2 className="text-xs md:text-lg font-bold text-slate-800 tracking-tight mt-1 line-clamp-2 md:line-clamp-none">
+                      <h2 className="text-base md:text-lg font-bold text-slate-800 tracking-tight mt-1 line-clamp-2 md:line-clamp-none">
                         {s.title}
                       </h2>
                     )}
@@ -225,21 +279,21 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                           <tbody>
                             {infoRows.map(([label, value]) => (
                               <tr key={label} className="leading-tight md:leading-normal">
-                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
+                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-bold text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
                                   {label}
                                 </th>
-                                <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right text-slate-800 text-[12px] md:text-xs">
+                                <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right font-bold text-slate-800 text-[12px] md:text-xs">
                                   {value}
                                 </td>
                               </tr>
                             ))}
                             {statusInfo && (
                               <tr className="leading-tight md:leading-normal">
-                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-medium text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
+                                <th className="border border-slate-200 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1.5 font-bold text-slate-800 whitespace-nowrap text-[12px] md:text-xs">
                                   وضعیت
                                 </th>
                                 <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right">
-                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-medium border ${statusInfo.className}`}>
+                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-[11px] font-bold border ${statusInfo.className}`}>
                                     {statusInfo.label}
                                   </span>
                                 </td>
