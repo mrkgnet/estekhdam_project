@@ -20,7 +20,7 @@ export default function StatusBadge({ status }: { status: NewsStatus }) {
       animate: true
     },
     NEWS: {
-      text: "فقط خبر",
+      text: "در انتظار نتایج",
       color: "text-slate-600", bg: "bg-slate-100", border: "border-slate-200", dot: "bg-slate-400",
       animate: true
     },

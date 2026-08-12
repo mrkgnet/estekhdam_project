@@ -9,7 +9,7 @@ const STATUS_OPTIONS = [
   { key: "OPEN", label: "ثبت نام" },
   { key: "CARD_RECEIVED", label: "دریافت کارت" },
   { key: "RESULTS_ANNOUNCED", label: "اعلام نتایج" },
-  { key: "NEWS", label: "اطلاعیه و خبر" },
+  { key: "NEWS", label: "در انتظار نتایج" },
 ];
 
 interface Props {
