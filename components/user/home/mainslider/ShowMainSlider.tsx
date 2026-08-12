@@ -129,7 +129,6 @@ function buildInfoRows(s: SliderDBItem): [string, string][] {
   const endJalali = toJalaliDate(s.endAt);
   if (endJalali) rows.push(["پایان ثبت‌نام", endJalali]);
   
-  // ✅ اضافه کردن زمان برگزاری آزمون (فقط تاریخ، بدون ساعت)
   const examJalali = toJalaliDate(s.examAt);
   if (examJalali) rows.push(["زمان برگزاری آزمون", examJalali]);
   
@@ -162,8 +161,8 @@ function SliderSkeleton() {
 
       <div className="w-full h-[620px] md:h-[360px] flex-1 pb-8 md:pb-4">
         <div className="flex h-full items-stretch gap-2 md:gap-8">
-          {/* بخش متن */}
-          <div className="order-1 w-full h-full flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
+          {/* ✅ بخش متن - در موبایل 60% عرض و در دسکتاپ 50% */}
+          <div className="order-1 w-[60%] md:w-1/2 h-full flex-shrink-0 flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
             {/* عنوان */}
             <div className="h-4 md:h-6 w-3/4 skeleton-wave rounded mt-1"></div>
 
@@ -171,15 +170,15 @@ function SliderSkeleton() {
             <div className="w-full space-y-2 mt-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex gap-2">
-                  <div className="w-24 md:w-32 h-6 md:h-8 skeleton-wave rounded border border-slate-200"></div>
+                  <div className="w-20 md:w-32 h-6 md:h-8 skeleton-wave rounded border border-slate-200"></div>
                   <div className="flex-1 h-6 md:h-8 skeleton-wave rounded border border-slate-200"></div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* بخش تصویر */}
-          <div className="order-2 w-full h-full flex items-center justify-center p-1 md:p-4">
+          {/* ✅ بخش تصویر - در موبایل 40% عرض و در دسکتاپ 50% */}
+          <div className="order-2 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-1 md:p-4">
             <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
               <div className="w-full h-full skeleton-wave"></div>
             </div>
@@ -266,7 +265,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
             return (
               <SwiperSlide key={s.id} className="h-full">
                 <div className="flex h-full items-stretch gap-2 md:gap-8">
-                  <div className="order-1 w-full h-full flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
+                  {/* ✅ بخش متن - در موبایل 60% عرض و در دسکتاپ 50% */}
+                  <div className="order-1 w-[60%] md:w-1/2 h-full flex-shrink-0 flex flex-col justify-center gap-2 md:gap-3 px-2 md:px-6 text-right">
                     {s.title && (
                       <h2 className="text-base md:text-lg font-bold text-slate-800 tracking-tight mt-1 line-clamp-2 md:line-clamp-none">
                         {s.title}
@@ -316,14 +316,15 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                     )} */}
                   </div>
 
-                  <div className="order-2 w-full h-full flex items-center justify-center p-1 md:p-4">
+                  {/* ✅ بخش تصویر - در موبایل 40% عرض و در دسکتاپ 50% */}
+                  <div className="order-2 w-[40%] md:w-1/2 h-full flex-shrink-0 flex items-center justify-center p-1 md:p-4">
                     <div className="relative w-full h-full rounded overflow-hidden border-slate-100 bg-white">
                       {s.imageUrl && (
                         <Image
                           src={s.imageUrl}
                           alt={s.title || "تصویر اسلایدر"}
                           fill
-                          sizes="(max-width: 768px) 100vw, 50vw"
+                          sizes="(max-width: 768px) 40vw, 50vw"
                           className="object-contain duration-700 ease-out"
                           priority={index === 0}
                           fetchPriority={index === 0 ? "high" : "auto"}
