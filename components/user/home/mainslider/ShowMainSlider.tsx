@@ -36,7 +36,7 @@ interface ShowMainSliderProps {
 }
 
 const STATUS_MAP: Record<NewsStatus, { label: string; className: string }> = {
-  OPEN:               { label: "ثبت‌نام باز",       className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  OPEN:               { label: "ثبت‌نام ",       className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   CARD_RECEIVED:      { label: "دریافت کارت",       className: "bg-blue-50 text-blue-700 border-blue-200" },
   RESULTS_ANNOUNCED:  { label: "اعلام نتایج",       className: "bg-violet-50 text-violet-700 border-violet-200" },
   NEWS:               { label: "در‌انتظار نتایج",           className: "bg-amber-50 text-amber-700 border-amber-200" },
@@ -130,7 +130,7 @@ function buildInfoRows(s: SliderDBItem): [string, string][] {
   if (endJalali) rows.push(["پایان ثبت‌نام", endJalali]);
   
   const examJalali = toJalaliDate(s.examAt);
-  if (examJalali) rows.push(["زمان برگزاری آزمون", examJalali]);
+  if (examJalali) rows.push([" برگزاری آزمون", examJalali]);
   
   if (s.maxAge) rows.push(["شرط سنی", `حداکثر ${toPersianDigits(s.maxAge)} سال`]);
   return rows;
@@ -198,7 +198,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
     queryKey: ["main-slider"],
     queryFn: () => fetchMainSliderUserAction(),
     initialData: initialSliders,
-    staleTime: 2000,
+    staleTime: 200,
   });
 
   const sliders: SliderDBItem[] = response?.data || [];
@@ -293,7 +293,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                                   وضعیت
                                 </th>
                                 <td className="border border-slate-200 px-1.5 md:px-2 py-0.5 md:py-1.5 text-right">
-                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[11px] md:text-sm font-bold border ${statusInfo.className}`}>
+                                  <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded-full text-[13px] md:text-sm font-bold border ${statusInfo.className}`}>
                                     {statusInfo.label}
                                   </span>
                                 </td>
