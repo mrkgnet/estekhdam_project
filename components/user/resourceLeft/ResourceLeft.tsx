@@ -25,14 +25,14 @@ function ProductImage({ src, alt, fallback }: { src: string; alt: string; fallba
       {/* ✅ اسکلتون شیمر تا لود کامل تصویر + آیکون کتاب */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
-          <BookOpen className="w-10 h-10 text-slate-400 opacity-60" strokeWidth={1.5} />
+          <BookOpen className="w-12 h-12 sm:w-10 sm:h-10 text-slate-400 opacity-60" strokeWidth={1.5} />
         </div>
       )}
 
       {/* ✅ در صورت خطا، نمایش تصویر fallback */}
       {hasError && (
         <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
-          <BookOpen className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+          <BookOpen className="w-12 h-12 sm:w-10 sm:h-10 text-slate-300" strokeWidth={1.5} />
         </div>
       )}
 
@@ -42,10 +42,10 @@ function ProductImage({ src, alt, fallback }: { src: string; alt: string; fallba
         fill
         priority
         fetchPriority="high"
-        sizes="(max-width: 768px) 140px, (max-width: 1200px) 50vw, 33vw"
+        sizes="(max-width: 768px) 180px, (max-width: 1200px) 50vw, 33vw"
         placeholder="blur"
         blurDataURL={blurDataURL}
-        className={`object-contain md:p-4 transition-all duration-700 ease-out ${
+        className={`object-contain p-3 sm:p-3 md:p-4 transition-all duration-700 ease-out ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => setIsLoaded(true)}
@@ -86,13 +86,13 @@ export default function ResourceLeft({ product }: Props) {
         }
       `}</style>
 
-      <div className="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div className="lg:sticky lg:top-24 bg-white rounded border border-slate-300 overflow-hidden">
         {/* ✅ Mobile: افقی | Desktop: عمودی */}
         <div className="flex flex-row lg:flex-col">
-          {/* IMAGE */}
-          <div className="relative w-[130px] lg:w-full lg:aspect-[4/3] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {/* IMAGE - بزرگ‌تر در موبایل */}
+          <div className="relative w-[170px] sm:w-[180px] lg:w-full min-h-[180px] sm:min-h-[200px] lg:min-h-0 lg:aspect-[4/3] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center flex-shrink-0 overflow-hidden">
             {/* ✅ Label - z-20 برای دیده شدن روی شیمر */}
-            <span className="absolute top-2 right-2 z-20 text-[10px] px-2 py-1 rounded-full bg-blue-600 text-white shadow">
+            <span className="absolute top-2 right-2 z-20 text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full bg-blue-600 text-white shadow font-medium">
               آنلاین
             </span>
 
@@ -105,18 +105,18 @@ export default function ResourceLeft({ product }: Props) {
           </div>
 
           {/* CONTENT */}
-          <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 flex-1">
+          <div className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 flex-1 min-w-0">
             <div className="space-y-2">
-              <h1 className="text-13 md:text-14 font-semibold text-slate-800 leading-7">
+              <h1 className="text-13 sm:text-15 font-semibold text-slate-800 leading-6 sm:leading-7">
                 {product?.name}
               </h1>
 
               {product?.categories?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {product.categories.map((cat: any, idx: number) => (
                     <span
                       key={idx}
-                      className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
+                      className="text-[13px] sm:text-sm bg-slate-100 text-slate-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"
                     >
                       {cat.catName}
                     </span>
@@ -125,10 +125,10 @@ export default function ResourceLeft({ product }: Props) {
               )}
             </div>
 
-            <div className="border-t border-slate-100 pt-4 space-y-3 text-12 md:text-13 text-slate-600">
+            <div className="border-t border-slate-300 pt-3 sm:pt-4 space-y-3 text-11 sm:text-12 md:text-13 text-slate-600">
               <div className="flex items-center gap-2">
-                <RefreshCcw className="w-4 h-4 text-blue-600" />
-                بروزرسانی رایگان سوالات
+                <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 shrink-0" />
+                <span>بروزرسانی رایگان سوالات</span>
               </div>
             </div>
           </div>

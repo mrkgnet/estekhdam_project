@@ -35,9 +35,9 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
   if (isLoading || !product) {
     return (
       <div>
-        <div className="bg-white rounded shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
+        <div className="bg-white rounded shadow-sm overflow-hidden min-h-[380px]">
           {/* هدر تب‌ها (اسکلتون) */}
-          <div className="flex overflow-x-auto border-b border-slate-100 bg-slate-50/50 p-2 gap-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex overflow-x-auto border-b border-slate-300 bg-slate-50/50 p-2 gap-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -49,7 +49,6 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
           {/* محتوای تب‌ها (اسکلتون) */}
           <div className="p-5 sm:p-6 md:p-8 space-y-6">
             <div className="h-7 w-48 bg-slate-200/60 rounded-lg animate-pulse" />
-
             <div className="space-y-4">
               <div className="h-4 w-full bg-slate-100 rounded-md animate-pulse" />
               <div className="h-4 w-11/12 bg-slate-100 rounded-md animate-pulse" />
@@ -67,11 +66,11 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
   // ================= حالت نمایش محتوای اصلی + لودر اسکلتونی کوتاه مثل قبل =================
   return (
     <div>
-      <div className="relative bg-white sm:rounded overflow-hidden min-h-[400px] border border-slate-200/60">
+      <div className="relative bg-white sm:rounded overflow-hidden min-h-[380px] border border-slate-300">
         {/* لودر اسکلتونی Overlay - مشابه قبل به جای اسپینر تا آماده شدن محتوا */}
         {!isReady && (
           <div className="absolute inset-0 z-10 bg-white">
-            <div className="flex overflow-x-hidden border-b border-slate-100 bg-slate-50/50 p-2 gap-2">
+            <div className="flex overflow-x-hidden border-b border-slate-300 bg-slate-50/50 p-2 gap-2">
               {[1, 2].map((i) => (
                 <div
                   key={i}
@@ -102,7 +101,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
           {/* هدر تب‌ها */}
           <div
             role="tablist"
-            className="flex overflow-x-auto border-b border-slate-100 bg-slate-50/50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            className="flex overflow-x-auto border-b border-slate-300 bg-slate-50/50 p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -112,12 +111,12 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex items-center  font-bold text-13 md:text-14 lg:text-13 justify-center cursor-pointer gap-2 px-5 sm:px-6 py-3.5 transition-colors whitespace-nowrap rounded-2xl flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  className="relative flex items-center font-bold text-13 md:text-14 lg:text-13 justify-center cursor-pointer gap-2 px-5 sm:px-6 py-3.5 transition-colors whitespace-nowrap rounded-2xl flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                 >
                   {isActive && (
                     <motion.div
                       layoutId="active-tab-exam"
-                      className="absolute inset-0 bg-white shadow-sm border border-slate-200/50 rounded-xl"
+                      className="absolute inset-0 bg-white shadow-sm border border-slate-300 rounded-xl"
                       initial={false}
                       transition={{ type: "spring", stiffness: 400, damping: 35 }}
                     />
@@ -184,7 +183,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
                         {product.features.map((feature: string, idx: number) => (
                           <li
                             key={idx}
-                            className="flex items-start gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 transition-colors hover:bg-green-50/50 hover:border-green-100"
+                            className="flex items-start gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-300 transition-colors hover:bg-green-50/50 hover:border-green-100"
                           >
                             <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                             <span className="text-slate-700 leading-relaxed">
@@ -194,7 +193,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-slate-500 bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                      <p className="text-slate-500 bg-slate-50 p-4 rounded-xl text-center border border-slate-300">
                         ویژگی خاصی ثبت نشده است.
                       </p>
                     )}

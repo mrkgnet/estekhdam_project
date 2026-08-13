@@ -12,6 +12,8 @@ import { Suspense } from "react";
 import FetchDataMainSlider from "@/components/user/home/mainslider/FetchDataMainSlider";
 import SliderTopLeftComponent from "@/components/user/home/sliderTopLeft/page";
 import CategoryGrid from "@/components/user/home/categoryGrid/CategoryGrid";
+import QuestionCounterComponent from "@/components/user/questionCounter/QCComponent";
+import QCComponent from "@/components/user/questionCounter/QCComponent";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -56,11 +58,6 @@ export default function page() {
                     <BrandTopSlider />
                 </section>
                 {/* کامپوننت فیلتربار */}
-                {/* <div className="mb-12">
-                    <FilterBar />
-                </div> */}
-
-
                 <section className=" px-4 grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
                     <div className="lg:col-span-4">
                         <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
@@ -81,7 +78,7 @@ export default function page() {
 
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
                 {/* <section className="mb-16">
-                    <HeroSection questionsCount={questionsCount} />
+                    <QCComponent />                
                 </section> */}
 
 

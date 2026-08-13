@@ -116,7 +116,7 @@ export default function ExamDetailsPage({ initialResponse, slugValue }: ExamDeta
           {/* ==================== ستون سمت وسط ==================== */}
           <div className="lg:col-span-6 w-full flex flex-col gap-3 lg:gap-8">
             {/* تب‌های توضیحات */}
-            <div className="bg-white rounded shadow-sm border border-slate-200/60 p-1">
+            <div className="bg-white rounded shadow-sm  ">
               <TabSectionCR product={product} isLoading={false} />
             </div>
           </div>
