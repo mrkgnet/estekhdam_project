@@ -3,103 +3,116 @@
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export async function fetchDataQues(id: string, step: number = 1, chapterId?: string, questionType?: string) {
+export async function fetchDataQues(
+  id: string,
+  step: number | string = 1,
+  chapterId?: string,
+  questionType?: string
+) {
   try {
+    // تبدیل قطعی step به عدد برای جلوگیری از خطای مقایسه String
+    const currentStep = Number(step) || 1;
     const currentUser = await infoCurentUser();
+    let hasActiveSubscription = false;
 
-    let hasPurchased = false;
-
-    // بررسی اینکه آیا کاربر این دوره را قبلا خریده/ثبت‌نام کرده است؟
-    if (currentUser) {
-      const order = await db.order.findFirst({
+    // ۱. بررسی دقیق اشتراک فعال کاربر در دیتابیس
+    if (currentUser?.id) {
+      const now = new Date();
+      const activeSub = await db.userSubscription.findFirst({
         where: {
           userId: currentUser.id,
-          productId: id,
-          // نکته مهم: وضعیت پرداخت موفق را بر اساس Enum خودتان تنظیم کنید
-          // مثلا ممکن است COMPLETED یا SUCCESS یا PAID باشد
-          status: "SUCCESS",
+          isActive: true,
+          endDate: {
+            gt: now, // تاریخ پایان اشتراک باید حتماً بعد از الان باشد
+          },
         },
       });
 
-      if (order) {
-        hasPurchased = true;
+      if (activeSub) {
+        hasActiveSubscription = true;
       }
     }
 
-    // ۲. واکشی سرفصل‌های مربوط به این دوره (محصول)
+    // ۲. سرفصل‌های دوره
     const chapters = await db.chapter.findMany({
       where: { productId: id },
-      orderBy: { order: "asc" }, // مرتب‌سازی بر اساس ترتیب سرفصل
+      orderBy: { order: "asc" },
     });
 
-    // === مدیریت محدودیت‌های مرحله ۵ به بعد ===
-    if (step > 4) {
+    // ۳. قفل امنیتی: سوالات بعد از سوال ۵ (۶ به بعد)
+    if (currentStep > 5) {
+      // حالت اول: کاربر اصلاً لاگین نکرده است
       if (!currentUser) {
         return {
           success: false,
           requiresAuth: true,
-          message: "  لطفا وارد حساب کاربری خود شوید .",
+          message: "لطفاً ابتدا وارد حساب کاربری خود شوید.",
           data: null,
           totalCount: 0,
-          hasPurchased: false,
+          hasActiveSubscription: false,
           chapters,
         };
       }
-    }
 
-    if (step > 6) {
-      // ۲. اگر لاگین است اما دوره را نخریده
-      if (!hasPurchased) {
+      // حالت دوم: کاربر لاگین کرده اما اشتراک فعال ندارد
+      if (!hasActiveSubscription) {
         return {
           success: false,
-          requiresPurchase: true, // فلگ جدید برای کلاینت
-          message: "برای مشاهده ادامه سوالات، لطفا   دوره را خریداری کنید.",
+          requiresSubscription: true,
+          message: "برای مشاهده سوالات ۵ به بعد، باید اشتراک فعال تهیه کنید.",
           data: null,
           totalCount: 0,
-          hasPurchased: false,
+          hasActiveSubscription: false,
           chapters,
         };
       }
     }
 
+    // ۴. دریافت سوال از دیتابیس (فقط در صورتی که مجاز باشد)
     const whereCondition = {
       productId: id,
-      ...(chapterId ? { chapterId: chapterId } : {}),
-      ...(questionType ? { questionType: questionType  } : {}),
+      ...(chapterId ? { chapterId } : {}),
+      ...(questionType ? { questionType } : {}),
     };
 
     const totalCount = await db.question.count({
       where: whereCondition,
     });
 
-     const question = await db.question.findFirst({
+    const question = await db.question.findFirst({
       where: whereCondition,
       orderBy: [
         { createdAt: "asc" },
-        { id: "asc" } // <--- اضافه کردن این خط برای جلوگیری از به هم ریختن ترتیب
+        { id: "asc" }
       ],
-      skip: step - 1,
+      skip: Math.max(0, currentStep - 1),
     });
 
     if (!question) {
-      return { success: false, message: "سوالی یافت نشد.", data: null, totalCount, hasPurchased };
+      return {
+        success: false,
+        message: "سوالی یافت نشد.",
+        data: null,
+        totalCount,
+        hasActiveSubscription,
+      };
     }
 
     return {
       success: true,
       data: question,
       totalCount,
-      hasPurchased, // ارسال این مقدار به کلاینت برای مدیریت دکمه "بعدی"
+      hasActiveSubscription,
       chapters,
     };
   } catch (error) {
     console.error("❌ Error in fetchDataQues:", error);
     return {
       success: false,
-      message: "خطا در برقراری ارتباط با دیتابیس",
+      message: "خطا در برقراری ارتباط با سرور",
       data: null,
       totalCount: 0,
-      hasPurchased: false,
+      hasActiveSubscription: false,
     };
   }
 }

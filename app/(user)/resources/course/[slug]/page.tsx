@@ -109,9 +109,9 @@ export default async function page({ params }: { params: Promise<{ slug: string 
   
   return (
     <div>
-      <Suspense fallback={<ExamDetailsSkeleton />}>
+      {/* <Suspense fallback={<ExamDetailsSkeleton />}> */}
         <FetchDataQues slugValue={slug} />
-      </Suspense>
+      {/* </Suspense> */}
     </div>
   )
 }

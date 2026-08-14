@@ -51,6 +51,28 @@ const btnBase =
 const statusBase =
   "rounded p-2.5 sm:p-3 flex items-center justify-center gap-2 font-bold border";
 
+/* ✅ استایل موج‌دار به صورت ثابت در هر دو حالت */
+const shimmerStyle = (
+  <style jsx global>{`
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-wave {
+      background: linear-gradient(
+        90deg,
+        #e2e8f0 0%,
+        #f1f5f9 40%,
+        #f8fafc 50%,
+        #f1f5f9 60%,
+        #e2e8f0 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite linear;
+    }
+  `}</style>
+);
+
 function PriceDisplay({
   oldPrice,
   newPrice,
@@ -103,6 +125,16 @@ function StatusBanner({
   );
 }
 
+/* ✅ اسکلتون StatusBanner موج‌دار */
+function StatusBannerSkeleton() {
+  return (
+    <div className="rounded border border-slate-200 p-2.5 sm:p-3 flex items-center gap-2 bg-slate-50">
+      <div className="w-4 h-4 sm:w-5 sm:h-5 skeleton-wave rounded-full shrink-0" />
+      <div className="h-4 w-3/4 skeleton-wave rounded" />
+    </div>
+  );
+}
+
 function StatBox({
   icon,
   title,
@@ -127,21 +159,51 @@ function StatBox({
   );
 }
 
+/* ✅ اسکلتون دکمه‌های پایین موج‌دار */
+function ButtonsSkeleton({ isFreeResource }: { isFreeResource: boolean }) {
+  return (
+    <div className="space-y-2 sm:space-y-3 w-full">
+      <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+      {!isFreeResource && (
+        <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------- */
+/* ✅ اسکلتون موج‌دار کامل - برای حالت !mounted */
+/* ---------------------------------- */
 function Skeleton() {
   return (
     <div className="lg:col-span-3 w-full">
+      {shimmerStyle}
+
       <div className={`${cardBase} lg:sticky lg:top-24`}>
-        <div className="p-2.5 sm:p-3 space-y-3 sm:space-y-4 lg:space-y-6 animate-pulse">
-          <div className="h-11 sm:h-12 bg-slate-100 rounded" />
-          <div className="space-y-2 sm:space-y-3">
-            <div className="h-11 sm:h-12 bg-slate-100 rounded-lg" />
-            <div className="h-11 sm:h-12 bg-slate-100 rounded-lg" />
-            <div className="h-11 sm:h-12 bg-slate-100 rounded-lg" />
+        <div className="p-2.5 sm:p-3 pb-24 sm:pb-28 lg:pb-3 space-y-3 sm:space-y-4 lg:space-y-6">
+          {/* 1️⃣ StatusBanner اسکلتون */}
+          <StatusBannerSkeleton />
+
+          {/* 2️⃣ سه StatBox اسکلتون */}
+          <div className="grid grid-cols-1 gap-2 sm:gap-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-slate-50 rounded p-2.5 sm:p-3 flex items-center justify-between gap-3 border border-slate-100"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 skeleton-wave rounded shrink-0" />
+                  <div className="w-20 sm:w-24 h-3.5 skeleton-wave rounded" />
+                </div>
+                <div className="w-12 sm:w-16 h-4 skeleton-wave rounded" />
+              </div>
+            ))}
           </div>
-          <div className="h-11 sm:h-12 bg-slate-100 rounded" />
-          <div className="space-y-2 sm:space-y-3">
-            <div className="h-11 sm:h-12 bg-slate-100 rounded" />
-            <div className="h-11 sm:h-12 bg-slate-100 rounded" />
+
+          {/* 3️⃣ دکمه‌های پایین */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-300 p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
+            <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+            <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
           </div>
         </div>
       </div>
@@ -281,6 +343,7 @@ export default function ResourceRight({ product }: Props) {
     }
   };
 
+  // ✅ حالت اول: قبل از mount → اسکلتون کامل
   if (!mounted) return <Skeleton />;
 
   return (
@@ -291,28 +354,33 @@ export default function ResourceRight({ product }: Props) {
         onSuccess={() => setIsAuthModalOpen(false)}
       />
 
-      <div className="lg:col-span-3 w-full text-12 sm:text-13">
+      {/* ✅ استایل موج‌دار برای حالت لودینگ بعد از mount */}
+      {shimmerStyle}
+
+      <div className="lg:col-span-3 w-full text-13 sm:text-14">
         <aside
           className={`${cardBase} lg:sticky lg:top-24 ${
             !isProductActive ? "opacity-70" : ""
           }`}
           aria-label="اطلاعات محصول"
         >
-          {/* ✅ کاهش ارتفاع در موبایل: padding کمتر + space کمتر + pb کمتر */}
           <div className="p-2.5 sm:p-3 pb-24 sm:pb-28 lg:pb-3 space-y-3 sm:space-y-4 lg:space-y-6">
-            {!isLoading && topStatus ? (
+            
+            {/* ✅ وضعیت بالا: اسکلتون یا محتوای واقعی */}
+            {isLoading ? (
+              <StatusBannerSkeleton />
+            ) : topStatus ? (
               <StatusBanner
                 tone={topStatus.tone}
                 icon={topStatus.icon}
                 text={topStatus.text}
               />
-            ) : (
-              <div className="w-full h-11 sm:h-12 bg-slate-100 animate-pulse rounded" />
-            )}
+            ) : null}
 
+            {/* ✅ بخش آمار/قیمت: همیشه نمایش داده میشه (از initialData میاد) */}
             {isFreeResource ? (
               <div className={`${softCard} p-3 sm:p-4 flex items-center justify-between font-bold`}>
-                <div className="text-slate-500 text-[12px] sm:text-[13px]">قیمت محصول</div>
+                <div className="text-slate-500 text-[13px] sm:text-[14px]">قیمت محصول</div>
                 <span className="font-black text-emerald-600 text-[13px] sm:text-[14px]">رایگان</span>
               </div>
             ) : (
@@ -335,7 +403,7 @@ export default function ResourceRight({ product }: Props) {
               </div>
             )}
 
-            {/* ✅ بخش دکمه‌های ثابت پایین - ارتفاع کمتر در موبایل */}
+            {/* ✅ بخش دکمه‌های ثابت پایین */}
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-300 p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
               {!isProductActive ? (
                 <div className={`${btnBase} bg-rose-100 text-rose-700 border border-rose-200 text-[12px] sm:text-[13px]`}>
@@ -343,12 +411,8 @@ export default function ResourceRight({ product }: Props) {
                   {isFreeResource ? "دانلود متوقف شده" : "فروش این محصول متوقف شده"}
                 </div>
               ) : isLoading ? (
-                <div className="space-y-2 sm:space-y-3 w-full">
-                  <div className="w-full h-11 sm:h-12 bg-slate-100 animate-pulse rounded"></div>
-                  {!isFreeResource && (
-                    <div className="w-full h-11 sm:h-12 bg-slate-100 animate-pulse rounded"></div>
-                  )}
-                </div>
+                /* ✅ اسکلتون موج‌دار برای دکمه‌ها در حالت لودینگ */
+                <ButtonsSkeleton isFreeResource={isFreeResource} />
               ) : isFreeResource ? (
                 !isLoggedIn ? (
                   <button
@@ -362,7 +426,7 @@ export default function ResourceRight({ product }: Props) {
                   <button
                     onClick={handleDownloadClick}
                     disabled={isDownloadLoading}
-                    className={`${btnBase} bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 text-[12px] sm:text-[13px]`}
+                    className={`${btnBase} bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 text-[13px] sm:text-[14px]`}
                     aria-busy={isDownloadLoading}
                   >
                     {isDownloadLoading ? (
@@ -373,25 +437,24 @@ export default function ResourceRight({ product }: Props) {
                     {isDownloadLoading ? "در حال آماده‌سازی..." : "دریافت فایل"}
                   </button>
                 ) : (
-                  <div className={`${btnBase} bg-slate-100 text-slate-500 border border-slate-300 text-[12px] sm:text-[13px]`}>
+                  <div className={`${btnBase} bg-slate-100 text-slate-500 border border-slate-300 text-[13px] sm:text-[14px]`}>
                     <Info className="w-4 h-4 sm:w-5 sm:h-5" />
                     پیوستی برای دانلود موجود نیست
                   </div>
                 )
               ) : hasAccess ? (
-                /* 🟢 اگر کاربر اشتراک فعال داشته باشد یا دوره را خریده باشد */
                 <>
                   <Link
                     href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${btnBase} bg-blue-600 text-[12px] sm:text-14 hover:bg-blue-700 text-white`}
+                    className={`${btnBase} bg-blue-600 text-[13px] sm:text-14 hover:bg-blue-700 text-white`}
                   >
                     <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     شروع / ادامه دوره
                   </Link>
 
-                  <div className={`${btnBase} bg-emerald-100 text-[12px] sm:text-14 text-emerald-700 border border-emerald-200`}>
+                  <div className={`${btnBase} bg-emerald-100 text-[13px] sm:text-14 text-emerald-700 border border-emerald-200`}>
                     <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     {hasActiveSubscription
                       ? "دسترسی فعال با اشتراک"
@@ -399,13 +462,12 @@ export default function ResourceRight({ product }: Props) {
                   </div>
                 </>
               ) : (
-                /* 🔴 اگر کاربر اشتراک نداشته باشد و دوره را نخریده باشد */
                 <>
                   <Link
                     href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${btnBase} border-2 text-[12px] sm:text-14 border-slate-300 bg-slate-100 hover:bg-slate-50 text-slate-800`}
+                    className={`${btnBase} border-2 text-[13px] sm:text-14 border-slate-300 bg-slate-100 hover:bg-slate-50 text-slate-800`}
                   >
                     <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                     رایگان شروع کن
@@ -415,7 +477,7 @@ export default function ResourceRight({ product }: Props) {
                     href={`/plans`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${btnBase} bg-[#3b5998] text-[12px] sm:text-14 hover:bg-[#334e88] text-white`}
+                    className={`${btnBase} bg-[#3b5998] text-[13px] sm:text-14 hover:bg-[#334e88] text-white`}
                   >
                     <ShoppingBasket className="w-4 h-4 sm:w-5 sm:h-5" />
                     خرید اشتراک

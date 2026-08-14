@@ -11,8 +11,6 @@ import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import ExamSidebar from "@/components/user/questions/ExamSidebar";
 import ExamContent from "@/components/user/questions/ExamContent";
 
-// 👈 ایمپورت کامپوننت‌های جدا شده (مسیر زیر را متناسب با پوشه خود تنظیم کنید)
-
 type ChoiceKey = "A" | "B" | "C" | "D";
 
 type DBQuestion = {
@@ -64,7 +62,6 @@ export default function ExamPage({
   const commentsRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState<number>(14);
 
-  // === State برای دارک مود ===
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -77,7 +74,7 @@ export default function ExamPage({
 
   const dbQuestion = response?.data as DBQuestion;
   const totalCount = response?.totalCount || 0;
-  const hasPurchased = response?.hasPurchased || false;
+  const hasActiveSubscription = response?.hasActiveSubscription || false;
   const chapters = (response?.chapters || []) as Chapter[];
 
   const currentChapterId = searchParams.get("chapterId");
@@ -86,7 +83,6 @@ export default function ExamPage({
   const [isPendingRoute, startTransition] = useTransition();
   const [selected, setSelected] = useState<ChoiceKey | null>(null);
 
-  // === State برای مدال پرش به سوال ===
   const [isJumpModalOpen, setIsJumpModalOpen] = useState(false);
   const [jumpTarget, setJumpTarget] = useState("");
 
@@ -94,7 +90,15 @@ export default function ExamPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [targetStep, setTargetStep] = useState<number | null>(null);
 
-  // === Effect بررسی اولیه و لود شدن کامپوننت برای تم ===
+  // 🟢 بررسی محافظتی: اگر پاسخ سرور گفت نیاز به اشتراک هست، ریدایرکت کن
+  useEffect(() => {
+    if (response?.requiresSubscription) {
+      router.push("/plans");
+    } else if (response?.requiresAuth && !isLoggedIn && !isLoading) {
+      setIsAuthModalOpen(true);
+    }
+  }, [response, isLoggedIn, isLoading, router]);
+
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
@@ -123,7 +127,6 @@ export default function ExamPage({
     return () => { document.body.style.overflow = ""; };
   }, [isJumpModalOpen]);
 
-  // === تابع تغییر تم ===
   const toggleTheme = () => {
     const root = document.documentElement;
     if (isDarkMode) {
@@ -145,20 +148,28 @@ export default function ExamPage({
     return `${pathname}?${params.toString()}`;
   };
 
+  // 🟢 مدیریت دکمه‌های بعدی و پرش به سوال (چک کردن سوالات بعد از ۵)
   const handleNavigation = (newStep: number) => {
     if (newStep < 1 || newStep > totalCount) return;
-    if (newStep > 4) {
+
+    if (newStep > 5) {
       if (isLoading) return;
+
       if (!isLoggedIn) {
         setTargetStep(newStep);
         setIsAuthModalOpen(true);
         return;
       }
-      if (!hasPurchased) {
-        startTransition(() => router.push(`/plans`));
+
+      // اگر کاربر وارد شده ولی اشتراک فعال ندارد
+      if (!hasActiveSubscription) {
+        startTransition(() => {
+          router.push(`/plans`);
+        });
         return;
       }
     }
+
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("step", newStep.toString());
@@ -221,11 +232,15 @@ export default function ExamPage({
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
     if (targetStep !== null) {
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("step", targetStep.toString());
-        router.push(`${pathname}?${params.toString()}`);
-      });
+      if (!hasActiveSubscription && targetStep > 5) {
+        startTransition(() => router.push(`/plans`));
+      } else {
+        startTransition(() => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("step", targetStep.toString());
+          router.push(`${pathname}?${params.toString()}`);
+        });
+      }
     }
   };
 
@@ -270,7 +285,7 @@ export default function ExamPage({
                     onChange={(e) => setJumpTarget(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleJumpSubmit(); }}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-emerald-500 focus:border-transparent transition-all dark:text-slate-100"
-                    placeholder="مثلاً: 5" autoFocus
+                    placeholder="مثلاً: 6" autoFocus
                   />
                 </div>
                 <div className="flex bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 p-4 gap-3 justify-end">
@@ -284,8 +299,6 @@ export default function ExamPage({
       </AnimatePresence>
 
       <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-        
-        {/* ۱. اضافه شدن سایدبار جدا شده */}
         <ExamSidebar 
           fontSize={fontSize}
           setFontSize={setFontSize}
@@ -303,7 +316,6 @@ export default function ExamPage({
           handleTypeClick={handleTypeClick}
         />
 
-        {/* ۲. اضافه شدن محتوای سوالات جدا شده */}
         <ExamContent 
           fontSize={fontSize}
           q={q}
@@ -318,7 +330,6 @@ export default function ExamPage({
           setIsJumpModalOpen={setIsJumpModalOpen}
           commentsRef={commentsRef}
         />
-        
       </div>
     </div>
   );

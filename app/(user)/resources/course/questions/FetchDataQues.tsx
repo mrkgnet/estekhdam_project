@@ -1,6 +1,7 @@
 import { fetchDataQues } from '@/actions/user/resources/course/DataQues/Actions'
 import React from 'react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { FileQuestion, Home } from 'lucide-react'
 import ExamPage from './ShowDataQues'
 
@@ -14,14 +15,17 @@ export default async function FetchDataQues({
   pid: string
   pname?: string
   currentStep: number
-  chapterId?: string,
+  chapterId?: string
   questionType?: string
 }) {
+  const response = await fetchDataQues(pid, currentStep, chapterId, questionType)
 
-  // واکشی داده‌های اولیه از سرور
-  const response = await fetchDataQues(pid, currentStep, chapterId , questionType)
+  // 🟢 اگر کاربر اشتراک نداشت و مرحله بالاتر از 5 بود، مستقیماً ریدایرکت سروری شود
+  if (response?.requiresSubscription) {
+    redirect('/plans');
+  }
 
-  if (!response?.data && !response?.success) {
+  if (!response?.data && !response?.success && !response?.requiresAuth) {
     return (
       <div className="flex flex-col max-w-5xl mx-auto items-center justify-center gap-4 text-center p-12 bg-white border border-slate-200/80 rounded shadow-sm my-6">
         <div className="p-4 bg-slate-100 rounded-full">
@@ -45,7 +49,7 @@ export default async function FetchDataQues({
 
   return (
     <ExamPage
-      initialResponse={response} // کل دیتای سرور
+      initialResponse={response}
       courseId={pid}
       currentStep={currentStep}
       chapterId={chapterId}
