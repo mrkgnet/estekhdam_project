@@ -142,14 +142,14 @@ export default function QCCShow({ stats }: { stats: PlatformStats }) {
   const counterItems: CounterItem[] = [
     {
       key: 'questions',
-      label: 'سوالات استخدامی و تالیفی',
+      label: 'سوالات استخدامی دولتی و تالیفی',
       value: stats.questions,
       icon: FileText,
       color: 'emerald',
     },
     {
       key: 'booklets',
-      label: 'دفترچه‌های آزمون',
+      label: 'دفترچه‌های آزمون‌های استخدامی',
       value: stats.booklets,
       icon: BookOpen,
       color: 'blue',
