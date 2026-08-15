@@ -67,7 +67,7 @@ export default function ExamContent({
                   onClick={() => setIsJumpModalOpen(true)}
                   className="text-xs bg-rose-400 dark:bg-rose-500 text-white hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 py-1 px-2.5 rounded-lg transition-colors border border-slate-200 dark:border-slate-600"
                 >
-                  برو به سواله ...
+                  برو به سوال...
                 </button>
               )}
             </div>
@@ -109,7 +109,7 @@ export default function ExamContent({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-white dark:bg-slate-800 rounded shadow-sm border border-slate-200/60 dark:border-slate-700/60  sm:p-8 transition-colors"
+              className="bg-white dark:bg-slate-800 rounded shadow-sm border border-slate-200/60 dark:border-slate-700/60 sm:p-8 transition-colors"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
                 <h2 dangerouslySetInnerHTML={{ __html: q.text }} className="text-slate-800 dark:text-slate-100 leading-relaxed flex-1"></h2>
@@ -188,7 +188,6 @@ export default function ExamContent({
               </AnimatePresence>
             </motion.div>
           </AnimatePresence>
-
         ) : (
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 p-10 flex flex-col items-center justify-center text-center transition-colors">
             <Filter className="w-16 h-16 text-slate-200 dark:text-slate-600 mb-4" />

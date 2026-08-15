@@ -69,12 +69,13 @@ export default function ExamPage({
     queryKey: ['exam-question', courseId, currentStep, chapterId, questionType],
     queryFn: async () => await fetchDataQues(courseId, currentStep, chapterId, questionType),
     initialData: initialResponse,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   });
 
   const dbQuestion = response?.data as DBQuestion;
   const totalCount = response?.totalCount || 0;
-  const hasActiveSubscription = response?.hasActiveSubscription || false;
+  // بررسی اشتراک هم با نام جدید و هم با نام قدیم
+  const hasActiveSubscription = Boolean(response?.hasActiveSubscription ?? response?.hasPurchased);
   const chapters = (response?.chapters || []) as Chapter[];
 
   const currentChapterId = searchParams.get("chapterId");
@@ -90,10 +91,10 @@ export default function ExamPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [targetStep, setTargetStep] = useState<number | null>(null);
 
-  // 🟢 بررسی محافظتی: اگر پاسخ سرور گفت نیاز به اشتراک هست، ریدایرکت کن
+  // ریدایرکت خودکار در صورت عدم دسترسی از سمت سرور
   useEffect(() => {
     if (response?.requiresSubscription) {
-      router.push("/plans");
+      router.replace("/plans");
     } else if (response?.requiresAuth && !isLoggedIn && !isLoading) {
       setIsAuthModalOpen(true);
     }
@@ -148,10 +149,10 @@ export default function ExamPage({
     return `${pathname}?${params.toString()}`;
   };
 
-  // 🟢 مدیریت دکمه‌های بعدی و پرش به سوال (چک کردن سوالات بعد از ۵)
   const handleNavigation = (newStep: number) => {
     if (newStep < 1 || newStep > totalCount) return;
 
+    // فقط اگر کاربر بیشتر از ۵ رفت بررسی می‌شود
     if (newStep > 5) {
       if (isLoading) return;
 
@@ -161,10 +162,10 @@ export default function ExamPage({
         return;
       }
 
-      // اگر کاربر وارد شده ولی اشتراک فعال ندارد
+      // اگر کاربر اشتراک ندارد ریدایرکت شود
       if (!hasActiveSubscription) {
         startTransition(() => {
-          router.push(`/plans`);
+          router.push("/plans");
         });
         return;
       }
@@ -232,15 +233,11 @@ export default function ExamPage({
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
     if (targetStep !== null) {
-      if (!hasActiveSubscription && targetStep > 5) {
-        startTransition(() => router.push(`/plans`));
-      } else {
-        startTransition(() => {
-          const params = new URLSearchParams(searchParams.toString());
-          params.set("step", targetStep.toString());
-          router.push(`${pathname}?${params.toString()}`);
-        });
-      }
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("step", targetStep.toString());
+        router.push(`${pathname}?${params.toString()}`);
+      });
     }
   };
 

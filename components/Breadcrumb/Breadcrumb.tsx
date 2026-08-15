@@ -41,7 +41,7 @@ export default function Breadcrumb({ items = [] }) {
       <nav className="flex mb-4 text-slate-600 dark:text-slate-400 text-xs sm:font-medium transition-colors duration-300" aria-label="Breadcrumb">
         <ol className="inline-flex items-center space-x-1 space-x-reverse md:space-x-2">
           <li className="inline-flex items-center">
-            <Link href="/" className="inline-flex items-center hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300 border border-gray-200 dark:border-slate-700 p-1 rounded-full bg-gray-100 dark:bg-slate-800">
+            <Link href="/" className="inline-flex items-center hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300 border border-gray-400 dark:border-slate-700 p-1 rounded-full bg-gray-100 dark:bg-slate-800">
               <Home className="w-3.5 h-3.5 ml-1.5 mb-0.5" />
               خانه
             </Link>

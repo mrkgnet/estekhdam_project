@@ -10,21 +10,25 @@ export async function fetchDataQues(
   questionType?: string
 ) {
   try {
-    // تبدیل قطعی step به عدد برای جلوگیری از خطای مقایسه String
     const currentStep = Number(step) || 1;
     const currentUser = await infoCurentUser();
+    const userId = currentUser?.id || (currentUser as any)?.userId;
     let hasActiveSubscription = false;
 
-    // ۱. بررسی دقیق اشتراک فعال کاربر در دیتابیس
-    if (currentUser?.id) {
+    // ۱. بررسی اشتراک فعال در دیتابیس
+    if (userId) {
       const now = new Date();
+
       const activeSub = await db.userSubscription.findFirst({
         where: {
-          userId: currentUser.id,
+          userId: String(userId),
           isActive: true,
           endDate: {
-            gt: now, // تاریخ پایان اشتراک باید حتماً بعد از الان باشد
+            gt: now, // تاریخ انقضا نگذشته باشد
           },
+        },
+        orderBy: {
+          endDate: "desc",
         },
       });
 
@@ -33,16 +37,15 @@ export async function fetchDataQues(
       }
     }
 
-    // ۲. سرفصل‌های دوره
+    // ۲. دریافت سرفصل‌ها
     const chapters = await db.chapter.findMany({
       where: { productId: id },
       orderBy: { order: "asc" },
     });
 
-    // ۳. قفل امنیتی: سوالات بعد از سوال ۵ (۶ به بعد)
+    // ۳. بررسی دسترسی از سوال ۶ به بعد (بیش از ۵ سوال رایگان)
     if (currentStep > 5) {
-      // حالت اول: کاربر اصلاً لاگین نکرده است
-      if (!currentUser) {
+      if (!userId) {
         return {
           success: false,
           requiresAuth: true,
@@ -50,25 +53,26 @@ export async function fetchDataQues(
           data: null,
           totalCount: 0,
           hasActiveSubscription: false,
+          hasPurchased: false,
           chapters,
         };
       }
 
-      // حالت دوم: کاربر لاگین کرده اما اشتراک فعال ندارد
       if (!hasActiveSubscription) {
         return {
           success: false,
           requiresSubscription: true,
-          message: "برای مشاهده سوالات ۵ به بعد، باید اشتراک فعال تهیه کنید.",
+          message: "برای مشاهده سوالات بعد از سوال ۵، نیاز به اشتراک فعال دارید.",
           data: null,
           totalCount: 0,
           hasActiveSubscription: false,
+          hasPurchased: false,
           chapters,
         };
       }
     }
 
-    // ۴. دریافت سوال از دیتابیس (فقط در صورتی که مجاز باشد)
+    // ۴. دریافت سوال
     const whereCondition = {
       productId: id,
       ...(chapterId ? { chapterId } : {}),
@@ -95,6 +99,7 @@ export async function fetchDataQues(
         data: null,
         totalCount,
         hasActiveSubscription,
+        hasPurchased: hasActiveSubscription,
       };
     }
 
@@ -103,6 +108,7 @@ export async function fetchDataQues(
       data: question,
       totalCount,
       hasActiveSubscription,
+      hasPurchased: hasActiveSubscription,
       chapters,
     };
   } catch (error) {
@@ -113,6 +119,7 @@ export async function fetchDataQues(
       data: null,
       totalCount: 0,
       hasActiveSubscription: false,
+      hasPurchased: false,
     };
   }
 }
