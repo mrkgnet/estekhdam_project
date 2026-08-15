@@ -77,9 +77,9 @@ export default function page() {
 
 
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
-                {/* <section className="mb-16">
+                <section className="mb-16">
                     <QCComponent />                
-                </section> */}
+                </section>
 
 
 

@@ -186,14 +186,43 @@ export default function TabHomePage({ initialData = [] }: TabHomePageProps) {
       `}</style>
 
       {/* Header */}
-      <div className="text-center mb-6 sm:mb-8 flex flex-col items-center gap-1.5 sm:gap-2">
-        <h1 className="text-xl sm:text-4xl font-bold sm:font-semibold text-slate-900 tracking-tight">
-          مرجع آزمون‌های استخدامی کشور
-        </h1>
-        <p className="text-xs sm:text-base text-slate-500 max-w-xl px-2">
-          دسترسی به جامع‌ترین بانک سوالات، دفترچه‌های آزمون و درسنامه‌های تفکیک‌شده
-        </p>
-      </div>
+      <div
+          className={`text-center mb-12 sm:mb-16 transition-all duration-700 my-4 `}
+        >
+          
+
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-slate-50 mb-4 tracking-tight">
+            مرجع کامل{' '}
+            <span className="relative inline-block">
+              <span className="relative z-10 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                آزمون‌های استخدامی
+              </span>
+              <svg
+                className="absolute -bottom-2 left-0 w-full"
+                viewBox="0 0 200 8"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 6C50 2 150 2 198 6"
+                  stroke="url(#gradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="gradient" x1="0" y1="0" x2="200" y2="0">
+                    <stop stopColor="#10b981" />
+                    <stop offset="1" stopColor="#0891b2" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+          </h1>
+
+          <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            بزرگ‌ترین مجموعه سوالات و منابع استخدامی کشور با به‌روزرسانی مداوم
+          </p>
+        </div>
 
       {/* Search Box Container */}
       <div className="w-full max-w-2xl mx-auto mb-8 sm:mb-10 px-1">

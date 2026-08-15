@@ -1,10 +1,14 @@
 import React from 'react'
-import QCCShow from './QCCShow'
 
-export default function QCCFetch() {
+import QCCShow from './QCCShow'
+import { getPlatformStats } from '@/actions/qcc/Actions'
+
+export default async function QCCFetch() {
+  const stats = await getPlatformStats()
+
   return (
     <div>
-     <QCCShow/>
+      <QCCShow stats={stats} />
     </div>
   )
 }
