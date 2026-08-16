@@ -15,9 +15,9 @@ export default function KpiGrid() {
   return (
     <div>
       {/* تا زمانی که دیتای FetchDataKPIC لود شود، SkeletonGrid نمایش داده می‌شود */}
-      <Suspense fallback={<SkeletonGrid />}>
+      
         <FetchDataKPIC />
-      </Suspense>
+     
     </div>
   );
 }

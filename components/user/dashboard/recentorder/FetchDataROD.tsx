@@ -1,12 +1,17 @@
-import { fetchDataROUAction } from '@/actions/user/dashboard/recentorder/Fetch/Actions'
-import React from 'react'
-import ShowDataROD from './ShowDataROD'
+import React from 'react';
+import ShowDataROD from './ShowDataROD';
+import { fetchDataROUAction } from '@/actions/user/dashboard/recentorder/Fetch/Actions';
 
-export default async function FetchDataROD() {
-    const response = await fetchDataROUAction()
+interface FetchDataRODProps {
+  page?: number;
+}
+
+export default async function FetchDataROD({ page = 1 }: FetchDataRODProps) {
+  const response = await fetchDataROUAction(page, 5);
+
   return (
     <div>
-      <ShowDataROD response = {response} />
+      <ShowDataROD response={response} />
     </div>
-  )
+  );
 }

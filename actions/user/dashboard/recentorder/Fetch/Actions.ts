@@ -1,47 +1,108 @@
-"use server" 
+"use server";
+
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export async function fetchDataROUAction() {
+export interface FetchOrdersResult {
+  success: boolean;
+  message?: string;
+  data: any[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+    pageSize: number;
+  };
+}
+
+export async function fetchDataROUAction(
+  page: number = 1,
+  pageSize: number = 5
+): Promise<FetchOrdersResult> {
   try {
     const currentUser = await infoCurentUser();
 
-    // بررسی لاگین بودن کاربر
     if (!currentUser || currentUser.role !== "user") {
       console.log("❌ Access denied: User is not logged in");
       return {
         success: false,
         message: "دسترسی غیرمجاز.",
-        data: [] 
+        data: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          pageSize,
+        },
       };
     }
 
     const userId = currentUser.userId;
+    const safePage = Math.max(1, Number(page) || 1);
+    const safePageSize = Math.max(1, Number(pageSize) || 5);
+    const skip = (safePage - 1) * safePageSize;
 
-    // دریافت لیست تمامی سفارش‌های اخیر کاربر (بدون فیلتر وضعیت خاص)
-    const recentOrders = await db.order.findMany({
+    const totalCount = await db.order.count({
+      where: {
+        userId: userId,
+      },
+    });
+
+    const orders = await db.order.findMany({
       where: {
         userId: userId,
       },
       include: {
-        product: true // برای دریافت نام دوره‌ای که خریداری شده
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            imageUrl: true,
+            type: true,
+          },
+        },
+        subscriptionPlan: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            durationDays: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc' // جدیدترین سفارش‌ها اول باشند
+        createdAt: "desc",
       },
-      take: 5 // نمایش ۵ سفارش آخر در داشبورد
+      skip: skip,
+      take: safePageSize,
     });
 
-    return { 
-      success: true, 
-      data: recentOrders 
-    };
+    const calculatedTotalPages = Math.ceil(totalCount / safePageSize);
+    const totalPages = calculatedTotalPages === 0 ? 1 : calculatedTotalPages;
 
+    return {
+      success: true,
+      data: orders,
+      pagination: {
+        currentPage: safePage,
+        totalPages: totalPages,
+        totalCount,
+        pageSize: safePageSize,
+      },
+    };
   } catch (error) {
     console.error("Error fetching user orders:", error);
-    return { 
-      success: false, 
-      data: [] 
+    return {
+      success: false,
+      message: "خطا در دریافت اطلاعات سفارش‌ها",
+      data: [],
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        pageSize,
+      },
     };
   }
 }

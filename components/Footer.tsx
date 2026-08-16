@@ -100,7 +100,7 @@ export default function Footer() {
               <ul className="grid grid-cols-1 gap-2.5 text-sm text-slate-200">
                 <li>
                   <Link href="/resources/free-resources" className="hover:text-emerald-400 transition flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5" /> نمونه سوالات رایگان
+                    <BookOpen className="h-3.5 w-3.5" /> نمونه سوالات رایگان
                   </Link>
                 </li>
                 <li>
