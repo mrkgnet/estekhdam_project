@@ -39,14 +39,12 @@ function formatToman(amount?: number | null) {
 
 function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
   return (
-    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
       <SafeImage
-        src={src ?? ''} // اگر src وجود نداشت یک رشته خالی بفرستید تا getSafeImageUrl آن را مدیریت کند
+        src={src ?? ''}
         alt={alt}
         fill
         className="object-contain p-2"
-      // اگر می‌خواهید برای لوگوها عکس جایگزین متفاوتی داشته باشید:
-      // onError={(e) => { e.currentTarget.src = '/images/default-logo.png'; }}
       />
     </div>
   );
@@ -54,14 +52,14 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
 
 function InfoChip({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl   bg-slate-50/80 hover:bg-slate-100 transition-colors duration-300 px-3 py-2 border border-slate-100/50">
-      <div className="flex items-center gap-2  text-slate-500">
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-700 shadow-sm">
+    <div className="rounded-lg bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300 px-3 py-2 border-2 border-slate-300 dark:border-slate-700">
+      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-sm">
           {icon}
         </span>
-        <span>{label}</span>
+        <span className="text-xs">{label}</span>
       </div>
-      <p className="mt-1  text-slate-900 font-medium">{value}</p>
+      <p className="mt-1 text-slate-900 dark:text-slate-100 font-medium text-sm">{value}</p>
     </div>
   );
 }
@@ -73,7 +71,6 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // 🟢 اصلاح ۱: برای جلوگیری از رندر مجدد useMemo، به جای آرایه، استرینگ را می‌گیریم
   const regionsQuery = searchParams.get("regions") || "";
   const statusesQuery = searchParams.get("statuses") || "";
   const filtered = useMemo(() => {
@@ -93,20 +90,17 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
 
       return okRegion && okStatus;
     });
-  }, [news, regionsQuery, statusesQuery]); // اینجا فقط به استرینگ وابسته هستیم نه یک آرایه جدید در هر رندر
+  }, [news, regionsQuery, statusesQuery]);
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
 
-  // 🟢 اصلاح ۲: حل مشکل لوپ بی‌نهایت
   useEffect(() => {
     const currentQueryFromUrl = searchParams.get("query") || "";
 
-    // 🔥 ترمز (Circuit Breaker): 
-    // اگر کلمه‌ای که تایپ شده دقیقا همانی است که الان در URL وجود دارد، کاری نکن و خارج شو!
     if (searchTerm === currentQueryFromUrl) return;
 
     const delayDebounceFn = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString()); // حتما toString() بگذارید
+      const params = new URLSearchParams(searchParams.toString());
 
       if (searchTerm) {
         params.set("query", searchTerm);
@@ -114,85 +108,76 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
         params.delete("query");
       }
 
-      // چون مطمئنیم کوئری تغییر کرده، پس صفحه را ۱ میکنیم
       params.set("page", "1");
 
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, pathname, router, searchParams]); // حالا وجود searchParams بی‌خطر است
-
+  }, [searchTerm, pathname, router, searchParams]);
 
   if (!initialNews.success && news.length === 0) {
     return (
-      <div className="p-8 mt-10 text-center bg-white rounded border border-slate-200 shadow-sm max-w-2xl mx-auto">
-        <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-          <CalendarRange className="h-8 w-8 text-slate-400" />
+      <div className="p-8 mt-10 text-center bg-white dark:bg-slate-900 rounded-lg border-2 border-slate-300 dark:border-slate-700 shadow-sm max-w-2xl mx-auto">
+        <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 border-2 border-slate-300 dark:border-slate-700">
+          <CalendarRange className="h-8 w-8 text-slate-400 dark:text-slate-500" />
         </div>
-        <p className="text-slate-600 font-medium">{initialNews.message || "اطلاعاتی یافت نشد"}</p>
-        <button onClick={() => router.push(pathname)} className="mt-4 text-emerald-600 hover:text-emerald-700  ">
+        <p className="text-slate-600 dark:text-slate-400 font-medium">{initialNews.message || "اطلاعاتی یافت نشد"}</p>
+        <button onClick={() => router.push(pathname)} className="mt-4 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
           پاک کردن فیلترها و بازگشت
         </button>
       </div>
     )
   }
 
-
-
   return (
-    <div className="w-full max-w-7xl mx-auto  sm:px-6  mt-4">
-      <div className="grid grid-cols-12 gap-4 p-4 md:p-2 ">
+    <div className="w-full max-w-7xl mx-auto sm:px-6 mt-4">
+      <div className="grid grid-cols-12 gap-4 p-4 md:p-2">
         <div className="col-span-12 lg:col-span-3">
           <FiltersSidebar />
         </div>
-        {/* سمت چپ  */}
+        
+        {/* سمت چپ */}
         <div className="col-span-12 lg:col-span-9">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 mb-5 rounded shadow-sm">
-            {/* بخش تعداد نتایج (در موبایل میره دوم) */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 p-4 mb-5 rounded-lg shadow-sm">
+            {/* بخش تعداد نتایج */}
             <div className="w-full md:w-auto text-right order-1 md:order-1">
-              <p className="text-slate-600   flex items-center gap-1.5">
+              <p className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                 تعداد نتایج:
-                <span className="text-emerald-600 font-black ">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                   {filtered.length.toLocaleString("fa-IR")}
                 </span>
                 آگهی
               </p>
             </div>
-
           </div>
-
 
           <div className="space-y-5">
             {filtered.map((x) => {
               return (
-
-
-                <div key={x.id} className="group rounded-xl border border-slate-200 bg-white p-5 hover:shadow-xl hover:border-emerald-100 transition-all duration-500">
+                <div key={x.id} className="group rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-600 transition-all duration-500">
                   <Link
                     href={`/jobnews/government/${x.slugNews}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
-
                       <div className="flex items-start gap-4">
                         <BrandLogo src={x.imageUrl} alt={x.organization ?? x.title} />
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="font-bold  text-base leading-tight group-hover:text-emerald-700 transition-colors">
+                            <h2 className="font-medium text-base leading-tight text-slate-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                               {x.title}
                             </h2>
                             <StatusBadge status={x.status || 'NEWS'} />
                           </div>
 
-                          <p className="text-slate-500 flex flex-wrap items-center gap-2 mt-1">
-                            {x.organization && <span className=" ">{x.organization}</span>}
-                            {x.organization && <span className="text-slate-300">•</span>}
+                          <p className="text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2 mt-1 text-sm">
+                            {x.organization && <span>{x.organization}</span>}
+                            {x.organization && <span className="text-slate-300 dark:text-slate-600">•</span>}
 
-                            <span className="inline-flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
-                              <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+                            <span className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-md border-2 border-slate-300 dark:border-slate-700">
+                              <MapPin className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                               {x.cities && x.cities.length > 0 ? x.cities.join("، ") : "سراسر کشور"}
                             </span>
                           </p>
@@ -212,9 +197,9 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                     </div>
 
                     {x.jobs?.length > 0 && (
-                      <div className="mt-5 flex flex-wrap gap-2 pt-5 border-t border-slate-100/80">
+                      <div className="mt-5 flex flex-wrap gap-2 pt-5 border-t-2 border-slate-200 dark:border-slate-800">
                         {x.jobs.map((t: string, i: number) => (
-                          <span key={i} className="rounded bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 font-medium text-slate-600 transition-colors cursor-default">
+                          <span key={i} className="rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-2 border-slate-300 dark:border-slate-700 px-3 py-1.5 font-medium text-slate-600 dark:text-slate-300 text-xs transition-colors cursor-default">
                             {t}
                           </span>
                         ))}
@@ -222,29 +207,24 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                     )}
 
                     <div className="mt-5 flex justify-end">
-
-                      <button className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3  bg-emerald-600 hover:bg-emerald-500 shadow-md hover:shadow-lg shadow-emerald-600/20 text-white transition-all duration-300 w-full sm:w-auto transform hover:-translate-y-0.5">
+                      <button className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-600 hover:border-emerald-500 shadow-md hover:shadow-lg shadow-emerald-600/20 text-white font-medium transition-all duration-300 w-full sm:w-auto transform hover:-translate-y-0.5">
                         <ExternalLink className="h-4 w-4" />
                         مشاهده جزئیات و ثبت‌نام
                       </button>
                     </div>
                   </Link>
                 </div>
-
               );
             })}
 
             {filtered.length === 0 && (
-              <div className="text-center py-16 bg-slate-50 rounded border-2 border-dashed border-slate-200">
-                <div className="mx-auto w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                  <MapPin className="h-8 w-8 text-slate-300" />
+              <div className="text-center py-16 bg-slate-50 dark:bg-slate-900/50 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700">
+                <div className="mx-auto w-16 h-16 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center mb-4 shadow-sm border-2 border-slate-300 dark:border-slate-700">
+                  <MapPin className="h-8 w-8 text-slate-300 dark:text-slate-500" />
                 </div>
-                <p className="text-slate-500 font-medium ">آگهی استخدامی با این فیلترها یافت نشد.</p>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">آگهی استخدامی با این فیلترها یافت نشد.</p>
               </div>
             )}
-
-
-
           </div>
 
           {totalPages > 1 && (
@@ -252,7 +232,6 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
               <Pagination totalPages={totalPages} currentPage={currentPage} />
             </div>
           )}
-
         </div>
       </div>
     </div>

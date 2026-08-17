@@ -32,7 +32,7 @@ export default async function page({
       {/* 🟢 هدر یکپارچه مشابه صفحه منابع */}
       <PageHeader
         title="اخبار استخدامی دولتی"
-        subtitle="جدیدترین اخبار و اطلاعیه‌های استخدامی سازمان‌های دولتی"
+       
         breadcrumbItems={breadcrumbItems}
       >
         <SearchInPage />

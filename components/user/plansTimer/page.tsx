@@ -10,7 +10,7 @@ export default function PlansOffer() {
   const staticData = {
     text: "استفاده از تمامی خدمات سایت با خرید اشتراک با تخفیف",
     endAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    buttonText: "خرید/تمدیداشتراک با تخفیف",
+    buttonText: "خرید/تمدید اشتراک با تخفیف",
     link: "/plans",
   };
 
