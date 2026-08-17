@@ -1,10 +1,7 @@
 'use client';
 
-// ۱. هوک useActionState را از react ایمپورت کنید
 import React, { useActionState } from 'react';
-// ۲. فقط useFormStatus از react-dom ایمپورت می‌شود
 import { useFormStatus } from 'react-dom';
-
 import { User, Mail, Phone, Fingerprint, Save, Camera, Loader2, Home, ChevronLeft } from 'lucide-react';
 import { updateProfileAction } from '@/actions/user/dashboard/profile/update/Actions';
 import Link from 'next/link';
@@ -27,120 +24,126 @@ function SubmitButton() {
         <button
             type="submit"
             disabled={pending}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-md border-2 border-blue-600 hover:bg-blue-700 hover:border-blue-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
         >
-            {pending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            <span>{pending ? 'در حال ذخیره...' : 'ذخیره اطلاعات'}</span>
+            {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span className="text-sm font-medium">{pending ? 'در حال ذخیره...' : 'ذخیره اطلاعات'}</span>
         </button>
     );
 }
 
 export default function ShowDataPU({ user }: { user: UserData }) {
-    // ۳. تغییر نام useFormState به useActionState
     const [state, formAction] = useActionState(updateProfileAction, null);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border-2 border-slate-300 dark:border-slate-700 overflow-hidden">
             {/* بردکرامب (Breadcrumb) */}
-            <nav className="flex items-center gap-1.5 text-sm text-gray-500 p-3.5">
+            <nav className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 p-3.5 border-b-2 border-slate-200 dark:border-slate-800">
                 <Link
                     href="/ddashboard"
-                    className="flex items-center hover:text-blue-600 transition-colors"
+                    className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
-                    <Home size={16} className="ml-1" />
+                    <Home size={14} className="ml-1" />
                     داشبورد
                 </Link>
-                <ChevronLeft size={16} className="text-gray-400" />
-                <span className="text-gray-800 font-semibold">پروفایل کاربری</span>
+                <ChevronLeft size={14} className="text-slate-400" />
+                <span className="text-slate-800 dark:text-slate-200 font-medium">پروفایل کاربری</span>
             </nav>
+
             {/* هدر آواتار */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-100 flex items-center gap-6">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/50 px-6 md:px-8 py-5 border-b-2 border-slate-200 dark:border-slate-800 flex items-center gap-5">
                 <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
-                        <User className="w-12 h-12 text-gray-300" />
+                    <div className="w-20 h-20 rounded-md bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 shadow-sm flex items-center justify-center overflow-hidden">
+                        <User className="w-10 h-10 text-slate-300 dark:text-slate-600" />
                     </div>
-                    <button className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full text-white shadow-sm hover:bg-blue-700 transition-colors">
-                        <Camera className="w-4 h-4" />
+                    <button className="absolute bottom-0 right-0 bg-blue-600 p-1.5 rounded-md text-white shadow-sm hover:bg-blue-700 transition-colors border-2 border-white dark:border-slate-800">
+                        <Camera className="w-3.5 h-3.5" />
                     </button>
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800">
+                    <h2 className="text-base font-medium text-slate-800 dark:text-slate-100">
                         {user.firstName || user.lastName ? `${user.firstName || ''} ${user.lastName || ''}` : 'کاربر عزیز'}
                     </h2>
-                    <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full mt-2 inline-block">
+                    <span className="text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/50 border-2 border-blue-300 dark:border-blue-800 px-2.5 py-0.5 rounded-md mt-2 inline-block">
                         کاربر عادی
                     </span>
                 </div>
             </div>
 
             {/* فرم متصل به Server Action */}
-            <form action={formAction} className="p-8">
+            <form action={formAction} className="p-5 md:p-8">
 
                 {/* نمایش پیام سرور */}
                 {state?.message && (
-                    <div className={`p-4 rounded-lg mb-6 text-sm flex items-center gap-2 ${state.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
+                    <div className={`p-3.5 rounded-md mb-5 text-xs flex items-center gap-2 border-2 ${
+                        state.type === 'success' 
+                            ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800' 
+                            : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-800'
+                    }`}>
                         {state.message}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
 
-                    <div className="space-y-2">
-
-                        <label className="text-sm font-medium text-gray-700">نام</label>
+                    {/* نام */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">نام</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <User className="h-5 w-5 text-gray-400" />
+                                <User className="h-4 w-4 text-slate-400" />
                             </div>
                             <input
                                 type="text"
                                 name="firstName"
                                 defaultValue={user.firstName || ''}
                                 placeholder="مثال: علی"
-                                className="block w-full pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                className="block w-full pr-10 pl-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">نام خانوادگی</label>
+                    {/* نام خانوادگی */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">نام خانوادگی</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <User className="h-5 w-5 text-gray-400" />
+                                <User className="h-4 w-4 text-slate-400" />
                             </div>
                             <input
                                 type="text"
                                 name="lastName"
                                 defaultValue={user.lastName || ''}
                                 placeholder="مثال: محمدی"
-                                className="block w-full pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                className="block w-full pr-10 pl-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">شماره موبایل</label>
+                    {/* شماره موبایل */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">شماره موبایل</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <Phone className="h-5 w-5 text-gray-400" />
+                                <Phone className="h-4 w-4 text-slate-400" />
                             </div>
                             <input
                                 type="text"
                                 value={user.phoneNumber || ''}
                                 disabled
                                 dir="ltr"
-                                className="block w-full text-right pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-100 text-gray-500 text-sm cursor-not-allowed outline-none"
+                                className="block w-full text-right pr-10 pl-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-500 text-sm cursor-not-allowed outline-none font-mono"
                             />
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">شماره موبایل غیرقابل تغییر است.</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">شماره موبایل غیرقابل تغییر است.</p>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">کد ملی</label>
+                    {/* کد ملی */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">کد ملی</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <Fingerprint className="h-5 w-5 text-gray-400" />
+                                <Fingerprint className="h-4 w-4 text-slate-400" />
                             </div>
                             <input
                                 type="text"
@@ -149,16 +152,17 @@ export default function ShowDataPU({ user }: { user: UserData }) {
                                 placeholder="0123456789"
                                 dir="ltr"
                                 maxLength={10}
-                                className="block w-full text-right pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                className="block w-full text-right pr-10 pl-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 font-mono"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">ایمیل</label>
+                    {/* ایمیل */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">ایمیل</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <Mail className="h-5 w-5 text-gray-400" />
+                                <Mail className="h-4 w-4 text-slate-400" />
                             </div>
                             <input
                                 type="email"
@@ -166,17 +170,18 @@ export default function ShowDataPU({ user }: { user: UserData }) {
                                 defaultValue={user.email || ''}
                                 placeholder="example@mail.com"
                                 dir="ltr"
-                                className="block w-full text-right pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                className="block w-full text-right pr-10 pl-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all outline-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 font-mono"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">جنسیت</label>
+                    {/* جنسیت */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">جنسیت</label>
                         <select
                             name="gender"
                             defaultValue={user.gender || 'UNKNOWN'}
-                            className="block w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all outline-none appearance-none"
+                            className="block w-full px-3 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-900 transition-all outline-none appearance-none text-slate-800 dark:text-slate-200 cursor-pointer"
                         >
                             <option value="UNKNOWN">انتخاب نشده</option>
                             <option value="MALE">مرد</option>
@@ -185,7 +190,7 @@ export default function ShowDataPU({ user }: { user: UserData }) {
                     </div>
                 </div>
 
-                <div className="mt-8 flex justify-end pt-6 border-t border-gray-100">
+                <div className="mt-6 flex justify-end pt-5 border-t-2 border-slate-200 dark:border-slate-800">
                     <SubmitButton />
                 </div>
 

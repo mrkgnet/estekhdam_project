@@ -1,21 +1,23 @@
-import React, { Suspense } from 'react';
-import FetchTiketDU from './FetchTiketDU';
-import { SkeletonUserTicketsLoader } from '@/components/ui/SkeletonLoding/SkeletonUserTicketsLoader';
+import React, { Suspense } from "react";
+import FetchTiketDU from "./FetchTiketDU";
+import { SkeletonUserTicketsLoader } from "@/components/ui/SkeletonLoding/SkeletonUserTicketsLoader";
 
-// ۱. تعریف کامپوننت اسکلتون منطبق با ساختار TicketsListPage
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
 
+export default async function Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
+  const currentPage = Number(resolvedSearchParams?.page) || 1;
 
-// ۲. کامپوننت اصلی صفحه
-export default function page() {
   return (
     <div className="w-full">
       {/* 
-        استفاده از Suspense
-        تا زمان واکشی دیتای تیکت‌ها توسط FetchTiketDU، 
-        اسکلتون بالا نمایش داده می‌شود و تجربه کاربری نرمی (بدون پرش) ایجاد می‌کند.
+        حذف key باعث می‌شود هنگام تغییر صفحه، Suspense کل صفحه را به اسکلتون تبدیل نکند
+        و اجازه دهد useTransition لودینگ محلی را مدیریت کند.
       */}
       <Suspense fallback={<SkeletonUserTicketsLoader />}>
-        <FetchTiketDU />
+        <FetchTiketDU page={currentPage} />
       </Suspense>
     </div>
   );

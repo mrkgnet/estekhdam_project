@@ -47,7 +47,7 @@ export default function Footer() {
     <>
       <ScrollToTop />
       
-      <footer dir="rtl" className="relative w-full bg-[#3A4D56] text-white font-sans mt-12">
+      <footer dir="rtl" className="relative w-full bg-[#3A4D56] text-white font-sans mt-12 mt-4">
         
         {/* موج بالای فوتر */}
         <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform -translate-y-[99%]">

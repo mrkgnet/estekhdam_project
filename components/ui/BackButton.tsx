@@ -21,7 +21,7 @@ export default function BackButton() {
         hover: { scale: 1.02 },
         tap: { scale: 0.96 }
       }}
-      className="group text-gray-800 flex items-center cursor-pointer gap-2.5 px-5 py-2  bg-white border border-slate-400 rounded shadow-sm text-sm font-medium text-gray-600 transition-all hover:text-gray-900 hover:shadow-md hover:border-gray-300 hover:bg-gray-50 focus:outline-none"
+      className="group text-gray-800 flex items-center cursor-pointer gap-2.5 px-5 py-2  bg-white border border-red-800 rounded shadow-sm text-sm font-medium text-gray-600 transition-all hover:text-gray-900 hover:shadow-md hover:border-gray-300 hover:bg-gray-50 focus:outline-none"
     >
       <motion.div
         // انیمیشن اختصاصی برای آیکون (حرکت به سمت راست هنگام هاور)

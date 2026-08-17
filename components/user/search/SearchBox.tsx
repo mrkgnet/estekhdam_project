@@ -86,8 +86,8 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setIsSearchOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-          className={`w-full h-12 rounded border bg-gray-50 pr-11 pl-10 text-sm outline-none transition-all duration-200 placeholder:text-gray-400 ${
+          placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید ..."
+          className={`w-full h-12 rounded border border-slate-400 bg-gray-50 pr-11 pl-10 text-sm outline-none transition-all duration-200 placeholder:text-gray-400 ${
             isSearchOpen
               ? "bg-white border-green-500 ring-4 ring-green-50 shadow-sm"
               : "border-gray-300 hover:border-gray-400 focus:bg-white"
