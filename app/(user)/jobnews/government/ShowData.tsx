@@ -166,7 +166,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                         <BrandLogo src={x.imageUrl} alt={x.organization ?? x.title} />
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="font-medium text-base leading-tight text-slate-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                            <h2 className="font-bold text-base leading-tight text-slate-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                               {x.title}
                             </h2>
                             <StatusBadge status={x.status || 'NEWS'} />

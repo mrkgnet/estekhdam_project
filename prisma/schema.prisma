@@ -33,6 +33,14 @@ enum NewsStatus {
   NEWS
 }
 
+enum NewsStatusBannerTop {
+  REGISTRATION
+  REGISTRATION_RENEWAL
+  CARD_RECEIVED
+  RESULTS_ANNOUNCED
+}
+
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS

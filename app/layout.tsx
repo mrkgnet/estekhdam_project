@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import Providers from "@/components/react-query/Providers";
 import { LoadingProvider } from "@/providers/loading-provider";
 import TopBanner from "@/components/topBanner/TopBanner";
+import FetchDataTopBanner from "@/components/topBanner/FetchDataTopBanner";
 
 // ایمپورت کردن کامپوننت بنر
 
@@ -59,7 +60,7 @@ export default function RootLayout({
             <div className="min-h-screen flex flex-col">
               
               {/* قرار دادن بنر در بالاترین قسمت صفحه */}
-              <TopBanner />
+              <FetchDataTopBanner />
 
               <LoadingProvider>
                 <main className="bg-white flex-1 dark:bg-slate-900">{children}</main>

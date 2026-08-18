@@ -58,22 +58,34 @@ const StatusBadge = ({ status }: { status: NewsStatus }) => {
   const config = {
     OPEN: {
       text: "در حال ثبت‌نام",
-      color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", dot: "bg-emerald-500",
+      color: "text-emerald-700 dark:text-emerald-400", 
+      bg: "bg-emerald-100 dark:bg-emerald-950/50", 
+      border: "border-2 border-emerald-400 dark:border-emerald-700", 
+      dot: "bg-emerald-500",
       animate: true
     },
     CARD_RECEIVED: {
       text: "دریافت کارت",
-      color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200", dot: "bg-blue-500",
+      color: "text-blue-700 dark:text-blue-400", 
+      bg: "bg-blue-100 dark:bg-blue-950/50", 
+      border: "border-2 border-blue-400 dark:border-blue-700", 
+      dot: "bg-blue-500",
       animate: true
     },
     RESULTS_ANNOUNCED: {
       text: "اعلام نتایج",
-      color: "text-fuchsia-700", bg: "bg-fuchsia-50", border: "border-fuchsia-200", dot: "bg-fuchsia-500",
+      color: "text-fuchsia-700 dark:text-fuchsia-400", 
+      bg: "bg-fuchsia-100 dark:bg-fuchsia-950/50", 
+      border: "border-2 border-fuchsia-400 dark:border-fuchsia-700", 
+      dot: "bg-fuchsia-500",
       animate: false
     },
     NEWS: {
       text: "فقط خبر",
-      color: "text-slate-600", bg: "bg-slate-100", border: "border-slate-200", dot: "bg-slate-400",
+      color: "text-slate-700 dark:text-slate-300", 
+      bg: "bg-slate-200 dark:bg-slate-800", 
+      border: "border-2 border-slate-400 dark:border-slate-600", 
+      dot: "bg-slate-500",
       animate: false
     },
   };
@@ -81,14 +93,14 @@ const StatusBadge = ({ status }: { status: NewsStatus }) => {
   const current = config[status] || config.NEWS;
 
   return (
-    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border ${current.bg} ${current.border} shadow-sm`}>
+    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md ${current.bg} ${current.border} shadow-sm`}>
       <span className="relative flex h-2.5 w-2.5">
         {current.animate && (
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${current.dot}`}></span>
         )}
         <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${current.dot}`}></span>
       </span>
-      <span className={`text-[11px] font-bold tracking-wide ${current.color}`}>
+      <span className={`text-[11px] font-medium tracking-wide ${current.color}`}>
         {current.text}
       </span>
     </div>
@@ -128,12 +140,12 @@ function formatToman(amount?: number) {
 
 function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-4 hover:bg-slate-50 transition-colors">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
+    <div className="rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
         {icon}
         {label}
       </div>
-      <p className="mt-2 font-medium text-slate-900">{value}</p>
+      <p className="mt-2 font-medium text-slate-900 dark:text-slate-100 text-sm">{value}</p>
     </div>
   );
 }
@@ -162,40 +174,51 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
   ];
 
   return (
-    // 🟢 اصلاح ۱: اضافه شدن w-full
     <div className="w-full mx-auto max-w-6xl px-4 md:px-6 lg:px-8 overflow-x-hidden">
       <div>
         <div className="mt-4">
           <Breadcrumb items={breadcrumbItems} />
         </div>
 
-        <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
+        {/* کارت اصلی آگهی */}
+        <div className="rounded-lg bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 shadow-sm p-5 md:p-6">
           <div className="flex justify-between gap-6 flex-wrap">
             <div className="flex gap-5">
-              <div className="relative h-16 w-16 rounded-2xl overflow-hidden border shadow-sm shrink-0">
+              <div className="relative h-16 w-16 rounded-lg overflow-hidden border-2 border-slate-300 dark:border-slate-700 shadow-sm shrink-0 bg-white dark:bg-slate-800">
                 {item.imageUrl && (
                   <Image src={item.imageUrl} alt={item.title} fill className="object-cover p-1" />
                 )}
               </div>
               <div className="flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="font-extrabold text-slate-800">
+                  <h1 className="font-medium text-slate-800 dark:text-slate-100 text-base md:text-lg">
                     {item.title}
                   </h1>
                   <StatusBadge status={item.status || 'NEWS'} />
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-slate-600">
+                <div className="flex flex-wrap gap-4 text-slate-600 dark:text-slate-400 text-sm">
                   {item.organization && (
-                    <span className="flex items-center gap-1.5 font-medium"><ShieldCheck className="w-4 h-4 text-emerald-600" />{item.organization}</span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      {item.organization}
+                    </span>
                   )}
-                  <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-600" />{item.cities?.join("، ") || "سراسری"}</span>
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    {item.cities?.join("، ") || "سراسری"}
+                  </span>
                 </div>
 
                 {item.jobs?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-1">
                     {item.jobs.map((job) => (
-                      <span key={job} className="px-3 py-1 text-xs rounded-full bg-slate-100/80 border border-slate-200/50 text-slate-600">{job}</span>
+                      <span 
+                        key={job} 
+                        className="px-3 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium"
+                      >
+                        {job}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -208,6 +231,7 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
           </div>
         </div>
 
+        {/* کارت‌های اطلاعات */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
           <InfoCard icon={<CalendarRange className="w-4 h-4" />} label="شروع ثبت نام" value={formatFaDate(item.startAt)} />
           <InfoCard icon={<CalendarRange className="w-4 h-4" />} label="پایان ثبت نام" value={formatFaDate(item.endAt)} />
@@ -217,59 +241,101 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
 
         <div className="grid grid-cols-12 gap-5 mt-6">
           <div className="col-span-12 lg:col-span-8 space-y-4">
-            {/* 🟢 اصلاح ۲: اضافه شدن flex-wrap و sm:flex-nowrap */}
-            <div className="bg-white border border-slate-200 rounded-3xl p-3 flex flex-wrap sm:flex-nowrap gap-2">
-              <button onClick={() => setTab("desc")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "desc" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>توضیحات</button>
-              <button onClick={() => setTab("jobs")} className={`w-full lg:w-auto px-4 py-2.5 rounded-xl font-medium transition-colors ${tab === "jobs" ? "bg-slate-900 text-white shadow-md" : "hover:bg-slate-100"}`}>رشته‌های شغلی</button>
+            {/* دکمه‌های تب */}
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-2 flex flex-wrap sm:flex-nowrap gap-2">
+              <button 
+                onClick={() => setTab("desc")} 
+                className={`w-full lg:w-auto px-4 py-2.5 rounded-md font-medium transition-colors text-sm ${
+                  tab === "desc" 
+                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md" 
+                    : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
+              >
+                توضیحات
+              </button>
+              <button 
+                onClick={() => setTab("jobs")} 
+                className={`w-full lg:w-auto px-4 py-2.5 rounded-md font-medium transition-colors text-sm ${
+                  tab === "jobs" 
+                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md" 
+                    : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
+              >
+                رشته‌های شغلی
+              </button>
             </div>
 
             {tab === "desc" && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
-                <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><Info className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">توضیحات آزمون</h2></div>
-                {/* 🟢 اصلاح ۳: اضافه شدن overflow-x-auto و break-words */}
-                <div className="leading-8 text-slate-700 prose prose-sm max-w-none overflow-x-auto break-words">
-
-
-
+              <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-5 md:p-6 min-h-[200px]">
+                <div className="flex gap-2.5 mb-4 items-center border-b-2 border-slate-200 dark:border-slate-800 pb-3">
+                  <Info className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                  <h2 className="font-medium text-slate-800 dark:text-slate-100">توضیحات آزمون</h2>
+                </div>
+                <div className="leading-8 text-slate-700 dark:text-slate-300 prose prose-sm max-w-none overflow-x-auto break-words">
                   {item?.description ? (
                     <div
-                      className="prose max-w-none prose-slate"
+                      className="prose max-w-none prose-slate dark:prose-invert"
                       dangerouslySetInnerHTML={{ __html: item.description }}
                     />
                   ) : (
-                    <span className="text-slate-400 italic">
+                    <span className="text-slate-400 dark:text-slate-500 italic">
                       توضیحاتی برای این آزمون ثبت نشده است.
                     </span>
                   )}
-
-
                 </div>
               </div>
             )}
 
             {tab === "jobs" && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 min-h-[200px]">
-                <div className="flex gap-2.5 mb-4 items-center border-b pb-3"><BookOpen className="w-5 h-5 text-slate-400" /><h2 className="font-bold text-slate-800">مشاغل مورد نیاز</h2></div>
-                <div className="flex flex-wrap gap-2">{item.jobs.map((job) => (<span key={job} className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-medium text-slate-700">{job}</span>))}</div>
+              <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-5 md:p-6 min-h-[200px]">
+                <div className="flex gap-2.5 mb-4 items-center border-b-2 border-slate-200 dark:border-slate-800 pb-3">
+                  <BookOpen className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                  <h2 className="font-medium text-slate-800 dark:text-slate-100">مشاغل مورد نیاز</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {item.jobs.map((job) => (
+                    <span 
+                      key={job} 
+                      className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-md font-medium text-slate-700 dark:text-slate-300 text-sm"
+                    >
+                      {job}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
           <div className="col-span-12 lg:col-span-4">
             <div className="sticky top-5 space-y-4">
-              <div className="bg-white border border-slate-200 rounded-3xl p-4">
+              {/* کارت ثبت نام */}
+              <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4">
                 {item.registerUrl ? (
-                  <Link target="_blank" rel="noopener noreferrer" href={item.registerUrl.toString()} className="w-full block text-white bg-emerald-600 py-3 rounded-xl text-center font-bold hover:bg-emerald-500 shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 duration-300">
+                  <Link 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    href={item.registerUrl.toString()} 
+                    className="w-full block text-white bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-600 hover:border-emerald-500 py-3 rounded-lg text-center font-medium shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 duration-300"
+                  >
                     ثبت نام در آزمون
                   </Link>
                 ) : (
-                  <div className="w-full bg-gray-200 text-gray-600 py-3 rounded-xl text-center">لینک ثبت‌نام موجود نیست</div>
+                  <div className="w-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 py-3 rounded-lg text-center border-2 border-slate-300 dark:border-slate-700 font-medium">
+                    لینک ثبت‌نام موجود نیست
+                  </div>
                 )}
               </div>
+
+              {/* کارت محدودیت سنی */}
               {item.maxAge && (
-                <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
-                  <div className="flex items-center gap-2.5 text-amber-800 font-bold"><AlarmClock className="w-5 h-5" />محدودیت سنی</div>
-                  <p className="mt-2 text-amber-900">حداکثر سن مجاز برای ثبت‌نام <span className="font-black">{item.maxAge}</span> سال می‌باشد.</p>
+                <div className="rounded-lg border-2 border-amber-400 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/50 p-5">
+                  <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-400 font-medium">
+                    <AlarmClock className="w-5 h-5" />
+                    محدودیت سنی
+                  </div>
+                  <p className="mt-2 text-amber-900 dark:text-amber-300 text-sm">
+                    حداکثر سن مجاز برای ثبت‌نام <span className="font-bold">{item.maxAge}</span> سال می‌باشد.
+                  </p>
                 </div>
               )}
             </div>
@@ -288,9 +354,7 @@ export default function ShowData({ initialNews }: { initialNews: News }) {
           )}
         </div>
 
-       
         <CommentManagment targetId={item.id} targetType="governmentNews" />
-
       </div>
     </div>
   );

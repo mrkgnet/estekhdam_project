@@ -1,4 +1,4 @@
-import { getAllBanners } from "@/actions/admin/topBanner/fetch/Actions";
+import { getAllBanners } from "@/actions/admin/topBanner/Actions";
 import ShowDataTopBannerPage from "./showData";
 
 export default async function TopBannerPage() {
