@@ -10,7 +10,7 @@ interface SearchInPageProps {
 }
 
 export default function SearchInPage({
-  placeholder = "جستجوی نام محصول، دوره و...",
+  placeholder = "جست و جو کنید ...",
   className = "",
 }: SearchInPageProps) {
   const router = useRouter();

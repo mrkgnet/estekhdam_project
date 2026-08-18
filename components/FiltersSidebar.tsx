@@ -473,7 +473,7 @@ export default function FiltersSidebar() {
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="flex items-center justify-center gap-2 w-full rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all"
+          className="flex items-center justify-center gap-2 w-full rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 text-base font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all"
         >
           <Filter className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           فیلترها

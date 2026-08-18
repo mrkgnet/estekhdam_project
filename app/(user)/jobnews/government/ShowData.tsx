@@ -155,7 +155,7 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
           <div className="space-y-5">
             {filtered.map((x) => {
               return (
-                <div key={x.id} className="group rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-600 transition-all duration-500">
+                <div key={x.id} className="group rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-600 transition-all duration-500">
                   <Link
                     href={`/jobnews/government/${x.slugNews}`}
                     target="_blank"
@@ -189,15 +189,15 @@ export default function ShowData({ initialNews, currentPage, totalPages }: ShowD
                       </div>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="mt-6 grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       <InfoChip icon={<CalendarRange className="h-4 w-4" />} label="شروع ثبت‌نام" value={formatFaDate(x.startAt)} />
                       <InfoChip icon={<CalendarRange className="h-4 w-4" />} label="پایان ثبت‌نام" value={formatFaDate(x.endAt)} />
-                      <InfoChip icon={<Wallet className="h-4 w-4" />} label="هزینه ثبت‌نام" value={formatToman(x.price)} />
+                      {/* <InfoChip icon={<Wallet className="h-4 w-4" />} label="هزینه ثبت‌نام" value={formatToman(x.price)} /> */}
                       <InfoChip icon={<AlarmClock className="h-4 w-4" />} label="شرط سنی" value={x.maxAge ? `حداکثر ${x.maxAge} سال` : "ندارد"} />
                     </div>
 
                     {x.jobs?.length > 0 && (
-                      <div className="mt-5 flex flex-wrap gap-2 pt-5 border-t-2 border-slate-200 dark:border-slate-800">
+                      <div className="mt-5 flex flex-wrap gap-2 pt-2 border-t-2 border-slate-200 dark:border-slate-800">
                         {x.jobs.map((t: string, i: number) => (
                           <span key={i} className="rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-2 border-slate-300 dark:border-slate-700 px-3 py-1.5 font-medium text-slate-600 dark:text-slate-300 text-xs transition-colors cursor-default">
                             {t}
