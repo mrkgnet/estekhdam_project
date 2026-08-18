@@ -1,8 +1,5 @@
 "use client";
 
-
-
-
 import React, { useState, useEffect, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
@@ -23,10 +20,30 @@ import {
   CheckCircle2,
   ImageOff,
   LayoutGrid,
+  BellRing
 } from "lucide-react";
 import { createBannerAction, deleteBannerAction, updateBannerAction } from "@/actions/admin/topBanner/Actions";
 
-// کامپوننت دکمه Submit با ظاهر هماهنگ با داشبورد
+const NEWS_STATUS_MAP = {
+  NONE: "بدون وضعیت (بنر معمولی)",
+  REGISTRATION: "ثبت نام",
+  REGISTRATION_RENEWAL: "تمدید ثبت نام",
+  CARD_RECEIVED: "دریافت کارت",
+  RESULTS_ANNOUNCED: "اعلام نتایج",
+};
+
+// تابع کمکی برای تولید اسلاگ استاندارد فارسی و انگلیسی
+function generateSlugFromTitle(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // حذف نیم‌فاصله و کاراکترهای مخفی
+    .replace(/[\s_]+/g, "-")               // تبدیل فاصله‌ها و آندرلاین به خط تیره
+    .replace(/[^\p{L}\p{N}\-]+/gu, "")     // حفظ حروف و اعداد فارسی و انگلیسی و حذف علائم نگارشی
+    .replace(/-+/g, "-")                   // حذف خط‌تیره‌های تکراری
+    .replace(/^-+|-+$/g, "");              // حذف خط تیره از ابتدا و انتهای متن
+}
+
 function SubmitButton({ label = "ذخیره بنر" }: { label?: string }) {
   const { pending } = useFormStatus();
   return (
@@ -54,7 +71,6 @@ function SubmitButton({ label = "ذخیره بنر" }: { label?: string }) {
   );
 }
 
-// کامپوننت نمایش پیش‌نمایش تصویر با کنترل خطا
 function ImagePreview({ url, alt }: { url: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,7 +119,6 @@ function ImagePreview({ url, alt }: { url: string; alt: string }) {
   );
 }
 
-// کامپوننت مودال تایید حذف
 function DeleteConfirmModal({
   isOpen,
   onClose,
@@ -174,72 +189,53 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentBanner, setCurrentBanner] = useState<any>(null);
 
-  // فیلدهای فرم
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [imgPreview, setImgPreview] = useState("");
 
-  // مودال حذف
   const [bannerToDelete, setBannerToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // استفاده از useActionState
   const [addState, addAction] = useActionState(createBannerAction, null);
   const [editState, editAction] = useActionState(updateBannerAction, null);
 
-  // آیا هر مودالی باز است؟
   const isAnyModalOpen = isAddModalOpen || isEditModalOpen || !!bannerToDelete;
 
-  // قفل اسکرول پس‌زمینه وقتی مودال باز است
   useEffect(() => {
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-
     return () => {
       document.body.style.overflow = "";
     };
   }, [isAnyModalOpen]);
 
-  // تولید اسلاگ خودکار با پشتیبانی از حروف فارسی و انگلیسی
-  useEffect(() => {
-    if (title) {
-      const generatedSlug = title
-        .trim()
-        .toLowerCase()
-        .replace(/[\u200B-\u200D\uFEFF]/g, "") // حذف نیم‌فاصله مخفی
-        .replace(/[\s_]+/g, "-") // تبدیل فاصله و آندرلاین به خط تیره
-        .replace(/[^\p{L}\p{N}\-]+/gu, "") // حفظ حروف، اعداد و خط تیره
-        .replace(/\-+/g, "-") // تبدیل خط تیره‌های تکراری
-        .replace(/^-+|-+$/g, ""); // حذف خط تیره اول و آخر
-
-      setSlug(generatedSlug);
-    } else {
-      setSlug("");
+  // کنترل تغییر عنوان و ساخت خودکار اسلاگ
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextTitle = e.target.value;
+    setTitle(nextTitle);
+    if (!isEditModalOpen) {
+      setSlug(generateSlugFromTitle(nextTitle));
     }
-  }, [title]);
+  };
 
-  // هندل کردن توست و باطل‌سازی کش برای ایجاد بنر
   useEffect(() => {
     if (addState?.success) {
-      toast.success(addState.message || "بنر جدید با موفقیت ایجاد شد");
+      toast.success(addState.success);
       queryClient.invalidateQueries({ queryKey: ["latestActiveBanner"] });
-      setIsAddModalOpen(false);
-      resetForm();
+      if (addState.clearForm) closeAllModals();
     } else if (addState?.error) {
       toast.error(addState.error);
     }
   }, [addState, queryClient]);
 
-  // هندل کردن توست و باطل‌سازی کش برای ویرایش بنر
   useEffect(() => {
     if (editState?.success) {
-      toast.success(editState.message || "تغییرات بنر با موفقیت ذخیره شد");
+      toast.success(editState.success);
       queryClient.invalidateQueries({ queryKey: ["latestActiveBanner"] });
-      setIsEditModalOpen(false);
-      resetForm();
+      closeAllModals();
     } else if (editState?.error) {
       toast.error(editState.error);
     }
@@ -287,7 +283,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
 
   return (
     <div className="p-4 w-full md:px-8 max-w-7xl mx-auto mb-10" dir="rtl">
-      {/* هدر صفحه */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-white dark:bg-slate-900 p-4 md:p-5 rounded-lg shadow-sm border-2 border-slate-300 dark:border-slate-700 gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-sm shrink-0">
@@ -298,7 +294,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
               مدیریت بنرهای بالای سایت
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              ایجاد، ویرایش و حذف بنرهای نمایشی
+              ایجاد، ویرایش و حذف بنرهای نمایشی و خبرهای فوری
             </p>
           </div>
         </div>
@@ -315,15 +311,15 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
         </button>
       </div>
 
-      {/* جدول نمایش دیتا */}
+      {/* Table */}
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border-2 border-slate-300 dark:border-slate-700 overflow-hidden">
-        {/* هدر جدول */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-right border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm border-b-2 border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4 font-medium whitespace-nowrap">تصویر بنر</th>
                 <th className="p-4 font-medium">عنوان</th>
+                <th className="p-4 font-medium">وضعیت خبر فوری</th>
                 <th className="p-4 font-medium">لینک مقصد</th>
                 <th className="p-4 font-medium">وضعیت</th>
                 <th className="p-4 font-medium text-center whitespace-nowrap">عملیات</th>
@@ -332,7 +328,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {initialData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center">
+                  <td colSpan={6} className="p-12 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center">
                         <ImageIcon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
@@ -341,28 +337,17 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                         <p className="text-slate-700 dark:text-slate-300 font-medium">
                           هنوز بنری ایجاد نشده است
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                          اولین بنر خود را با کلیک روی دکمه بالا ایجاد کنید
-                        </p>
                       </div>
                     </div>
                   </td>
                 </tr>
               ) : (
                 initialData.map((banner) => (
-                  <tr
-                    key={banner.id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-150 group"
-                  >
-                    {/* تصویر */}
+                  <tr key={banner.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-150 group">
                     <td className="p-4">
                       <div className="w-36 h-16 rounded-md overflow-hidden border-2 border-slate-300 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-800">
                         {banner.imageUrl ? (
-                          <img
-                            src={banner.imageUrl}
-                            alt={banner.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <ImageOff className="w-6 h-6 text-slate-400" />
@@ -370,8 +355,6 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                         )}
                       </div>
                     </td>
-
-                    {/* عنوان و اسلاگ */}
                     <td className="p-4">
                       <div className="font-medium text-slate-800 dark:text-slate-200 text-sm">
                         {banner.title}
@@ -380,17 +363,19 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                         /{banner.slug}
                       </div>
                     </td>
-
-                    {/* لینک مقصد */}
+                    <td className="p-4">
+                      {banner.newsStatus ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-700">
+                          <BellRing className="w-3 h-3" />
+                          {NEWS_STATUS_MAP[banner.newsStatus as keyof typeof NEWS_STATUS_MAP] || banner.newsStatus}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">ندارد</span>
+                      )}
+                    </td>
                     <td className="p-4">
                       {banner.targetUrl ? (
-                        <Link
-                          href={banner.targetUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium truncate max-w-[180px]"
-                          dir="ltr"
-                        >
+                        <Link href={banner.targetUrl} target="_blank" className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium truncate max-w-[150px]" dir="ltr">
                           <LinkIcon className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">{banner.targetUrl}</span>
                         </Link>
@@ -398,37 +383,25 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                         <span className="text-xs text-slate-400">—</span>
                       )}
                     </td>
-
-                    {/* وضعیت */}
                     <td className="p-4">
                       {banner.isActive ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 border-2 border-emerald-400 dark:border-emerald-700">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400 border border-emerald-400">
                           <ToggleRight className="w-3.5 h-3.5" />
                           فعال
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-400 dark:border-slate-600">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-400">
                           <ToggleLeft className="w-3.5 h-3.5" />
                           غیرفعال
                         </span>
                       )}
                     </td>
-
-                    {/* عملیات */}
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(banner)}
-                          title="ویرایش بنر"
-                          className="inline-flex items-center justify-center w-9 h-9 rounded-md text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-300 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-700 transition-colors"
-                        >
+                        <button onClick={() => openEditModal(banner)} className="inline-flex items-center justify-center w-9 h-9 rounded-md text-blue-600 bg-blue-50 border-2 border-blue-300 hover:bg-blue-100 transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => setBannerToDelete(banner)}
-                          title="حذف بنر"
-                          className="inline-flex items-center justify-center w-9 h-9 rounded-md text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 border-2 border-rose-300 dark:border-rose-800 hover:border-rose-400 dark:hover:border-rose-700 transition-colors"
-                        >
+                        <button onClick={() => setBannerToDelete(banner)} className="inline-flex items-center justify-center w-9 h-9 rounded-md text-rose-600 bg-rose-50 border-2 border-rose-300 hover:bg-rose-100 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -439,108 +412,12 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
             </tbody>
           </table>
         </div>
-
-        {/* نمایش کارت‌وار در موبایل */}
-        <div className="md:hidden p-3 space-y-3">
-          {initialData.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="flex flex-col items-center justify-center gap-3">
-                <div className="w-14 h-14 rounded-lg bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center">
-                  <ImageIcon className="w-7 h-7 text-slate-400 dark:text-slate-500" />
-                </div>
-                <div>
-                  <p className="text-slate-700 dark:text-slate-300 font-medium text-sm">
-                    هنوز بنری ایجاد نشده است
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    اولین بنر خود را ایجاد کنید
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            initialData.map((banner) => (
-              <div
-                key={banner.id}
-                className="bg-slate-50 dark:bg-slate-800/40 rounded-md border-2 border-slate-300 dark:border-slate-700 p-3 space-y-3"
-              >
-                {/* تصویر + عنوان */}
-                <div className="flex items-start gap-3">
-                  <div className="w-24 h-14 rounded-md overflow-hidden border-2 border-slate-300 dark:border-slate-700 shrink-0 bg-white dark:bg-slate-900">
-                    {banner.imageUrl ? (
-                      <img
-                        src={banner.imageUrl}
-                        alt={banner.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageOff className="w-5 h-5 text-slate-400" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">
-                      {banner.title}
-                    </div>
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      {banner.isActive ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-400 dark:border-emerald-700">
-                          <ToggleRight className="w-3 h-3" />
-                          فعال
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-2 border-slate-400 dark:border-slate-600">
-                          <ToggleLeft className="w-3 h-3" />
-                          غیرفعال
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* لینک مقصد */}
-                {banner.targetUrl && (
-                  <Link
-                    href={banner.targetUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 truncate py-1.5 px-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900"
-                    dir="ltr"
-                  >
-                    <LinkIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{banner.targetUrl}</span>
-                  </Link>
-                )}
-
-                {/* دکمه‌های عملیات */}
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                  <button
-                    onClick={() => openEditModal(banner)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-300 dark:border-blue-800 transition-colors"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    ویرایش
-                  </button>
-                  <button
-                    onClick={() => setBannerToDelete(banner)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 border-2 border-rose-300 dark:border-rose-800 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    حذف
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
 
-      {/* مودال افزودن / ویرایش */}
+      {/* Modal */}
       {(isAddModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border-2 border-slate-300 dark:border-slate-700">
-            {/* هدر مودال */}
             <div className="flex justify-between items-center mb-5 pb-4 border-b-2 border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 border-2 border-emerald-400 dark:border-emerald-700 flex items-center justify-center">
@@ -550,10 +427,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                   {isEditModalOpen ? "ویرایش بنر" : "ایجاد بنر جدید"}
                 </h2>
               </div>
-              <button
-                onClick={closeAllModals}
-                className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 p-2 rounded-md transition-colors border-2 border-transparent hover:border-rose-300 dark:hover:border-rose-800"
-              >
+              <button onClick={closeAllModals} className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-md transition-colors border-2 border-transparent">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -571,10 +445,28 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                   name="title"
                   required
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none placeholder:text-slate-400"
-                  placeholder="مثلا: جشنواره فروش پاییزه"
+                  onChange={handleTitleChange}
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
+                  placeholder="مثلا: آغاز ثبت نام آزمون استخدامی"
                 />
+              </div>
+
+              {/* وضعیت فوری */}
+              <div>
+                <label className="block mb-1.5 font-medium text-slate-700 dark:text-slate-300 text-sm">
+                  نوع خبر فوری
+                </label>
+                <select
+                  name="newsStatus"
+                  defaultValue={isEditModalOpen ? (currentBanner?.newsStatus || "NONE") : "NONE"}
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
+                >
+                  <option value="NONE">{NEWS_STATUS_MAP.NONE}</option>
+                  <option value="REGISTRATION">{NEWS_STATUS_MAP.REGISTRATION}</option>
+                  <option value="REGISTRATION_RENEWAL">{NEWS_STATUS_MAP.REGISTRATION_RENEWAL}</option>
+                  <option value="CARD_RECEIVED">{NEWS_STATUS_MAP.CARD_RECEIVED}</option>
+                  <option value="RESULTS_ANNOUNCED">{NEWS_STATUS_MAP.RESULTS_ANNOUNCED}</option>
+                </select>
               </div>
 
               {/* اسلاگ */}
@@ -588,80 +480,70 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                   required
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 outline-none font-mono text-left text-sm"
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-800/50 outline-none font-mono text-left"
                   dir="ltr"
-                  placeholder="banner-slug"
                 />
-              </div>
-
-              {/* لینک تصویر */}
-              <div>
-                <label className="block mb-1.5 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                  لینک تصویر بنر <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="url"
-                  name="imageUrl"
-                  required
-                  defaultValue={isEditModalOpen ? currentBanner?.imageUrl : ""}
-                  onChange={(e) => setImgPreview(e.target.value)}
-                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none font-mono text-left text-sm placeholder:text-slate-400"
-                  dir="ltr"
-                  placeholder="https://example.com/image.jpg"
-                />
-                <ImagePreview url={imgPreview} alt="پیش‌نمایش بنر" />
               </div>
 
               {/* لینک مقصد */}
               <div>
                 <label className="block mb-1.5 font-medium text-slate-700 dark:text-slate-300 text-sm">
-                  لینک مقصد (Target URL) <span className="text-rose-500">*</span>
+                  لینک مقصد (Target URL) <span className="text-xs text-slate-400 font-normal">(اختیاری)</span>
                 </label>
                 <input
                   type="url"
                   name="targetUrl"
-                  required
-                  defaultValue={isEditModalOpen ? currentBanner?.targetUrl : ""}
-                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 transition-all bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none font-mono text-left text-sm placeholder:text-slate-400"
+                  defaultValue={isEditModalOpen ? currentBanner?.targetUrl || "" : ""}
+                  placeholder="https://example.com/target"
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md outline-none font-mono text-left bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                   dir="ltr"
-                  placeholder="https://example.com/page"
                 />
               </div>
 
+              {/* لینک تصویر (منتقل شده به زیر لینک مقصد) */}
+              <div>
+                <label className="block mb-1.5 font-medium text-slate-700 dark:text-slate-300 text-sm">
+                  لینک تصویر بنر <span className="text-xs text-slate-400 font-normal">(اختیاری)</span>
+                </label>
+                <input
+                  type="url"
+                  name="imageUrl"
+                  defaultValue={isEditModalOpen ? currentBanner?.imageUrl || "" : ""}
+                  onChange={(e) => setImgPreview(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2.5 border-2 border-slate-300 dark:border-slate-700 rounded-md outline-none font-mono text-left bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  dir="ltr"
+                />
+                <ImagePreview url={imgPreview} alt="پیش‌نمایش بنر" />
+              </div>
+
               {/* وضعیت فعال */}
-              <div className="flex items-center gap-3 p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-md border-2 border-emerald-300 dark:border-emerald-800">
+              <div className="flex items-center gap-3 p-3 bg-emerald-50/50 rounded-md border-2 border-emerald-300">
                 <input
                   type="checkbox"
                   name="isActive"
                   id="isActive"
                   defaultChecked={isEditModalOpen ? currentBanner?.isActive : true}
-                  className="w-5 h-5 text-emerald-600 rounded-md border-2 border-slate-300 dark:border-slate-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600"
+                  className="w-5 h-5 text-emerald-600 rounded-md border-2 border-slate-300 cursor-pointer"
                 />
-                <label
-                  htmlFor="isActive"
-                  className="cursor-pointer font-medium text-slate-700 dark:text-slate-300 select-none text-sm flex items-center gap-2"
-                >
-                  <ToggleRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <label htmlFor="isActive" className="cursor-pointer font-medium text-slate-700 text-sm flex items-center gap-2">
+                  <ToggleRight className="w-5 h-5 text-emerald-600" />
                   این بنر در سایت نمایش داده شود
                 </label>
               </div>
 
               {/* پیام خطا */}
               {(addState?.error || editState?.error) && (
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/30 border-2 border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-400 rounded-md text-center font-medium flex items-center justify-center gap-2">
+                <div className="p-3 bg-rose-50 border-2 border-rose-300 text-rose-700 rounded-md text-center font-medium flex items-center justify-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span className="text-sm">{addState?.error || editState?.error}</span>
                 </div>
               )}
 
-              {/* دکمه‌های اکشن */}
-              <div className="pt-4 mt-2 border-t-2 border-slate-200 dark:border-slate-800 space-y-2.5">
+              {/* دکمه‌ها */}
+              <div className="pt-4 mt-2 border-t-2 border-slate-200 space-y-2.5">
                 <SubmitButton label={isEditModalOpen ? "ذخیره تغییرات" : "ثبت و ایجاد بنر"} />
-                <button
-                  type="button"
-                  onClick={closeAllModals}
-                  className="w-full py-2.5 px-4 rounded-md font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-2 border-slate-300 dark:border-slate-700 transition-colors"
-                >
+                <button type="button" onClick={closeAllModals} className="w-full py-2.5 px-4 rounded-md font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300">
                   انصراف
                 </button>
               </div>
@@ -670,14 +552,8 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
         </div>
       )}
 
-      {/* مودال تایید حذف */}
-      <DeleteConfirmModal
-        isOpen={!!bannerToDelete}
-        onClose={() => setBannerToDelete(null)}
-        onConfirm={handleDelete}
-        title={bannerToDelete?.title || ""}
-        isDeleting={isDeleting}
-      />
+      {/* مودال حذف */}
+      <DeleteConfirmModal isOpen={!!bannerToDelete} onClose={() => setBannerToDelete(null)} onConfirm={handleDelete} title={bannerToDelete?.title || ""} isDeleting={isDeleting} />
     </div>
   );
 }

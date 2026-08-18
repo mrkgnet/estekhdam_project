@@ -453,19 +453,19 @@ model Notification {
 }
 
 model TopBanner {
-  id        String  @id @default(uuid())
-  title     String // متن بنر
-  imageUrl  String // لینک عکس بنر
-  targetUrl String // لینک مقصد
-  slug      String  @unique // اسلاگ بنر
-  isActive  Boolean @default(true) // فعال یا غیرفعال
+  id          String   @id @default(uuid())
+  title       String   // متن بنر
+  imageUrl    String?  // لینک عکس بنر (اختیاری شد)
+  targetUrl   String?  // لینک مقصد (اختیاری شد)
+  slug        String   @unique // اسلاگ بنر
+  isActive    Boolean  @default(true) // فعال یا غیرفعال
+  newsStatus  NewsStatusBannerTop? // وضعیت خبر فوری
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([isActive])
 }
-
 
 
 
