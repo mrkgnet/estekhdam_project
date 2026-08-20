@@ -251,15 +251,6 @@ export default function AddQuestionModal({
     [setQuestionText, setOptions, setAnswerText, setExamPoints, setCorrectAnswer]
   );
 
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
   // Memoized chapter options
   const chapterOptions = useMemo(
     () =>
@@ -294,7 +285,7 @@ export default function AddQuestionModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={handleBackdropClick}
+          // حذف onClick برای جلوگیری از بسته شدن با کلیک روی پس‌زمینه
           className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
         >
           <motion.div
@@ -305,7 +296,7 @@ export default function AddQuestionModal({
             aria-modal="true"
             aria-labelledby="modal-title"
             className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
-            onClick={(e) => e.stopPropagation()}
+            // حذف stopPropagation چون دیگر نیازی به آن نیست
           >
             {/* ==================== Header ==================== */}
             <div className="flex justify-between items-center mb-4 border-b pb-2">
