@@ -210,7 +210,7 @@ export default function ExamSidebar({
                   <div className="flex items-center justify-center w-7 h-7 rounded bg-white dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-600 shadow-sm">
                     <Filter className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                   </div>
-                  <h3 className="text-sm font-semibold border-2 border-slate-400 dark:border-slate-600 rounded p-1 text-slate-800 dark:text-slate-200">
+                  <h3 className="text-sm font-semibold   dark:border-slate-600 rounded p-1 text-slate-800 dark:text-slate-200">
                     فیلتر سوالات
                   </h3>
                 </div>

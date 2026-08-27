@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache";
 
 // دریافت همه بنرها
 export async function getAllBanners() {
@@ -18,18 +19,30 @@ export async function getAllBanners() {
 // دریافت آخرین بنر فعال ثبت‌شده
 export async function getLatestActiveBanner() {
   try {
+    // این تابع نباید از Data Cache استفاده کند.
+    noStore();
+
     const latestBanner = await db.topBanner.findFirst({
       where: {
         isActive: true,
       },
+
       orderBy: {
         createdAt: "desc",
       },
     });
 
-    return { success: true, data: latestBanner };
+    return {
+      success: true,
+      data: latestBanner,
+    };
   } catch (error) {
-    return { success: false, error: "خطا در واکشی آخرین بنر" };
+    console.error("getLatestActiveBanner error:", error);
+
+    return {
+      success: false,
+      error: "خطا در واکشی آخرین بنر",
+    };
   }
 }
 
