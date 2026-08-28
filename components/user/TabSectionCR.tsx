@@ -152,10 +152,7 @@ export default function TabSectionCR({ product, isLoading }: TabSectionCRProps) 
               >
                 {activeTab === "description" && (
                   <div className="space-y-4 sm:space-y-5">
-                    <h2 className="font-black text-slate-800 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-green-500" />
-                      درباره این آزمون
-                    </h2>
+                   
 
                     <div className="text-slate-600 leading-[2.2] text-justify">
                       {product?.description ? (

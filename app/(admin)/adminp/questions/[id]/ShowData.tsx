@@ -1,18 +1,31 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Edit, Trash2, HelpCircle, CheckCircle2, GraduationCap, Plus, Download, FileSpreadsheet } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  HelpCircle,
+  CheckCircle2,
+  GraduationCap,
+  Plus,
+  Download,
+  FileSpreadsheet,
+  Search,
+} from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import DeleteButton from "@/components/ui/DeleteButton";
 import deleteQuestionAction from "@/actions/admin/questions/gov/delete/Actions";
-import SearchBar from "@/components/ui/SearchBar";
 import AddQuestionModal from "@/components/modals/AddQuestionModal";
 import EditQuestionModal from "@/components/modals/EditQuestionModal";
 import ImportQuestionsModal from "@/components/modals/ImportQuestionsModal";
 import deleteAllQuestionCourseAction from "@/actions/admin/questions/gov/delete_all_questions/actions";
 import Pagination from "@/components/ui/Pagination";
 import BatchAddQuestionsModal from "@/components/modals/BatchAddQuestionsModal";
+
+type Question = any;
+type Chapter = any;
+type CategoryChapter = any;
 
 export default function ExamQuestionsPage({
   productId,
@@ -22,19 +35,20 @@ export default function ExamQuestionsPage({
 }: {
   productId: string;
   questionsData: {
-    questions: any[];
+    questions: Question[];
     totalCount: number;
     currentPage: number;
     totalPages: number;
   };
-  chapters: any[];
-  categoryChapters: any[];
+  chapters: Chapter[];
+  categoryChapters: CategoryChapter[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctAnswer, setCorrectAnswer] = useState<number | null>(null);
@@ -42,24 +56,25 @@ export default function ExamQuestionsPage({
   const [answerText, setAnswerText] = useState("");
   const [examPoints, setExamPoints] = useState("");
 
-  const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editOptions, setEditOptions] = useState(["", "", "", ""]);
   const [editCorrectAnswer, setEditCorrectAnswer] = useState<number | null>(null);
   const [editQuestionText, setEditQuestionText] = useState("");
   const [editAnswerText, setEditAnswerText] = useState("");
   const [editExamPoints, setEditExamPoints] = useState("");
 
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [isPendingDeleteAll, startTransitionDeleteAll] = useTransition();
 
   const { questions, totalCount, currentPage, totalPages } = questionsData;
 
-  const productName =
-    questions && questions.length > 0
-      ? questions[0].product?.name
-      : "هیچی !! چیزی پیدا نکردم";
+  const productName = useMemo(
+    () =>
+      questions && questions.length > 0
+        ? questions[0].product?.name
+        : "نام محصول موجود نیست",
+    [questions]
+  );
 
   const closeAddModal = () => {
     setIsModalOpen(false);
@@ -79,10 +94,10 @@ export default function ExamQuestionsPage({
     setEditExamPoints("");
   };
 
-  const handleOpenEditModal = (q: any) => {
+  const handleOpenEditModal = (q: Question) => {
     setEditingQuestion(q);
-    setEditOptions([...q.options]);
-    setEditCorrectAnswer(q.correctAnswer - 1);
+    setEditOptions([...(q.options || ["", "", "", ""])]);
+    setEditCorrectAnswer((q.correctAnswer ?? 1) - 1);
     setEditQuestionText(q.questionText || "");
     setEditAnswerText(q.answerText || "");
     setEditExamPoints(q.examPoints || "");
@@ -90,12 +105,12 @@ export default function ExamQuestionsPage({
 
   const handleDeleteAllQuestions = () => {
     if (!questions || questions.length === 0) {
-      alert("سوالی برای حذف وجود ندارد!");
+      alert("سوالی برای حذف وجود ندارد.");
       return;
     }
 
     const confirmed = window.confirm(
-      "آیا کاملا مطمئن هستید؟ تمام سوالات این درس برای همیشه حذف خواهند شد!"
+      "آیا مطمئن هستید؟ تمام سوالات این درس برای همیشه حذف می‌شوند."
     );
     if (!confirmed) return;
 
@@ -127,98 +142,109 @@ export default function ExamQuestionsPage({
 
     const timer = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
-      if (searchQuery) {
-        params.set("search", searchQuery);
+
+      if (searchQuery.trim()) {
+        params.set("search", searchQuery.trim());
         params.set("page", "1");
       } else {
         params.delete("search");
-        if (currentPage !== 1) {
-          params.set("page", "1");
-        }
+        params.set("page", "1");
       }
+
       router.push(`?${params.toString()}`);
-    }, 500);
+    }, 450);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchParams, router]);
 
   const startIndex = (currentPage - 1) * 10;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-4 sm:p-6 lg:p-8" dir="rtl">
-      <div className="max-w-6xl mx-auto space-y-5">
-        {/* Header */}
-        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100">
-          <div>
-            <h1 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-blue-600 shrink-0" />
-              <span>مدیریت</span>
-              <span className="text-rose-500 font-semibold">{productName}</span>
-            </h1>
-            <p className="text-xs text-gray-500 mt-1">تعداد کل: {totalCount} سوال</p>
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            <button
-              onClick={handleDeleteAllQuestions}
-              disabled={isPendingDeleteAll}
-              className="flex cursor-pointer items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm disabled:opacity-50"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              {isPendingDeleteAll ? "در حال حذف..." : "حذف همه سوالات"}
-            </button>
-            <button
-              onClick={() => setIsImportModalOpen(true)}
-              className="flex cursor-pointer items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm"
-            >
-              <Download className="w-3.5 h-3.5" />
-              ایمپورت از دسته‌بندی
-            </button>
-            
-            <button
-              onClick={() => setIsBatchModalOpen(true)}
-              className="flex cursor-pointer items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm shadow-emerald-200"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              افزودن گروهی (اکسل)
-            </button>
+    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8" dir="rtl">
+      <div className="mx-auto max-w-7xl space-y-5">
+        {/* Top Bar */}
+        <header className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="flex items-center gap-2 text-xl font-semibold text-slate-800 sm:text-2xl">
+                <HelpCircle className="h-5 w-5 text-blue-600 shrink-0" />
+                <span className="truncate">مدیریت سوالات</span>
+              </h1>
+              <p className="mt-1 text-sm text-slate-500">
+                <span className="font-medium text-slate-700">{productName}</span>
+                <span className="mx-2">•</span>
+                <span>{totalCount} سوال</span>
+              </p>
+            </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex cursor-pointer items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm shadow-blue-200"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              افزودن سوال جدید
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              >
+                <Plus className="h-4 w-4" />
+                افزودن سوال
+              </button>
+
+              <button
+                onClick={() => setIsBatchModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400/30"
+              >
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                افزودن گروهی
+              </button>
+
+              <button
+                onClick={() => setIsImportModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400/30"
+              >
+                <Download className="h-4 w-4 text-amber-600" />
+                ایمپورت
+              </button>
+
+              <button
+                onClick={handleDeleteAllQuestions}
+                disabled={isPendingDeleteAll}
+                className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-rose-400/30"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isPendingDeleteAll ? "در حال حذف..." : "حذف همه"}
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* Search */}
-        <div className="flex items-center bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="جستجو در سوالات، گزینه‌ها و سرفصل‌ها..."
-            className="md:w-1/3 text-xs"
-          />
-        </div>
+        {/* Search Card */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+          <div className="relative w-full md:max-w-md">
+            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="جستجو در متن سوال، گزینه‌ها، فصل و دسته‌بندی..."
+              className="h-11 w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </section>
 
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        {/* Table Card */}
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse table-fixed min-w-[1000px]">
+            <table className="w-full min-w-[1100px] table-fixed border-collapse text-right">
               <thead>
-                <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 text-xs font-semibold">
-                  <th className="p-3 w-[6%] text-center">ردیف</th>
-                  <th className="p-3 w-[10%] text-center">کد سوال</th>
-                  <th className="p-3 w-[34%]">متن سوال</th>
-                  <th className="p-3 w-[10%]">نوع سوال</th>
-                  <th className="p-3 w-[12%]">دسته‌بندی</th>
-                  <th className="p-3 w-[12%]">فصل</th>
-                  <th className="p-3 w-[16%]">پاسخ تشریحی</th>
-                  <th className="p-3 w-[12%] text-center">عملیات</th>
+                <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
+                  <th className="w-[6%] p-4 text-center">ردیف</th>
+                  <th className="w-[10%] p-4 text-center">کد سوال</th>
+                  <th className="w-[34%] p-4">متن سوال</th>
+                  <th className="w-[10%] p-4">نوع</th>
+                  <th className="w-[12%] p-4">دسته‌بندی</th>
+                  <th className="w-[12%] p-4">فصل</th>
+                  <th className="w-[16%] p-4">پاسخ تشریحی</th>
+                  <th className="w-[12%] p-4 text-center">عملیات</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-xs">
+
+              <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
                 {questions && questions.length > 0 ? (
                   questions.map((q, index) => {
                     const category = categoryChapters?.find((c) => c.id === q.categoryChapterId);
@@ -227,88 +253,97 @@ export default function ExamQuestionsPage({
                     const actualIndex = startIndex + index + 1;
 
                     return (
-                      <tr key={q.id} className="hover:bg-gray-50/50 transition-colors group">
-                        <td className="p-3 text-center text-gray-500 font-medium">
-                          {actualIndex}
+                      <tr key={q.id} className="align-top transition hover:bg-slate-50/70">
+                        <td className="p-4 text-center font-medium text-slate-500">{actualIndex}</td>
+
+                        <td className="p-4 text-center font-medium text-slate-500 break-words">
+                          {q.questionCode || "-"}
                         </td>
-                        <td className="p-3 text-center text-gray-500 font-medium break-words">
-                          {q.questionCode}
-                        </td>
-                        <td className="p-3 break-words">
+
+                        <td className="p-4">
                           <div
-                            className="text-gray-800 font-medium text-xs leading-relaxed line-clamp-3"
+                            className="line-clamp-3 leading-7 text-slate-800"
                             dangerouslySetInnerHTML={{ __html: q.questionText || "" }}
                           />
-                          <div className="flex flex-col gap-1 mt-2 text-[11px] text-gray-500">
-                            {q.options.map((opt: string, i: number) => (
-                              <div
-                                key={i}
-                                className={`px-2 py-1 rounded flex items-start gap-1.5 ${
-                                  i + 1 === q.correctAnswer
-                                    ? "bg-green-50 text-green-700 border border-green-200 font-semibold"
-                                    : "bg-gray-50"
-                                }`}
-                              >
-                                {i + 1 === q.correctAnswer && (
-                                  <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" />
-                                )}
-                                <span className="shrink-0">{i + 1}- </span>
+                          <div className="mt-3 space-y-1.5 text-xs">
+                            {(q.options || []).map((opt: string, i: number) => {
+                              const isCorrect = i + 1 === q.correctAnswer;
+                              return (
                                 <div
-                                  className="[&>p]:m-0 break-words leading-relaxed"
-                                  dangerouslySetInnerHTML={{ __html: opt || "" }}
-                                />
-                              </div>
-                            ))}
+                                  key={i}
+                                  className={`flex items-start gap-2 rounded-lg border px-2.5 py-1.5 ${
+                                    isCorrect
+                                      ? "border-green-200 bg-green-50 text-green-800"
+                                      : "border-slate-200 bg-slate-50 text-slate-700"
+                                  }`}
+                                >
+                                  {isCorrect && <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
+                                  <span className="shrink-0 font-medium">{i + 1})</span>
+                                  <div
+                                    className="[&>p]:m-0 break-words leading-6"
+                                    dangerouslySetInnerHTML={{ __html: opt || "" }}
+                                  />
+                                </div>
+                              );
+                            })}
                           </div>
                         </td>
-                        <td className="p-3 align-top">
+
+                        <td className="p-4">
                           {q.questionType === "SARASARI" ? (
-                            <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded text-[11px] font-semibold border border-purple-100 inline-flex items-center gap-1 w-max">
-                              <GraduationCap className="w-3 h-3" /> سراسری
+                            <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
+                              <GraduationCap className="h-3.5 w-3.5" />
+                              سراسری
                             </span>
                           ) : (
-                            <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded text-[11px] font-semibold border border-orange-100 inline-flex items-center gap-1 w-max">
-                              <Edit className="w-3 h-3" /> تالیفی
+                            <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
+                              <Edit className="h-3.5 w-3.5" />
+                              تالیفی
                             </span>
                           )}
                         </td>
-                        <td className="p-3 break-words align-top">
+
+                        <td className="p-4">
                           {categoryName ? (
-                            <span className="bg-teal-50 text-teal-600 px-2 py-0.5 rounded text-[11px] border border-teal-100 inline-block max-w-full truncate">
+                            <span className="inline-block max-w-full truncate rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700">
                               {categoryName}
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-[11px]">ندارد</span>
+                            <span className="text-xs text-slate-400">ندارد</span>
                           )}
                         </td>
-                        <td className="p-3 break-words align-top">
+
+                        <td className="p-4">
                           {q.chapter?.title ? (
-                            <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[11px] border border-blue-100 inline-block max-w-full">
+                            <span className="inline-block max-w-full rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
                               فصل {q.chapter.order}: {q.chapter.title}
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-[11px]">عمومی</span>
+                            <span className="text-xs text-slate-400">عمومی</span>
                           )}
                         </td>
-                        <td className="p-3 break-words align-top">
+
+                        <td className="p-4">
                           <div
-                            className="text-gray-600 text-[11px] leading-relaxed line-clamp-4"
+                            className="line-clamp-4 text-xs leading-6 text-slate-600"
                             dangerouslySetInnerHTML={{ __html: q.answerText || "" }}
                           />
                         </td>
-                        <td className="p-3 align-top">
-                          <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5">
+
+                        <td className="p-4">
+                          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
                             <button
                               onClick={() => handleOpenEditModal(q)}
-                              className="w-full sm:w-auto px-2 py-1 text-[11px] text-blue-600 border border-blue-200 hover:border-blue-400 cursor-pointer hover:bg-blue-50 rounded transition-colors text-center font-medium"
+                              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
                             >
                               ویرایش
                             </button>
+
                             <DeleteButton
                               id={q.id}
                               action={deleteQuestionAction}
                               itemName="این سوال"
-                              className="w-full sm:w-auto px-2 py-1 text-[11px] text-rose-600 cursor-pointer border border-rose-200 hover:border-rose-400 hover:bg-rose-50 rounded transition-colors text-center font-medium"
+                              className="w-full rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-100 sm:w-auto"
                             >
                               حذف
                             </DeleteButton>
@@ -319,8 +354,13 @@ export default function ExamQuestionsPage({
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="p-10 text-center text-gray-500 text-xs">
-                      هیچ سوالی یافت نشد!
+                    <td colSpan={8} className="p-14 text-center">
+                      <div className="mx-auto max-w-sm">
+                        <p className="text-base font-medium text-slate-700">نتیجه‌ای پیدا نشد</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          عبارت جستجو را تغییر دهید یا سوال جدید اضافه کنید.
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -328,15 +368,18 @@ export default function ExamQuestionsPage({
             </table>
           </div>
 
-          <Pagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            itemName="سوال"
-          />
-        </div>
+          <div className="border-t border-slate-200 bg-white p-2 sm:p-3">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              itemName="سوال"
+            />
+          </div>
+        </section>
       </div>
 
+      {/* Modals */}
       <AnimatePresence>
         {isModalOpen && (
           <AddQuestionModal

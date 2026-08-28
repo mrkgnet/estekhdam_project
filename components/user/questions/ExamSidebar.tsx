@@ -15,6 +15,7 @@ import {
   Moon,
   ChevronRight,
   ChevronLeft,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import SendPQComponent from "@/components/user/questions/SendPQComponent";
@@ -73,11 +74,7 @@ export default function ExamSidebar({
   }, []);
 
   useEffect(() => {
-    if (isMobileFilterOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isMobileFilterOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -97,62 +94,57 @@ export default function ExamSidebar({
     handleTypeClick(type);
   };
 
+  const baseBtn =
+    "inline-flex items-center justify-center rounded-lg border text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40 disabled:opacity-60 disabled:cursor-not-allowed";
+  const ghostBtn =
+    "bg-white hover:bg-slate-50 border-slate-300 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-slate-700 dark:text-slate-200";
+  const sectionTitle = "text-sm font-semibold text-slate-800 dark:text-slate-100";
+
   return (
     <>
       <aside
-        className={`relative w-full shrink-0 z-20 transition-all duration-150 ease-out ${
-          isDesktopCollapsed ? "lg:w-[78px]" : "lg:w-[300px] xl:w-[320px]"
+        className={`relative z-20 w-full shrink-0 transition-all duration-200 ease-out ${
+          isDesktopCollapsed ? "lg:w-[84px]" : "lg:w-[308px] xl:w-[328px]"
         }`}
       >
-        {/* قاب اصلی سایدبار - بوردر پررنگ‌تر */}
-        <div className="relative w-full rounded-lg border-2 border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-sm overflow-visible">
-          {/* دکمه باز/بستن روی بوردر */}
-          <div
-            className={`hidden lg:block absolute top-5 z-[70] ${
-              isDesktopCollapsed ? "-left-3.5" : "-left-3.5"
-            }`}
-          >
-            <div className="group relative">
-              <button
-                type="button"
-                onClick={() => setIsDesktopCollapsed((prev) => !prev)}
-                className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-150"
-                title={isDesktopCollapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
-                aria-label={isDesktopCollapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
-              >
-                {isDesktopCollapsed ? (
-                  <ChevronLeft className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </button>
-
-              <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-slate-900 text-white text-[11px] px-2 py-1 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150">
-                {isDesktopCollapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
-              </div>
-            </div>
+        <div className="relative overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          {/* collapse toggle */}
+          <div className="absolute -left-4 top-6 z-[70] hidden lg:block">
+            <button
+              type="button"
+              onClick={() => setIsDesktopCollapsed((prev) => !prev)}
+              className="group flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-900/40"
+              title={isDesktopCollapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
+              aria-label={isDesktopCollapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
+            >
+              {isDesktopCollapsed ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
           </div>
 
-          {/* حالت باز */}
+          {/* expanded */}
           <div
-            className={`transition-all duration-150 overflow-hidden ${
-              isDesktopCollapsed ? "lg:opacity-0 lg:h-0" : "opacity-100 h-auto"
+            className={`overflow-hidden transition-all duration-200 ${
+              isDesktopCollapsed ? "h-0 opacity-0 lg:h-0" : "h-auto opacity-100"
             }`}
           >
-            <div className="p-3 sm:p-4 flex flex-col gap-3">
-              {/* تنظیمات فونت و تم - بوردر پررنگ‌تر */}
-              <div className="flex flex-col gap-4 border-2 border-slate-400 dark:border-slate-600 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <h5 className="text-slate-800 dark:text-slate-200 text-sm font-medium">
-                    تغییر اندازه فونت
-                  </h5>
+            <div className="flex flex-col gap-4 p-4">
+              {/* controls */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+                <div className="flex items-center justify-between gap-3">
+                  <h5 className={sectionTitle}>اندازه فونت</h5>
                   <FontSizeHandler fontSize={fontSize} setFontSize={setFontSize} />
                 </div>
 
-                <div className="w-full h-px bg-slate-400 dark:bg-slate-600" />
+                <div className="my-4 h-px bg-slate-200 dark:bg-slate-700" />
+
+                
               </div>
 
-              {/* نظرات - بوردر پررنگ‌تر */}
+              {/* comments */}
               <button
                 type="button"
                 onClick={() =>
@@ -161,19 +153,19 @@ export default function ExamSidebar({
                     block: "start",
                   })
                 }
-                className="group relative w-full rounded-lg border-2 border-slate-400 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70 px-4 py-3 shadow-sm transition-all duration-200 hover:border-slate-500 dark:hover:border-slate-500 hover:shadow-md active:scale-[0.98] outline-none"
+                className="group w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-right shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800/70 dark:focus-visible:ring-blue-900/40"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-300 shadow-inner border border-slate-400 dark:border-slate-600">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
                       <MessageCircle className="h-4.5 w-4.5" />
                     </span>
-                    <div className="min-w-0 text-right">
-                      <p className="truncate font-medium tracking-tight text-slate-800 dark:text-slate-200">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
                         نظرات کاربران
                       </p>
-                      <p className="truncate text-10 sm:text-12 leading-tight text-slate-400 dark:text-slate-500">
-                        دیدگاه‌ها و تجربه‌ی دیگران
+                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                        مشاهده دیدگاه‌ها و تجربه‌ها
                       </p>
                     </div>
                   </div>
@@ -181,63 +173,66 @@ export default function ExamSidebar({
                 </div>
               </button>
 
-              {/* ارسال/کپی */}
-              <div className="flex text-10 gap-2 w-full">
+              {/* send/copy */}
+              <div className="flex w-full gap-2">
                 <SendPQComponent />
                 {questionCode && (
-                  <CopyClipBoard className="text-10 flex-1" text={questionCode} label="شناسه سوال:" />
+                  <CopyClipBoard className="flex-1 text-xs" text={questionCode} label="شناسه سوال:" />
                 )}
               </div>
 
-              {/* موبایل: دکمه باز کردن فیلتر - بوردر پررنگ‌تر */}
-              <div className="lg:hidden w-full">
+              {/* mobile filter opener */}
+              <div className="w-full lg:hidden">
                 <button
                   type="button"
                   onClick={() => setIsMobileFilterOpen(true)}
-                  className="flex items-center justify-between w-full bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border-2 border-slate-400 dark:border-slate-600 active:scale-[0.99] transition"
+                  className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:focus-visible:ring-blue-900/40"
                 >
                   <div className="flex items-center gap-2">
-                    <Filter className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-200">فیلتر سوالات</h3>
+                    <Filter className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      فیلتر سوالات
+                    </h3>
                   </div>
-                  <ChevronDown className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                  <ChevronDown className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                 </button>
               </div>
 
-              {/* دسکتاپ: هدر فیلتر - بوردر پررنگ‌تر */}
-              <div className="hidden lg:flex items-center justify-between w-full px-3 py-2 rounded-lg border-2 border-slate-400 dark:border-slate-600 bg-white/60 dark:bg-slate-800/60">
+              {/* desktop filter header */}
+              <div className="hidden items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 lg:flex dark:border-slate-700 dark:bg-slate-800/40">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-7 h-7 rounded bg-white dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-600 shadow-sm">
-                    <Filter className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  </div>
-                  <h3 className="text-sm font-semibold   dark:border-slate-600 rounded p-1 text-slate-800 dark:text-slate-200">
-                    فیلتر سوالات
-                  </h3>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                    <Filter className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                  </span>
+                  <h3 className={sectionTitle}>فیلتر سوالات</h3>
                 </div>
               </div>
 
-              {/* دسکتاپ: لیست فیلتر - بوردر پررنگ‌تر */}
-              <div className="hidden lg:flex w-full bg-white dark:bg-slate-800 rounded-lg border-2 border-slate-400 dark:border-slate-600 overflow-hidden flex-col">
+              {/* desktop filter panel */}
+              <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-700 dark:bg-slate-900">
                 <Link
                   href={getClearFiltersUrl()}
-                  className="group flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 border-b-2 border-slate-400 dark:border-slate-600 p-3 transition-all hover:bg-slate-100 dark:hover:bg-slate-800/80"
+                  className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300 transition-colors">
-                    <List className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  <div className="flex items-center gap-2">
+                    <List className="h-4.5 w-4.5 text-slate-500" />
                     <span>نمایش همه سوالات دوره</span>
                   </div>
                 </Link>
 
-                <div className="border-b-2 border-slate-400 dark:border-slate-600">
+                {/* chapter filter */}
+                <div className="border-b border-slate-200 dark:border-slate-700">
                   <button
-                    onClick={() => setIsChaptersOpen(!isChaptersOpen)}
-                    className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors p-4 flex items-center justify-between outline-none"
+                    onClick={() => setIsChaptersOpen((v) => !v)}
+                    className="flex w-full items-center justify-between px-4 py-3 text-right hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   >
                     <div className="flex items-center gap-2">
-                      <PlayCircle className="w-5 h-5 text-rose-500 dark:text-rose-400" />
-                      <h2 className="text-slate-700 dark:text-slate-200">بر اساس سرفصل</h2>
+                      <PlayCircle className="h-5 w-5 text-rose-500" />
+                      <h2 className="text-sm font-medium text-slate-700 dark:text-slate-200">بر اساس سرفصل</h2>
                     </div>
-                    <ChevronDown className={`w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${isChaptersOpen ? "rotate-0" : "rotate-90"}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-slate-400 transition-transform ${isChaptersOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   <AnimatePresence initial={false}>
@@ -247,20 +242,21 @@ export default function ExamSidebar({
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-slate-50/50 dark:bg-slate-900/30"
+                        className="overflow-hidden bg-slate-50/70 dark:bg-slate-800/30"
                       >
-                        <div className="p-2 flex flex-col gap-1 max-h-[40vh] overflow-y-auto custom-scrollbar">
+                        <div className="custom-scrollbar flex max-h-[40vh] flex-col gap-1 overflow-y-auto p-2">
                           <button
                             onClick={() => onChapterClick(null)}
                             disabled={isAnyLoading}
-                            className={`text-right p-2.5 rounded transition-all ${
+                            className={`rounded-lg px-3 py-2.5 text-right text-sm transition ${
                               !currentChapterId
-                                ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-2 border-rose-400 dark:border-rose-700"
-                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
+                                ? "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                                : "border border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                             }`}
                           >
                             همه سرفصل‌ها
                           </button>
+
                           {chapters.length > 0 ? (
                             chapters.map((chapter) => {
                               const isActive = currentChapterId === chapter.id;
@@ -269,19 +265,19 @@ export default function ExamSidebar({
                                   key={chapter.id}
                                   onClick={() => onChapterClick(chapter.id)}
                                   disabled={isAnyLoading}
-                                  className={`flex items-center justify-between w-full text-right p-2.5 rounded transition-all ${
+                                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-right text-sm transition ${
                                     isActive
-                                      ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-2 border-rose-400 dark:border-rose-700"
-                                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
-                                  } ${isAnyLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                                      ? "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                                      : "border border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                                  }`}
                                 >
-                                  <span className="truncate pr-1">{chapter.title}</span>
-                                  {isActive && <CheckCircle2 className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />}
+                                  <span className="truncate">{chapter.title}</span>
+                                  {isActive && <CheckCircle2 className="h-4 w-4 shrink-0" />}
                                 </button>
                               );
                             })
                           ) : (
-                            <div className="text-center text-slate-400 py-4">سرفصلی یافت نشد.</div>
+                            <div className="py-4 text-center text-sm text-slate-400">سرفصلی یافت نشد.</div>
                           )}
                         </div>
                       </motion.div>
@@ -289,16 +285,19 @@ export default function ExamSidebar({
                   </AnimatePresence>
                 </div>
 
+                {/* type filter */}
                 <div>
                   <button
-                    onClick={() => setIsTypeOpen(!isTypeOpen)}
-                    className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors p-4 flex items-center justify-between outline-none"
+                    onClick={() => setIsTypeOpen((v) => !v)}
+                    className="flex w-full items-center justify-between px-4 py-3 text-right hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   >
                     <div className="flex items-center gap-2">
-                      <GraduationCap className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                      <h2 className="text-slate-700 dark:text-slate-200">بر اساس نوع سوال</h2>
+                      <GraduationCap className="h-5 w-5 text-blue-500" />
+                      <h2 className="text-sm font-medium text-slate-700 dark:text-slate-200">بر اساس نوع سوال</h2>
                     </div>
-                    <ChevronDown className={`w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${isTypeOpen ? "rotate-0" : "rotate-90"}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-slate-400 transition-transform ${isTypeOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   <AnimatePresence initial={false}>
@@ -308,61 +307,51 @@ export default function ExamSidebar({
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-slate-50/50 dark:bg-slate-900/30"
+                        className="overflow-hidden bg-slate-50/70 dark:bg-slate-800/30"
                       >
-                        <div className="p-3 flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 p-3">
                           <button
                             onClick={() => onTypeClick(null)}
                             disabled={isAnyLoading}
-                            className={`p-2.5 rounded border-2 transition-all ${
+                            className={`rounded-lg border px-3 py-2.5 text-sm transition ${
                               !currentQuestionType
-                                ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500/50 dark:bg-blue-900/40 dark:text-blue-300"
-                                : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500"
+                                ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                             }`}
                           >
                             همه نوع سوالات
                           </button>
+
                           <button
                             onClick={() => onTypeClick("SARASARI")}
                             disabled={isAnyLoading}
-                            className={`flex items-center justify-between p-2.5 rounded border-2 transition-all ${
+                            className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition ${
                               currentQuestionType === "SARASARI"
-                                ? "border-purple-500 bg-purple-50 text-purple-700 dark:border-purple-500/50 dark:bg-purple-900/40 dark:text-purple-300"
-                                : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500"
+                                ? "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                             }`}
                           >
                             <div className="flex items-center gap-2">
-                              <GraduationCap
-                                className={`w-4 h-4 ${
-                                  currentQuestionType === "SARASARI"
-                                    ? "text-purple-600 dark:text-purple-400"
-                                    : "text-slate-400 dark:text-slate-500"
-                                }`}
-                              />
+                              <GraduationCap className="h-4 w-4" />
                               <span>سوالات سراسری</span>
                             </div>
-                            {currentQuestionType === "SARASARI" && <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                            {currentQuestionType === "SARASARI" && <CheckCircle2 className="h-4 w-4" />}
                           </button>
+
                           <button
                             onClick={() => onTypeClick("TALIFI")}
                             disabled={isAnyLoading}
-                            className={`flex items-center justify-between p-2.5 rounded border-2 transition-all ${
+                            className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition ${
                               currentQuestionType === "TALIFI"
-                                ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-500/50 dark:bg-orange-900/40 dark:text-orange-300"
-                                : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-500 dark:hover:border-slate-500"
+                                ? "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+                                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                             }`}
                           >
                             <div className="flex items-center gap-2">
-                              <Edit
-                                className={`w-4 h-4 ${
-                                  currentQuestionType === "TALIFI"
-                                    ? "text-orange-600 dark:text-orange-400"
-                                    : "text-slate-400 dark:text-slate-500"
-                                }`}
-                              />
+                              <Edit className="h-4 w-4" />
                               <span>سوالات تالیفی</span>
                             </div>
-                            {currentQuestionType === "TALIFI" && <CheckCircle2 className="w-4 h-4 text-orange-600 dark:text-orange-400" />}
+                            {currentQuestionType === "TALIFI" && <CheckCircle2 className="h-4 w-4" />}
                           </button>
                         </div>
                       </motion.div>
@@ -373,21 +362,22 @@ export default function ExamSidebar({
             </div>
           </div>
 
-          {/* حالت بسته (آیکن‌ها) */}
+          {/* collapsed */}
           <div
-            className={`hidden transition-all duration-150 ${
-              isDesktopCollapsed ? "lg:flex opacity-100 h-auto" : "opacity-0 h-0 overflow-hidden"
+            className={`hidden transition-all duration-200 ${
+              isDesktopCollapsed ? "h-auto opacity-100 lg:flex" : "h-0 overflow-hidden opacity-0"
             }`}
           >
-            <div className="w-full p-2.5 mt-14">
-              <div className="flex flex-col gap-3 items-center">
+            <div className="mt-14 w-full p-2.5">
+              <div className="flex flex-col items-center gap-3">
                 <button
                   onClick={toggleTheme}
-                  className="flex items-center justify-center w-10 h-10 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border-2 border-slate-400 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className={`${baseBtn} ${ghostBtn} h-10 w-10`}
                   title={isDarkMode ? "تغییر به روز" : "تغییر به شب"}
                 >
-                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </button>
+
                 <button
                   onClick={() =>
                     commentsRef.current?.scrollIntoView({
@@ -395,17 +385,18 @@ export default function ExamSidebar({
                       block: "start",
                     })
                   }
-                  className="flex items-center justify-center w-10 h-10 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border-2 border-slate-400 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className={`${baseBtn} ${ghostBtn} h-10 w-10`}
                   title="نظرات کاربران"
                 >
-                  <MessageCircle className="w-5 h-5" />
+                  <MessageCircle className="h-5 w-5" />
                 </button>
+
                 <button
                   onClick={() => setIsDesktopCollapsed(false)}
-                  className="flex items-center justify-center w-10 h-10 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded border-2 border-slate-400 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  className={`${baseBtn} ${ghostBtn} h-10 w-10`}
                   title="نمایش فیلترها"
                 >
-                  <Filter className="w-5 h-5" />
+                  <Filter className="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -413,17 +404,18 @@ export default function ExamSidebar({
         </div>
       </aside>
 
-      {/* مدال فیلترهای موبایل */}
+      {/* mobile bottom sheet */}
       <AnimatePresence>
         {isMobileFilterOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-[90] bg-black/40 dark:bg-black/60 lg:hidden"
+              className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-[1px] dark:bg-black/60 lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileFilterOpen(false)}
             />
+
             <motion.div
               className="fixed inset-x-0 bottom-0 z-[95] lg:hidden"
               initial={{ y: "100%" }}
@@ -431,76 +423,86 @@ export default function ExamSidebar({
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
             >
-              <div className="mx-auto w-full max-w-2xl rounded-t-xl bg-white dark:bg-slate-900 shadow-2xl border-t-2 border-slate-400 dark:border-slate-600">
-                <div className="px-4 pt-3 pb-2 border-b-2 border-slate-400 dark:border-slate-600">
-                  <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-400 dark:bg-slate-600" />
+              <div className="mx-auto w-full max-w-2xl rounded-t-2xl border-t border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                <div className="border-b border-slate-200 px-4 pb-3 pt-3 dark:border-slate-700">
+                  <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700" />
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-slate-800 dark:text-slate-100">فیلتر سوالات</h3>
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                      فیلتر سوالات
+                    </h3>
                     <button
                       onClick={() => setIsMobileFilterOpen(false)}
-                      className="rounded border-2 border-slate-400 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      className={`${baseBtn} ${ghostBtn} h-9 w-9`}
+                      aria-label="بستن"
                     >
-                      بستن
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="max-h-[75vh] overflow-y-auto p-3 space-y-3">
+                <div className="max-h-[75vh] space-y-3 overflow-y-auto p-3">
                   <Link
                     href={getClearFiltersUrl()}
                     onClick={() => setIsMobileFilterOpen(false)}
-                    className="group flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border-slate-600 p-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                      <List className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    <div className="flex items-center gap-2">
+                      <List className="h-4 w-4 text-slate-500" />
                       <span>نمایش همه سوالات دوره</span>
                     </div>
                   </Link>
 
-                  <div className="rounded-lg border-2 border-slate-400 dark:border-slate-600 overflow-hidden">
+                  {/* mobile chapters */}
+                  <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
                     <button
-                      onClick={() => setIsChaptersOpen(!isChaptersOpen)}
-                      className="w-full bg-white dark:bg-slate-800 p-4 flex items-center justify-between"
+                      onClick={() => setIsChaptersOpen((v) => !v)}
+                      className="flex w-full items-center justify-between bg-white p-4 dark:bg-slate-900"
                     >
                       <div className="flex items-center gap-2">
-                        <PlayCircle className="w-5 h-5 text-rose-500 dark:text-rose-400" />
-                        <span className="text-slate-700 dark:text-slate-200">بر اساس سرفصل</span>
+                        <PlayCircle className="h-5 w-5 text-rose-500" />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                          بر اساس سرفصل
+                        </span>
                       </div>
-                      <ChevronDown className={`w-5 h-5 text-slate-400 dark:text-slate-500 transition ${isChaptersOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-5 w-5 text-slate-400 transition ${isChaptersOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
+
                     <AnimatePresence initial={false}>
                       {isChaptersOpen && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-slate-50 dark:bg-slate-900/50"
+                          className="overflow-hidden bg-slate-50 dark:bg-slate-800/40"
                         >
-                          <div className="p-2 flex flex-col gap-1 max-h-[34vh] overflow-y-auto">
+                          <div className="flex max-h-[34vh] flex-col gap-1 overflow-y-auto p-2">
                             <button
                               onClick={() => onChapterClick(null)}
-                              className={`text-right p-2.5 rounded ${
+                              className={`rounded-lg px-3 py-2.5 text-right text-sm ${
                                 !currentChapterId
-                                  ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-2 border-rose-400 dark:border-rose-700"
-                                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
+                                  ? "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                               }`}
                             >
                               همه سرفصل‌ها
                             </button>
+
                             {chapters.map((chapter) => {
                               const isActive = currentChapterId === chapter.id;
                               return (
                                 <button
                                   key={chapter.id}
                                   onClick={() => onChapterClick(chapter.id)}
-                                  className={`flex items-center justify-between w-full text-right p-2.5 rounded ${
+                                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-right text-sm ${
                                     isActive
-                                      ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 border-2 border-rose-400 dark:border-rose-700"
-                                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
+                                      ? "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-300"
+                                      : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                                   }`}
                                 >
                                   <span className="truncate">{chapter.title}</span>
-                                  {isActive && <CheckCircle2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />}
+                                  {isActive && <CheckCircle2 className="h-4 w-4" />}
                                 </button>
                               );
                             })}
@@ -510,57 +512,63 @@ export default function ExamSidebar({
                     </AnimatePresence>
                   </div>
 
-                  <div className="rounded-lg border-2 border-slate-400 dark:border-slate-600 overflow-hidden">
+                  {/* mobile types */}
+                  <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
                     <button
-                      onClick={() => setIsTypeOpen(!isTypeOpen)}
-                      className="w-full bg-white dark:bg-slate-800 p-4 flex items-center justify-between"
+                      onClick={() => setIsTypeOpen((v) => !v)}
+                      className="flex w-full items-center justify-between bg-white p-4 dark:bg-slate-900"
                     >
                       <div className="flex items-center gap-2">
-                        <GraduationCap className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        <span className="text-slate-700 dark:text-slate-200">بر اساس نوع سوال</span>
+                        <GraduationCap className="h-5 w-5 text-blue-500" />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                          بر اساس نوع سوال
+                        </span>
                       </div>
-                      <ChevronDown className={`w-5 h-5 text-slate-400 dark:text-slate-500 transition ${isTypeOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-5 w-5 text-slate-400 transition ${isTypeOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
+
                     <AnimatePresence initial={false}>
                       {isTypeOpen && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-slate-50 dark:bg-slate-900/50"
+                          className="overflow-hidden bg-slate-50 dark:bg-slate-800/40"
                         >
-                          <div className="p-3 flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 p-3">
                             <button
                               onClick={() => onTypeClick(null)}
-                              className={`p-2.5 rounded border-2 ${
+                              className={`rounded-lg border px-3 py-2.5 text-sm ${
                                 !currentQuestionType
-                                  ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500/50 dark:bg-blue-900/40 dark:text-blue-300"
-                                  : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                  ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                  : "border-slate-300 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                               }`}
                             >
                               همه نوع سوالات
                             </button>
                             <button
                               onClick={() => onTypeClick("SARASARI")}
-                              className={`flex items-center justify-between p-2.5 rounded border-2 ${
+                              className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm ${
                                 currentQuestionType === "SARASARI"
-                                  ? "border-purple-500 bg-purple-50 text-purple-700 dark:border-purple-500/50 dark:bg-purple-900/40 dark:text-purple-300"
-                                  : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                  ? "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                                  : "border-slate-300 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                               }`}
                             >
                               <span>سوالات سراسری</span>
-                              {currentQuestionType === "SARASARI" && <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                              {currentQuestionType === "SARASARI" && <CheckCircle2 className="h-4 w-4" />}
                             </button>
                             <button
                               onClick={() => onTypeClick("TALIFI")}
-                              className={`flex items-center justify-between p-2.5 rounded border-2 ${
+                              className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm ${
                                 currentQuestionType === "TALIFI"
-                                  ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-500/50 dark:bg-orange-900/40 dark:text-orange-300"
-                                  : "border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                  ? "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+                                  : "border-slate-300 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                               }`}
                             >
                               <span>سوالات تالیفی</span>
-                              {currentQuestionType === "TALIFI" && <CheckCircle2 className="w-4 h-4 text-orange-600 dark:text-orange-400" />}
+                              {currentQuestionType === "TALIFI" && <CheckCircle2 className="h-4 w-4" />}
                             </button>
                           </div>
                         </motion.div>

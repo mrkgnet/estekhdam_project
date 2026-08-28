@@ -24,7 +24,7 @@ interface Props {
 
 type ExcelRow = (string | number | boolean | undefined)[];
 
-// تطابق دقیق با ایندکس‌های کد قبلی شما + اضافه شدن نوع سوال
+// تطابق دقیق با ایندکس‌ها + اضافه شدن نوع سوال و کد سوال
 const EXCEL_COLUMNS = {
   QUESTION_TEXT: 0,
   OPTION_1: 1,
@@ -34,8 +34,16 @@ const EXCEL_COLUMNS = {
   ANSWER_TEXT: 5,
   EXAM_POINTS: 6,
   CORRECT_ANSWER: 7,
-  QUESTION_TYPE: 8, // ستون جدید
+  QUESTION_TYPE: 8,
+  QUESTION_CODE: 9, // ستون کد سوال (اختیاری)
 } as const;
+
+// تابع تولید کد رندم برای سوالات
+const generateRandomCode = () => {
+  const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const randomNum = Math.floor(Math.random() * 1000);
+  return `Q-${randomStr}${randomNum}`;
+};
 
 export default function BatchAddQuestionsModal({
   isOpen,
@@ -86,7 +94,7 @@ export default function BatchAddQuestionsModal({
     }
   };
 
-  // تابع پارس کردن هر ردیف بر اساس ایندکس (مشابه سیستم سینگل)
+  // تابع پارس کردن هر ردیف بر اساس ایندکس
   const parseExcelRow = (row: ExcelRow) => {
     const getString = (index: number): string => {
       const value = row[index];
@@ -98,15 +106,19 @@ export default function BatchAddQuestionsModal({
       if (value === undefined || value === null) return 1;
 
       const parsed = parseInt(String(value), 10);
-      return parsed >= 1 && parsed <= 4 ? parsed : 1; // اگر نامعتبر بود ۱ در نظر میگیرد
+      return parsed >= 1 && parsed <= 4 ? parsed : 1; 
     };
 
     const getQuestionType = (index: number): string => {
       const val = getString(index).toUpperCase();
       if (val.includes("سراسری") || val === "SARASARI") return "SARASARI";
       if (val.includes("تالیفی") || val === "TALIFI") return "TALIFI";
-      return defaultQuestionType; // اگر خالی بود یا نامعتبر، مقدار پیش‌فرض را می‌گیرد
+      return defaultQuestionType; 
     };
+
+    // بررسی وجود کد سوال در اکسل، در غیر این صورت تولید کد رندم
+    const rawQuestionCode = getString(EXCEL_COLUMNS.QUESTION_CODE);
+    const finalQuestionCode = rawQuestionCode !== "" ? rawQuestionCode : generateRandomCode();
 
     return {
       questionText: getString(EXCEL_COLUMNS.QUESTION_TEXT),
@@ -120,6 +132,7 @@ export default function BatchAddQuestionsModal({
       examPoints: getString(EXCEL_COLUMNS.EXAM_POINTS),
       correctAnswer: getCorrectAnswerIndex(EXCEL_COLUMNS.CORRECT_ANSWER),
       questionType: getQuestionType(EXCEL_COLUMNS.QUESTION_TYPE),
+      questionCode: finalQuestionCode, // ✅ ارسال کد نهایی به سرور
     };
   };
 
@@ -146,7 +159,6 @@ export default function BatchAddQuestionsModal({
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
 
-        // استفاده از header: 1 برای خواندن خروجی آرایه‌ای بر اساس ایندکس ستون‌ها
         const data = XLSX.utils.sheet_to_json<ExcelRow>(worksheet, { header: 1 });
 
         if (data.length < 2) {
@@ -154,11 +166,9 @@ export default function BatchAddQuestionsModal({
           return;
         }
 
-        // نادیده گرفتن ردیف اول (هدر) و پارس کردن ردیف‌های بعدی
         const rows = data.slice(1);
         const formattedQuestions = rows.map((row) => parseExcelRow(row));
 
-        // فیلتر کردن ردیف‌های خالی
         const validQuestions = formattedQuestions.filter(
           (question) => question.questionText !== ""
         );
@@ -203,12 +213,12 @@ export default function BatchAddQuestionsModal({
         className="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 py-3 sm:px-5 sm:py-4">
-          <h2 className="flex items-center gap-2.5 text-xs font-bold text-slate-800 sm:text-sm">
-            <span className="rounded-lg bg-emerald-50 p-2">
-              <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 py-3 sm:px-5 sm:py-3.5">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-slate-800 sm:text-[15px]">
+            <span className="rounded-lg bg-emerald-50 p-1.5">
+              <FileSpreadsheet className="h-4 w-4 text-emerald-600 sm:h-[18px] sm:w-[18px]" />
             </span>
-            افزودن گروهی سوالات (اکسل)
+            افزودن گروهی سوالات اکسل
           </h2>
 
           <button
@@ -216,47 +226,52 @@ export default function BatchAddQuestionsModal({
             onClick={onClose}
             disabled={isPending}
             aria-label="بستن"
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50"
+            className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50"
           >
-            <X className="h-5 w-5" />
+            <X className="h-[18px] w-[18px]" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:space-y-5 sm:p-5">
           {/* راهنما */}
-          <div className="flex gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-[10px] leading-relaxed text-blue-800 sm:text-xs">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+          <div className="flex gap-2.5 rounded-xl border border-blue-100 bg-blue-50/60 p-3 text-[11px] leading-relaxed text-blue-800 sm:text-xs">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
 
             <div>
-              <p className="mb-1.5 font-semibold text-blue-900">
-                ترتیب اجباری ستون‌های اکسل:
+              <p className="mb-0.5 font-semibold">
+                ساختار استاندارد فایل اکسل:
               </p>
-              <p className="text-blue-800/90 leading-relaxed font-medium">
-                1. صورت سوال | 2. گزینه اول | 3. گزینه دوم | 4. گزینه سوم | 5. گزینه چهارم <br />
-                6. پاسخ تشریحی | 7. نکات کنکوری | 8. شماره گزینه صحیح (1 تا 4) | 9. نوع سوال
-              </p>
-              <p className="mt-2 text-[10px] opacity-75">
-                * نام هدر مهم نیست، فقط <span className="font-bold">ترتیب ستون‌ها</span> دقیقاً رعایت شود. <br/>
-                * ستون نوع سوال اگر خالی باشد، مقدار پیش‌فرض انتخاب شده اعمال می‌شود.
+
+              <p className="text-blue-700/80">
+                ترتیب ستون‌های فایل شما باید دقیقاً به شکل زیر باشد:
+                <br />
+                <span className="font-bold">
+                  1. صورت سوال | 2. گزینه اول | 3. گزینه دوم | 4. گزینه سوم | 5. گزینه چهارم <br />
+                  6. پاسخ تشریحی | 7. نکات کنکوری | 8. پاسخ صحیح (1 تا 4) | 9. نوع سوال | 10. کد سوال
+                </span>
+                <br />
+                <span className="mt-1 block opacity-75">
+                  * ستون نوع سوال (سراسری/تالیفی) و کد سوال اختیاری هستند. سیستم در صورت خالی بودن، کد رندم تولید می‌کند.
+                </span>
               </p>
             </div>
           </div>
 
           {/* تنظیمات پیش‌فرض */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-700">
-                فصل (اختیاری)
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-700 sm:text-xs">
+                فصل اختیاری
               </label>
+
               <select
                 value={selectedChapterId}
                 onChange={(e) => setSelectedChapterId(e.target.value)}
                 disabled={isPending}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 sm:text-[13px]"
               >
-                <option value="">بدون فصل (عمومی)</option>
+                <option value="">بدون فصل عمومی</option>
                 {chapters?.map((chapter) => (
                   <option key={chapter.id} value={chapter.id}>
                     {chapter.title}
@@ -265,15 +280,16 @@ export default function BatchAddQuestionsModal({
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-700">
-                دسته‌بندی (اختیاری)
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-700 sm:text-xs">
+                دسته‌بندی اختیاری
               </label>
+
               <select
                 value={selectedCategoryId}
                 onChange={(e) => setSelectedCategoryId(e.target.value)}
                 disabled={isPending}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 sm:text-[13px]"
               >
                 <option value="">بدون دسته‌بندی</option>
                 {categoryChapters?.map((category) => (
@@ -284,15 +300,16 @@ export default function BatchAddQuestionsModal({
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-slate-700">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-semibold text-slate-700 sm:text-xs">
                 نوع سوال پیش‌فرض
               </label>
+
               <select
                 value={defaultQuestionType}
                 onChange={(e) => setDefaultQuestionType(e.target.value)}
                 disabled={isPending}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 sm:text-[13px]"
               >
                 <option value="TALIFI">تالیفی</option>
                 <option value="SARASARI">سراسری</option>
@@ -302,12 +319,12 @@ export default function BatchAddQuestionsModal({
 
           {/* ناحیه آپلود فایل */}
           <div>
-            <label className="mb-2 block text-[11px] font-semibold text-slate-700">
+            <label className="mb-1.5 block text-[11px] font-semibold text-slate-700 sm:text-xs">
               فایل سوالات
             </label>
 
             {!selectedFile ? (
-              <div className="group relative cursor-pointer rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition-colors hover:border-emerald-300 hover:bg-slate-50">
+              <div className="group relative cursor-pointer rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-5 text-center transition-colors hover:border-emerald-300 hover:bg-slate-50 sm:p-6">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -316,36 +333,38 @@ export default function BatchAddQuestionsModal({
                   className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 />
 
-                <div className="flex flex-col items-center gap-3">
-                  <div className="rounded-full bg-white p-3 text-slate-500 shadow-sm ring-1 ring-slate-100 transition-colors group-hover:text-emerald-600">
-                    <Upload className="h-6 w-6" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="rounded-full bg-white p-2.5 text-slate-500 shadow-sm ring-1 ring-slate-100 transition-colors group-hover:text-emerald-600">
+                    <Upload className="h-5 w-5" />
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-slate-700">
+                    <p className="text-xs font-semibold text-slate-700 sm:text-[13px]">
                       برای انتخاب فایل کلیک کنید یا فایل را بکشید
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-400">
-                      فایل‌های XLSX و CSV پشتیبانی می‌شوند
+
+                    <p className="mt-0.5 text-[10px] text-slate-400 sm:text-[11px]">
+                      فایل‌های XLSX، XLS و CSV پشتیبانی می‌شوند
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
-                <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-                  <div className="rounded-lg bg-white p-2.5 shadow-sm">
-                    <FileText className="h-6 w-6 text-emerald-600" />
+              <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 sm:p-3.5">
+                <div className="flex min-w-0 items-center gap-2.5 overflow-hidden">
+                  <div className="rounded-lg bg-white p-2 shadow-sm">
+                    <FileText className="h-5 w-5 text-emerald-600" />
                   </div>
 
                   <div className="min-w-0 truncate">
                     <p
                       dir="ltr"
-                      className="truncate text-xs font-semibold text-slate-800"
+                      className="truncate text-xs font-semibold text-slate-800 sm:text-[13px]"
                     >
                       {selectedFile.name}
                     </p>
-                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-emerald-600">
+
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-emerald-600 sm:text-[11px]">
                       <CheckCircle2 className="h-3 w-3" />
                       فایل آماده آپلود
                     </p>
@@ -357,15 +376,16 @@ export default function BatchAddQuestionsModal({
                   onClick={removeFile}
                   disabled={isPending}
                   title="حذف فایل"
-                  className="ml-1 shrink-0 rounded-lg p-2 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50"
+                  aria-label="حذف فایل"
+                  className="ml-1 shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50"
                 >
-                  <Trash2 className="h-5 w-5" />
+                  <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
             )}
 
             {fileError && (
-              <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-rose-500">
+              <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-rose-500 sm:text-xs">
                 <span className="block h-1 w-1 rounded-full bg-rose-500" />
                 {fileError}
               </p>
@@ -374,12 +394,12 @@ export default function BatchAddQuestionsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 flex-col-reverse items-center justify-end gap-3 rounded-b-2xl border-t border-slate-100 bg-slate-50/60 p-4 sm:flex-row sm:p-5">
+        <div className="flex shrink-0 flex-col-reverse items-center justify-end gap-2.5 rounded-b-2xl border-t border-slate-100 bg-slate-50/60 px-4 py-3 sm:flex-row sm:px-5 sm:py-3.5">
           <button
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="w-full rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 sm:w-auto"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 sm:w-auto sm:text-[13px]"
           >
             انصراف
           </button>
@@ -388,11 +408,11 @@ export default function BatchAddQuestionsModal({
             type="button"
             onClick={handleConfirmUpload}
             disabled={!selectedFile || isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 text-xs font-medium text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-xs font-medium text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:text-[13px]"
           >
             {isPending ? (
               <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 در حال ثبت اطلاعات...
               </>
             ) : (

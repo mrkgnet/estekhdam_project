@@ -87,13 +87,15 @@ export async function fetchDataQuestion(
 }
 
 // ================= BATCH ADD QUESTIONS ACTION =================
+
 interface BatchQuestionInput {
   questionText: string;
   options: string[];
   correctAnswer: number;
   answerText?: string;
   examPoints?: string;
-  questionType?: QuestionType; // ✅ اضافه شدن فیلد نوع سوال
+  questionType?: QuestionType; 
+  questionCode?: string; // ✅ اضافه شدن فیلد کد سوال
 }
 
 export default async function batchAddQuestionsAction(
@@ -103,6 +105,11 @@ export default async function batchAddQuestionsAction(
   questionsData: BatchQuestionInput[]
 ) {
   try {
+    const currentUser = await infoCurentUser();
+    if (!currentUser || currentUser.role !== "admin") {
+      return { success: false, message: "عدم دسترسی. شما ادمین نیستید." };
+    }
+
     if (!productId || !questionsData || questionsData.length === 0) {
       return { success: false, message: "اطلاعات ارسالی ناقص است." };
     }
@@ -117,7 +124,8 @@ export default async function batchAddQuestionsAction(
       correctAnswer: Number(q.correctAnswer),
       answerText: q.answerText || "",
       examPoints: q.examPoints || "",
-      questionType: q.questionType || "TALIFI", // ✅ اختصاص پیش‌فرض یا مقدار ارسالی از سمت کلاینت
+      questionType: q.questionType || "TALIFI",
+      questionCode: q.questionCode || null, // ✅ مپ کردن کد سوال برای دیتابیس
       isActive: true,
     }));
 
@@ -127,7 +135,8 @@ export default async function batchAddQuestionsAction(
       skipDuplicates: true, // در صورت وجود خطای تکراری، رد شود
     });
 
-    revalidatePath("/admin/products/[id]/questions", "page");
+    // آدرس صفحه‌ای که میخواهید بعد از آپلود رفرش شود را اینجا بگذارید
+    revalidatePath("/adminp/products/[id]", "page");
 
     return { 
       success: true, 
