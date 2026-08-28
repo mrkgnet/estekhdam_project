@@ -160,7 +160,7 @@ export default function ExamQuestionsPage({
   const startIndex = (currentPage - 1) * 10;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 sm:p-6 lg:p-8" dir="rtl">
+    <div className="min-h-screen  p-4 sm:p-6 lg:p-8" dir="rtl">
       <div className="mx-auto max-w-7xl space-y-5">
         {/* Top Bar */}
         <header className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">

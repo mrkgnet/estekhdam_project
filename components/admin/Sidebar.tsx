@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -16,8 +17,30 @@ export default function Sidebar() {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [activeSubTabId, setActiveSubTabId] = useState<string | null>(null);
 
+  // وضعیت اسکرول صفحه
+  const [isScrolled, setIsScrolled] = useState(false);
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // --------------------------------------------------
+  // Detect page scroll
+  // --------------------------------------------------
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // --------------------------------------------------
   // Reset sidebar when pathname changes
@@ -192,6 +215,33 @@ export default function Sidebar() {
     activeSubTab?.subItems &&
     activeSubTab.subItems.length > 0;
 
+  // --------------------------------------------------
+  // Sidebar top position
+  //
+  // بالای صفحه:
+  // top-30
+  //
+  // بعد از اسکرول:
+  // top-0
+  // --------------------------------------------------
+  const sidebarTopClass = isScrolled
+    ? "top-0 h-screen"
+    : "top-30 h-[calc(100vh-4rem)]";
+
+  // --------------------------------------------------
+  // Backdrop top position
+  // --------------------------------------------------
+  const backdropTopClass = isScrolled
+    ? "top-0"
+    : "top-30";
+
+  // --------------------------------------------------
+  // Desktop close button position
+  // --------------------------------------------------
+  const closeButtonTopClass = isScrolled
+    ? "top-4"
+    : "top-34";
+
   return (
     <>
       {/* ==================================================
@@ -202,15 +252,15 @@ export default function Sidebar() {
           {/* Dark background */}
           <div
             onClick={close}
-            className="
+            className={`
               fixed
-              top-30
               inset-x-0
               bottom-0
               z-40
               bg-gray-900/40
               backdrop-blur-sm
-            "
+              ${backdropTopClass}
+            `}
             aria-hidden="true"
           />
 
@@ -219,11 +269,10 @@ export default function Sidebar() {
             type="button"
             onClick={close}
             aria-label="بستن منو"
-            className="
+            className={`
               hidden
               md:flex
               fixed
-              top-34
               right-[300px]
               z-[60]
               w-10
@@ -240,7 +289,8 @@ export default function Sidebar() {
               hover:text-red-600
               active:scale-95
               cursor-pointer
-            "
+              ${closeButtonTopClass}
+            `}
           >
             <X className="w-5 h-5" />
           </button>
@@ -265,8 +315,8 @@ export default function Sidebar() {
           shadow-xl
           border-l
           border-gray-100
-          top-30
-          h-[calc(100vh-4rem)]
+
+          ${sidebarTopClass}
 
           ${
             isOpen
@@ -517,12 +567,10 @@ export default function Sidebar() {
               onMouseEnter={() =>
                 handleInteraction(null, 0)
               }
-              className="
+              className={`
                 fixed
-                top-0
                 right-[280px]
                 w-[260px]
-                h-[calc(100vh-4rem)]
                 bg-white
                 shadow-2xl
                 z-[15]
@@ -530,7 +578,13 @@ export default function Sidebar() {
                 flex-col
                 border-r
                 border-gray-100
-              "
+
+                ${
+                  isScrolled
+                    ? "top-0 h-screen"
+                    : "top-0 h-[calc(100vh-4rem)]"
+                }
+              `}
             >
               <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
@@ -619,12 +673,10 @@ export default function Sidebar() {
               onMouseEnter={() =>
                 handleInteraction(null, 0)
               }
-              className="
+              className={`
                 fixed
-                top-16
                 right-[540px]
                 w-[260px]
-                h-[calc(100vh-4rem)]
                 bg-white
                 shadow-2xl
                 z-[10]
@@ -632,7 +684,13 @@ export default function Sidebar() {
                 border-gray-100
                 flex
                 flex-col
-              "
+
+                ${
+                  isScrolled
+                    ? "top-0 h-screen"
+                    : "top-16 h-[calc(100vh-4rem)]"
+                }
+              `}
             >
               <div className="p-6 border-b border-gray-100 bg-gray-50/50 font-bold text-gray-800">
                 {activeSubTab.title}
@@ -677,3 +735,4 @@ export default function Sidebar() {
     </>
   );
 }
+

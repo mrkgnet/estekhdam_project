@@ -247,7 +247,7 @@ export default function ExamPage({
   ];
 
   return (
-    <div className="min-h-screen max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300" dir="rtl">
+    <div className="min-h-screen  max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300" dir="rtl">
       <div className="mt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
