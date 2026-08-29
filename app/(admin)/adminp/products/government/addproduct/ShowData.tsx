@@ -1,10 +1,11 @@
 "use client";
 
 import addProductAction from "@/actions/admin/products/government/addproduct/Actions";
+import UploadImage from "@/components/admin/uploadImage/UploadImage";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import { 
   ArrowLeft, UploadCloud, X, LayoutList, Tag, 
-  DollarSign, ListChecks, Type, Link as LinkIcon, PackageOpen, Download
+  DollarSign, ListChecks, Type, Link as LinkIcon, PackageOpen, Download, Image as ImageIcon
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useRef } from "react";
@@ -27,18 +28,22 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
 
   const [state, formAction, isPending] = useActionState(addProductAction, initialState);
 
+  // States
   const [productName, setProductName] = useState("");
   const [productSlug, setProductSlug] = useState("");
   const [productType, setProductType] = useState<"MAIN" | "FREE_RESOURCE">("MAIN");
-  const [newPrice, setNewPrice] = useState<string | number>("");
-  const [oldPrice, setOldPrice] = useState<string | number>("");
-  const [downloadUrl, setDownloadUrl] = useState(""); // 🟢 استیت جدید
+  const [newPrice, setNewPrice] = useState<string>("");
+  const [oldPrice, setOldPrice] = useState<string>("");
+  const [downloadUrl, setDownloadUrl] = useState(""); 
   const [selectedCategories, setSelectedCategories] = useState<{ id: string, name: string }[]>([]);
   const [features, setFeatures] = useState<string[]>([]);
   const [featureInput, setFeatureInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [externalImageUrl, setExternalImageUrl] = useState("");
   const [description, setDescription] = useState("");
+  
+  // رفع خطا: اضافه کردن State برای ریست کردن آپلودر بعد از ثبت محصول
+  const [uploadResetKey, setUploadResetKey] = useState(0);
 
   useEffect(() => {
     if (state?.message) {
@@ -52,9 +57,10 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
         setProductType("MAIN");
         setNewPrice("");
         setOldPrice("");
-        setDownloadUrl(""); // 🟢 ریست
+        setDownloadUrl("");
         clearImage();
         setDescription(""); 
+        setUploadResetKey(prev => prev + 1); // تغییر کلید برای ریست شدن کامپوننت آپلودر
       } else {
         toast.error(state.message);
       }
@@ -78,17 +84,20 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setExternalImageUrl(""); 
-      setPreviewImage(URL.createObjectURL(file));}
-  };
-
   const clearImage = () => {
     setPreviewImage(null);
     setExternalImageUrl("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // رفع خطا: اضافه کردن تابع دریافت لینک موفقیت آمیز از کامپوننت آپلود
+  const handleUploadSuccess = (url: string) => {
+    if(url) {
+      setExternalImageUrl(url);
+      setPreviewImage(url);
+    } else {
+      clearImage(); // در صورتی که کاربر دکمه پاک کردن را در آپلودر زد
+    }
   };
 
   const handleSelectCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -124,26 +133,37 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
     }
   };
 
+  // هندل کردن قیمت و فیلتر کردن کاراکترهای غیر عددی
+  const handleNewPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, ""); // حذف همه کاراکترهای غیر عددی
+    setNewPrice(numericValue);
+  };
+
+  const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, "");
+    setOldPrice(numericValue);
+  };
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6 text-xs md:text-sm" dir="rtl">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6 text-sm" dir="rtl">
       
-      <div className="flex flex-wrap items-center justify-between mb-8">
+      {/* هدر صفحه */}
+      <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="tabsDataUserPanel text-gray-800 font-bold text-xl">افزودن محصول جدید</h1>
-          <p className="text-gray-500 tabsDataUserPanel mt-2">اطلاعات محصول، قیمت و ویژگی‌های آن را وارد کنید</p>
+          <h1 className="tabsDataUserPanel text-gray-800 font-bold text-2xl">افزودن محصول جدید</h1>
+          <p className="text-gray-500 tabsDataUserPanel mt-1.5 text-sm">اطلاعات محصول، قیمت و ویژگی‌های آن را وارد کنید</p>
         </div>
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm font-medium cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm font-medium cursor-pointer"
         >
           <span>بازگشت</span>
           <ArrowLeft className="w-4 h-4" />
         </button>
       </div>
 
-      <form ref={formRef} action={formAction} className="space-y-8">
-        
+      <form ref={formRef} action={formAction} className="space-y-6">
         {selectedCategories.map((cat, index) => (
           <input key={`cat-${index}`} type="hidden" name="categories" value={cat.id} />
         ))}
@@ -151,30 +171,30 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           <input key={`feat-${index}`} type="hidden" name="features" value={feature} />
         ))}
 
-        {/* 1. اطلاعات پایه و تصویر */}
+        {/* 1. اطلاعات پایه */}
         <section className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
               <Type className="w-5 h-5" />
             </div>
-            <h2 className="tabsDataUserPanel text-gray-800 font-bold">اطلاعات اصلی و تصویر</h2>
+            <h2 className="tabsDataUserPanel text-gray-800 font-bold text-lg">اطلاعات اصلی</h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700">نام محصول <span className="text-red-500">*</span></label>
+              <label className="tabsDataUserPanel text-gray-700 font-medium">نام محصول <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
                 name="name" 
                 value={productName}
                 onChange={handleNameChange}
                 required 
-                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500" 
+                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all" 
                 placeholder="مثال: بسته آموزشی آزمون استخدامی" 
               />
             </div>
             <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700 flex justify-between">
+              <label className="tabsDataUserPanel text-gray-700 font-medium flex justify-between">
                 <span>اسلاگ (شناسه URL) <span className="text-red-500">*</span></span>
                 <span className="text-xs text-gray-400 font-normal">تولید خودکار</span>
               </label>
@@ -184,7 +204,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                 value={productSlug}
                 onChange={(e) => setProductSlug(e.target.value)}
                 required 
-                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left font-mono tabsDataUserPanel" 
+                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-left font-mono tabsDataUserPanel" 
                 dir="ltr" 
                 placeholder="product-slug" 
               />
@@ -192,16 +212,16 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           </div>
 
           {/* نوع محصول و قیمت‌گذاری */}
-          <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+          <div className="grid md:grid-cols-3 gap-6 pt-2">
             <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+              <label className="tabsDataUserPanel text-gray-700 font-medium flex items-center gap-2">
                 <PackageOpen className="w-4 h-4 text-blue-500"/> نوع محصول <span className="text-red-500">*</span>
               </label>
               <select 
                 name="type" 
                 value={productType}
                 onChange={(e) => setProductType(e.target.value as "MAIN" | "FREE_RESOURCE")}
-                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 cursor-pointer transition-all"
               >
                 <option value="MAIN">محصول اصلی / پولی</option>
                 <option value="FREE_RESOURCE">منابع رایگان / دانلودی</option>
@@ -209,45 +229,53 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </div>
 
             <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+              <label className="tabsDataUserPanel text-gray-700 font-medium flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-green-500"/> قیمت فروش (تومان) <span className="text-red-500">*</span>
               </label>
               <input 
-                type="number" 
-                name="newPrice" 
+                type="text" 
+                inputMode="numeric"
                 required={productType === "MAIN"} 
                 readOnly={productType === "FREE_RESOURCE"}
-                value={productType === "FREE_RESOURCE" ? 0 : newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-green-500 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`}placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"} 
+                value={productType === "FREE_RESOURCE" ? "0" : newPrice ? Number(newPrice).toLocaleString() : ""}
+                onChange={handleNewPriceChange}
+                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none transition-all text-left font-mono ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-green-500/50 focus:border-green-500"}`}
+                placeholder={productType === "FREE_RESOURCE" ? "رایگان" : "0"} 
+                dir="ltr"
               />
-              {productType === "FREE_RESOURCE" && <p className="text-[10px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>}
+              {/* ارسال مقدار واقعی به سرور */}
+              <input type="hidden" name="newPrice" value={productType === "FREE_RESOURCE" ? "0" : newPrice} />
+              {productType === "FREE_RESOURCE" && <p className="text-[11px] text-green-600 mt-1">منابع رایگان نیاز به قیمت‌گذاری ندارند.</p>}
             </div>
 
             <div className="space-y-2">
-              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-gray-400"/> قیمت قبل (تومان)</label>
+              <label className="tabsDataUserPanel text-gray-700 font-medium flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-gray-400"/> قیمت قبل (تومان)
+              </label>
               <input 
-                type="number" 
-                name="oldPrice" 
+                type="text" 
+                inputMode="numeric"
                 readOnly={productType === "FREE_RESOURCE"}
-                value={productType === "FREE_RESOURCE" ? 0 : oldPrice}
-                onChange={(e) => setOldPrice(e.target.value)}
-                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-gray-400 ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400" : "bg-gray-50/50"}`} 
+                value={productType === "FREE_RESOURCE" ? "0" : oldPrice ? Number(oldPrice).toLocaleString() : ""}
+                onChange={handleOldPriceChange}
+                className={`w-full px-4 py-3.5 border border-gray-200 rounded-xl outline-none transition-all text-left font-mono ${productType === "FREE_RESOURCE" ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-gray-400 focus:border-gray-400"}`} 
                 placeholder="0" 
+                dir="ltr"
               />
+              {/* ارسال مقدار واقعی به سرور */}
+              <input type="hidden" name="oldPrice" value={productType === "FREE_RESOURCE" ? "0" : oldPrice} />
             </div>
           </div>
 
-          {/* 🟢 فیلد آدرس دانلود - فقط برای FREE_RESOURCE */}
+          {/* آدرس دانلود - فقط برای FREE_RESOURCE */}
           {productType === "FREE_RESOURCE" && (
-            <div className="space-y-2 pt-4 border-t border-gray-100">
-              <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2">
+            <div className="space-y-2 pt-4 border-t border-gray-100 animate-in fade-in zoom-in duration-300">
+              <label className="tabsDataUserPanel text-gray-700 font-medium flex items-center gap-2">
                 <Download className="w-4 h-4 text-orange-500"/> آدرس فایل دانلودی <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <LinkIcon className="h-4 w-4 text-gray-400" />
+                  <LinkIcon className="h-4 w-4 text-orange-400" />
                 </div>
                 <input
                   type="url"
@@ -256,101 +284,107 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                   onChange={(e) => setDownloadUrl(e.target.value)}
                   required
                   placeholder="https://example.com/file.pdf"
-                  className="w-full pr-10 pl-4 py-3.5 border border-orange-200 rounded-xl bg-orange-50/30 outline-none focus:ring-2 focus:ring-orange-400 text-left"dir="ltr"
+                  className="w-full pr-11 pl-4 py-3.5 border border-orange-200 rounded-xl bg-orange-50/30 outline-none focus:bg-orange-50 focus:ring-2 focus:ring-orange-400/50 transition-all text-left"
+                  dir="ltr"
                 />
               </div>
               <p className="text-[11px] text-gray-400">آدرس مستقیم فایل دانلودی را وارد کنید (PDF، ZIP و ...)</p>
             </div>
           )}
+        </section>
 
-          {/* بخش تصویر */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <label className="tabsDataUserPanel text-gray-700">تصویر محصول (آپلود یا لینک) <span className="text-red-500">*</span></label>
-            <div className="relative">
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                <LinkIcon className="h-4 w-4 text-gray-400" />
+        {/* 2. تصویر محصول */}
+        <section className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                <ImageIcon className="w-5 h-5" />
               </div>
-              <input 
-                type="url" 
-                name="externalImageUrl"
-                value={externalImageUrl}
-                onChange={handleExternalUrlChange}
-                disabled={!!(previewImage && !externalImageUrl && fileInputRef.current?.value)}
-                placeholder="لینک مستقیم تصویر را اینجا وارد کنید (مثال: https://site.com/img.jpg)"
-                className="w-full pr-10 pl-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-blue-500 text-left disabled:opacity-50 disabled:bg-gray-100"
-                dir="ltr"
-              />
+              <h2 className="tabsDataUserPanel text-gray-800 font-bold text-lg">تصویر محصول</h2>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <UploadImage key={`main-${uploadResetKey}`} onUploadSuccess={handleUploadSuccess} />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="tabsDataUserPanel text-gray-700 font-medium block">
+                  یا لینک مستقیم تصویر را وارد کنید <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <LinkIcon className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="url"
+                    name="externalImageUrl"
+                    required
+                    value={externalImageUrl}
+                    onChange={handleExternalUrlChange}
+                    placeholder="https://example.com/main-image.jpg"
+                    className="w-full pr-11 pl-4 py-3 border border-gray-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-left"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-center space-x-4 space-x-reverse text-gray-400 text-sm">
-              <span className="h-[1px] w-full bg-gray-200"></span>
-              <span>یا</span>
-              <span className="h-[1px] w-full bg-gray-200"></span>
-            </div>
-
-            <div className={`relative border-2 border-dashed rounded-2xl transition-all overflow-hidden group ${externalImageUrl ? 'border-gray-200 bg-gray-100 opacity-50' : 'border-gray-300 hover:border-blue-400 bg-gray-50/50'}`}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                name="imageFile"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={!!externalImageUrl}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
-              />
-              {!previewImage ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <div className="w-14 h-14 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-500 group-hover:text-blue-500 transition-colors">
-                    <UploadCloud className="w-6 h-6" />
+            {/* بخش پیش‌نمایش تصویر */}
+            <div className="flex flex-col space-y-2">
+              <label className="tabsDataUserPanel text-gray-700 font-medium">پیش‌نمایش تصویر</label>
+              <div className="relative w-full h-full min-h-[220px] bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden group transition-all">
+                {previewImage ? (
+                  <>
+                    <img src={previewImage} alt="Preview" className="w-full h-full object-contain p-2" />
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="absolute top-3 right-3 z-20 p-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 rounded-xl shadow-sm backdrop-blur-sm transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                      title="حذف تصویر"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center text-gray-400 flex flex-col items-center">
+                    <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
+                    <span className="text-sm">تصویری انتخاب نشده است</span>
                   </div>
-                  <p className="tabsDataUserPanel font-medium text-gray-700">برای انتخاب عکس کلیک کنید یا عکس را اینجا رها کنید</p>
-                  <p className="text-xs text-gray-400 mt-2">فرمت‌های مجاز: JPG, PNG, WEBP</p>
-                </div>
-              ) : (
-                <div className="relative w-full h-64 bg-gray-100 flex items-center justify-center">
-                  <img src={previewImage} alt="Preview" className="w-full h-full object-contain" />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute top-4 right-4 z-20 p-2 bg-white/90 hover:bg-red-50 text-red-500 rounded-xl shadow-sm backdrop-blur-sm transition-all cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                  <div className="absolute bottom-4 left-4 z-20 px-4 py-2 bg-black/60 text-white text-xs rounded-lg backdrop-blur-sm">
-                    {externalImageUrl ? "تصویر از لینک" : "برای تغییر عکس کلیک کنید"}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* 2. دسته‌بندی و ویژگی‌ها */}
+        {/* 3. دسته‌بندی و ویژگی‌ها */}
         <div className="grid md:grid-cols-2 gap-6">
           <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
             <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-              <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-xl">
                 <LayoutList className="w-5 h-5" />
               </div>
-              <h2 className="tabsDataUserPanel text-gray-800 font-bold">دسته‌بندی‌های محصول</h2>
+              <h2 className="tabsDataUserPanel text-gray-800 font-bold text-lg">دسته‌بندی‌های محصول</h2>
             </div>
             
             <div className="space-y-4">
-              <select defaultValue="" onChange={handleSelectCategory} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
+              <select defaultValue="" onChange={handleSelectCategory} className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:bg-white focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all cursor-pointer">
                 <option value="" disabled>جستجو و انتخاب دسته‌بندی...</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>{cat.catName}</option>
                 ))}
               </select>
-
-              <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
+              
+              <div className="flex flex-wrap gap-2 min-h-[44px] items-start p-3 bg-gray-50 rounded-xl border border-gray-100">
                 {selectedCategories.length === 0 ? (
-                  <span className="tabsDataUserPanel text-gray-400 mt-2">هیچ دسته‌بندی انتخاب نشده است.</span>
+                  <span className="tabsDataUserPanel text-gray-400 text-sm m-auto">هیچ دسته‌بندی انتخاب نشده است.</span>
                 ) : (
                   selectedCategories.map((cat, index) => (
-                    <span key={index} className="flex items-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-lg tabsDataUserPanel animate-in fade-in zoom-in duration-200">
+                    <span key={index} className="flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg tabsDataUserPanel text-sm animate-in fade-in zoom-in duration-200">
                       {cat.name}
-                      <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 bg-white rounded-full p-0.5 cursor-pointer">
+                      <button type="button" onClick={() => removeCategory(cat.id)} className="text-purple-400 hover:text-red-500 hover:bg-white rounded-md p-0.5 transition-colors cursor-pointer">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -362,12 +396,12 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
 
           <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-5">
             <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <ListChecks className="w-5 h-5" />
               </div>
-              <h2 className="tabsDataUserPanel text-gray-800 font-bold">ویژگی‌ها و امکانات</h2>
+              <h2 className="tabsDataUserPanel text-gray-800 font-bold text-lg">ویژگی‌ها و امکانات</h2>
             </div>
-
+            
             <div className="space-y-4">
               <div className="flex gap-2">
                 <input
@@ -375,22 +409,22 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
                   value={featureInput}
                   onChange={(e) => setFeatureInput(e.target.value)}
                   onKeyDown={handleFeatureKeyDown}
-                  className="flex-1 px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 tabsDataUserPanel"
-                  placeholder="مثال: دارای پاسخنامه (Enter بزنید)"
+                  className="flex-1 px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50/50 outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all tabsDataUserPanel"
+                  placeholder="مثال: دارای پاسخنامه (سپس Enter بزنید)"
                 />
-                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-4 rounded-xl hover:bg-emerald-200 transition-colors font-medium cursor-pointer">
+                <button type="button" onClick={addFeature} className="bg-emerald-100 text-emerald-700 px-5 rounded-xl hover:bg-emerald-200 transition-colors font-medium cursor-pointer">
                   افزودن
                 </button>
               </div>
-
-              <div className="flex flex-wrap gap-2 min-h-[40px] items-start">
+              
+              <div className="flex flex-wrap gap-2 min-h-[44px] items-start p-3 bg-gray-50 rounded-xl border border-gray-100">
                 {features.length === 0 ? (
-                  <span className="tabsDataUserPanel text-gray-400 mt-2">ویژگی ثبت نشده است.</span>
+                  <span className="tabsDataUserPanel text-gray-400 text-sm m-auto">ویژگی ثبت نشده است.</span>
                 ) : (
                   features.map((f, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg tabsDataUserPanel animate-in fade-in zoom-in duration-200">
+                    <div key={index} className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg tabsDataUserPanel text-sm animate-in fade-in zoom-in duration-200">
                       <span>{f}</span>
-                      <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 bg-white rounded-full p-0.5 cursor-pointer">
+                      <button type="button" onClick={() => removeFeature(index)} className="text-emerald-400 hover:text-red-500 hover:bg-white rounded-md p-0.5 transition-colors cursor-pointer">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
@@ -401,20 +435,20 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
           </section>
         </div>
 
-        {/* 3. توضیحات */}
+        {/* 4. توضیحات کامل */}
         <input type="hidden" name="description" value={description} />
         <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-          <label className="tabsDataUserPanel text-gray-700 flex items-center gap-2 mb-2 font-bold">
-            <Tag className="w-4 h-4 text-blue-500"/> توضیحات محصول
+          <label className="tabsDataUserPanel text-gray-800 flex items-center gap-2 mb-2 font-bold text-lg">
+            <Tag className="w-5 h-5 text-blue-500"/> توضیحات کامل محصول
           </label>
-          <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+          <div className="border border-gray-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/50 transition-all">
             <RichTextEditor value={description} onChange={setDescription} />
           </div>
         </section>
 
         {/* نوار دکمه شناور */}
         <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 flex justify-center z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-          <div className="w-full max-w-5xl flex justify-end gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-5xl flex justify-end gap-3 px-4 sm:px-6 lg:px-8">
             <button
               type="button"
               onClick={() => router.back()}
@@ -425,7 +459,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center cursor-pointer justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20 cursor-pointer"
             >
               {isPending ? (
                 <span className="flex items-center gap-2">
@@ -438,6 +472,7 @@ export default function CreateProductPage({ dataCategory }: { dataCategory: any 
             </button>
           </div>
         </div>
+
       </form>
     </div>
   );

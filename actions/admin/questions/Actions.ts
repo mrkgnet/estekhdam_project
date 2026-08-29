@@ -64,10 +64,10 @@ export async function fetchDataQuestion(id: string, page: number = 1, limit: num
       },
       orderBy: [
         {
-          questionNumber: "asc",
+          questionNumber: "desc",
         },
         {
-          id: "asc",
+          id: "desc",
         },
       ],
       skip,
