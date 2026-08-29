@@ -1,16 +1,11 @@
-"use server"
+"use server";
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { QuestionType } from "@prisma/client";
 
 // ================= FETCH DATA QUESTION =================
-export async function fetchDataQuestion(
-  id: string,
-  page: number = 1,
-  limit: number = 10,
-  searchQuery?: string
-) {
+export async function fetchDataQuestion(id: string, page: number = 1, limit: number = 10, searchQuery?: string) {
   try {
     const currentUser = await infoCurentUser();
 
@@ -67,9 +62,14 @@ export async function fetchDataQuestion(
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        {
+          questionNumber: "asc",
+        },
+        {
+          id: "asc",
+        },
+      ],
       skip,
       take: limit,
     });
@@ -94,7 +94,7 @@ interface BatchQuestionInput {
   correctAnswer: number;
   answerText?: string;
   examPoints?: string;
-  questionType?: QuestionType; 
+  questionType?: QuestionType;
   questionCode?: string; // ✅ اضافه شدن فیلد کد سوال
 }
 
@@ -102,7 +102,7 @@ export default async function batchAddQuestionsAction(
   productId: string,
   chapterId: string | null,
   categoryChapterId: number | null,
-  questionsData: BatchQuestionInput[]
+  questionsData: BatchQuestionInput[],
 ) {
   try {
     const currentUser = await infoCurentUser();
@@ -138,11 +138,10 @@ export default async function batchAddQuestionsAction(
     // آدرس صفحه‌ای که میخواهید بعد از آپلود رفرش شود را اینجا بگذارید
     revalidatePath("/adminp/products/[id]", "page");
 
-    return { 
-      success: true, 
-      message: `${created.count} سوال با موفقیت به صورت گروهی اضافه شد.` 
+    return {
+      success: true,
+      message: `${created.count} سوال با موفقیت به صورت گروهی اضافه شد.`,
     };
-
   } catch (error) {
     console.error("Batch Add Error:", error);
     return { success: false, message: "خطایی در ثبت سوالات رخ داد." };
