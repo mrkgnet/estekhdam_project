@@ -10,7 +10,7 @@ export default function NavbarUser() {
   const toggleSidebar = useSidebarStore((state) => state.toggle);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center w-full px-4 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm sm:px-6 transition-colors duration-300">
+    <header className="sticky top-0 z-50 flex items-center w-full px-4 py-2 bg-white dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 shadow-sm sm:px-6 transition-colors duration-300">
 
       {/* دسته‌بندی‌ها */}
       <div className="flex items-center bg-blue-50 dark:bg-blue-900/30 rounded-sm transition-colors duration-300">
@@ -19,7 +19,7 @@ export default function NavbarUser() {
           aria-label="باز کردن منو"
           className="
             flex items-center gap-2 p-2
-            text-gray-600 dark:text-slate-300
+            text-slate-800 dark:text-slate-300
             
             border border-transparent
             border-b-0
@@ -46,7 +46,7 @@ export default function NavbarUser() {
             className="
               flex items-center gap-2 px-2 py-2
               font-medium
-              text-gray-600 dark:text-slate-300
+              text-slate-800 dark:text-slate-300
               
               border border-transparent
               border-b-0
@@ -60,19 +60,19 @@ export default function NavbarUser() {
           </Link>
 
           {/* استخدامی‌های دولتی */}
-          <div className="relative bg-slate-100 dark:bg-slate-800 rounded-md transition-colors duration-300">
+          <div className="relative  dark:bg-slate-800 rounded-md transition-colors duration-300">
 
             {/* برچسب جدید */}
-            <span className="absolute -top-3 left-0 px-2 py-0.5 text-[10px] font-bold text-white bg-blue-500 dark:bg-blue-600 rounded-full shadow-sm">
+            {/* <span className="absolute -top-3 left-0 px-2 py-0.5 text-[10px] font-bold text-white bg-blue-500 dark:bg-blue-600 rounded-full shadow-sm">
               جدید
-            </span>
+            </span> */}
 
             <Link
               href="/jobnews/government"
               className="
                 flex items-center gap-2 px-2 py-2
                 font-medium
-                text-gray-600 dark:text-slate-300
+                text-slate-800 dark:text-slate-300
                 
                 border border-transparent
                 border-b-0
