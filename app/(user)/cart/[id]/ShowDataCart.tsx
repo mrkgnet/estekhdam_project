@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
@@ -14,12 +14,16 @@ import {
   Plus,
   Clock,
   CheckCircle2,
+  Gift,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/modals/AuthModal";
 import toast from "react-hot-toast";
 import DotsLoader from "@/components/ui/Loading/DotsLoader";
-import { getUserSubscriptionsActiveAction } from "@/actions/admin/plans/Actions";
+import {
+  getUserSubscriptionsActiveAction,
+  activateFreeSubscriptionAction,
+} from "@/actions/admin/plans/Actions";
 
 // --- Type Definitions ---
 type Plan = {
@@ -50,13 +54,6 @@ type Props = {
 };
 
 // --- Helper Functions ---
-const now = new Date();
-const faDate = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-}).format(now);
-
 const formatPersianDate = (dateStr: Date | string) => {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return "-";
@@ -87,25 +84,79 @@ export default function ShowDataCart({ planData, planId }: Props) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConnectingToGateway, setIsConnectingToGateway] = useState(false);
+  const [, startTransition] = useTransition();
 
   const [userSubs, setUserSubs] = useState<UserSubscription[]>([]);
   const [isSubsLoading, setIsSubsLoading] = useState(false);
 
+  // محاسبه تاریخ امروز بر اساس تقویم شمسی
+  const [faDate, setFaDate] = useState("");
   useEffect(() => {
-    async function fetchSubscriptions() {
-      if (isLoggedIn && user?.id) {
-        setIsSubsLoading(true);
-        const result = await getUserSubscriptionsActiveAction(user.id);
-        if (result.success && result.data) {
-          setUserSubs(result.data as UserSubscription[]);
-        }
-        setIsSubsLoading(false);
-      }
-    }
+    setFaDate(
+      new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date())
+    );
+  }, []);
 
+  const fetchSubscriptions = async () => {
+    if (isLoggedIn && user?.id) {
+      setIsSubsLoading(true);
+      const result = await getUserSubscriptionsActiveAction(user.id);
+      if (result.success && result.data) {
+        setUserSubs(result.data as UserSubscription[]);
+      }
+      setIsSubsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSubscriptions();
   }, [isLoggedIn, user?.id]);
 
+  const isFreePlan = planData?.newPrice === 0;
+
+  const activeSub = userSubs.length > 0 ? userSubs[0] : null;
+  const currentRemainingDays = activeSub ? getRemainingDays(new Date(activeSub.endDate)) : 0;
+  const newPlanDays = planData?.durationDays || 30;
+
+  // شرط عدم امکان تمدید رایگان در صورت داشتن بیش از ۳ روز اعتبار
+  const isFreeRenewalBlocked = isFreePlan && activeSub && currentRemainingDays > 3;
+
+  // ۱. فعال‌سازی پلن رایگان (بدون ریدایرکت و باقی ماندن در همین صفحه)
+  const handleFreeActivation = async () => {
+    if (!user?.id || !planData) return;
+
+    if (isFreeRenewalBlocked) {
+      toast.error(
+        `شما در حال حاضر دارای اشتراک فعال هستید (${currentRemainingDays} روز باقی مانده). تمدید مجدد رایگان تنها در ۳ روز پایانی امکان‌پذیر است.`
+      );
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const response = await activateFreeSubscriptionAction(user.id, planData.id);
+
+      if (response.success) {
+        toast.success(response.message || "اشتراک رایگان با موفقیت برای شما فعال شد.");
+        await fetchSubscriptions();
+        startTransition(() => {
+          router.refresh();
+        });
+      } else {
+        toast.error(response.error || "خطا در فعال‌سازی اشتراک رایگان.");
+      }
+    } catch {
+      toast.error("خطا در برقراری ارتباط با سرور.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // ۲. ارسال به درگاه پرداخت برای پلن‌های غیر رایگان
   const proceedToCheckout = async () => {
     if (!isLoggedIn) return;
 
@@ -128,14 +179,22 @@ export default function ShowDataCart({ planData, planId }: Props) {
         toast.error(data.message || "خطا در ایجاد تراکنش درگاه پرداخت");
         setIsProcessing(false);
       }
-    } catch (error) {
+    } catch {
       toast.error("خطا در ارتباط با سرور");
       setIsProcessing(false);
     }
   };
 
-  const handlePayment = () => {
-    if (isLoggedIn) {
+  // مدیریت کلیک دکمه اصلی
+  const handleAction = () => {
+    if (!isLoggedIn) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (isFreePlan) {
+      handleFreeActivation();
+    } else {
       proceedToCheckout();
     }
   };
@@ -174,16 +233,10 @@ export default function ShowDataCart({ planData, planId }: Props) {
     );
   }
 
-  const discountAmount = planData.oldPrice > planData.newPrice
-    ? planData.oldPrice - planData.newPrice
-    : 0;
+  const discountAmount =
+    planData.oldPrice > planData.newPrice ? planData.oldPrice - planData.newPrice : 0;
 
-  const isButtonDisabled = isProcessing || isAuthLoading || !isLoggedIn;
-
-  // --- محاسبات تفکیک‌شده روزها ---
-  const activeSub = userSubs.length > 0 ? userSubs[0] : null;
-  const currentRemainingDays = activeSub ? getRemainingDays(new Date(activeSub.endDate)) : 0;
-  const newPlanDays = planData.durationDays || 30;
+  const isButtonDisabled = isProcessing || isAuthLoading || isFreeRenewalBlocked;
 
   const baseExpiration = activeSub ? new Date(activeSub.endDate) : new Date();
   const finalEndDate = addDaysToDate(baseExpiration, newPlanDays);
@@ -196,6 +249,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={() => {
           setIsAuthModalOpen(false);
+          fetchSubscriptions();
         }}
       />
 
@@ -205,7 +259,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-              <p className="text-sm">شما هنوز وارد حساب کاربری خود نشده‌اید. برای پرداخت، ابتدا وارد شوید.</p>
+              <p className="text-sm">
+                شما هنوز وارد حساب کاربری خود نشده‌اید. برای {isFreePlan ? "فعال‌سازی رایگان" : "پرداخت"}، ابتدا وارد شوید.
+              </p>
             </div>
             <button
               onClick={() => setIsAuthModalOpen(true)}
@@ -214,6 +270,16 @@ export default function ShowDataCart({ planData, planId }: Props) {
               <LogIn className="w-4 h-4" />
               <span>ورود / ثبت‌نام</span>
             </button>
+          </div>
+        )}
+
+        {/* Free Renewal Warning Banner */}
+        {isLoggedIn && isFreeRenewalBlocked && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3 text-blue-800">
+            <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
+            <p className="text-sm">
+              شما در حال حاضر دارای اشتراک فعال هستید ({currentRemainingDays} روز باقی‌مانده). تمدید مجدد این هدیه رایگان تنها در ۳ روز پایانی اعتبار امکان‌پذیر خواهد بود.
+            </p>
           </div>
         )}
 
@@ -226,15 +292,18 @@ export default function ShowDataCart({ planData, planId }: Props) {
             <ChevronRight className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-bold text-lg text-slate-800">تایید و پرداخت اشتراک</h1>
-            <p className="text-slate-500 mt-0.5 text-xs sm:text-sm">اطلاعات فاکتور و میزان اعتبار جدید خود را مشاهده کنید.</p>
+            <h1 className="font-bold text-lg text-slate-800">
+              {isFreePlan ? "تایید و فعال‌سازی اشتراک هدیه" : "تایید و پرداخت اشتراک"}
+            </h1>
+            <p className="text-slate-500 mt-0.5 text-xs sm:text-sm">
+              اطلاعات فاکتور و میزان اعتبار جدید خود را مشاهده کنید.
+            </p>
           </div>
         </header>
 
-        {/* --- Subscription Status Card (Google Style) --- */}
+        {/* --- Subscription Status Card --- */}
         {isLoggedIn && (
           <div className="w-full rounded border border-gray-300 bg-white shadow-sm overflow-hidden">
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-300">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -253,7 +322,6 @@ export default function ShowDataCart({ planData, planId }: Props) {
               )}
             </div>
 
-            {/* Body */}
             <div className="p-5">
               {isSubsLoading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-gray-400 text-sm">
@@ -263,39 +331,36 @@ export default function ShowDataCart({ planData, planId }: Props) {
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Current Credit */}
                     <div className="rounded-xl border border-gray-400 bg-gray-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded bg-blue-50 flex items-center justify-center">
                           <Clock className="w-4 h-4 text-blue-600" />
                         </div>
-                        <span className="text-sm text-gray-700">اعتبار فعلی</span>
+                        <span className="text-sm text-gray-700">اعتبار فعلی شما</span>
                       </div>
                       <p className="text-xl font-semibold text-gray-900">
                         {currentRemainingDays} <span className="text-sm font-normal text-gray-600">روز</span>
                       </p>
                     </div>
 
-                    {/* New Plan */}
                     <div className="rounded-xl border border-gray-400 bg-gray-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded bg-amber-50 flex items-center justify-center">
                           <Plus className="w-4 h-4 text-amber-600" />
                         </div>
-                        <span className="text-sm text-gray-700"> پلن جدید در صورت خرید</span>
+                        <span className="text-sm text-gray-700">پلن انتخابی</span>
                       </div>
                       <p className="text-xl font-semibold text-gray-900">
                         {newPlanDays} <span className="text-sm font-normal text-gray-600">روز</span>
                       </p>
                     </div>
 
-                    {/* Total Access */}
                     <div className="rounded-xl border border-emerald-400 bg-emerald-50/60 p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center">
                           <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                         </div>
-                        <span className="text-sm text-emerald-700">مجموع دسترسی</span>
+                        <span className="text-sm text-emerald-700">مجموع دسترسی بعداز پرداخت</span>
                       </div>
                       <p className="text-xl font-semibold text-emerald-800">
                         {totalRemainingDays} <span className="text-sm font-normal text-emerald-600">روز</span>
@@ -303,10 +368,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
                     </div>
                   </div>
 
-                  {/* Final Date */}
                   <div className="mt-4 rounded-xl border border-gray-300 bg-gray-50/60 px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm text-gray-700">تاریخ پایان اعتبار نهایی</span>
-                    <span className="text-13 md:text-15 font-medium text-gray-900">
+                    <span className="text-sm text-gray-700">تاریخ پایان اعتبار پس از فعال‌سازی</span>
+                    <span className="text-sm md:text-base font-medium text-gray-900">
                       {formatPersianDate(finalEndDate)}
                     </span>
                   </div>
@@ -327,12 +391,16 @@ export default function ShowDataCart({ planData, planId }: Props) {
             </div>
             <div>
               <span className="block text-slate-500 text-xs sm:text-sm">تاریخ صدور</span>
-              <span className="block mt-1 text-sm sm:text-base font-semibold text-slate-700">{faDate}</span>
+              <span className="block mt-1 text-sm sm:text-base font-semibold text-slate-700">{faDate || "—"}</span>
             </div>
             <div className="col-span-2 md:col-span-1">
               <span className="block text-slate-500 text-xs sm:text-sm">وضعیت</span>
-              <span className="inline-flex items-center bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full mt-1 text-xs sm:text-sm font-medium">
-                در انتظار پرداخت
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full mt-1 text-xs sm:text-sm font-medium ${
+                  isFreePlan ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                {isFreePlan ? "آماده فعال‌سازی رایگان" : "در انتظار پرداخت"}
               </span>
             </div>
           </div>
@@ -351,7 +419,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
                   <td className="px-6 py-4 text-slate-800 font-medium text-sm sm:text-base">{planData.name}</td>
                   <td className="px-6 py-4 text-center text-slate-600 text-sm">{newPlanDays} روزه</td>
                   <td className="px-6 py-4 text-left font-medium text-slate-800 text-sm sm:text-base">
-                    {planData.oldPrice.toLocaleString()}
+                    {planData.oldPrice === 0 ? "رایگان" : planData.oldPrice.toLocaleString()}
                   </td>
                 </tr>
               </tbody>
@@ -362,7 +430,7 @@ export default function ShowDataCart({ planData, planId }: Props) {
             <div className="ml-auto max-w-xs space-y-2.5">
               <div className="flex items-center justify-between text-sm text-slate-600">
                 <span>جمع کل:</span>
-                <span>{planData.oldPrice.toLocaleString()} تومان</span>
+                <span>{planData.oldPrice === 0 ? "رایگان" : `${planData.oldPrice.toLocaleString()} تومان`}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex items-center justify-between text-sm text-rose-600">
@@ -373,7 +441,9 @@ export default function ShowDataCart({ planData, planId }: Props) {
               <div className="border-t border-slate-200 my-1"></div>
               <div className="flex items-center justify-between text-base">
                 <span className="text-slate-800 font-bold">مبلغ نهایی:</span>
-                <span className="font-extrabold text-lg text-blue-600">{planData.newPrice.toLocaleString()} تومان</span>
+                <span className={`font-extrabold text-lg ${isFreePlan ? "text-emerald-600" : "text-blue-600"}`}>
+                  {planData.newPrice === 0 ? "رایگان (۰ تومان)" : `${planData.newPrice.toLocaleString()} تومان`}
+                </span>
               </div>
             </div>
           </div>
@@ -383,23 +453,39 @@ export default function ShowDataCart({ planData, planId }: Props) {
         <footer className="bg-white border-t border-slate-400 p-3 md:p-0 md:bg-transparent md:border-none">
           <div className="mx-auto bg-white flex items-center justify-between p-3.5 border border-slate-300 rounded shadow-sm">
             <div>
-              <span className="text-slate-500 text-xs block">مبلغ قابل پرداخت</span>
-              <p className="font-black text-base sm:text-lg text-slate-800">{planData.newPrice.toLocaleString()} تومان</p>
+              <span className="text-slate-500 text-xs block">مبلغ نهایی فاکتور</span>
+              <p className={`font-black text-base sm:text-lg ${isFreePlan ? "text-emerald-600" : "text-slate-800"}`}>
+                {planData.newPrice === 0 ? "رایگان" : `${planData.newPrice.toLocaleString()} تومان`}
+              </p>
             </div>
             <button
-              onClick={handlePayment}
+              onClick={handleAction}
               disabled={isButtonDisabled}
-              className="w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+              className={`w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
+                isFreePlan
+                  ? "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98]"
+                  : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+              }`}
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>در حال انتقال...</span>
+                  <span>{isFreePlan ? "در حال فعال‌سازی..." : "در حال انتقال..."}</span>
                 </>
               ) : !isLoggedIn ? (
                 <>
                   <Lock className="w-4 h-4" />
                   <span>ابتدا وارد شوید</span>
+                </>
+              ) : isFreeRenewalBlocked ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>دارای اشتراک فعال</span>
+                </>
+              ) : isFreePlan ? (
+                <>
+                  <Gift className="w-5 h-5" />
+                  <span>افزودن رایگان اشتراک</span>
                 </>
               ) : (
                 <>

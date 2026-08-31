@@ -250,7 +250,7 @@ export default function TabHomePage({
   }[] = [
     {
       key: 'questions',
-      label: 'بانک سوالات تخصصی',
+      label: 'بانک سوالات ',
       description:
         'دسته‌بندی سوالات تخصصی آزمون‌های استخدامی',
       icon: (
@@ -268,7 +268,7 @@ export default function TabHomePage({
     },
     {
       key: 'free',
-      label: 'منابع و جزوات رایگان',
+      label: ' رایگان',
       description:
         'منابع آموزشی و جزوات رایگان',
       icon: (

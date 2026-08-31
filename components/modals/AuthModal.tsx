@@ -168,7 +168,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-white rounded shadow-xl overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               {/* هدر کوچک */}
               <div className="relative bg-slate-50 border-b border-slate-200 px-6 py-3">
                 <p className="text-sm text-slate-600 text-center" dir="rtl">

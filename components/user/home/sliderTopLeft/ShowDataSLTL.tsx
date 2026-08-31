@@ -197,7 +197,6 @@ export default function ShowDataSLTL({
                 <Link
                   href={`/resources/course/${p.slug}`}
                   className="block h-full"
-                  target="_blank"
                   rel="noopener noreferrer"
                 >
                   <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white relative">

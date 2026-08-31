@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useRef, useState, useEffect, Suspense } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Loader2, LayoutGrid, X } from "lucide-react";
+import {
+  Search,
+  Loader2,
+  LayoutGrid,
+  X,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react";
 import { getDataSearchMany } from "@/actions/search/Actions";
 
 interface SearchBoxProps {
@@ -12,59 +25,169 @@ interface SearchBoxProps {
   onCloseMobile?: () => void;
 }
 
-function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, onCloseMobile }: SearchBoxProps) {
+interface SearchResultItem {
+  type: string;
+  slug: string;
+  title: string;
+}
+
+interface SearchInnerProps {
+  searchContainerRef: React.RefObject<HTMLDivElement | null>;
+  isSearchOpen: boolean;
+  isSearching: boolean;
+  searchQuery: string;
+  searchResults: SearchResultItem[];
+  setIsSearchOpen: (value: boolean) => void;
+  setSearchQuery: (value: string) => void;
+  handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  closeSearch: () => void;
+  clearQuery: () => void;
+  popularCategories: any[];
+}
+
+function SearchBoxContent({
+  popularCategories = [],
+  isMobileSearchOpen = true,
+  onCloseMobile,
+}: SearchBoxProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams?.get("search") || "");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams?.get("search") || searchParams?.get("q") || ""
+  );
+
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const requestIdRef = useRef(0);
 
-  const closeSearch = () => {
+  const closeSearch = useCallback(() => {
     setIsSearchOpen(false);
-    if (onCloseMobile) onCloseMobile();
-  };
+    onCloseMobile?.();
+  }, [onCloseMobile]);
 
-  const clearQuery = () => {
+  const clearQuery = useCallback(() => {
     setSearchQuery("");
     setSearchResults([]);
-  };
+    setIsSearchOpen(true);
+  }, []);
 
+  /**
+   * Search with debounce
+   * جلوگیری از Race Condition با requestId
+   */
   useEffect(() => {
-    if (searchQuery.trim() === "") {
+    const query = searchQuery.trim();
+
+    if (!query) {
       setSearchResults([]);
       setIsSearching(false);
       return;
     }
+
+    const currentRequestId = ++requestIdRef.current;
+
     setIsSearching(true);
+
     const timer = setTimeout(async () => {
-      const results = await getDataSearchMany(searchQuery);
-      setSearchResults(results);
-      setIsSearching(false);
-    }, 500);
-    return () => clearTimeout(timer);
+      try {
+        const results = await getDataSearchMany(query);
+
+        if (currentRequestId !== requestIdRef.current) {
+          return;
+        }
+
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (error) {
+        console.error("Search error:", error);
+
+        if (currentRequestId === requestIdRef.current) {
+          setSearchResults([]);
+        }
+      } finally {
+        if (currentRequestId === requestIdRef.current) {
+          setIsSearching(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [searchQuery]);
 
+  /**
+   * Close dropdown when clicking outside
+   */
   useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
-        closeSearch();
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(target)
+      ) {
+        setIsSearchOpen(false);
       }
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
   }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchQuery.trim() !== "") {
-      closeSearch();
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
+  /**
+   * Escape key
+   */
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
 
-  const innerProps = {
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  /**
+   * Open search result page
+   */
+  const handleSearchSubmit = useCallback(() => {
+    const query = searchQuery.trim();
+
+    if (!query) {
+      return;
+    }
+
+    closeSearch();
+
+    router.push(`/search?q=${encodeURIComponent(query)}`);
+  }, [closeSearch, router, searchQuery]);
+
+  /**
+   * Enter key
+   */
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSearchSubmit();
+      }
+    },
+    [handleSearchSubmit]
+  );
+
+  const innerProps: SearchInnerProps = {
     searchContainerRef,
     isSearchOpen,
     isSearching,
@@ -78,6 +201,9 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
     popularCategories,
   };
 
+  /**
+   * Desktop only
+   */
   if (!isMobileSearchOpen) {
     return (
       <div className="hidden md:flex md:flex-1 md:justify-center">
@@ -88,9 +214,12 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
 
   return (
     <>
-      <div className="w-full border-b border-gray-100 bg-white pb-4 pt-2 md:hidden animate-in slide-in-from-top-2">
+      {/* Mobile */}
+      <div className="w-full border-b border-slate-100 bg-white px-3 pb-3 pt-2 md:hidden">
         <SearchInner {...innerProps} />
       </div>
+
+      {/* Desktop */}
       <div className="hidden md:flex md:flex-1 md:justify-center">
         <SearchInner {...innerProps} />
       </div>
@@ -98,123 +227,375 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
   );
 }
 
-interface SearchInnerProps {
-  searchContainerRef: React.RefObject<HTMLDivElement>;
-  isSearchOpen: boolean;
-  isSearching: boolean;
-  searchQuery: string;
-  searchResults: any[];
-  setIsSearchOpen: (v: boolean) => void;
-  setSearchQuery: (v: string) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  closeSearch: () => void;
-  clearQuery: () => void;
-  popularCategories: any[];
-}
-
 function SearchInner({
-  searchContainerRef, isSearchOpen, isSearching, searchQuery,
-  searchResults, setIsSearchOpen, setSearchQuery, handleKeyDown,
-  closeSearch, clearQuery, popularCategories,
+  searchContainerRef,
+  isSearchOpen,
+  isSearching,
+  searchQuery,
+  searchResults,
+  setIsSearchOpen,
+  setSearchQuery,
+  handleKeyDown,
+  closeSearch,
+  clearQuery,
+  popularCategories,
 }: SearchInnerProps) {
+  const hasQuery = searchQuery.trim().length > 0;
+  const hasResults = searchResults.length > 0;
+
   return (
-    <div ref={searchContainerRef} className="relative w-full max-w-[550px]">
-      {/* Right icon: loader or search */}
-      {isSearching ? (
-        <Loader2 size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 animate-spin z-10" />
-      ) : (
-        <Search size={22} className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors z-10 ${isSearchOpen ? "text-green-600" : "text-gray-400"}`} />
-      )}
+    <div
+      ref={searchContainerRef}
+      className="relative w-full max-w-[600px]"
+      dir="rtl"
+    >
+      {/* Search input wrapper */}
+      <div
+        className={[
+          "relative flex h-[48px] items-center rounded-xl border bg-white",
+          "transition-[border-color,box-shadow] duration-150",
+          isSearchOpen
+            ? "border-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.10)]"
+            : "border-slate-300 hover:border-slate-400",
+        ].join(" ")}
+      >
+        {/* Search icon / Loader */}
+        <div className="pointer-events-none absolute right-4 top-1/2 z-10 -translate-y-1/2">
+          {isSearching ? (
+            <Loader2
+              size={19}
+              strokeWidth={2}
+              className="animate-spin text-emerald-600"
+            />
+          ) : (
+            <Search
+              size={20}
+              strokeWidth={2}
+              className={
+                isSearchOpen
+                  ? "text-emerald-600"
+                  : "text-slate-400"
+              }
+            />
+          )}
+        </div>
 
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onFocus={() => setIsSearchOpen(true)}
-        onKeyDown={handleKeyDown}
-        placeholder="منبع آموزش، آزمون، دسته مورد نظرتان را جستجو کنید"
-        className={`w-full h-12 rounded border border-slate-400 bg-gray-50 pr-11 pl-10 text-sm outline-none transition-all duration-200 placeholder:text-gray-400 ${
-          isSearchOpen ? "bg-white border-green-500 ring-4 ring-green-50 shadow-sm" : "border-gray-300 hover:border-gray-400 focus:bg-white"
-        }`}
-      />
+        {/* Input */}
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => {
+            setSearchQuery(event.target.value);
+            setIsSearchOpen(true);
+          }}
+          onFocus={() => setIsSearchOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="جستجو..."
+          autoComplete="off"
+          spellCheck={false}
+          aria-label="جستجو"
+          aria-expanded={isSearchOpen}
+          aria-haspopup="listbox"
+          className="h-full w-full rounded-xl shadow-lg bg-transparent pr-12 pl-20 text-[14px] text-slate-800 outline-none placeholder:text-slate-400"
+        />
 
-      {/* Clear (X) button — left side, visible only when there's text */}
-      {searchQuery && (
-        <button
-          type="button"
-          onClick={clearQuery}
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="پاک کردن جستجو"
-        >
-          <X size={18} />
-        </button>
-      )}
-
-      <div className={`absolute top-[calc(100%+8px)] left-0 w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top z-50 ${
-        isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
-      }`}>
-        {searchQuery.trim() === "" ? (
-          <div className="p-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-gray-100 mb-3 text-gray-500">
-              <LayoutGrid size={18} className="text-gray-400" />
-              <span className="font-medium text-sm">جستجوهای محبوب</span>
-            </div>
-            {popularCategories.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {popularCategories.map((cat: any, index: number) => (
-                  <Link
-                    key={cat?.id || index}
-                    href={`/category/${cat?.catSlug || ""}`}
-                    onClick={closeSearch}
-                    className="rounded-lg text-xs font-medium border border-gray-200 px-3 py-2 text-gray-600 bg-white hover:border-green-300 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
-                  >
-                    {cat?.catName || "بدون نام"}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-2">
-            {searchResults.length > 0 ? (
-              <div className="mb-2">
-                {searchResults.map((item) => (
-                  <Link
-                    key={`${item.type}-${item.slug}`}
-                    href={item.type === "product" ? `/resources/course/${item.slug}` : `/news/${item.slug}`}
-                    onClick={closeSearch}
-                    className="flex items-center justify-between p-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-700 rounded-lg transition-colors border-b border-gray-50 last:border-0"
-                  >
-                    <div className="font-medium truncate">{item.title}</div>
-                    <span className="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[11px] whitespace-nowrap ml-2">
-                      {item.type === "product" ? "محصول" : "خبر"}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              !isSearching && <div className="p-6 text-center text-sm text-gray-500">موردی یافت نشد.</div>
-            )}
-            {searchResults.length > 0 && (
-              <Link
-                href={`/search?q=${encodeURIComponent(searchQuery)}`}
-                onClick={closeSearch}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium hover:bg-green-100 text-green-700 transition-colors bg-green-50 mt-1"
-              >
-                <Search size={16} />
-                <span>مشاهده همه نتایج برای <strong className="mx-1">"{searchQuery}"</strong></span>
-              </Link>
-            )}
-          </div>
+        {/* Clear button */}
+        {hasQuery && (
+          <button
+            type="button"
+            onClick={clearQuery}
+            aria-label="پاک کردن جستجو"
+            className="absolute left-3 top-1/2 z-20 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={17} strokeWidth={2} />
+          </button>
         )}
       </div>
+
+      {/* Search dropdown */}
+      {isSearchOpen && (
+        <>
+          {/* Mobile backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[1px] md:hidden"
+            onClick={closeSearch}
+            aria-hidden="true"
+          />
+
+          <div
+            className="
+              absolute
+              right-0
+              top-[calc(100%+8px)]
+              z-50
+              w-full
+              overflow-hidden
+              rounded-2xl
+              border
+              border-slate-200
+              bg-white
+              shadow-[0_16px_45px_rgba(15,23,42,0.14)]
+            "
+            role="listbox"
+          >
+            {/* Empty query */}
+            {!hasQuery ? (
+              <div className="p-4">
+                {/* Header */}
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+                      <Sparkles
+                        size={16}
+                        className="text-emerald-600"
+                      />
+                    </div>
+
+                    <div>
+                      <p className="text-[13px] font-bold text-slate-800">
+                        جستجوهای پیشنهادی
+                      </p>
+
+                      <p className="mt-0.5 text-[11px] text-slate-400">
+                        دسته‌بندی‌های پرطرفدار
+                      </p>
+                    </div>
+                  </div>
+
+                  <LayoutGrid
+                    size={17}
+                    className="text-slate-300"
+                  />
+                </div>
+
+                {/* Popular categories */}
+                {popularCategories.length > 0 ? (
+                  <div className="flex max-h-[230px] flex-wrap gap-2 overflow-y-auto pt-1">
+                    {popularCategories.map(
+                      (category: any, index: number) => {
+                        const slug = category?.catSlug || "";
+                        const name =
+                          category?.catName || "بدون نام";
+
+                        return (
+                          <Link
+                            key={category?.id || `${slug}-${index}`}
+                            href={`/category/${slug}`}
+                            onClick={closeSearch}
+                            className="
+                              inline-flex
+                              items-center
+                              rounded-lg
+                              border
+                              border-slate-200
+                              bg-white
+                              px-3
+                              py-2
+                              text-[12px]
+                              font-medium
+                              text-slate-600
+                              transition-colors
+                              hover:border-emerald-200
+                              hover:bg-emerald-50
+                              hover:text-emerald-700
+                            "
+                          >
+                            {name}
+                          </Link>
+                        );
+                      }
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-slate-50 px-4 py-5 text-center">
+                    <p className="text-xs text-slate-400">
+                      هنوز دسته‌ای برای نمایش وجود ندارد.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                {/* Results header */}
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <Search
+                      size={16}
+                      className="text-slate-400"
+                    />
+
+                    <span className="text-[12px] font-medium text-slate-500">
+                      نتایج جستجو
+                    </span>
+                  </div>
+
+                  {hasResults && (
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-500">
+                      {searchResults.length} نتیجه
+                    </span>
+                  )}
+                </div>
+
+                {/* Loading */}
+                {isSearching && (
+                  <div className="space-y-1 p-2">
+                    {[1, 2, 3].map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-3 rounded-xl p-3"
+                      >
+                        <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="h-3 w-3/4 animate-pulse rounded bg-slate-100" />
+                          <div className="h-2.5 w-1/3 animate-pulse rounded bg-slate-100" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Search results */}
+                {!isSearching && hasResults && (
+                  <>
+                    <div className="max-h-[350px] overflow-y-auto p-2">
+                      {searchResults.map((item, index) => {
+                        const isProduct =
+                          item.type === "product";
+
+                        const href = isProduct
+                          ? `/resources/course/${item.slug}`
+                          : `/news/${item.slug}`;
+
+                        return (
+                          <Link
+                            key={`${item.type}-${item.slug}-${index}`}
+                            href={href}
+                            onClick={closeSearch}
+                            className="
+                              group
+                              flex
+                              items-center
+                              gap-3
+                              rounded-xl
+                              p-3
+                              text-right
+                              transition-colors
+                              hover:bg-slate-50
+                            "
+                            role="option"
+                          >
+                            {/* Result icon */}
+                            <div
+                              className={[
+                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                                isProduct
+                                  ? "bg-emerald-50 text-emerald-600"
+                                  : "bg-sky-50 text-sky-600",
+                              ].join(" ")}
+                            >
+                              <Search
+                                size={15}
+                                strokeWidth={2}
+                              />
+                            </div>
+
+                            {/* Content */}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-semibold text-slate-700 transition-colors group-hover:text-emerald-700">
+                                {item.title}
+                              </p>
+
+                              <p className="mt-1 text-[10px] text-slate-400">
+                                {isProduct
+                                  ? "محصول"
+                                  : "خبر"}
+                              </p>
+                            </div>
+
+                            {/* Arrow */}
+                            <ArrowLeft
+                              size={15}
+                              className="shrink-0 text-slate-300 transition-transform group-hover:-translate-x-1 group-hover:text-emerald-500"
+                            />
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    {/* View all */}
+                    <div className="border-t border-slate-100 p-2">
+                      <Link
+                        href={`/search?q=${encodeURIComponent(
+                          searchQuery.trim()
+                        )}`}
+                        onClick={closeSearch}
+                        className="
+                          flex
+                          h-11
+                          w-full
+                          items-center
+                          justify-center
+                          gap-2
+                          rounded-xl
+                          bg-slate-50
+                          text-[12px]
+                          font-semibold
+                          text-emerald-700
+                          transition-colors
+                          hover:bg-emerald-50
+                        "
+                      >
+                        <Search size={15} />
+
+                        <span>
+                          مشاهده همه نتایج برای
+                        </span>
+
+                        <span className="max-w-[150px] truncate font-bold">
+                          «{searchQuery.trim()}»
+                        </span>
+                      </Link>
+                    </div>
+                  </>
+                )}
+
+                {/* Empty state */}
+                {!isSearching && !hasResults && (
+                  <div className="px-5 py-10 text-center">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
+                      <Search
+                        size={21}
+                        className="text-slate-300"
+                      />
+                    </div>
+
+                    <p className="text-[13px] font-semibold text-slate-700">
+                      نتیجه‌ای پیدا نشد
+                    </p>
+
+                    <p className="mx-auto mt-1 max-w-[300px] text-[11px] leading-5 text-slate-400">
+                      عبارت جستجو را بررسی کنید یا از کلمات
+                      کوتاه‌تر و عمومی‌تر استفاده کنید.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 export default function SearchBoxInPage(props: SearchBoxProps) {
   return (
-    <Suspense fallback={<div className="h-12 w-full max-w-[550px] bg-gray-100 animate-pulse rounded-xl" />}>
+    <Suspense
+      fallback={
+        <div className="h-12 w-full max-w-[600px] animate-pulse rounded-xl bg-slate-100" />
+      }
+    >
       <SearchBoxContent {...props} />
     </Suspense>
   );

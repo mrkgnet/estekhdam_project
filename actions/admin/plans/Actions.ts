@@ -157,7 +157,7 @@ export async function GetDataFactorPlansUser(id: string) {
     const plan = await db.subscriptionPlan.findUnique({
       where: {
         id: id,
-        isActive: true, // فقط پلن‌های فعال قابل فاکتور شدن هستند
+        isActive: true,
       },
       select: {
         id: true,
@@ -174,12 +174,17 @@ export async function GetDataFactorPlansUser(id: string) {
       return { success: false, error: "پلن مورد نظر یافت نشد یا غیرفعال است", data: null };
     }
 
-    // نگاشت داده به ساختار مورد نیاز فاکتور
+    // محاسبه قیمت نهایی با پشتیبانی از قیمت صفر
+    const newPrice =
+      plan.discountPrice !== null && plan.discountPrice !== undefined && plan.discountPrice < plan.price
+        ? plan.discountPrice
+        : plan.price;
+
     const planData = {
       id: plan.id,
       name: plan.title,
       oldPrice: plan.price,
-      newPrice: plan.discountPrice && plan.discountPrice < plan.price ? plan.discountPrice : plan.price,
+      newPrice: newPrice,
       description: plan.description,
       durationDays: plan.durationDays,
     };
@@ -504,4 +509,117 @@ export async function checkUserSubscriptionAction(userId: string) {
   }
 }
 
+//-------------- free action-------------
+
+
+export async function activateFreeSubscriptionAction(userId: string, planId: string) {
+  try {
+    if (!userId || !planId) {
+      return { success: false, error: "اطلاعات ارسالی نامعتبر است." };
+    }
+
+    // ۱. بررسی و قفل روی کاربر
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isActive: true },
+    });
+
+    if (!user || !user.isActive) {
+      return { success: false, error: "حساب کاربری یافت نشد یا غیرفعال است." };
+    }
+
+    // ۲. بررسی پلن و اعتبارسنجی صفر بودن قیمت در سمت سرور
+    const plan = await db.subscriptionPlan.findUnique({
+      where: { id: planId, isActive: true },
+    });
+
+    if (!plan) {
+      return { success: false, error: "پلن مورد نظر یافت نشد یا غیرفعال است." };
+    }
+
+    const effectivePrice =
+      plan.discountPrice !== null && plan.discountPrice !== undefined
+        ? plan.discountPrice
+        : plan.price;
+
+    if (effectivePrice !== 0) {
+      return {
+        success: false,
+        error: "این پلن رایگان نیست و نیاز به پرداخت از طریق درگاه دارد.",
+      };
+    }
+
+    // ۳. بررسی اشتراک‌های فعال فعلی کاربر
+    const now = new Date();
+    const activeSub = await db.userSubscription.findFirst({
+      where: {
+        userId: userId,
+        isActive: true,
+        endDate: { gt: now },
+      },
+      orderBy: { endDate: "desc" },
+    });
+
+    let newStartDate = now;
+    let newEndDate = new Date();
+
+    if (activeSub) {
+      // محاسبه روزهای باقی‌مانده از اشتراک فعال
+      const diffTime = new Date(activeSub.endDate).getTime() - now.getTime();
+      const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // محدودیت امنیتی: تمدید رایگان فقط در صورتی مجاز است که ۳ روز یا کمتر باقی مانده باشد
+      if (remainingDays > 3) {
+        return {
+          success: false,
+          error: `شما در حال حاضر دارای اشتراک فعال هستید (${remainingDays} روز باقی مانده). تمدید مجدد پلن رایگان تنها در ۳ روز پایانی اعتبار امکان‌پذیر است.`,
+        };
+      }
+
+      // تمدید اشتراک با اضافه کردن به تاریخ پایان قبلی
+      newStartDate = new Date(activeSub.endDate);
+      newEndDate = new Date(activeSub.endDate);
+      newEndDate.setDate(newEndDate.getDate() + plan.durationDays);
+    } else {
+      // ایجاد اشتراک جدید از همین لحظه
+      newEndDate.setDate(now.getDate() + plan.durationDays);
+    }
+
+    // ۴. ثبت تراکنش امن (Order + Subscription)
+    const result = await db.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          userId: user.id,
+          subscriptionPlanId: plan.id,
+          pricePaid: 0,
+          status: "SUCCESS",
+          expiresAt: newEndDate,
+          isActive: true,
+        },
+      });
+
+      const subscription = await tx.userSubscription.create({
+        data: {
+          userId: user.id,
+          planId: plan.id,
+          orderId: order.id,
+          startDate: newStartDate,
+          endDate: newEndDate,
+          isActive: true,
+        },
+      });
+
+      return { order, subscription };
+    });
+
+    return {
+      success: true,
+      message: "اشتراک رایگان با موفقیت برای شما فعال شد.",
+      data: result.subscription,
+    };
+  } catch (error) {
+    console.error("Error in activateFreeSubscriptionAction:", error);
+    return { success: false, error: "خطایی در پردازش فعال‌سازی اشتراک رخ داد." };
+  }
+}
 

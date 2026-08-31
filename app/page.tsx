@@ -77,15 +77,15 @@ export default function page() {
 
 
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
-                <section className="mb-16">
+                {/* <section className="mb-16">
                     <QCComponent />                
-                </section>
+                </section> */}
 
 
 
-                <section className="w-full bg-white rounded-2xl">
+                {/* <section className="w-full bg-white rounded-2xl">
                     <CategoryGrid />
-                </section>
+                </section> */}
 
                 {/* بخش اخبار فوری */}
                 {/* <section className="w-full mb-16">
