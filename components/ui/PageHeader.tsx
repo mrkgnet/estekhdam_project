@@ -25,7 +25,7 @@ export default function PageHeader({
       </div>
 
       {/* Header Card */}
-      <div className="relative overflow-hidden rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-[0_4px_16px_rgba(0,0,0,0.05)]">
+      <div className="relative overflow-hidden rounded-xl border border-slate-300 dark:border-slate-600 bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-[0_4px_16px_rgba(0,0,0,0.05)]">
         {/* Accent line */}
         <div className="h-0.5 w-full bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
 

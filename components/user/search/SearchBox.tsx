@@ -106,7 +106,7 @@ function SearchBoxContent({ popularCategories = [], isMobileSearchOpen = true, o
         )}
 
         <div
-          className={`absolute top-[calc(100%+8px)] w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${
+          className={`absolute top-[calc(100%+8px)] w-full bg-white rounded shadow-xl border border-gray-300 overflow-hidden transition-all duration-200 origin-top ${
             isSearchOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
           }`}
         >

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, TransitionStartFunction } from "react";
-import { ChevronUp, X, Filter, CheckCircle2 } from "lucide-react";
+import { useMemo, useState, TransitionStartFunction, useCallback, memo, useEffect } from "react";
+import { ChevronUp, X, Filter } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,7 +27,8 @@ type FiltersSidebarContentProps = {
   clearAll: () => void;
 };
 
-function FiltersSidebarContent({
+// استفاده از memo برای جلوگیری از رندرهای اضافی فرزند وقتی توابع یا پراپ‌ها تغییر نکرده‌اند
+const FiltersSidebarContent = memo(function FiltersSidebarContent({
   activeStatuses,
   statusOpen,
   setStatusOpen,
@@ -40,7 +41,7 @@ function FiltersSidebarContent({
       {showHeader && (
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border-2 border-emerald-400 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400">
               <Filter className="w-4 h-4" />
             </span>
             <div>
@@ -56,7 +57,7 @@ function FiltersSidebarContent({
                 exit={{ opacity: 0, scale: 0.9 }}
                 type="button"
                 onClick={clearAll}
-                className="text-[11px] font-bold text-red-800  dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 transition-colors cursor-pointer"
+                className="text-[11px] font-bold text-red-800 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
                 پاک کردن همه
@@ -67,7 +68,7 @@ function FiltersSidebarContent({
       )}
 
       {/* بخش وضعیت */}
-      <section className="rounded-lg border-2 border-slate-300 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-all duration-200">
+      <section className="rounded-lg dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 transition-all duration-200">
         <button
           type="button"
           onClick={() => setStatusOpen(!statusOpen)}
@@ -81,7 +82,7 @@ function FiltersSidebarContent({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-400 dark:border-emerald-700 font-bold"
+                  className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-400 dark:border-emerald-700 font-bold"
                 >
                   {activeStatuses.length}
                 </motion.span>
@@ -111,7 +112,7 @@ function FiltersSidebarContent({
                     return (
                       <label
                         key={s.key}
-                        className={`flex items-center justify-between gap-3 p-2.5 rounded-md cursor-pointer border-2 select-none transition-all duration-150 active:scale-[0.99] ${
+                        className={`flex items-center justify-between gap-3 p-2.5 rounded-md cursor-pointer border select-none transition-all duration-150 active:scale-[0.99] ${
                           checked
                             ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 dark:border-emerald-700"
                             : "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-transparent"
@@ -122,9 +123,7 @@ function FiltersSidebarContent({
                           <input
                             type="checkbox"
                             checked={checked}
-                            onChange={() =>
-                              updateUrl("statuses", toggleInArray(activeStatuses, s.key))
-                            }
+                            onChange={() => updateUrl("statuses", toggleInArray(activeStatuses, s.key))}
                             className="w-4 h-4 accent-emerald-600 cursor-pointer rounded"
                           />
                         </div>
@@ -139,24 +138,33 @@ function FiltersSidebarContent({
       </section>
     </div>
   );
-}
+});
 
 export default function FiltersSidebar({ startTransition }: { startTransition?: TransitionStartFunction }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // گرفتن استیت اصلی از URL
   const activeStatuses = useMemo(() => searchParams.get("statuses")?.split(",").filter(Boolean) || [], [searchParams]);
 
-  const [localStatuses, setLocalStatuses] = useState<string[]>(activeStatuses);
+  const [localStatuses, setLocalStatuses] = useState<string[]>([]);
   const [statusOpen, setStatusOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // سینک کردن استیت موبایل فقط زمانی که URL تغییر می‌کند یا کاربر در منوی موبایل است
   useEffect(() => {
     setLocalStatuses(activeStatuses);
-  }, [searchParams, mobileOpen, activeStatuses]);
+  }, [activeStatuses]);
 
-  const updateUrl = (key: string, values: string[]) => {
+  // باز کردن منوی موبایل و کپی کردن استیت فعلی به عنوان پیش‌نویس
+  const handleOpenMobile = useCallback(() => {
+    setLocalStatuses(activeStatuses);
+    setMobileOpen(true);
+  }, [activeStatuses]);
+
+  // متد اصلی آپدیت URL که با useCallback كش شده است
+  const updateUrl = useCallback((key: string, values: string[]) => {
     const params = new URLSearchParams(searchParams.toString());
     if (values.length > 0) params.set(key, values.join(","));
     else params.delete(key);
@@ -168,60 +176,54 @@ export default function FiltersSidebar({ startTransition }: { startTransition?: 
     } else {
       apply();
     }
-  };
+  }, [searchParams, pathname, router, startTransition]);
 
-  const handleLocalUpdate = (key: string, values: string[]) => {
+  // هندلر برای آپدیت لوکال (نسخه موبایل)
+  const handleLocalUpdate = useCallback((key: string, values: string[]) => {
     if (key === "statuses") setLocalStatuses(values);
-  };
+  }, []);
 
-  const applyMobileFilters = () => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (localStatuses.length > 0) params.set("statuses", localStatuses.join(","));
-    else params.delete("statuses");
-
-    const apply = () => router.push(`${pathname}?${params.toString()}`, { scroll: false });
-
-    if (startTransition) {
-      startTransition(apply);
-    } else {
-      apply();
-    }
-
+  // اعمال نهایی فیلترها در موبایل
+  const applyMobileFilters = useCallback(() => {
+    updateUrl("statuses", localStatuses);
     setMobileOpen(false);
-  };
+  }, [updateUrl, localStatuses]);
 
-  const clearAll = () => {
+  // پاک کردن همه فیلترهای URL
+  const clearAll = useCallback(() => {
     const apply = () => router.push(pathname, { scroll: false });
     if (startTransition) startTransition(apply);
     else apply();
-  };
+  }, [pathname, router, startTransition]);
 
-  const clearMobileAll = () => {
+  // پاک کردن فیلترهای پیش‌نویس موبایل
+  const clearMobileAll = useCallback(() => {
     setLocalStatuses([]);
-  };
+  }, []);
 
   const filtersCount = activeStatuses.length;
   const localFiltersCount = localStatuses.length;
 
   return (
     <>
+      {/* دکمه باز کردن در موبایل */}
       <div className="md:hidden">
         <button
           type="button"
-          onClick={() => setMobileOpen(true)}
-          className="flex font-bold items-center justify-center gap-2 w-full rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 text-base  text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          onClick={handleOpenMobile}
+          className="flex font-bold items-center justify-center gap-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 text-base text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
           <Filter className="w-4 h-4 font-bold text-emerald-600 dark:text-emerald-400" />
           فیلترها
           {filtersCount > 0 && (
-            <span className="text-xs inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-400 dark:border-emerald-700 font-bold">
+            <span className="text-xs inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-400 dark:border-emerald-700 font-bold">
               {filtersCount}
             </span>
           )}
         </button>
       </div>
 
+      {/* منوی مدال در موبایل */}
       <AnimatePresence>
         {mobileOpen && (
           <div className="fixed inset-0 z-50 md:hidden overflow-hidden">
@@ -244,7 +246,7 @@ export default function FiltersSidebar({ startTransition }: { startTransition?: 
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-900 dark:text-slate-100">فیلترها</span>
                   {localFiltersCount > 0 && (
-                    <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-400 dark:border-emerald-700 font-bold">
+                    <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-400 dark:border-emerald-700 font-bold">
                       {localFiltersCount} فعال
                     </span>
                   )}
@@ -294,7 +296,8 @@ export default function FiltersSidebar({ startTransition }: { startTransition?: 
         )}
       </AnimatePresence>
 
-      <aside className="hidden md:block w-full rounded-lg border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop-blur p-4 md:p-5 shadow-sm sticky top-24">
+      {/* سایدبار دسکتاپ */}
+      <aside className="hidden md:block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 backdrop-blur p-4 md:p-5 shadow-sm sticky top-24">
         <FiltersSidebarContent
           activeStatuses={activeStatuses}
           statusOpen={statusOpen}

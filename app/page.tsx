@@ -22,7 +22,7 @@ const BreakingNewsComponent = dynamic(() => import("@/components/user/home/break
 
 export default function page() {
     return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-800" dir="rtl">
+        <div className="min-h-screen  text-slate-800" dir="rtl">
 
             <div className="pointer-events-none absolute -top-8 left-0 opacity-30">
                 <svg width="856" height="655" viewBox="0 0 856 655" fill="none" xmlns="http://www.w3.org/2000/svg">

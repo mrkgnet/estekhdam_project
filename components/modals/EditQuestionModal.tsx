@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useActionState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import { editQuestionAction } from "@/actions/admin/questions/gov/edit/Actions";
@@ -51,29 +50,43 @@ export default function EditQuestionModal({
     setOptions(newOptions);
   };
 
+  // بستن مودال در صورت موفقیت‌آمیز بودن عملیات
   useEffect(() => {
     if (state?.success) {
       onClose();
     }
   }, [state, onClose]);
 
+  // بستن مودال با دکمه Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // جلوگیری از اسکرول صفحه اصلی وقتی مودال باز است
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen || !question) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-     
-    >
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -50, opacity: 0 }}
-        // تغییر از max-w-2xl به max-w-4xl برای فضای بیشتر ادیتورها
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
         className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4 border-b pb-2">
           <h2 className="text-xl font-bold">ویرایش سوال</h2>
@@ -81,6 +94,7 @@ export default function EditQuestionModal({
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="بستن"
+            aria-label="بستن"
           >
             <X className="w-6 h-6" />
           </button>
@@ -247,7 +261,7 @@ export default function EditQuestionModal({
             </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

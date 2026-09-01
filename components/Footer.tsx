@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,36 +11,95 @@ import {
   Send,
   ChevronUp,
 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 /* ----------------------------------
- * تنظیمات و ثابت‌ها
+ * ثابت‌ها و لینک‌ها
  * ---------------------------------- */
 
 const EITAA_URL = "https://eitaa.com/estekhdampro";
-const TELEGRAM_URL = "#";
-const INSTAGRAM_URL = "#";
+const TELEGRAM_URL = "https://t.me/your_channel"; // جایگزین با آدرس واقعی
+const INSTAGRAM_URL = "https://instagram.com/your_page"; // جایگزین با آدرس واقعی
+
+const ENAMAD_URL =
+  "https://trustseal.enamad.ir/?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp";
+
+const ENAMAD_IMG =
+  "https://trustseal.enamad.ir/logo.aspx?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp";
 
 /* ----------------------------------
- * کامپوننت دکمه بازگشت به بالا
+ * زیرآیتم‌های بانک سوالات
+ *
+ * برای اضافه کردن آیتم جدید فقط
+ * یک object جدید به این آرایه اضافه کن.
  * ---------------------------------- */
 
-function ScrollToTop() {
+const QUESTION_BANK_ITEMS = [
+  {
+    title: " آموزش و پرورش",
+    href: "/resources/main-resource?category=بانک-سوالات-آموزش-و-پرورش",
+  },
+  {
+    title: " دستگاه‌های اجرایی",
+    href: "/resources/question-bank/executive",
+  },
+  {
+    title: "بانک‌ها",
+    href: "/resources/question-bank/banks",
+  },
+  {
+    title: "وزارت بهداشت",
+    href: "/resources/question-bank/health",
+  },
+];
+
+/* ----------------------------------
+ * زیرآیتم‌های دفترچه‌های استخدامی
+ *
+ * برای اضافه کردن آیتم جدید فقط
+ * یک object جدید به این آرایه اضافه کن.
+ * ---------------------------------- */
+
+const BOOKLET_ITEMS = [
+  {
+    title: "آموزش و پرورش",
+    href: "/resources/booklets/education",
+  },
+  {
+    title: " دستگاه‌های اجرایی",
+    href: "/resources/booklets/executive",
+  },
+  {
+    title: "بانک‌ها",
+    href: "/resources/booklets/banks",
+  },
+  {
+    title: " وزارت بهداشت",
+    href: "/resources/booklets/health",
+  },
+];
+
+/* ----------------------------------
+ * کامپوننت دکمه شناور بازگشت به بالا
+ * ---------------------------------- */
+
+export function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
+    const handleScroll = () => {
       setVisible(window.scrollY > 300);
     };
 
-    window.addEventListener("scroll", onScroll, {
+    window.addEventListener("scroll", handleScroll, {
       passive: true,
     });
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  if (!visible) return null;
 
   return (
     <button
@@ -49,20 +110,89 @@ function ScrollToTop() {
           behavior: "smooth",
         })
       }
-      aria-label="بازگشت به بالا"
-      className={`fixed bottom-6 left-6 z-50 w-10 h-10 rounded-full
-        bg-emerald-500 hover:bg-emerald-600
-        text-white flex items-center justify-center
-        shadow-lg shadow-emerald-500/30
-        transition-all duration-300
-        ${
-          visible
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
+      aria-label="بازگشت به بالای صفحه"
+      className="fixed bottom-6 left-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-400"
     >
-      <ChevronUp className="h-5 w-5" />
+      <ChevronUp className="h-5 w-5" aria-hidden="true" />
     </button>
+  );
+}
+
+/* ----------------------------------
+ * دکمه وسط‌چین بازگشت به بالا
+ * ---------------------------------- */
+
+function ScrollToTopBanner() {
+  return (
+    <div className="flex justify-center border-b border-white/10 bg-slate-600 py-4">
+      <button
+        type="button"
+        onClick={() =>
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          })
+        }
+        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+      >
+        <ChevronUp className="h-4 w-4" aria-hidden="true" />
+
+        <span className="border-b border-transparent pb-0.5 hover:border-white">
+          بازگشت به بالا
+        </span>
+      </button>
+    </div>
+  );
+}
+
+/* ----------------------------------
+ * کامپوننت نشان‌های اعتماد
+ *
+ * اینماد و زرین‌پال عمودی و زیر هم
+ * ---------------------------------- */
+
+export function FooterTrustBadges() {
+  return (
+    <div className="w-full max-w-[220px] rounded-2xl border border-slate-200/20 bg-white/95 p-3 shadow-lg">
+      <p className="mb-3 text-center text-xs font-bold text-slate-800">
+        با خیال راحت خرید کنید
+      </p>
+
+      <div className="flex flex-col items-center gap-3">
+        {/* اینماد */}
+
+        <a
+          href={ENAMAD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          referrerPolicy="origin"
+          aria-label="نماد اعتماد الکترونیکی"
+          className="flex h-[76px] w-full items-center justify-center rounded-xl bg-slate-50 p-1.5 shadow-sm"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={ENAMAD_IMG}
+            alt="نماد اعتماد الکترونیکی اینماد"
+            width={64}
+            height={64}
+            className="h-16 w-16 object-contain"
+            loading="lazy"
+          />
+        </a>
+
+        {/* زرین‌پال */}
+
+        <div className="flex h-[76px] w-full items-center justify-center rounded-xl bg-slate-50 p-1.5 shadow-sm">
+          <Image
+            src="/images/footer/zrinpal.png"
+            alt="نشان پرداخت امن زرین‌پال"
+            width={64}
+            height={64}
+            className="h-16 w-16 object-contain"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -71,31 +201,35 @@ function ScrollToTop() {
  * ---------------------------------- */
 
 export default function Footer() {
+  const currentYear = 1403;
+
   return (
     <>
-      <ScrollToTop />
+      <ScrollToTopButton />
 
-      {/* فوتر ساده - بدون موج */}
       <footer
         dir="rtl"
-        className="w-full bg-[#3A4D56] text-white font-sans mt-4"
+        className="mt-4 w-full bg-[#3A4D56] font-sans text-white"
       >
+        <ScrollToTopBanner />
+
         {/* ----------------------------------
          * محتوای اصلی فوتر
          * ---------------------------------- */}
 
-        <div className="mx-auto max-w-7xl px-6 pt-8 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 text-right items-start">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-6 pt-8 sm:px-6">
+          <div className="grid grid-cols-2 items-start gap-x-6 gap-y-10 text-right sm:grid-cols-2 lg:grid-cols-12 lg:gap-x-6">
+
             {/* ----------------------------------
              * ستون برند
              * ---------------------------------- */}
 
-            <div className="lg:col-span-4 flex flex-col gap-4">
-              <h3 className="text-xl font-black text-white">
+            <div className="flex min-w-0 flex-col gap-4 sm:col-span-2 lg:col-span-3">
+              <span className="text-xl font-black text-white">
                 استخدام‌پرو
-              </h3>
+              </span>
 
-              <p className=" leading-7 text-slate-200 max-w-sm">
+              <p className="max-w-sm text-sm leading-7 text-slate-200">
                 شیوه نوین برای مطالعه دروس استخدامی. ارائه‌دهنده جامع‌ترین
                 منابع آزمون‌های سراسری و اختصاصی.
               </p>
@@ -105,83 +239,161 @@ export default function Footer() {
              * ستون پیوندها
              * ---------------------------------- */}
 
-            <div className="lg:col-span-2 flex flex-col gap-4">
-              <h4 className="text-base font-bold text-white border-r-4 border-emerald-400 pr-2">
+            <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
+              <h3 className="border-r-4 border-emerald-400 pr-2 text-base font-bold text-white">
                 پیوندها
-              </h4>
+              </h3>
 
-              <ul className="grid grid-cols-1 gap-2.5  text-slate-200">
+              <ul className="grid grid-cols-1 gap-2.5 text-sm text-slate-200">
                 <li>
                   <Link
                     href="/"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
+                    className="inline-flex items-center gap-1.5"
                   >
-                    <Home className="h-3.5 w-3.5" />
-                    خانه
-                  </Link>
-                </li>
+                    <Home
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
 
-                <li>
-                  <Link
-                    href="/resources/main-resource"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    بانک سوالات
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href="/resources/main-resource"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    دفترچه‌های استخدامی
+                    <span className="border-b border-transparent pb-0.5 hover:border-white">
+                      خانه
+                    </span>
                   </Link>
                 </li>
 
                 <li>
                   <Link
                     href="/plans"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
+                    className="inline-flex items-center gap-1.5"
                   >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    خرید اشتراک
+                    <BookOpen
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
+
+                    <span className="border-b border-transparent pb-0.5 hover:border-white">
+                      خرید اشتراک
+                    </span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="/resources/free-questions"
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <BookOpen
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
+
+                    <span className="border-b border-transparent pb-0.5 hover:border-white">
+                      نمونه سوالات رایگان
+                    </span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="/resources/free-booklets"
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <BookOpen
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
+
+                    <span className="border-b border-transparent pb-0.5 hover:border-white">
+                      دفترچه‌های رایگان
+                    </span>
                   </Link>
                 </li>
               </ul>
             </div>
 
             {/* ----------------------------------
-             * ستون منابع رایگان
+             * ستون بانک سوالات
+             *
+             * خط عمودی dashed برای مشخص کردن
+             * ارتباط دسته با زیرآیتم‌ها
              * ---------------------------------- */}
 
-            <div className="lg:col-span-3 flex flex-col gap-4">
-              <h4 className="text-base font-bold text-white border-r-4 border-emerald-400 pr-2">
-                منابع رایگان
-              </h4>
+            <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
+              <h3 className="border-r-4 border-emerald-400 pr-2 text-base font-bold text-white">
+                بانک سوالات
+              </h3>
 
-              <ul className="grid grid-cols-1 gap-2.5  text-slate-200">
-                <li>
-                  <Link
-                    href="/resources/free-resources"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
+              <ul className="relative mr-1 flex flex-col gap-2.5 border-r border-dashed border-slate-400/60 pr-4 text-sm text-slate-200">
+                {QUESTION_BANK_ITEMS.map((item, index) => (
+                  <li
+                    key={`${item.href}-${index}`}
+                    className="relative min-w-0"
                   >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    نمونه سوالات رایگان
-                  </Link>
-                </li>
+                    {/* اتصال کوچک زیرآیتم به خط اصلی */}
 
-                <li>
-                  <Link
-                    href="/resources/free-resources"
-                    className="hover:text-emerald-400 transition flex items-center gap-1.5"
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-[-17px] top-[10px] h-px w-3 border-t border-dashed border-slate-400/60"
+                    />
+
+                    <Link
+                      href={item.href}
+                      className="inline-flex max-w-full items-start gap-1.5"
+                    >
+                      <BookOpen
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      />
+
+                      <span className="break-words border-b border-transparent pb-0.5 hover:border-white">
+                        {item.title}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* ----------------------------------
+             * ستون دفترچه‌های استخدامی
+             *
+             * خط عمودی dashed برای مشخص کردن
+             * ارتباط دسته با زیرآیتم‌ها
+             * ---------------------------------- */}
+
+            <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
+              <h3 className="border-r-4 border-emerald-400 pr-2 text-base font-bold text-white">
+                دفترچه‌های استخدامی
+              </h3>
+
+              <ul className="relative mr-1 flex flex-col gap-2.5 border-r border-dashed border-slate-400/60 pr-4 text-sm text-slate-200">
+                {BOOKLET_ITEMS.map((item, index) => (
+                  <li
+                    key={`${item.href}-${index}`}
+                    className="relative min-w-0"
                   >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    دفترچه‌های رایگان
-                  </Link>
-                </li>
+                    {/* اتصال کوچک زیرآیتم به خط اصلی */}
+
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-[-17px] top-[10px] h-px w-3 border-t border-dashed border-slate-400/60"
+                    />
+
+                    <Link
+                      href={item.href}
+                      className="inline-flex max-w-full items-start gap-1.5"
+                    >
+                      <BookOpen
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      />
+
+                      <span className="break-words border-b border-transparent pb-0.5 hover:border-white">
+                        {item.title}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -189,7 +401,7 @@ export default function Footer() {
              * ستون نشان‌های اعتماد
              * ---------------------------------- */}
 
-            <div className="lg:col-span-3 flex justify-center lg:justify-end">
+            <div className="flex min-w-0 justify-center lg:col-span-3 lg:justify-end">
               <FooterTrustBadges />
             </div>
           </div>
@@ -198,32 +410,32 @@ export default function Footer() {
            * نوار پایین
            * ---------------------------------- */}
 
-          <div className="mt-10 rounded-2xl bg-[#24333A] p-4 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700/30 shadow-inner">
+          <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-700/30 bg-[#24333A] p-4 shadow-inner md:flex-row">
+
             {/* کپی‌رایت */}
 
-            <div className="text-xs text-slate-300 text-center md:text-right">
-              © {new Date().getFullYear()} کپی‌رایت، کلیه حقوق برای سایت{" "}
-              <span className="text-white font-bold">
+            <p className="text-center text-sm leading-6 text-slate-300 md:text-right">
+              © {currentYear} کپی‌رایت، کلیه حقوق برای سایت{" "}
+              <strong className="font-bold text-white">
                 استخدام‌پرو
-              </span>{" "}
+              </strong>{" "}
               محفوظ است.
-            </div>
+            </p>
 
-            {/* ----------------------------------
-             * شبکه‌های اجتماعی
-             * ---------------------------------- */}
+            {/* شبکه‌های اجتماعی */}
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+
               {/* ایتا */}
 
               <a
                 href={EITAA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
-                aria-label="ایتا"
+                className="inline-flex items-center gap-1 text-white"
+                aria-label="کانال ایتا"
               >
-                <span className="text-xs font-bold">
+                <span className="border-b border-transparent pb-0.5 text-xs font-bold hover:border-white">
                   ایتا
                 </span>
               </a>
@@ -234,10 +446,17 @@ export default function Footer() {
                 href={TELEGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-sky-500 hover:text-white transition-all shadow-sm"
-                aria-label="تلگرام"
+                className="inline-flex items-center gap-1 text-white"
+                aria-label="کانال تلگرام"
               >
-                <Send className="h-4 w-4" />
+                <Send
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+
+                <span className="border-b border-transparent pb-0.5 text-xs hover:border-white">
+                  تلگرام
+                </span>
               </a>
 
               {/* اینستاگرام */}
@@ -246,10 +465,17 @@ export default function Footer() {
                 href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#24333A] hover:bg-pink-600 hover:text-white transition-all shadow-sm"
-                aria-label="اینستاگرام"
+                className="inline-flex items-center gap-1 text-white"
+                aria-label="صفحه اینستاگرام"
               >
-                <Instagram className="h-4 w-4" />
+                <Instagram
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+
+                <span className="border-b border-transparent pb-0.5 text-xs hover:border-white">
+                  اینستاگرام
+                </span>
               </a>
             </div>
           </div>
@@ -259,52 +485,3 @@ export default function Footer() {
   );
 }
 
-/* ----------------------------------
- * کامپوننت نشان‌های اعتماد
- * ---------------------------------- */
-
-export function FooterTrustBadges() {
-  return (
-    <div className="bg-white/95 rounded-2xl p-4 border border-slate-200/20 shadow-lg w-full max-w-[260px]">
-      <h4 className="text-xs font-bold text-slate-800 mb-3 text-center">
-        با خیال راحت خرید کنید
-      </h4>
-
-      <div className="grid grid-cols-2 gap-3 justify-center items-center">
-        {/* ----------------------------------
-         * اینماد
-         * ---------------------------------- */}
-
-        <a
-          referrerPolicy="origin"
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://trustseal.enamad.ir/?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-          className="border border-slate-100 rounded-xl p-1 bg-slate-50 hover:bg-white transition-all shadow-sm flex items-center justify-center"
-          aria-label="نشان اعتماد الکترونیکی"
-        >
-          <img
-            referrerPolicy="origin"
-            src="https://trustseal.enamad.ir/logo.aspx?id=726282&Code=lFABKJYOh6iJxU0CU2uOAlIYw7gtwEnp"
-            alt="اینماد"
-            className="w-16 h-16 object-contain mx-auto"
-          />
-        </a>
-
-        {/* ----------------------------------
-         * زرین‌پال
-         * ---------------------------------- */}
-
-        <div className="border border-slate-100 rounded-xl p-1 bg-slate-50 hover:bg-white transition-all shadow-sm flex items-center justify-center h-18">
-          <Image
-            src="/images/footer/zrinpal.png"
-            alt="زرین‌پال"
-            width={64}
-            height={64}
-            className="object-contain"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}

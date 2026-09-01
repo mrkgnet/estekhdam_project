@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useActionState, useEffect, useRef, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, FileSpreadsheet } from "lucide-react";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import addGovQuestion from "@/actions/admin/questions/gov/add/Actions";
@@ -278,204 +277,193 @@ export default function AddQuestionModal({
     [categoryChapters]
   );
 
+  // عدم رندر در صورت بسته بودن مودال
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          // حذف onClick برای جلوگیری از بسته شدن با کلیک روی پس‌زمینه
-          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-        >
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-            className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
-            // حذف stopPropagation چون دیگر نیازی به آن نیست
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
+      >
+        {/* ==================== Header ==================== */}
+        <div className="flex justify-between items-center mb-4 border-b pb-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 id="modal-title" className="text-xl font-bold">
+              ثبت سوال جدید
+            </h2>
+            <div className="h-6 w-[1px] bg-gray-300 mx-2 hidden sm:block" />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 transition-all text-sm font-medium cursor-pointer"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              وارد کردن از اکسل
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx, .xls"
+              className="hidden"
+              aria-label="آپلود فایل اکسل"
+            />
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="بستن مودال"
+            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer shrink-0"
           >
-            {/* ==================== Header ==================== */}
-            <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 id="modal-title" className="text-xl font-bold">
-                  ثبت سوال جدید
-                </h2>
-                <div className="h-6 w-[1px] bg-gray-300 mx-2 hidden sm:block" />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 transition-all text-sm font-medium cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  وارد کردن از اکسل
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept=".xlsx, .xls"
-                  className="hidden"
-                  aria-label="آپلود فایل اکسل"
-                />
-              </div>
-              <button
-                onClick={onClose}
-                aria-label="بستن مودال"
-                className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer shrink-0"
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* ==================== Form ==================== */}
+        <form
+          action={formAction}
+          className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 flex-1"
+        >
+          <input type="hidden" name="productId" value={productId} />
+
+          {/* Question Type & Category Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="questionType" className="text-sm font-semibold">
+                نوع سوال *
+              </label>
+              <select
+                id="questionType"
+                name="questionType"
+                required
+                className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
               >
-                <X className="w-6 h-6" />
-              </button>
+                <option value="TALIFI">تالیفی</option>
+                <option value="SARASARI">سراسری</option>
+              </select>
             </div>
 
-            {/* ==================== Form ==================== */}
-            <form
-              action={formAction}
-              className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 flex-1"
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="categoryChapterId"
+                className="text-sm font-semibold"
+              >
+                دسته‌بندی
+              </label>
+              <select
+                id="categoryChapterId"
+                name="categoryChapterId"
+                className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
+              >
+                <option value="">همه دسته‌بندی‌ها</option>
+                {categoryOptions}
+              </select>
+            </div>
+          </div>
+
+          {/* Chapter Select */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="chapterId" className="text-sm font-semibold">
+              فصل
+            </label>
+            <select
+              id="chapterId"
+              name="chapterId"
+              className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
             >
-              <input type="hidden" name="productId" value={productId} />
+              <option value="">بدون سرفصل (عمومی)</option>
+              {chapterOptions}
+            </select>
+          </div>
 
-              {/* Question Type & Category Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="questionType" className="text-sm font-semibold">
-                    نوع سوال *
-                  </label>
-                  <select
-                    id="questionType"
-                    name="questionType"
-                    required
-                    className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
-                  >
-                    <option value="TALIFI">تالیفی</option>
-                    <option value="SARASARI">سراسری</option>
-                  </select>
-                </div>
+          {/* Question Text */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold">صورت سوال *</label>
+            <input type="hidden" name="questionText" value={questionText} />
+            <RichTextEditor value={questionText} onChange={setQuestionText} />
+          </div>
 
-                <div className="flex flex-col gap-1">
-                  <label
-                    htmlFor="categoryChapterId"
-                    className="text-sm font-semibold"
-                  >
-                    دسته‌بندی
-                  </label>
-                  <select
-                    id="categoryChapterId"
-                    name="categoryChapterId"
-                    className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
-                  >
-                    <option value="">همه دسته‌بندی‌ها</option>
-                    {categoryOptions}
-                  </select>
-                </div>
-              </div>
+          {/* Options */}
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-sm font-semibold">
+              گزینه‌ها *{" "}
+              <span className="text-xs text-gray-500 font-normal">
+                (جواب درست را انتخاب کنید)
+              </span>
+            </legend>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {options.map((opt, index) => (
+                <OptionEditor
+                  key={index}
+                  index={index}
+                  value={opt}
+                  isCorrect={correctAnswer === index}
+                  onValueChange={(value) => handleOptionChange(index, value)}
+                  onSetCorrect={() => setCorrectAnswer(index)}
+                />
+              ))}
+            </div>
+          </fieldset>
 
-              {/* Chapter Select */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="chapterId" className="text-sm font-semibold">
-                  فصل
-                </label>
-                <select
-                  id="chapterId"
-                  name="chapterId"
-                  className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
-                >
-                  <option value="">بدون سرفصل (عمومی)</option>
-                  {chapterOptions}
-                </select>
-              </div>
+          {/* Answer Text */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold">توضیحات سوال *</label>
+            <input type="hidden" name="answerText" value={answerText} />
+            <RichTextEditor value={answerText} onChange={setAnswerText} />
+          </div>
 
-              {/* Question Text */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold">صورت سوال *</label>
-                <input type="hidden" name="questionText" value={questionText} />
-                <RichTextEditor value={questionText} onChange={setQuestionText} />
-              </div>
+          {/* Exam Points */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold">
+              نکات کنکوری{" "}
+              <span className="text-xs text-gray-500 font-normal">(اختیاری)</span>
+            </label>
+            <input type="hidden" name="examPoints" value={examPoints} />
+            <RichTextEditor value={examPoints} onChange={setExamPoints} />
+          </div>
 
-              {/* Options */}
-              <fieldset className="flex flex-col gap-2">
-                <legend className="text-sm font-semibold">
-                  گزینه‌ها *{" "}
-                  <span className="text-xs text-gray-500 font-normal">
-                    (جواب درست را انتخاب کنید)
-                  </span>
-                </legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {options.map((opt, index) => (
-                    <OptionEditor
-                      key={index}
-                      index={index}
-                      value={opt}
-                      isCorrect={correctAnswer === index}
-                      onValueChange={(value) => handleOptionChange(index, value)}
-                      onSetCorrect={() => setCorrectAnswer(index)}
-                    />
-                  ))}
-                </div>
-              </fieldset>
+          {/* Message */}
+          {state?.message && (
+            <div
+              role="alert"
+              className={`p-3 rounded text-sm ${
+                state.success
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {state.message}
+            </div>
+          )}
 
-              {/* Answer Text */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold">توضیحات سوال *</label>
-                <input type="hidden" name="answerText" value={answerText} />
-                <RichTextEditor value={answerText} onChange={setAnswerText} />
-              </div>
-
-              {/* Exam Points */}
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold">
-                  نکات کنکوری{" "}
-                  <span className="text-xs text-gray-500 font-normal">(اختیاری)</span>
-                </label>
-                <input type="hidden" name="examPoints" value={examPoints} />
-                <RichTextEditor value={examPoints} onChange={setExamPoints} />
-              </div>
-
-              {/* Message */}
-              {state?.message && (
-                <div
-                  role="alert"
-                  className={`p-3 rounded text-sm ${
-                    state.success
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "bg-red-50 text-red-700 border border-red-200"
-                  }`}
-                >
-                  {state.message}
-                </div>
+          {/* Actions */}
+          <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 cursor-pointer bg-gray-200 rounded hover:bg-gray-300 text-gray-800 transition-colors"
+            >
+              انصراف
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="px-4 py-2 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isPending ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  در حال ثبت...
+                </span>
+              ) : (
+                "ثبت سوال"
               )}
-
-              {/* Actions */}
-              <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 cursor-pointer bg-gray-200 rounded hover:bg-gray-300 text-gray-800 transition-colors"
-                >
-                  انصراف
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="px-4 py-2 cursor-pointer bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isPending ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      در حال ثبت...
-                    </span>
-                  ) : (
-                    "ثبت سوال"
-                  )}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

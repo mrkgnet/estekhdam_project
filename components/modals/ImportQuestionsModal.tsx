@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useTransition, useEffect } from "react";
 import { X, Download, CheckCircle2 } from "lucide-react";
 import { importQuestionsAction } from "@/actions/admin/import_questions/import/Actions";
 
@@ -22,6 +21,27 @@ export default function ImportQuestionsModal({
   // استیت جدید برای نوع سوال
   const [importType, setImportType] = useState<string>("ALL"); 
   const [isPending, startTransition] = useTransition();
+
+  // کنترل‌های دسترسی‌پذیری و تجربه کاربری (بستن با Escape و قفل اسکرول بدنه)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    document.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
 
   const handleImport = () => {
     if (!selectedCategoryId) {
@@ -49,18 +69,11 @@ export default function ImportQuestionsModal({
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4"
-    >
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -50, opacity: 0 }}
-        className="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="bg-white p-6 rounded-lg w-full max-w-2xl shadow-xl flex flex-col max-h-[95vh]"
         dir="rtl"
       >
         <div className="flex justify-between items-center mb-6 border-b pb-3">
@@ -68,12 +81,17 @@ export default function ImportQuestionsModal({
             <Download className="w-6 h-6 text-blue-600" />
             ایمپورت سوالات جدید از دسته‌بندی
           </h2>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer" title="بستن">
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            title="بستن"
+            aria-label="بستن"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto custom-scrollbar pr-1">
           <div className="flex flex-col gap-2">
             <label htmlFor="categorySelect" className="text-sm font-semibold text-gray-700">
               انتخاب دسته‌بندی سرفصل *
@@ -141,11 +159,7 @@ export default function ImportQuestionsModal({
           </div>
 
           {selectedCategoryId && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-green-50 border border-green-200 rounded-lg p-4"
-            >
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 transition-all duration-300 ease-in-out">
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-green-800">
@@ -155,15 +169,25 @@ export default function ImportQuestionsModal({
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
 
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-          <button type="button" onClick={onClose} disabled={isPending} className="px-5 py-2.5 cursor-pointer bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-800 transition-colors disabled:opacity-50">
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+            className="px-5 py-2.5 cursor-pointer bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-800 transition-colors disabled:opacity-50"
+          >
             انصراف
           </button>
-          <button type="button" onClick={handleImport} disabled={!selectedCategoryId || isPending} className="px-5 py-2.5 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleImport}
+            disabled={!selectedCategoryId || isPending}
+            className="px-5 py-2.5 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
             {isPending ? (
               <>
                 <span className="animate-spin">⏳</span>
@@ -177,7 +201,7 @@ export default function ImportQuestionsModal({
             )}
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
