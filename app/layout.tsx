@@ -7,11 +7,12 @@ import { AuthProvider } from "@/context/AuthContext";
 import { GoogleAnalytics } from '@next/third-parties/google' // <--- ایمپورت
 
 import { Toaster } from "react-hot-toast";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer/Footer";
 import Providers from "@/components/react-query/Providers";
 import { LoadingProvider } from "@/providers/loading-provider";
 import TopBanner from "@/components/topBanner/TopBanner";
 import FetchDataTopBanner from "@/components/topBanner/FetchDataTopBanner";
+import FooterSSR from "@/components/footer/FooterSSR";
 
 // ایمپورت کردن کامپوننت بنر
 
@@ -66,7 +67,7 @@ export default function RootLayout({
                 <main className="bg-white flex-1 dark:bg-slate-900">{children}</main>
                
               </LoadingProvider>
-              <Footer />
+              <FooterSSR />
             </div>
           </AuthProvider>
         </Providers>

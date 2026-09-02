@@ -9,6 +9,8 @@ import DeleteButton from "@/components/ui/DeleteButton";
 import { deleteItemCategoryAction } from "@/actions/category/deletecategory/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query"; // 👈 ۱. ایمپورت ری‌اکت کوئری
+import { FOOTER_CATEGORIES_KEY } from "@/hooks/useFooterCategories"; // یا مستقیماً ["footer", "categories"]
 
 type Category = {
     id: string;
@@ -50,6 +52,9 @@ const CategoryTreeNode = ({ node, selectedId, onSelect }: { node: CategoryNode, 
 
 export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
     const categories: Category[] = Array.isArray(getDataCat) ? getDataCat : (getDataCat?.data || []);
+
+    // 👈 ۲. مقداردهی queryClient
+    const queryClient = useQueryClient();
 
     // ---------------- استیت‌های مودال افزودن ----------------
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -94,7 +99,7 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
         return buildTree();
     }, [categories, editId]);
 
-    // ---------------- Effect افزودن ----------------
+    // ---------------- Effect افزودن (باطل کردن کش هنگام موفقیت) ----------------
     useEffect(() => {
         if (addState?.success) {
             setIsAddModalOpen(false);
@@ -106,17 +111,23 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
             setAddExternalUrl("");
             clearAddImage();
             toast.success(addState?.message || "با موفقیت ثبت شد");
-        }
-    }, [addState]);
 
-    // ---------------- Effect ویرایش ----------------
+            // 👈 ۳. پاک کردن کش فوتر به محض اضافه شدن دسته جدید
+            queryClient.invalidateQueries({ queryKey: FOOTER_CATEGORIES_KEY });
+        }
+    }, [addState, queryClient]);
+
+    // ---------------- Effect ویرایش (باطل کردن کش هنگام موفقیت) ----------------
     useEffect(() => {
         if (editState?.success) {
             setIsEditModalOpen(false);
             editFormRef.current?.reset();
             toast.success(editState?.message || "با موفقیت ویرایش شد");
+
+            // 👈 ۴. پاک کردن کش فوتر به محض ویرایش دسته
+            queryClient.invalidateQueries({ queryKey: FOOTER_CATEGORIES_KEY });
         }
-    }, [editState]);
+    }, [editState, queryClient]);
 
     // ---------------- هندلرها ----------------
     const handleAddNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,7 +247,12 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                                         </button>
                                         <DeleteButton
                                             id={cat.id}
-                                            action={deleteItemCategoryAction}
+                                            action={async (id: string) => {
+                                                const res = await deleteItemCategoryAction(id);
+                                                // 👈 ۵. ابطال کش پس از حذف دسته
+                                                queryClient.invalidateQueries({ queryKey: FOOTER_CATEGORIES_KEY });
+                                                return res;
+                                            }}
                                             itemName={cat.catName}
                                             className="p-1.5 text-red-600 flex items-center gap-1 bg-red-50 hover:bg-red-50 rounded transition-colors"
                                         >
@@ -255,6 +271,7 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                 </table>
             </div>
 
+            {/* مودال افزودن */}
             {isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
                     <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
@@ -361,6 +378,7 @@ export default function CategoryManager({ getDataCat }: { getDataCat: any }) {
                 </div>
             )}
 
+            {/* مودال ویرایش */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
                     <div className="bg-white p-6 rounded w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
