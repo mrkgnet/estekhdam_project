@@ -108,7 +108,7 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
 
         <div className="mx-auto w-full px-4 py-8 sm:px-6">
           {/* گرید ستون‌ها */}
-          <div className="grid grid-cols-1 items-start gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 items-start gap-x-6 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             
             {/* ستون ۱: برند و معرفی */}
             <div className="flex flex-col gap-3">

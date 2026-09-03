@@ -23,6 +23,7 @@ import {
   BellRing
 } from "lucide-react";
 import { createBannerAction, deleteBannerAction, updateBannerAction } from "@/actions/admin/topBanner/Actions";
+import { TOP_BANNER_KEY } from "@/hooks/useTopBanner"; // 👈 استفاده از ثابت معتبر هوک
 
 const NEWS_STATUS_MAP = {
   NONE: "بدون وضعیت (بنر معمولی)",
@@ -37,11 +38,11 @@ function generateSlugFromTitle(text: string): string {
   return text
     .trim()
     .toLowerCase()
-    .replace(/[\u200B-\u200D\uFEFF]/g, "") // حذف نیم‌فاصله و کاراکترهای مخفی
-    .replace(/[\s_]+/g, "-")               // تبدیل فاصله‌ها و آندرلاین به خط تیره
-    .replace(/[^\p{L}\p{N}\-]+/gu, "")     // حفظ حروف و اعداد فارسی و انگلیسی و حذف علائم نگارشی
-    .replace(/-+/g, "-")                   // حذف خط‌تیره‌های تکراری
-    .replace(/^-+|-+$/g, "");              // حذف خط تیره از ابتدا و انتهای متن
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^\p{L}\p{N}\-]+/gu, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function SubmitButton({ label = "ذخیره بنر" }: { label?: string }) {
@@ -212,7 +213,6 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
     };
   }, [isAnyModalOpen]);
 
-  // کنترل تغییر عنوان و ساخت خودکار اسلاگ
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nextTitle = e.target.value;
     setTitle(nextTitle);
@@ -221,20 +221,28 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
     }
   };
 
+  // 👈 ابطال کش پس از ثبت موفق بنر
   useEffect(() => {
     if (addState?.success) {
       toast.success(addState.success);
-      queryClient.invalidateQueries({ queryKey: ["latestActiveBanner"] });
+      queryClient.invalidateQueries({ 
+        queryKey: TOP_BANNER_KEY,
+        refetchType: "all"
+      });
       if (addState.clearForm) closeAllModals();
     } else if (addState?.error) {
       toast.error(addState.error);
     }
   }, [addState, queryClient]);
 
+  // 👈 ابطال کش پس از ویرایش موفق بنر
   useEffect(() => {
     if (editState?.success) {
       toast.success(editState.success);
-      queryClient.invalidateQueries({ queryKey: ["latestActiveBanner"] });
+      queryClient.invalidateQueries({ 
+        queryKey: TOP_BANNER_KEY,
+        refetchType: "all"
+      });
       closeAllModals();
     } else if (editState?.error) {
       toast.error(editState.error);
@@ -262,6 +270,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
     resetForm();
   };
 
+  // 👈 ابطال کش پس از حذف بنر
   const handleDelete = async () => {
     if (!bannerToDelete) return;
     setIsDeleting(true);
@@ -271,7 +280,10 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
         toast.error(res.error);
       } else {
         toast.success("بنر با موفقیت حذف شد");
-        queryClient.invalidateQueries({ queryKey: ["latestActiveBanner"] });
+        queryClient.invalidateQueries({ 
+          queryKey: TOP_BANNER_KEY,
+          refetchType: "all"
+        });
         setBannerToDelete(null);
       }
     } catch (err) {
@@ -500,7 +512,7 @@ export default function ShowDataTopBannerPage({ initialData = [] }: { initialDat
                 />
               </div>
 
-              {/* لینک تصویر (منتقل شده به زیر لینک مقصد) */}
+              {/* لینک تصویر */}
               <div>
                 <label className="block mb-1.5 font-medium text-slate-700 dark:text-slate-300 text-sm">
                   لینک تصویر بنر <span className="text-xs text-slate-400 font-normal">(اختیاری)</span>

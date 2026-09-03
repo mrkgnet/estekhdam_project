@@ -208,7 +208,7 @@ export const tabsDataAdminPanel = [
     subItems: [
       {
         id: 121,
-        title: "مدیریت بن بالای صفحه",
+        title: "مدیریت بنر بالای صفحه",
         url: "/adminp/top-banner",
       },
     ],
@@ -223,6 +223,19 @@ export const tabsDataAdminPanel = [
         id: 121,
         title: "پلن‌های کاربران",
         url: "/adminp/plans",
+      },
+    ],
+  },
+  {
+    id: "15",
+    title: "مدیریت برندها",
+    icon: CreditCard,
+    url: "/adminp/brands",
+    subItems: [
+      {
+        id: 151,
+        title: "مدیریت برندهای استخدامی",
+        url: "/adminp/brands",
       },
     ],
   },
