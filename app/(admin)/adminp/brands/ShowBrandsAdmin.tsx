@@ -4,6 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { BRANDS_QUERY_KEY } from '@/hooks/useBrands';
 import { 
   createBrand, 
   updateBrand, 
@@ -33,6 +35,7 @@ interface Props {
 
 export default function ShowBrandsAdmin({ initial, initialSectionVisible = true }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const brands = initial?.data || [];
 
   const [sectionVisible, setSectionVisible] = useState(initialSectionVisible);
@@ -61,6 +64,12 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     }
   }, [editingBrand]);
 
+  // متد کمکی برای باطل‌سازی کش ری‌اکت کوئری و رفرش سرور اکشن‌ها
+  const invalidateBrandsCache = async () => {
+    await queryClient.invalidateQueries({ queryKey: BRANDS_QUERY_KEY });
+    router.refresh();
+  };
+
   // ریست کردن فرم افزودن هنگام باز شدن
   const openAddModal = () => {
     setAddImageUrl('');
@@ -79,8 +88,8 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setIsTogglingSection(true);
 
     await toast.promise(
-      toggleBrandsSectionSetting(previousState).then(() => {
-        router.refresh();
+      toggleBrandsSectionSetting(previousState).then(async () => {
+        await invalidateBrandsCache();
       }),
       {
         loading: 'در حال به‌روزرسانی وضعیت سکشن...',
@@ -112,10 +121,10 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setLoading(true);
 
     await toast.promise(
-      createBrand(formData).then(() => {
+      createBrand(formData).then(async () => {
         setIsAddOpen(false);
         setAddImageUrl('');
-        router.refresh();
+        await invalidateBrandsCache();
       }),
       {
         loading: 'در حال ایجاد برند...',
@@ -142,9 +151,9 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setLoading(true);
 
     await toast.promise(
-      updateBrand(editingBrand.id, formData).then(() => {
+      updateBrand(editingBrand.id, formData).then(async () => {
         setEditingBrand(null);
-        router.refresh();
+        await invalidateBrandsCache();
       }),
       {
         loading: 'در حال به‌روزرسانی برند...',
@@ -159,8 +168,8 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
   // تغییر وضعیت نمایش تک‌برند
   const handleToggleStatus = async (id: number, currentStatus: boolean) => {
     await toast.promise(
-      toggleBrandStatus(id, currentStatus).then(() => {
-        router.refresh();
+      toggleBrandStatus(id, currentStatus).then(async () => {
+        await invalidateBrandsCache();
       }),
       {
         loading: 'در حال تغییر وضعیت...',
@@ -178,9 +187,9 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setLoading(true);
 
     await toast.promise(
-      deleteBrand(deletingBrand.id).then(() => {
+      deleteBrand(deletingBrand.id).then(async () => {
         setDeletingBrand(null);
-        router.refresh();
+        await invalidateBrandsCache();
       }),
       {
         loading: 'در حال حذف برند...',
@@ -342,7 +351,9 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
 
             <form onSubmit={handleCreateBrand} className="flex flex-col gap-5">
               <div>
-                <label className="block text-sm font-medium mb-1">عنوان برند <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium mb-1">
+                  عنوان برند <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="title"
@@ -472,7 +483,9 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
 
             <form onSubmit={handleUpdateBrand} className="flex flex-col gap-5">
               <div>
-                <label className="block text-sm font-medium mb-1">عنوان برند <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium mb-1">
+                  عنوان برند <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="title"
@@ -586,7 +599,7 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
             onClick={() => !loading && setDeletingBrand(null)}
           />
           <div className="relative bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl z-10 text-center">
-            {/* پیش‌نمایش تصویر برندی که قرار است حذف شود */}
+            {/* پیش‌نمایش تصویر برند حذف‌شونده */}
             <div className="w-16 h-16 mx-auto mb-3 border rounded-xl p-1 bg-white shadow-sm flex items-center justify-center overflow-hidden">
               <img src={deletingBrand.imageUrl} alt={deletingBrand.title} className="w-full h-full object-contain" />
             </div>

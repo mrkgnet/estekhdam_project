@@ -1,6 +1,6 @@
-export default function DotsLoader() {
+export default function DotsLoaderBrands() {
   return (
-    <div className="w-full h-[620px]  md:h-[260px] flex items-center justify-center    ">
+    <div className="w-full h-[120px] border border-slate-400 md:h-[140px] flex items-center justify-center    ">
       <div className="flex flex-col items-center">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-slate-500 blink-dot" />

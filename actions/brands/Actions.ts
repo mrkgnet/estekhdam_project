@@ -12,7 +12,6 @@ export async function getBrandsSectionSetting(): Promise<boolean> {
     const setting = await db.setting.findUnique({
       where: { key: SHOW_BRANDS_KEY },
     });
-    // اگر رکوردی ثبت نشده بود، پیش‌فرض true در نظر گرفته می‌شود
     return setting ? setting.value === 'true' : true;
   } catch (error) {
     console.error("خطا در واکشی تنظیمات سکشن برندها:", error);
@@ -20,7 +19,7 @@ export async function getBrandsSectionSetting(): Promise<boolean> {
   }
 }
 
-// تغییر وضعیت نمایش سکشن برندها با الگوی Upsert
+// تغییر وضعیت نمایش سکشن برندها
 export async function toggleBrandsSectionSetting(currentStatus: boolean) {
   const nextStatus = !currentStatus;
 
@@ -31,11 +30,30 @@ export async function toggleBrandsSectionSetting(currentStatus: boolean) {
   });
 
   revalidatePath("/admin/brands");
-  revalidatePath("/"); // برای به‌روزرسانی صفحه اصلی سایت در فرانت
+  revalidatePath("/");
   return { success: true, isVisible: nextStatus };
 }
 
-// ۱. واکشی همه برندها
+// واکشی برندهای فعال مخصوص کاربران سایت
+export async function getActiveBrands() {
+  try {
+    const brands = await db.brand.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        imageUrl: true,
+      },
+    });
+    return brands;
+  } catch (error) {
+    console.error("خطا در واکشی برندهای فعال:", error);
+    return [];
+  }
+}
+
+// ۱. واکشی همه برندها (مخصوص پنل ادمین)
 export async function getBrands() {
   try {
     const brands = await db.brand.findMany({
@@ -63,6 +81,7 @@ export async function createBrand(formData: FormData) {
   });
 
   revalidatePath("/admin/brands");
+  revalidatePath("/");
   return { success: true };
 }
 
@@ -82,6 +101,7 @@ export async function updateBrand(id: number, formData: FormData) {
   });
 
   revalidatePath("/admin/brands");
+  revalidatePath("/");
   return { success: true };
 }
 
@@ -92,6 +112,7 @@ export async function deleteBrand(id: number) {
   });
 
   revalidatePath("/admin/brands");
+  revalidatePath("/");
   return { success: true };
 }
 
@@ -103,5 +124,6 @@ export async function toggleBrandStatus(id: number, currentStatus: boolean) {
   });
 
   revalidatePath("/admin/brands");
+  revalidatePath("/");
   return { success: true };
 }

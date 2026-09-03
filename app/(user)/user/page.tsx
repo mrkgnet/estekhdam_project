@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import NavbarUser from "@/components/navbar/Navbar";
 import HeaderTopComponnet from "@/components/header/HeaderTopComponnet";
 import SideBarUserComponent from "@/components/user/sidebar-user/SideBarUserComponent";
-import BrandTopSlider from "@/components/user/home/BrandTopSlider";
+import BrandTopSlider from "@/components/user/brands/BrandsTopHome";
 import HeroSearch from "@/components/HeroSearch";
 
 // 🟢 فقط کامپوننت فچ‌کننده را ایمپورت می‌کنیم (فایل‌های اضافی حذف شدند)
@@ -82,8 +82,8 @@ export default function HomePage() {
                 <FetchDataFRC />
               </Suspense>
             </section>
-            
-         
+
+
           </div>
         </main>
       </div>

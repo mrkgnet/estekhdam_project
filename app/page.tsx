@@ -1,4 +1,4 @@
-import BrandTopSlider from "@/components/user/home/BrandTopSlider";
+import BrandTopSlider from "@/components/user/brands/BrandsTopHome";
 import HeaderTopComponnet from "@/components/header/HeaderTopComponnet";
 import NavbarUser from "@/components/navbar/Navbar";
 import dynamic from "next/dynamic";
@@ -14,6 +14,7 @@ import SliderTopLeftComponent from "@/components/user/home/sliderTopLeft/page";
 import CategoryGrid from "@/components/user/home/categoryGrid/CategoryGrid";
 import QuestionCounterComponent from "@/components/user/questionCounter/QCComponent";
 import QCComponent from "@/components/user/questionCounter/QCComponent";
+import BrandsSSR from "@/components/user/brands/BrandsSSR";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -55,7 +56,7 @@ export default function page() {
 
                 {/* اسلایدر برندها */}
                 <section className="pb-10">
-                    <BrandTopSlider />
+                    <BrandsSSR />
                 </section>
                 {/* کامپوننت فیلتربار */}
                 <section className=" px-4 grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
@@ -71,26 +72,26 @@ export default function page() {
                     </div>
                 </section>
 
-                <div className="mb-12">
+                {/* <div className="mb-12">
                     <TabHomeComponent />
-                </div>
+                </div> */}
 
 
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
-                {/* <section className="mb-16">
-                    <QCComponent />                
-                </section> */}
+                <section className="mb-16">
+                    <QCComponent />
+                </section>
 
 
 
-                {/* <section className="w-full bg-white rounded-2xl">
+                <section className="w-full bg-white rounded-2xl">
                     <CategoryGrid />
-                </section> */}
+                </section>
 
                 {/* بخش اخبار فوری */}
-                {/* <section className="w-full mb-16">
+                <section className="w-full mb-16">
                     <BreakingNewsComponent />
-                </section> */}
+                </section>
 
 
             </main>
