@@ -25,24 +25,6 @@ export default function page() {
     return (
         <div className="min-h-screen  text-slate-800" dir="rtl">
 
-            <div className="pointer-events-none absolute -top-8 left-0 opacity-30">
-                <svg width="856" height="655" viewBox="0 0 856 655" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g opacity="0.5">
-                        <ellipse cx="166.838" cy="-18.3242" rx="648.861" ry="631.697" transform="rotate(3.73993 166.838 -18.3242)" stroke="url(#paint0)" />
-                        <ellipse opacity="0.500465" cx="9" cy="-41" rx="678" ry="583" fill="url(#paint1)" />
-                    </g>
-                    <defs>
-                        <linearGradient id="paint0" x1="-813.07" y1="-52.9581" x2="-68.6958" y2="953.258" gradientUnits="userSpaceOnUse">
-                            <stop stopColor="#4CAF50" />
-                            <stop offset="1" stopColor="#03ACF2" />
-                        </linearGradient>
-                        <linearGradient id="paint1" x1="-1014.91" y1="-72.964" x2="-356.962" y2="933.995" gradientUnits="userSpaceOnUse">
-                            <stop stopColor="#C8E6C9" />
-                            <stop offset="1" stopColor="#B3E5FC" />
-                        </linearGradient>
-                    </defs>
-                </svg>
-            </div>
 
             {/* بخش هدر و ناوبری */}
             <HeaderTopComponnet />
@@ -59,39 +41,41 @@ export default function page() {
                     <BrandsSSR />
                 </section>
                 {/* کامپوننت فیلتربار */}
-                <section className=" px-4 grid grid-cols-1 lg:grid-cols-6 gap-4 md:gap-6">
-                    <div className="lg:col-span-4">
-                        <div className="bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[220px] md:h-full">
-                            <Suspense fallback={<div className="h-full w-full bg-slate-100 animate-pulse"></div>}>
-                                <FetchDataMainSlider />
-                            </Suspense>
-                        </div>
+
+                {/* سکشن اول: اسلایدر اصلی */}
+                <section className="w-full px-4 mb-4 md:mb-6">
+                    <div className="w-full bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[190px] md:h-[260px]">
+                        <FetchDataMainSlider />
                     </div>
-                    <div className="lg:col-span-2 min-w-0 overflow-hidden h-full">
+                </section>
+                {/* سکشن دوم: کامپوننت کناری که حالا زیر اسلایدر قرار گرفته */}
+                <section className="w-full px-4">
+                    <div className="w-full min-w-0 overflow-hidden">
                         <SliderTopLeftComponent />
                     </div>
                 </section>
+
 
                 {/* <div className="mb-12">
                     <TabHomeComponent />
                 </div> */}
 
 
-                {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
-                <section className="mb-16">
-                    <QCComponent />
-                </section>
 
 
 
-                <section className="w-full bg-white rounded-2xl">
+                {/* <section className="w-full bg-white my-4 rounded-2xl">
                     <CategoryGrid />
-                </section>
+                </section> */}
 
                 {/* بخش اخبار فوری */}
-                <section className="w-full mb-16">
+                {/* <section className="w-full mb-16">
                     <BreakingNewsComponent />
-                </section>
+                </section> */}
+                {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
+                {/* <section className="mb-16">
+                    <QCComponent />
+                </section> */}
 
 
             </main>

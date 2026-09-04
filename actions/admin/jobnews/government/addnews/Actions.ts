@@ -2,7 +2,7 @@
 
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
@@ -122,6 +122,11 @@ export async function createNewsGovermentAction(prevState: any, formData: FormDa
         },
       },
     });
+
+    // 6. ابطال کش لایه سرور برای اسلایدر اصلی
+    if (isSlider) {
+      revalidateTag("main-slider");
+    }
 
     revalidatePath("/adminp/jobnews/government/add-news");
     revalidatePath("/adminp/jobnews/government");

@@ -10,6 +10,7 @@ export default async function FetchDataSLTL() {
   if (!response || !response.success || !response.data || response.data.length === 0) {
     return null;
   }
+  
 
   return (
     <div className="w-full">

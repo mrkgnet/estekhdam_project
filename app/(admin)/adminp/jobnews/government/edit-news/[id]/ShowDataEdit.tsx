@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, Save, Info } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query"; // 👈 اضافه شد
+import { sliderKeys } from "@/hooks/useMainSlider"; // 👈 کلید کوئری اسلایدر
 import { updateDataEditGov } from "@/actions/admin/jobnews/government/editnews/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
 import DateObject from "react-date-object";
@@ -34,6 +36,7 @@ export default function EditShowJobNewsGov({
 }) {
   const product = getDataGov?.product || {};
   const router = useRouter();
+  const queryClient = useQueryClient(); // 👈 هوک مدیریت کش
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [state, formAction, isPending] = useActionState(updateDataEditGov, null);
@@ -76,11 +79,18 @@ export default function EditShowJobNewsGov({
     if (!state) return;
     if (state.success) {
       toast.success(state.message);
+
+      // 👈 ابطال کش اسلایدر اصلی در کلاینت مرورگر
+      queryClient.invalidateQueries({
+        queryKey: sliderKeys.all,
+        refetchType: "all",
+      });
+
       router.back();
     } else {
       toast.error(state.message || state.error);
     }
-  }, [state, router]);
+  }, [state, router, queryClient]);
 
   const toggleProductSelection = (id: string) => {
     setSelectedProductIds((prev) =>

@@ -10,7 +10,7 @@ export default function PlansOffer() {
   const staticData = {
     text: "استفاده از تمامی خدمات سایت با خرید اشتراک با تخفیف",
     endAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    buttonText: "خرید/تمدید اشتراک با تخفیف",
+    buttonText: "رایگان(دسترسی به تمامی امکانات سایت)",
     link: "/plans",
   };
 
@@ -25,7 +25,10 @@ export default function PlansOffer() {
         href={staticData.link}
         className=" sm:w-auto shrink-0 flex items-end justify-start gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium px-5 py-2.5 rounded-lg shadow-sm transition-colors duration-150 active:scale-98"
       >
-        <span>{staticData.buttonText}</span>
+        <span>
+          رایگان(دسترسی به تمامی امکانات سایت)
+        </span>
+        
         <ArrowLeft size={18} />
       </Link>
 

@@ -36,7 +36,7 @@ interface Props {
 }
 
 /* ---------------------------------- */
-/* ✅ کامپوننت تصویر با اسکلتون شیمر */
+/* کامپوننت تصویر با اسکلتون شیمر */
 /* ---------------------------------- */
 function ProductImage({
   src,
@@ -52,20 +52,18 @@ function ProductImage({
 
   return (
     <div className="relative w-full h-full">
-      {/* ✅ اسکلتون شیمر تا لود کامل تصویر + آیکون BookOpen */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
           <BookOpen
-            className="w-10 h-10 text-slate-400 opacity-60"
+            className="w-8 h-8 text-slate-400 opacity-60"
             strokeWidth={1.5}
           />
         </div>
       )}
 
-      {/* ✅ در صورت خطا، آیکون پیش‌فرض */}
       {hasError && (
         <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
-          <BookOpen className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+          <BookOpen className="w-8 h-8 text-slate-300" strokeWidth={1.5} />
         </div>
       )}
 
@@ -73,7 +71,7 @@ function ProductImage({
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 170px, 400px"
+        sizes="(max-width: 768px) 140px, 200px"
         placeholder="blur"
         blurDataURL={blurDataURL}
         priority={priority}
@@ -124,8 +122,7 @@ export default function ShowDataSLTL({
   }
 
   return (
-    <div className="w-full mx-auto relative  h-full" dir="rtl">
-      {/* ✅ استایل شیمر برای اسکلتون تصاویر */}
+    <div className="w-full mx-auto relative h-full" dir="rtl">
       <style jsx global>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
@@ -179,10 +176,10 @@ export default function ShowDataSLTL({
             pauseOnMouseEnter: true,
           }}
           pagination={{ el: ".custom-swiper-progress", type: "progressbar" }}
-          spaceBetween={10}
-          slidesPerView={2}
+          spaceBetween={12}
+          slidesPerView={1}
           breakpoints={{
-            480: { slidesPerView: 2.8, spaceBetween: 12 },
+            640: { slidesPerView: 1.4, spaceBetween: 12 },
             768: { slidesPerView: 2, spaceBetween: 16 },
             1280: { slidesPerView: 2, spaceBetween: 16 },
           }}
@@ -199,20 +196,17 @@ export default function ShowDataSLTL({
                   className="block h-full"
                   rel="noopener noreferrer"
                 >
-                  <div className="group/card flex flex-col h-full w-full border border-gray-300 rounded overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white relative">
+                  <div className="group/card flex flex-row h-full w-full border border-gray-200 rounded-lg overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white relative min-h-[140px]">
                     
                     {/* Image Section */}
-                    <div className="relative w-full h-[130px] flex-shrink-0 flex items-center justify-center p-2 overflow-hidden bg-gray-50/40">
-                      
-                      {/* ✅ Badge با z-30 برای دیده شدن روی شیمر */}
-                      <div className="absolute top-0 left-0 z-30">
-                        <div className="bg-rose-500 text-white text-[11px] font-bold px-3 py-1 rounded-br-xl shadow-sm">
+                    <div className="relative w-36 sm:w-44 shrink-0 flex items-center justify-center p-2 bg-gray-50/40 border-l border-gray-100">
+                      <div className="absolute top-0 right-0 z-30">
+                        <div className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm">
                           درسنامه/تست
                         </div>
                       </div>
 
-                      {/* ✅ تصویر با اسکلتون شیمر */}
-                      <div className="relative w-full h-full">
+                      <div className="relative w-full h-full min-h-[110px]">
                         <ProductImage
                           src={p.imageUrl || "/images/products/bookExample.jpg"}
                           alt={p.name}
@@ -222,24 +216,25 @@ export default function ShowDataSLTL({
                     </div>
 
                     {/* Content Section */}
-                    <div className="flex flex-col flex-1 p-2 md:p-5 z-10 justify-between">
-                      <h3 className="text-slate-800 font-semibold leading-relaxed line-clamp-2 min-h-[2.5rem] group-hover/card:text-blue-600 transition-colors duration-200">
+                    <div className="flex flex-col flex-1 p-3 md:p-4 justify-between min-w-0">
+                      <h3 className="text-slate-800 text-sm font-semibold leading-snug line-clamp-2 group-hover/card:text-blue-600 transition-colors duration-200">
                         {p.name}
                       </h3>
-                      <div className="mt-auto">
-                        <ul className="space-y-2 text-[11px] mt-3">
-                          <li className="flex items-center gap-2 text-slate-800">
-                            <ClipboardList className="w-4 h-4 text-blue-500 shrink-0" />
+
+                      <div className="mt-2">
+                        <ul className="space-y-1.5 text-[11px]">
+                          <li className="flex items-center gap-1.5 text-slate-600 truncate">
+                            <ClipboardList className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                             <span>سوالات طبقه‌بندی شده</span>
                           </li>
-                          <li className="flex items-center gap-2 text-slate-800">
-                            <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />
+                          <li className="flex items-center gap-1.5 text-slate-600 truncate">
+                            <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                             <span>فصل‌بندی استاندارد</span>
                           </li>
                         </ul>
                       </div>
                     </div>
-                    
+
                   </div>
                 </Link>
               </SwiperSlide>

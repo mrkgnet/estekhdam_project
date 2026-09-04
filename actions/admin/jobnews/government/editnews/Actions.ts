@@ -2,7 +2,7 @@
 
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache"; // 👈 اضافه شدن revalidateTag
 import { NewsStatus } from "@prisma/client";
 import path from "path";
 import fs from "fs/promises";
@@ -127,8 +127,12 @@ export async function updateDataEditGov(prevState: any, formData: FormData) {
       },
     });
 
+    // 👈 ابطال کش لایه سرور برای اسلایدر اصلی
+    revalidateTag("main-slider");
+
     revalidatePath("/adminp/jobnews/government/edit-news");
     revalidatePath("/adminp/jobnews/government");
+    revalidatePath("/");
 
     return { success: true, message: "آگهی استخدام با موفقیت ویرایش شد." };
   } catch (error) {

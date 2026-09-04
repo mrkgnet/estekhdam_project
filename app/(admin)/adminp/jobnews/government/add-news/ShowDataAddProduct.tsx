@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, Save, Info } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { sliderKeys } from "@/hooks/useMainSlider";
 import { createNewsGovermentAction } from "@/actions/admin/jobnews/government/addnews/Actions";
 import { generatePersianSlug } from "@/lib/generateSlug";
 import DateObject from "react-date-object";
@@ -25,6 +27,7 @@ interface Props {
 
 export default function CreateNews({ getDataProduct = [] }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [state, formAction, isPending] = useActionState(createNewsGovermentAction, null);
@@ -50,6 +53,13 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     if (!state) return;
     if (state.success) {
       toast.success(state.message);
+
+      // ابطال کش کلاینت ری‌اکت کوئری برای اسلایدر
+      queryClient.invalidateQueries({
+        queryKey: sliderKeys.all,
+        refetchType: "all",
+      });
+
       // Reset form
       setJobInput("");
       setJobs([]);
@@ -69,7 +79,7 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
     } else {
       toast.error(state.message || "خطایی رخ داده است");
     }
-  }, [state]);
+  }, [state, queryClient]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -124,7 +134,6 @@ export default function CreateNews({ getDataProduct = [] }: Props) {
       </div>
 
       <form action={formAction} className="space-y-6">
-        {/* فیلدهای مخفی برای ارسال به سرور */}
         <input type="hidden" name="jobs" value={JSON.stringify(jobs)} />
         <input type="hidden" name="cities" value={JSON.stringify(cities)} />
         <input type="hidden" name="productIds" value={JSON.stringify(selectedProductIds)} />
