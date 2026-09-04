@@ -1,4 +1,3 @@
-// app/admin/brands/BrandsAdminView.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -46,15 +45,12 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
   const [deletingBrand, setDeletingBrand] = useState<Brand | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // استیت‌های اختصاصی مدال افزودن
   const [addImageUrl, setAddImageUrl] = useState('');
   const [addUploadKey, setAddUploadKey] = useState(0);
 
-  // استیت‌های اختصاصی مدال ویرایش
   const [editImageUrl, setEditImageUrl] = useState('');
   const [editUploadKey, setEditUploadKey] = useState(0);
 
-  // هماهنگ‌سازی مقدار تصویر هنگام باز شدن مدال ویرایش
   useEffect(() => {
     if (editingBrand) {
       setEditImageUrl(editingBrand.imageUrl || '');
@@ -64,20 +60,21 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     }
   }, [editingBrand]);
 
-  // متد کمکی برای باطل‌سازی کش ری‌اکت کوئری و رفرش سرور اکشن‌ها
+  // ابطال سراسری کش کلاینت + بازخوانی دیتای ادمین
   const invalidateBrandsCache = async () => {
-    await queryClient.invalidateQueries({ queryKey: BRANDS_QUERY_KEY });
+    await queryClient.invalidateQueries({ 
+      queryKey: BRANDS_QUERY_KEY,
+      refetchType: 'all',
+    });
     router.refresh();
   };
 
-  // ریست کردن فرم افزودن هنگام باز شدن
   const openAddModal = () => {
     setAddImageUrl('');
     setAddUploadKey((prev) => prev + 1);
     setIsAddOpen(true);
   };
 
-  // سوئیچ کلی نمایش سکشن برندها
   const handleToggleGlobalSection = async () => {
     if (isTogglingSection) return;
 
@@ -106,7 +103,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setIsTogglingSection(false);
   };
 
-  // افزودن برند جدید
   const handleCreateBrand = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading) return;
@@ -136,7 +132,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setLoading(false);
   };
 
-  // ویرایش اطلاعات برند
   const handleUpdateBrand = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading || !editingBrand) return;
@@ -165,7 +160,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     setLoading(false);
   };
 
-  // تغییر وضعیت نمایش تک‌برند
   const handleToggleStatus = async (id: number, currentStatus: boolean) => {
     await toast.promise(
       toggleBrandStatus(id, currentStatus).then(async () => {
@@ -179,7 +173,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
     );
   };
 
-  // حذف برند
   const handleConfirmDelete = async () => {
     if (loading || !deletingBrand) return;
 
@@ -203,7 +196,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
 
   return (
     <div className="p-6 w-full mx-auto space-y-6" dir="rtl">
-      {/* هدر صفحه */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">مدیریت برندها</h1>
@@ -218,7 +210,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
         </button>
       </div>
 
-      {/* بنر سوئیچ کنترل کلی سکشن */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className={`w-3 h-3 rounded-full transition-colors ${sectionVisible ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
@@ -253,7 +244,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
         </div>
       </div>
 
-      {/* جدول نمایش لیست برندها */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
         <table className="w-full text-right border-collapse">
           <thead className="bg-gray-100 text-sm">
@@ -329,7 +319,7 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
         </table>
       </div>
 
-      {/* ۱. مدال افزودن برند */}
+      {/* مدال افزودن */}
       {isAddOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -363,7 +353,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
                 />
               </div>
 
-              {/* بخش آپلود و آدرس تصویر */}
               <div className="bg-gray-50/70 p-4 md:p-5 rounded-2xl border border-gray-200 space-y-4">
                 <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
                   <ImageIcon className="w-5 h-5 text-blue-600" />
@@ -397,7 +386,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
                     </div>
                   </div>
 
-                  {/* پیش‌نمایش */}
                   <div className="flex flex-col space-y-1">
                     <span className="text-xs text-gray-600 font-medium">پیش‌نمایش تصویر</span>
                     <div className="relative w-full h-44 bg-white border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden group">
@@ -459,7 +447,7 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
         </div>
       )}
 
-      {/* ۲. مدال ویرایش برند */}
+      {/* مدال ویرایش */}
       {editingBrand && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -495,7 +483,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
                 />
               </div>
 
-              {/* بخش آپلود و آدرس تصویر ویرایش */}
               <div className="bg-gray-50/70 p-4 md:p-5 rounded-2xl border border-gray-200 space-y-4">
                 <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
                   <ImageIcon className="w-5 h-5 text-amber-600" />
@@ -529,7 +516,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
                     </div>
                   </div>
 
-                  {/* پیش‌نمایش */}
                   <div className="flex flex-col space-y-1">
                     <span className="text-xs text-gray-600 font-medium">پیش‌نمایش تصویر فعلی</span>
                     <div className="relative w-full h-44 bg-white border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden group">
@@ -591,7 +577,7 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
         </div>
       )}
 
-      {/* ۳. مدال تایید حذف */}
+      {/* مدال حذف */}
       {deletingBrand && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -599,7 +585,6 @@ export default function ShowBrandsAdmin({ initial, initialSectionVisible = true 
             onClick={() => !loading && setDeletingBrand(null)}
           />
           <div className="relative bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl z-10 text-center">
-            {/* پیش‌نمایش تصویر برند حذف‌شونده */}
             <div className="w-16 h-16 mx-auto mb-3 border rounded-xl p-1 bg-white shadow-sm flex items-center justify-center overflow-hidden">
               <img src={deletingBrand.imageUrl} alt={deletingBrand.title} className="w-full h-full object-contain" />
             </div>

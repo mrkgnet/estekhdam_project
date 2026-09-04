@@ -1,4 +1,3 @@
-// components/topBanner/TopBanner.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,9 +5,6 @@ import Link from "next/link";
 import { X, ArrowLeft, Megaphone } from "lucide-react";
 import { useTopBanner, BannerType } from "@/hooks/useTopBanner";
 
-/* ============================================================
-   News Status
-============================================================ */
 const NEWS_STATUS_MAP: Record<string, string> = {
   REGISTRATION: "ثبت‌نام کنید",
   REGISTRATION_RENEWAL: "تمدید ثبت‌نام",
@@ -16,9 +12,6 @@ const NEWS_STATUS_MAP: Record<string, string> = {
   RESULTS_ANNOUNCED: "مشاهده نتایج",
 };
 
-/* ============================================================
-   Action Button Text
-============================================================ */
 const ACTION_BUTTON_TEXT_MAP: Record<string, string> = {
   REGISTRATION: "شروع ثبت‌نام کلیک کنید",
   REGISTRATION_RENEWAL: "برای تمدید ثبت‌نام کلیک کنید",
@@ -26,9 +19,6 @@ const ACTION_BUTTON_TEXT_MAP: Record<string, string> = {
   RESULTS_ANNOUNCED: "برای مشاهده نتایج کلیک کنید",
 };
 
-/* ============================================================
-   Skeleton Loader
-============================================================ */
 function TopBannerSkeleton() {
   return (
     <div
@@ -71,30 +61,22 @@ function TopBannerSkeleton() {
   );
 }
 
-/* ============================================================
-   Top Banner Component
-============================================================ */
 interface TopBannerProps {
   initialBanner?: BannerType | null;
 }
 
 export default function TopBanner({ initialBanner = null }: TopBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
-
-  // استفاده از هوک سفارشی با کش هوشمند
   const { data: banner, isLoading, isFetching } = useTopBanner(initialBanner);
 
-  // اگر کاربر دکمه بستن را زده باشد
   if (!isVisible) {
     return null;
   }
 
-  // نمایش اسکلتون فقط در لود اولیه (اگر دیتای اولیه سرور موجود نباشد)
   if (isLoading) {
     return <TopBannerSkeleton />;
   }
 
-  // اگر بنری وجود نداشت یا غیرفعال بود
   if (!banner || !banner.isActive) {
     return null;
   }
@@ -112,8 +94,6 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
 
       <div className="relative mx-auto max-w-7xl px-3 py-2.5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3">
-          
-          {/* محتوای اصلی و آیکون */}
           <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
             {banner.imageUrl ? (
               <div className="relative shrink-0">
@@ -141,7 +121,6 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
               </div>
             )}
 
-            {/* عنوان و دکمه دسکتاپ */}
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <p className="truncate text-base font-semibold leading-snug text-white drop-shadow-sm">
                 {banner.title}
@@ -161,7 +140,6 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
             </div>
           </div>
 
-          {/* دکمه موبایل و بستن */}
           <div className="flex shrink-0 items-center gap-2">
             {banner.targetUrl && (
               <Link
@@ -192,7 +170,6 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
         </div>
       </div>
 
-      {/* خط شیمر هنگام به‌روزرسانی نامحسوس دیتای کش در پس‌زمینه */}
       {isFetching && !isLoading && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] overflow-hidden bg-white/10">
           <div className="h-full w-1/3 -translate-x-full animate-[shimmer_1.2s_infinite] bg-white/50" />

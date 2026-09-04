@@ -1,4 +1,3 @@
-// components/brands/BrandsSSR.tsx
 import React, { Suspense } from 'react';
 import { getBrandsSectionSetting, getActiveBrands } from '@/actions/brands/Actions';
 import BrandsTopHome from './BrandsTopHome';
@@ -18,7 +17,6 @@ export default function BrandsSSR() {
   );
 }
 
-// کامپوننت داخلی جهت فعال‌سازی استریم Suspense در حین واکشی دیتا
 async function BrandsFetcher() {
   const [isSectionVisible, activeBrands] = await Promise.all([
     getBrandsSectionSetting(),

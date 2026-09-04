@@ -1,4 +1,3 @@
-// components/brands/BrandsTopHome.tsx
 "use client";
 
 import React, { useMemo } from "react";
@@ -15,7 +14,7 @@ const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
 
 export default function BrandsTopHome({ brands: initialBrands, title }: Props) {
-  // تغذیه از دیتای SSR بدون نیاز به لودر کلاینتی
+  // تغذیه از دیتای SSR و هماهنگ با کش React Query
   const { data: brands = [] } = useBrands(initialBrands);
 
   const displayBrands = useMemo(() => {

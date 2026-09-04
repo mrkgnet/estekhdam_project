@@ -1,10 +1,9 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
-import { unstable_noStore as noStore } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
-// دریافت همه بنرها
+// دریافت همه بنرها (مخصوص پنل ادمین - زنده و بدون کش)
 export async function getAllBanners() {
   try {
     const banners = await db.topBanner.findMany({
@@ -16,36 +15,44 @@ export async function getAllBanners() {
   }
 }
 
-// دریافت آخرین بنر فعال ثبت‌شده
-export async function getLatestActiveBanner() {
-  try {
-    // این تابع نباید از Data Cache استفاده کند.
-    noStore();
+// تابع داخلی کش‌شده برای کاربران سایت با تگ اختصاصی
+const getCachedLatestActiveBanner = unstable_cache(
+  async () => {
+    try {
+      const latestBanner = await db.topBanner.findFirst({
+        where: {
+          isActive: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
-    const latestBanner = await db.topBanner.findFirst({
-      where: {
-        isActive: true,
-      },
-
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return {
-      success: true,
-      data: latestBanner,
-    };
-  } catch (error) {
-    console.error("getLatestActiveBanner error:", error);
-
-    return {
-      success: false,
-      error: "خطا در واکشی آخرین بنر",
-    };
+      return {
+        success: true,
+        data: latestBanner,
+      };
+    } catch (error) {
+      console.error("getCachedLatestActiveBanner error:", error);
+      return {
+        success: false,
+        error: "خطا در واکشی آخرین بنر",
+      };
+    }
+  },
+  ["latest-active-banner-cache-key"],
+  {
+    tags: ["top-banner-tag"],
+    revalidate: 60 * 60 * 24, // ۲۴ ساعت به عنوان Fallback
   }
+);
+
+// فقط تابع async مجاز به اکسپورت در فایل use server است
+export async function getLatestActiveBanner() {
+  return await getCachedLatestActiveBanner();
 }
 
+// ایجاد بنر جدید
 export async function createBannerAction(prevState: any, formData: FormData) {
   try {
     const title = (formData.get("title") as string)?.trim();
@@ -55,12 +62,10 @@ export async function createBannerAction(prevState: any, formData: FormData) {
     const newsStatusRaw = formData.get("newsStatus") as string;
     const isActive = formData.get("isActive") === "on";
 
-    // فیلدهای ضروری
     if (!title || !slug) {
       return { error: "لطفاً عنوان و اسلاگ بنر را وارد کنید." };
     }
 
-    // فیلدهای اختیاری
     const imageUrl = imageUrlRaw || null;
     const targetUrl = targetUrlRaw || null;
     const newsStatus = newsStatusRaw && newsStatusRaw !== "NONE" ? newsStatusRaw : null;
@@ -76,7 +81,11 @@ export async function createBannerAction(prevState: any, formData: FormData) {
       },
     });
 
+    // 👈 ابطال کش لایه سرور
+    revalidateTag("top-banner-tag");
     revalidatePath("/adminp/top-banner");
+    revalidatePath("/");
+
     return { success: "بنر با موفقیت ایجاد شد!", clearForm: true };
   } catch (error: any) {
     if (error?.code === "P2002") {
@@ -86,6 +95,7 @@ export async function createBannerAction(prevState: any, formData: FormData) {
   }
 }
 
+// ویرایش بنر
 export async function updateBannerAction(prevState: any, formData: FormData) {
   try {
     const id = formData.get("id") as string;
@@ -120,7 +130,11 @@ export async function updateBannerAction(prevState: any, formData: FormData) {
       },
     });
 
+    // 👈 ابطال کش لایه سرور
+    revalidateTag("top-banner-tag");
     revalidatePath("/adminp/top-banner");
+    revalidatePath("/");
+
     return { success: "تغییرات با موفقیت ذخیره شد!", clearForm: false };
   } catch (error: any) {
     if (error?.code === "P2002") {
@@ -130,10 +144,16 @@ export async function updateBannerAction(prevState: any, formData: FormData) {
   }
 }
 
+// حذف بنر
 export async function deleteBannerAction(id: string) {
   try {
     await db.topBanner.delete({ where: { id } });
+
+    // 👈 ابطال کش لایه سرور
+    revalidateTag("top-banner-tag");
     revalidatePath("/adminp/top-banner");
+    revalidatePath("/");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: "خطا در حذف بنر" };
