@@ -122,9 +122,9 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
             )}
 
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="truncate text-base font-semibold leading-snug text-white drop-shadow-sm">
-                {banner.title}
-              </p>
+             <p className="break-words whitespace-normal text-base font-semibold leading-snug text-white drop-shadow-sm">
+  {banner.title}
+</p>
 
               {banner.targetUrl && (
                 <Link
@@ -157,15 +157,7 @@ export default function TopBanner({ initialBanner = null }: TopBannerProps) {
               </Link>
             )}
 
-            <button
-              type="button"
-              onClick={() => setIsVisible(false)}
-              className="rounded-lg p-1 text-white/80 transition-all duration-200 hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-white sm:p-1.5"
-              title="بستن بنر"
-              aria-label="بستن بنر"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-            </button>
+           
           </div>
         </div>
       </div>

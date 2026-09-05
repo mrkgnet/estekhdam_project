@@ -1,69 +1,72 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Autoplay, Pagination } from "swiper/modules";
-import { ChevronLeft, ChevronRight, ClipboardList, BookOpen } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { memo, useCallback, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Lightbulb,
+  MonitorPlay,
+  ChevronsLeftRight,
+} from "lucide-react";
 
 import SafeImage from "@/components/ui/SafeImage";
-import { fetchLatestProductAction } from "@/actions/user/latestProduct/Actions";
-import { SliderSkeletonTopLeft } from "@/components/ui/SkeletonLoding/SliderSkeletonTopLeft";
 
 const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
 
-/* ---------------------------------- */
-/* Types */
-/* ---------------------------------- */
-interface ProductType {
+export interface ProductType {
   id: string;
   name: string;
   slug?: string;
   imageUrl?: string | null;
+  _count?: {
+    questions?: number;
+  };
+}
+
+interface ProductsResponse {
+  data?: ProductType[] | null;
 }
 
 interface Props {
   title?: string;
-  initialProducts: any;
-  viewAllLink?: string;
-  slug?: string;
+  initialProducts: ProductType[] | ProductsResponse | null | undefined;
 }
 
-/* ---------------------------------- */
-/* کامپوننت تصویر با اسکلتون شیمر */
-/* ---------------------------------- */
-function ProductImage({
-  src,
-  alt,
-  priority,
-}: {
+interface ProductImageProps {
   src: string;
   alt: string;
   priority?: boolean;
-}) {
+}
+
+const ProductImage = memo(function ProductImage({
+  src,
+  alt,
+  priority = false,
+}: ProductImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative h-full w-full">
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 z-10 skeleton-shimmer flex items-center justify-center">
-          <BookOpen
-            className="w-8 h-8 text-slate-400 opacity-60"
-            strokeWidth={1.5}
-          />
+        <div
+          aria-hidden="true"
+          className="skeleton-shimmer absolute inset-0 z-10 flex items-center justify-center"
+        >
+          <BookOpen className="h-8 w-8 text-slate-400 opacity-60" strokeWidth={1.5} />
         </div>
       )}
 
       {hasError && (
-        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
-          <BookOpen className="w-8 h-8 text-slate-300" strokeWidth={1.5} />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 flex items-center justify-center bg-slate-50"
+        >
+          <BookOpen className="h-8 w-8 text-slate-300" strokeWidth={1.5} />
         </div>
       )}
 
@@ -71,12 +74,14 @@ function ProductImage({
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 140px, 200px"
+        sizes="(max-width: 640px) 120px, (max-width: 1024px) 180px, 240px"
         placeholder="blur"
         blurDataURL={blurDataURL}
         priority={priority}
         fetchPriority={priority ? "high" : "auto"}
-        className={`object-contain mix-blend-multiply transition-all duration-700 ease-out group-hover/card:scale-105 ${
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className={`object-contain  mix-blend-multiply transition-opacity duration-300 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => setIsLoaded(true)}
@@ -84,49 +89,147 @@ function ProductImage({
       />
     </div>
   );
+});
+
+function normalizeProducts(
+  initialProducts: ProductType[] | ProductsResponse | null | undefined
+): ProductType[] {
+  if (Array.isArray(initialProducts)) return initialProducts;
+  if (initialProducts && "data" in initialProducts && Array.isArray(initialProducts.data)) {
+    return initialProducts.data;
+  }
+  return [];
 }
 
-/* ---------------------------------- */
-/* Component */
-/* ---------------------------------- */
+const FeatureBadge = memo(function FeatureBadge({
+  icon: Icon,
+  label,
+  colorClass = "bg-slate-100 text-slate-700 font-bold border-2 border-slate-200",
+}: {
+  icon: React.ElementType;
+  label: string;
+  colorClass?: string;
+}) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[10px] font-bold leading-none shadow-xs ${colorClass}`}
+    >
+      <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />
+      <span className="whitespace-nowrap">{label}</span>
+    </span>
+  );
+});
+
+const ProductCard = memo(function ProductCard({
+  product,
+  priority,
+}: {
+  product: ProductType;
+  priority: boolean;
+}) {
+  const imageSrc = product.imageUrl || "/images/products/bookExample.jpg";
+  const questionCount = product._count?.questions;
+
+  const questionText =
+    typeof questionCount === "number"
+      ? `${questionCount.toLocaleString("fa-IR")} تست`
+      : "تست چهارگزینه‌ای";
+
+  return (
+    <div className="h-[160px] sm:h-[185px] w-[90%] shrink-0 snap-start sm:w-[calc(100%/1.4-14px)] md:w-[calc(100%/2-14px)] lg:w-[calc(100%/3-14px)] xl:w-[calc(100%/4-16px)]">
+      <Link
+        href={`/resources/course/${product.slug ?? product.id}`}
+        className="block h-full w-full"
+      >
+        <article className="group/card relative flex h-full w-full flex-row overflow-hidden rounded border border-gray-200 bg-white  hover:border-slate-400 hover:shadow-md">
+          {/* بخش تصویر */}
+          <div className="relative h-full w-28 shrink-0 border-l border-gray-100 bg-gray-50/50 sm:w-36 xl:w-32 2xl:w-36">
+            <ProductImage src={imageSrc} alt={product.name} priority={priority} />
+          </div>
+
+          {/* بخش محتوا */}
+          <div className="flex h-full min-w-0 flex-1 flex-col justify-between p-3 sm:p-4">
+            {/* عنوان درس */}
+            <h3 className="shrink-0  text-xs sm:text-13 font-semibold leading-snug text-slate-800 transition-colors duration-200 group-hover/card:text-blue-600">
+              {product.name}
+            </h3>
+
+            {/* کانتینر بج‌ها با اسکرول عمودی و اسکرول‌بار مشخص */}
+            <div className="relative mt-2 min-h-0 flex-1 overflow-hidden">
+              <div
+                tabIndex={0}
+                onClick={(e) => e.stopPropagation()}
+                className="custom-scrollbar flex h-full max-h-[62px] sm:max-h-[76px] flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pl-1.5"
+              >
+                <FeatureBadge
+                  icon={ClipboardList}
+                  label={questionText}
+                  colorClass=" border-blue-100"
+                />
+                <FeatureBadge
+                  icon={BookOpen}
+                  label="درسنامه کامل"
+                  colorClass="  border-emerald-100"
+                />
+                <FeatureBadge
+                  icon={Lightbulb}
+                  label="نکات کنکوری"
+                  colorClass="  border-amber-100"
+                />
+                <FeatureBadge
+                  icon={MonitorPlay}
+                  label="آنلاین"
+                  colorClass="  border-purple-100"
+                />
+              
+                <FeatureBadge
+                  icon={BookOpen}
+                  label="پاسخ تشریحی"
+                  colorClass="bg-indigo-50 text-indigo-700 border-indigo-100"
+                />
+              </div>
+            </div>
+          </div>
+        </article>
+      </Link>
+    </div>
+  );
+});
+
 export default function ShowDataSLTL({
   title = "آموزش‌های پرمخاطب",
   initialProducts,
-  viewAllLink = "/resources",
 }: Props) {
-  const [isMounted, setIsMounted] = useState(false);
-  const [prevBtn, setPrevBtn] = useState<HTMLButtonElement | null>(null);
-  const [nextBtn, setNextBtn] = useState<HTMLButtonElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const regionId = useId();
 
-  useEffect(() => {
-    setIsMounted(true);
+  const products = useMemo(() => normalizeProducts(initialProducts), [initialProducts]);
+
+  const scrollByDirection = useCallback((direction: "next" | "prev") => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const scrollAmount = 320;
+    const amount = direction === "next" ? -scrollAmount : scrollAmount;
+
+    container.scrollBy({
+      left: amount,
+      behavior: "smooth",
+    });
   }, []);
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["latest-products"],
-    queryFn: fetchLatestProductAction,
-    initialData: initialProducts,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
-  });
-
-  const products: ProductType[] = response?.data || [];
-
-  if (!isMounted || (isLoading && products.length === 0)) {
-    return <SliderSkeletonTopLeft />;
-  }
-
-  if (!isLoading && products.length === 0) {
-    return null;
-  }
+  if (products.length === 0) return null;
 
   return (
-    <div className="w-full mx-auto relative h-full" dir="rtl">
+    <section className="relative mx-auto h-full w-full group" dir="rtl" aria-label={title}>
       <style jsx global>{`
         @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
         .skeleton-shimmer {
           background: linear-gradient(
@@ -140,123 +243,76 @@ export default function ShowDataSLTL({
           background-size: 200% 100%;
           animation: shimmer 1.8s infinite linear;
         }
-        .custom-swiper-progress {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: #e2e8f0;
-          z-index: 20;
-          border-radius: 4px 4px 0 0;
-          overflow: hidden;
-          --swiper-pagination-color: #2563eb;
+
+        /* اسکرول‌بار ظریف و کاربرپسند برای بخش‌های اسکرول‌خور */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
         }
-        .custom-swiper-progress .swiper-pagination-progressbar-fill {
-          background: #2563eb !important;
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          transform-origin: right top;
-          transition: transform 300ms ease;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #cbd5e1 #f1f5f9;
         }
       `}</style>
 
-      <div className="relative group h-full pt-2">
-        <div className="custom-swiper-progress" />
+      <div className="relative h-full pt-2">
+        {/* هدر بخش همراه با نشانگر راهنمای اسکرول */}
+        <div className="flex items-center justify-between gap-2 px-1 text-xs text-slate-500">
+          <div className="font-medium text-slate-700">دفترچه‌های استخدامی (تست/درسنامه)</div>
+          <div className="flex items-center gap-1 text-[11px] text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-full">
+            <ChevronsLeftRight className="h-3.5 w-3.5 animate-pulse text-blue-500" />
+            <span>اسکرول کنید</span>
+          </div>
+        </div>
 
-        <Swiper
-          modules={[Navigation, Autoplay, Pagination]}
-          navigation={{ nextEl: nextBtn, prevEl: prevBtn }}
-          autoplay={{
-            delay: 4000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
-          pagination={{ el: ".custom-swiper-progress", type: "progressbar" }}
-          spaceBetween={12}
-          slidesPerView={1}
-          breakpoints={{
-            640: { slidesPerView: 1.4, spaceBetween: 12 },
-            768: { slidesPerView: 2, spaceBetween: 16 },
-            1280: { slidesPerView: 2, spaceBetween: 16 },
-          }}
-          className="py-2 animate-in fade-in duration-500 static mt-2 h-full"
-          dir="rtl"
+        {/* کانتینر اسکرول افقی با اسکرول‌بار ظریف */}
+        <div
+          id={regionId}
+          ref={scrollContainerRef}
+          role="region"
+          aria-roledescription="carousel"
+          aria-label={title}
+          tabIndex={0}
+          className="custom-scrollbar mt-2 flex h-full snap-x snap-mandatory gap-[14px] overflow-x-auto scroll-smooth pb-3 pt-2"
         >
-          {products.map((p, index) => {
-            const isPriority = index < 2;
+          {products.map((product, index) => (
+            <ProductCard key={product.id} product={product} priority={index === 0} />
+          ))}
+        </div>
 
-            return (
-              <SwiperSlide key={p.id} className="w-full h-auto">
-                <Link
-                  href={`/resources/course/${p.slug}`}
-                  className="block h-full"
-                  rel="noopener noreferrer"
-                >
-                  <div className="group/card flex flex-row h-full w-full border border-gray-200 rounded-lg overflow-hidden hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-500 bg-white relative min-h-[140px]">
-                    
-                    {/* Image Section */}
-                    <div className="relative w-36 sm:w-44 shrink-0 flex items-center justify-center p-2 bg-gray-50/40 border-l border-gray-100">
-                      <div className="absolute top-0 right-0 z-30">
-                        <div className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm">
-                          درسنامه/تست
-                        </div>
-                      </div>
-
-                      <div className="relative w-full h-full min-h-[110px]">
-                        <ProductImage
-                          src={p.imageUrl || "/images/products/bookExample.jpg"}
-                          alt={p.name}
-                          priority={isPriority}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="flex flex-col flex-1 p-3 md:p-4 justify-between min-w-0">
-                      <h3 className="text-slate-800 text-sm font-semibold leading-snug line-clamp-2 group-hover/card:text-blue-600 transition-colors duration-200">
-                        {p.name}
-                      </h3>
-
-                      <div className="mt-2">
-                        <ul className="space-y-1.5 text-[11px]">
-                          <li className="flex items-center gap-1.5 text-slate-600 truncate">
-                            <ClipboardList className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <span>سوالات طبقه‌بندی شده</span>
-                          </li>
-                          <li className="flex items-center gap-1.5 text-slate-600 truncate">
-                            <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <span>فصل‌بندی استاندارد</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-
-                  </div>
-                </Link>
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-
-        {/* Navigation buttons */}
+        {/* دکمه اسکرول چپ (بعدی در RTL) */}
         <button
-          ref={setNextBtn}
-          className="absolute top-1/2 left-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-blue-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
+          type="button"
+          aria-label="اسلاید بعدی"
+          aria-controls={regionId}
+          onClick={() => scrollByDirection("next")}
+          className="absolute left-1 top-1/2 z-10 hidden sm:flex h-11 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft aria-hidden="true" className="h-5 w-5" />
         </button>
 
+        {/* دکمه اسکرول راست (قبلی در RTL) */}
         <button
-          ref={setPrevBtn}
-          className="absolute top-1/2 right-1 z-[50] -translate-y-1/2 w-7 h-7 bg-white/90 rounded-md shadow-lg border border-slate-200 flex items-center justify-center text-slate-700 hover:text-blue-600 transition-all xl:opacity-0 xl:group-hover:opacity-100 disabled:hidden"
+          type="button"
+          aria-label="اسلاید قبلی"
+          aria-controls={regionId}
+          onClick={() => scrollByDirection("prev")}
+          className="absolute right-1 top-1/2 z-10 hidden sm:flex h-11 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight aria-hidden="true" className="h-5 w-5" />
         </button>
       </div>
-    </div>
+    </section>
   );
 }

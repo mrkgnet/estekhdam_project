@@ -7,14 +7,20 @@ export async function fetchLatestProductAction() {
     const result = await db.product.findMany({
       // شرط اول: فقط محصولاتی که نوع‌شان MAIN است
       where: {
-        type: "MAIN"
+        type: "MAIN",
+      },
+      // شمارش تعداد سوالات متصل به هر درس/محصول
+      include: {
+        _count: {
+          select: {
+            questions: true,
+          },
+        },
       },
       // مرتب‌سازی: جدیدترین‌ها اول
       orderBy: {
-        createdAt: "desc" 
+        createdAt: "desc",
       },
-      // شرط دوم: گرفتن حداکثر ۱۰ رکورد
-      take: 10,
     });
 
     return { success: true, data: result };

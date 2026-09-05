@@ -44,7 +44,7 @@ export default function page() {
 
                 {/* سکشن اول: اسلایدر اصلی */}
                 <section className="w-full px-4 mb-4 md:mb-6">
-                    <div className="w-full bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[190px] md:h-[260px]">
+                    <div className="w-full bg-white rounded shadow-sm border border-slate-200 overflow-hidden h-[230px] md:h-[260px]">
                         <FetchDataMainSlider />
                     </div>
                 </section>

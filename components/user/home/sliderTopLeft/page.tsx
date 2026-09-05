@@ -1,15 +1,22 @@
-import React, { Suspense } from 'react';
-import FetchDataSLTL from './FetchDataSLTL'; // کامپوننت شما برای دریافت داده
-import { SliderSkeleton } from '@/components/ui/SkeletonLoding/SliderSkeleton';
+import React from 'react';
+import ShowDataSLTL from './ShowDataSLTL';
+import { fetchLatestProductAction } from '@/actions/user/latestProduct/Actions';
 
-export default function SliderTopLeftComponent() {
+export default async function FetchDataSLTL() {
+  // واکشی کامل پاسخ از اکشن
+  const response = await fetchLatestProductAction();
+
+  // اگر پاسخی نبود یا خطا داشت، طبق منطق رندر نمی‌کنیم
+  if (!response || !response.success || !response.data || response.data.length === 0) {
+    return null;
+  }
+
   return (
-    // ارتفاع کانتینر را برای جلوگیری از پرش حفظ کنید
-    <div className=""> {/* ارتفاع تقریبی کامپوننت نهایی */}
-      <Suspense fallback={<SliderSkeleton />}>
-        {/* این کامپوننت async است و داده‌ها را fetch می‌کند */}
-        <FetchDataSLTL />
-      </Suspense>
+    <div className="w-full">
+      <ShowDataSLTL
+        title="جدیدترین‌ها"
+        initialProducts={response} // کل آبجکت پاسخ فرستاده می‌شود
+      />
     </div>
   );
 }

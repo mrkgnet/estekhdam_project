@@ -173,11 +173,10 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                 
                 {/* بخش مشخصات و جدول */}
                 <div className="order-1 w-[60%] md:w-1/2 h-full flex-shrink-0 flex flex-col justify-center gap-1.5 md:gap-2 px-2 md:px-5">
-                  {s.title && (
-                    <h2 className="text-sm md:text-lg font-bold text-center text-slate-800 tracking-tight line-clamp-1 md:line-clamp-2">
-                      {s.title}
-                    </h2>
-                  )}
+                 <h2 className="text-sm md:text-lg font-bold text-center text-slate-800 tracking-tight break-words whitespace-normal">
+  {s.title}
+</h2>
+
 
                   {(infoRows.length > 0 || statusInfo) && (
                     <div className="overflow-x-auto">
@@ -185,10 +184,10 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                         <tbody>
                           {infoRows.map(([label, value]) => (
                             <tr key={label} className="leading-none md:leading-tight">
-                              <th className="border border-slate-300 bg-slate-100 px-1.5 py-0.5 md:py-1 font-semibold text-slate-700 text-center whitespace-nowrap">
+                              <th className="border border-slate-300 bg-slate-100 px-1.5 py-1 md:py-1.5 font-semibold text-slate-700 text-center whitespace-nowrap">
                                 {label}
                               </th>
-                              <td className="border border-slate-300 px-1.5 py-0.5 md:py-1 text-center font-semibold text-slate-800">
+                              <td className="border border-slate-300 px-1.5 py-1 md:py-1.5 text-center font-semibold text-slate-800">
                                 {value}
                               </td>
                             </tr>

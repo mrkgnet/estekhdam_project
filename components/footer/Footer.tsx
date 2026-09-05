@@ -68,7 +68,7 @@ export function ScrollToTopButton() {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
       aria-label="بازگشت به بالای صفحه"
       className="fixed bottom-6 left-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-slate-700/90 text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
     >
@@ -98,7 +98,7 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
         <div className="flex justify-center border-b border-white/10 bg-slate-600/60 py-3">
           <button
             type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
             className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-1.5 text-xs font-medium text-white transition-all hover:border-white/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30"
           >
             <ChevronUp className="h-4 w-4" aria-hidden="true" />
