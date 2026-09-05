@@ -2,30 +2,74 @@
 
 import { db } from "@/lib/db";
 
-export async function fetchLatestProductAction() {
+// تغییر به ۴ آیتم در هر صفحه تا دقیقاً یک ردیف کامل باشد
+const PAGE_SIZE = 4;
+
+export async function fetchPaginatedProductsAction(page: number = 1) {
   try {
-    const result = await db.product.findMany({
-      // شرط اول: فقط محصولاتی که نوع‌شان MAIN است
-      where: {
-        type: "MAIN",
-      },
-      // شمارش تعداد سوالات متصل به هر درس/محصول
-      include: {
-        _count: {
-          select: {
-            questions: true,
+    const targetSlugs = [
+      "بانک-سوالات",
+      "دفترچه-های-استخدامی",
+      encodeURI("بانک-سوالات"),
+      encodeURI("دفترچه-های-استخدامی"),
+    ];
+
+    const whereClause = {
+      type: "MAIN" as const,
+      isActive: true,
+      categories: {
+        some: {
+          parent: {
+            catSlug: {
+              in: targetSlugs,
+            },
+            parentId: null,
           },
         },
       },
-      // مرتب‌سازی: جدیدترین‌ها اول
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    };
 
-    return { success: true, data: result };
+    // واکشی دقیقاً ۴ آیتم
+    const [items, totalCount] = await Promise.all([
+      db.product.findMany({
+        where: whereClause,
+        take: PAGE_SIZE,
+        skip: (page - 1) * PAGE_SIZE,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          imageUrl: true,
+          _count: {
+            select: {
+              questions: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      db.product.count({ where: whereClause }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
+
+    return {
+      success: true,
+      data: items,
+      currentPage: page,
+      totalPages,
+      totalCount,
+    };
   } catch (error) {
-    console.error("❌ Error fetching latest products:", error);
-    return { success: false, data: [] };
+    console.error("❌ Error fetching paginated products:", error);
+    return {
+      success: false,
+      data: [],
+      currentPage: page,
+      totalPages: 1,
+      totalCount: 0,
+    };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useId, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -9,10 +9,12 @@ import {
   ClipboardList,
   Lightbulb,
   MonitorPlay,
-  ChevronsLeftRight,
+  RotateCcw,
+  Loader2,
 } from "lucide-react";
 
 import SafeImage from "@/components/ui/SafeImage";
+import { fetchPaginatedProductsAction } from "@/actions/user/latestProduct/Actions";
 
 const blurDataURL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZjFmNWY5Ii8+PC9zdmc+";
@@ -27,26 +29,21 @@ export interface ProductType {
   };
 }
 
-interface ProductsResponse {
-  data?: ProductType[] | null;
-}
-
 interface Props {
   title?: string;
-  initialProducts: ProductType[] | ProductsResponse | null | undefined;
-}
-
-interface ProductImageProps {
-  src: string;
-  alt: string;
-  priority?: boolean;
+  initialProducts: ProductType[];
+  totalPages: number;
 }
 
 const ProductImage = memo(function ProductImage({
   src,
   alt,
   priority = false,
-}: ProductImageProps) {
+}: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+}) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -74,14 +71,14 @@ const ProductImage = memo(function ProductImage({
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 640px) 120px, (max-width: 1024px) 180px, 240px"
+        sizes="(max-width: 640px) 130px, (max-width: 1024px) 180px, 240px"
         placeholder="blur"
         blurDataURL={blurDataURL}
         priority={priority}
         fetchPriority={priority ? "high" : "auto"}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
-        className={`object-contain  mix-blend-multiply transition-opacity duration-300 ${
+        className={`object-contain mix-blend-multiply transition-opacity duration-300 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={() => setIsLoaded(true)}
@@ -90,16 +87,6 @@ const ProductImage = memo(function ProductImage({
     </div>
   );
 });
-
-function normalizeProducts(
-  initialProducts: ProductType[] | ProductsResponse | null | undefined
-): ProductType[] {
-  if (Array.isArray(initialProducts)) return initialProducts;
-  if (initialProducts && "data" in initialProducts && Array.isArray(initialProducts.data)) {
-    return initialProducts.data;
-  }
-  return [];
-}
 
 const FeatureBadge = memo(function FeatureBadge({
   icon: Icon,
@@ -136,25 +123,21 @@ const ProductCard = memo(function ProductCard({
       : "تست چهارگزینه‌ای";
 
   return (
-    <div className="h-[160px] sm:h-[185px] w-[90%] shrink-0 snap-start sm:w-[calc(100%/1.4-14px)] md:w-[calc(100%/2-14px)] lg:w-[calc(100%/3-14px)] xl:w-[calc(100%/4-16px)]">
+    <div className="h-[165px] sm:h-[185px] w-full min-w-0">
       <Link
         href={`/resources/course/${product.slug ?? product.id}`}
         className="block h-full w-full"
       >
-        <article className="group/card relative flex h-full w-full flex-row overflow-hidden rounded border border-gray-200 bg-white  hover:border-slate-400 hover:shadow-md">
-          {/* بخش تصویر */}
-          <div className="relative h-full w-28 shrink-0 border-l border-gray-100 bg-gray-50/50 sm:w-36 xl:w-32 2xl:w-36">
+        <article className="group/card relative flex h-full w-full flex-row overflow-hidden rounded-md border border-gray-200 bg-white hover:border-slate-400 hover:shadow-md transition-all">
+          <div className="relative h-full w-28 sm:w-32 xl:w-28 2xl:w-32 shrink-0 border-l border-gray-100 bg-gray-50/50">
             <ProductImage src={imageSrc} alt={product.name} priority={priority} />
           </div>
 
-          {/* بخش محتوا */}
           <div className="flex h-full min-w-0 flex-1 flex-col justify-between p-3 sm:p-4">
-            {/* عنوان درس */}
-            <h3 className="shrink-0  text-xs sm:text-13 font-semibold leading-snug text-slate-800 transition-colors duration-200 group-hover/card:text-blue-600">
+            <h3 className="shrink-0 text-xs sm:text-13 font-semibold leading-snug text-slate-800 transition-colors duration-200 group-hover/card:text-blue-600 line-clamp-2">
               {product.name}
             </h3>
 
-            {/* کانتینر بج‌ها با اسکرول عمودی و اسکرول‌بار مشخص */}
             <div className="relative mt-2 min-h-0 flex-1 overflow-hidden">
               <div
                 tabIndex={0}
@@ -164,24 +147,23 @@ const ProductCard = memo(function ProductCard({
                 <FeatureBadge
                   icon={ClipboardList}
                   label={questionText}
-                  colorClass=" border-blue-100"
+                  colorClass="border-blue-100"
                 />
                 <FeatureBadge
                   icon={BookOpen}
                   label="درسنامه کامل"
-                  colorClass="  border-emerald-100"
+                  colorClass="border-emerald-100"
                 />
                 <FeatureBadge
                   icon={Lightbulb}
                   label="نکات کنکوری"
-                  colorClass="  border-amber-100"
+                  colorClass="border-amber-100"
                 />
                 <FeatureBadge
                   icon={MonitorPlay}
                   label="آنلاین"
-                  colorClass="  border-purple-100"
+                  colorClass="border-purple-100"
                 />
-              
                 <FeatureBadge
                   icon={BookOpen}
                   label="پاسخ تشریحی"
@@ -196,32 +178,137 @@ const ProductCard = memo(function ProductCard({
   );
 });
 
+const ProductSkeletonCard = memo(function ProductSkeletonCard() {
+  return (
+    <div className="h-[165px] sm:h-[185px] w-full min-w-0">
+      <div className="relative flex h-full w-full flex-row overflow-hidden rounded-md border border-gray-200 bg-white shadow-xs">
+        <div className="relative flex h-full w-28 sm:w-32 xl:w-28 2xl:w-32 shrink-0 items-center justify-center border-l border-gray-100 bg-slate-50">
+          <div className="skeleton-shimmer absolute inset-0 opacity-70" />
+          <Loader2 className="relative z-10 h-6 w-6 animate-spin text-slate-400" />
+        </div>
+
+        <div className="flex h-full min-w-0 flex-1 flex-col justify-between p-3 sm:p-4">
+          <div className="space-y-2">
+            <div className="skeleton-shimmer h-3.5 w-4/5 rounded" />
+            <div className="skeleton-shimmer h-3 w-1/2 rounded" />
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 pt-2">
+            <div className="skeleton-shimmer h-5 w-16 rounded-full" />
+            <div className="skeleton-shimmer h-5 w-20 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function ShowDataSLTL({
-  title = "آموزش‌های پرمخاطب",
-  initialProducts,
+  title = "دفترچه‌های استخدامی پیشنهادی",
+  initialProducts = [],
+  totalPages = 1,
 }: Props) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const regionId = useId();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [mobileItemIndex, setMobileItemIndex] = useState<number>(0);
+  const [isPending, startTransition] = useTransition();
 
-  const products = useMemo(() => normalizeProducts(initialProducts), [initialProducts]);
+  const touchStartX = useRef<number | null>(null);
 
-  const scrollByDirection = useCallback((direction: "next" | "prev") => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  const pagesCache = useRef<Record<number, ProductType[]>>({
+    1: initialProducts,
+  });
 
-    const scrollAmount = 320;
-    const amount = direction === "next" ? -scrollAmount : scrollAmount;
+  // اطمینان از اینکه حتی اگر سرور به اشتباه دیتای بیشتری داد، حداکثر ۴ تا رندر شود
+  const rawProducts = pagesCache.current[currentPage] || [];
+  const currentProducts = rawProducts.slice(0, 4);
+  const currentMobileProduct = currentProducts[mobileItemIndex] || currentProducts[0];
 
-    container.scrollBy({
-      left: amount,
-      behavior: "smooth",
-    });
-  }, []);
+  const prefetchNextPage = useCallback(
+    async (targetPage: number) => {
+      if (targetPage > totalPages || pagesCache.current[targetPage]) return;
+      const res = await fetchPaginatedProductsAction(targetPage);
+      if (res.success && res.data) {
+        pagesCache.current[targetPage] = res.data;
+      }
+    },
+    [totalPages]
+  );
 
-  if (products.length === 0) return null;
+  useEffect(() => {
+    if (currentPage < totalPages) {
+      prefetchNextPage(currentPage + 1);
+    }
+  }, [currentPage, totalPages, prefetchNextPage]);
+
+  const goToPage = useCallback(
+    (targetPage: number) => {
+      if (targetPage < 1 || targetPage > totalPages || targetPage === currentPage) return;
+
+      setMobileItemIndex(0);
+
+      if (pagesCache.current[targetPage]) {
+        setCurrentPage(targetPage);
+        return;
+      }
+
+      startTransition(async () => {
+        const res = await fetchPaginatedProductsAction(targetPage);
+        if (res.success && res.data) {
+          pagesCache.current[targetPage] = res.data;
+          setCurrentPage(targetPage);
+        }
+      });
+    },
+    [currentPage, totalPages]
+  );
+
+  const handleMobileNext = useCallback(() => {
+    if (mobileItemIndex < currentProducts.length - 1) {
+      setMobileItemIndex((prev) => prev + 1);
+    } else if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  }, [mobileItemIndex, currentProducts.length, currentPage, totalPages, goToPage]);
+
+  const handleMobilePrev = useCallback(() => {
+    if (mobileItemIndex > 0) {
+      setMobileItemIndex((prev) => prev - 1);
+    } else if (currentPage > 1) {
+      const prevPage = currentPage - 1;
+      if (pagesCache.current[prevPage]) {
+        setCurrentPage(prevPage);
+        setMobileItemIndex(pagesCache.current[prevPage].slice(0, 4).length - 1);
+      } else {
+        goToPage(prevPage);
+      }
+    }
+  }, [mobileItemIndex, currentPage, goToPage]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    if (diff > 45) {
+      handleMobileNext();
+    } else if (diff < -45) {
+      handleMobilePrev();
+    }
+    touchStartX.current = null;
+  };
+
+  if (initialProducts.length === 0) return null;
+
+  const isAtFirst = currentPage === 1 && mobileItemIndex === 0;
+  const isAtLast =
+    currentPage === totalPages && mobileItemIndex === currentProducts.length - 1;
 
   return (
-    <section className="relative mx-auto h-full w-full group" dir="rtl" aria-label={title}>
+    <section className="relative mx-auto w-full select-none" dir="rtl" aria-label={title}>
       <style jsx global>{`
         @keyframes shimmer {
           0% {
@@ -241,10 +328,9 @@ export default function ShowDataSLTL({
             #e2e8f0 100%
           );
           background-size: 200% 100%;
-          animation: shimmer 1.8s infinite linear;
+          animation: shimmer 1.6s infinite linear;
         }
 
-        /* اسکرول‌بار ظریف و کاربرپسند برای بخش‌های اسکرول‌خور */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
           height: 4px;
@@ -266,51 +352,128 @@ export default function ShowDataSLTL({
         }
       `}</style>
 
-      <div className="relative h-full pt-2">
-        {/* هدر بخش همراه با نشانگر راهنمای اسکرول */}
-        <div className="flex items-center justify-between gap-2 px-1 text-xs text-slate-500">
-          <div className="font-medium text-slate-700">دفترچه‌های استخدامی (تست/درسنامه)</div>
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-full">
-            <ChevronsLeftRight className="h-3.5 w-3.5 animate-pulse text-blue-500" />
-            <span>اسکرول کنید</span>
-          </div>
+      {/* هدر بالای کاروسل */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2.5 px-1 text-xs">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-bold text-slate-800">{title}</h2>
+          <span className="text-[10px] text-slate-400 font-medium">ویژه</span>
         </div>
 
-        {/* کانتینر اسکرول افقی با اسکرول‌بار ظریف */}
+        <div className="flex items-center gap-2.5 text-slate-500 font-medium text-xs">
+          <span className="hidden sm:inline-block">
+            صفحه <strong className="text-slate-800">{currentPage.toLocaleString("fa-IR")}</strong> از{" "}
+            {totalPages.toLocaleString("fa-IR")}
+          </span>
+
+          <span className="inline-block sm:hidden bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-bold text-[11px]">
+            {(mobileItemIndex + 1).toLocaleString("fa-IR")} از {currentProducts.length.toLocaleString("fa-IR")}{" "}
+            <span className="text-[9px] text-slate-400 font-normal">
+              (ص {currentPage.toLocaleString("fa-IR")})
+            </span>
+          </span>
+
+          {currentPage > 1 && (
+            <button
+              type="button"
+              onClick={() => goToPage(1)}
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>شروع مجدد</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="relative mt-3">
+        {/* ۱. مخصوص موبایل: ۱ آیتم */}
         <div
-          id={regionId}
-          ref={scrollContainerRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label={title}
-          tabIndex={0}
-          className="custom-scrollbar mt-2 flex h-full snap-x snap-mandatory gap-[14px] overflow-x-auto scroll-smooth pb-3 pt-2"
+          className="block sm:hidden w-full overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
-          {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} priority={index === 0} />
-          ))}
+          {isPending ? (
+            <ProductSkeletonCard />
+          ) : (
+            currentMobileProduct && (
+              <ProductCard
+                key={currentMobileProduct.id}
+                product={currentMobileProduct}
+                priority={true}
+              />
+            )
+          )}
         </div>
 
-        {/* دکمه اسکرول چپ (بعدی در RTL) */}
+        {/* ۲. مخصوص دسکتاپ: دقیقاً ۴ ستون در یک ردیف بدون شکستن به خط بعد */}
+        <div className="hidden sm:grid sm:grid-cols-4 gap-3 w-full">
+          {isPending
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <ProductSkeletonCard key={`page-skeleton-${idx}`} />
+              ))
+            : currentProducts.map((product, idx) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  priority={currentPage === 1 && idx === 0}
+                />
+              ))}
+        </div>
+
+        {/* دکمه بعدی (سمت چپ در RTL) */}
         <button
           type="button"
-          aria-label="اسلاید بعدی"
-          aria-controls={regionId}
-          onClick={() => scrollByDirection("next")}
-          className="absolute left-1 top-1/2 z-10 hidden sm:flex h-11 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
+          aria-label="بعدی"
+          disabled={
+            isPending ||
+            (typeof window !== "undefined" && window.innerWidth < 640
+              ? isAtLast
+              : currentPage === totalPages)
+          }
+          onClick={() => {
+            if (window.innerWidth < 640) {
+              handleMobileNext();
+            } else {
+              goToPage(currentPage + 1);
+            }
+          }}
+          className={`absolute -left-2.5 sm:-left-4 top-1/2 z-10 flex h-9 w-7 sm:h-12 sm:w-9 -translate-y-1/2 items-center justify-center rounded-r sm:rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
+            (typeof window !== "undefined" && window.innerWidth < 640
+              ? isAtLast
+              : currentPage === totalPages) || isPending
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-400 active:scale-95"
+          }`}
         >
-          <ChevronLeft aria-hidden="true" className="h-5 w-5" />
+          <ChevronLeft aria-hidden="true" className="h-4 w-4 sm:h-6 sm:w-6" />
         </button>
 
-        {/* دکمه اسکرول راست (قبلی در RTL) */}
+        {/* دکمه قبلی (سمت راست در RTL) */}
         <button
           type="button"
-          aria-label="اسلاید قبلی"
-          aria-controls={regionId}
-          onClick={() => scrollByDirection("prev")}
-          className="absolute right-1 top-1/2 z-10 hidden sm:flex h-11 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-sm transition-all hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
+          aria-label="قبلی"
+          disabled={
+            isPending ||
+            (typeof window !== "undefined" && window.innerWidth < 640
+              ? isAtFirst
+              : currentPage === 1)
+          }
+          onClick={() => {
+            if (window.innerWidth < 640) {
+              handleMobilePrev();
+            } else {
+              goToPage(currentPage - 1);
+            }
+          }}
+          className={`absolute -right-2.5 sm:-right-4 top-1/2 z-10 flex h-9 w-7 sm:h-12 sm:w-9 -translate-y-1/2 items-center justify-center rounded-l sm:rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
+            (typeof window !== "undefined" && window.innerWidth < 640
+              ? isAtFirst
+              : currentPage === 1) || isPending
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-400 active:scale-95"
+          }`}
         >
-          <ChevronRight aria-hidden="true" className="h-5 w-5" />
+          <ChevronRight aria-hidden="true" className="h-4 w-4 sm:h-6 sm:w-6" />
         </button>
       </div>
     </section>

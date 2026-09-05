@@ -1,12 +1,11 @@
-import React from 'react';
-import ShowDataSLTL from './ShowDataSLTL';
-import { fetchLatestProductAction } from '@/actions/user/latestProduct/Actions';
+import React from "react";
+import ShowDataSLTL from "./ShowDataSLTL";
+import { fetchPaginatedProductsAction } from "@/actions/user/latestProduct/Actions";
 
 export default async function FetchDataSLTL() {
-  // واکشی کامل پاسخ از اکشن
-  const response = await fetchLatestProductAction();
+  // واکشی اولیه صفحه اول
+  const response = await fetchPaginatedProductsAction(1);
 
-  // اگر پاسخی نبود یا خطا داشت، طبق منطق رندر نمی‌کنیم
   if (!response || !response.success || !response.data || response.data.length === 0) {
     return null;
   }
@@ -14,8 +13,9 @@ export default async function FetchDataSLTL() {
   return (
     <div className="w-full">
       <ShowDataSLTL
-        title="جدیدترین‌ها"
-        initialProducts={response} // کل آبجکت پاسخ فرستاده می‌شود
+        title="محصولات مرتبط با این مورد"
+        initialProducts={response.data}
+        totalPages={response.totalPages}
       />
     </div>
   );
