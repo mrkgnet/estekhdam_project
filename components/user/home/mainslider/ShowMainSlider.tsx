@@ -41,6 +41,26 @@ const STATUS_MAP: Record<NewsStatus, { label: string; className: string }> = {
   NEWS: { label: "در‌انتظار نتایج", className: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
+// توابع سازنده Shimmer Effect برای تصاویر
+const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#f6f7f8" offset="20%" />
+      <stop stop-color="#edeef1" offset="50%" />
+      <stop stop-color="#f6f7f8" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#f6f7f8" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`;
+
+const toBase64 = (str: string) =>
+  typeof window === "undefined"
+    ? Buffer.from(str).toString("base64")
+    : window.btoa(str);
+
 function toJalaliDate(dateStr: string | null): string | null {
   if (!dateStr) return null;
   try {
@@ -173,14 +193,13 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                 
                 {/* بخش مشخصات و جدول */}
                 <div className="order-1 w-[60%] md:w-1/2 h-full flex-shrink-0 flex flex-col justify-center gap-1.5 md:gap-2 px-2 md:px-5">
-                 <h2 className="text-sm md:text-lg font-bold text-center text-slate-800 tracking-tight break-words whitespace-normal">
-  {s.title}
-</h2>
-
+                  <h2 className="text-15 md:text-lg font-bold text-center text-slate-800 tracking-tight break-words whitespace-normal">
+                    {s.title}
+                  </h2>
 
                   {(infoRows.length > 0 || statusInfo) && (
                     <div className="overflow-x-auto">
-                      <table className="w-full border-collapse text-center text-[12px] md:text-sm">
+                      <table className="w-full border-collapse text-center text-[14px] md:text-sm">
                         <tbody>
                           {infoRows.map(([label, value]) => (
                             <tr key={label} className="leading-none md:leading-tight">
@@ -199,7 +218,7 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                               </th>
                               <td className="border border-slate-300 px-1.5 py-0.5 md:py-1 text-center">
                                 <span
-                                  className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] md:text-xs font-bold border ${statusInfo.className}`}
+                                  className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[13px] md:text-xs font-bold border ${statusInfo.className}`}
                                 >
                                   {statusInfo.label}
                                 </span>
@@ -224,6 +243,8 @@ export default function ShowMainSlider({ initialSliders }: ShowMainSliderProps) 
                         priority={isFirstSlide}
                         fetchPriority={isFirstSlide ? "high" : "auto"}
                         className="object-contain"
+                        placeholder="blur"
+                        blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
                       />
                     )}
                   </div>

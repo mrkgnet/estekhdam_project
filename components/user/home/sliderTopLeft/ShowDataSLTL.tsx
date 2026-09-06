@@ -91,7 +91,7 @@ const ProductImage = memo(function ProductImage({
 const FeatureBadge = memo(function FeatureBadge({
   icon: Icon,
   label,
-  colorClass = "bg-slate-100 text-slate-700 font-bold border-2 border-slate-200",
+  colorClass = "bg-slate-100 text-slate-700 font-bold border-4 border-slate-200",
 }: {
   icon: React.ElementType;
   label: string;
@@ -99,7 +99,7 @@ const FeatureBadge = memo(function FeatureBadge({
 }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[10px] font-bold leading-none shadow-xs ${colorClass}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[12px] font-bold leading-none shadow-xs ${colorClass}`}
     >
       <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />
       <span className="whitespace-nowrap">{label}</span>
@@ -119,7 +119,7 @@ const ProductCard = memo(function ProductCard({
 
   const questionText =
     typeof questionCount === "number"
-      ? `${questionCount.toLocaleString("fa-IR")} تست`
+      ? `${questionCount.toLocaleString("fa-IR")} تست (سراسری)`
       : "تست چهارگزینه‌ای";
 
   return (
@@ -147,12 +147,12 @@ const ProductCard = memo(function ProductCard({
                 <FeatureBadge
                   icon={ClipboardList}
                   label={questionText}
-                  colorClass="border-blue-100"
+                  colorClass="border border-2 border-blue-800"
                 />
                 <FeatureBadge
                   icon={BookOpen}
                   label="درسنامه کامل"
-                  colorClass="border-emerald-100"
+                  colorClass=" border border-2 border-emerald-100"
                 />
                 <FeatureBadge
                   icon={Lightbulb}
@@ -162,6 +162,11 @@ const ProductCard = memo(function ProductCard({
                 <FeatureBadge
                   icon={MonitorPlay}
                   label="آنلاین"
+                  colorClass="border-purple-100"
+                />
+                 <FeatureBadge
+                  icon={MonitorPlay}
+                  label="تست‌های تالیفی "
                   colorClass="border-purple-100"
                 />
                 <FeatureBadge
@@ -437,7 +442,7 @@ export default function ShowDataSLTL({
               goToPage(currentPage + 1);
             }
           }}
-          className={`absolute -left-2.5 sm:-left-4 top-1/2 z-10 flex h-9 w-7 sm:h-12 sm:w-9 -translate-y-1/2 items-center justify-center rounded-r sm:rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
+          className={`absolute -left-2.5 sm:-left-4 top-1/2 z-10 flex h-12 w-8 sm:h-14 sm:w-11 -translate-y-1/2 items-center justify-center rounded-r sm:rounded-md border border-slate-600 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
             (typeof window !== "undefined" && window.innerWidth < 640
               ? isAtLast
               : currentPage === totalPages) || isPending
@@ -465,7 +470,7 @@ export default function ShowDataSLTL({
               goToPage(currentPage - 1);
             }
           }}
-          className={`absolute -right-2.5 sm:-right-4 top-1/2 z-10 flex h-9 w-7 sm:h-12 sm:w-9 -translate-y-1/2 items-center justify-center rounded-l sm:rounded-md border border-slate-300 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
+          className={`absolute -right-2.5 sm:-right-4 top-1/2 z-10 flex h-12 w-8 sm:h-14 sm:w-11 -translate-y-1/2 items-center justify-center rounded-l sm:rounded-md border border-slate-600 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs transition-all ${
             (typeof window !== "undefined" && window.innerWidth < 640
               ? isAtFirst
               : currentPage === 1) || isPending
