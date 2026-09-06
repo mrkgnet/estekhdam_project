@@ -99,7 +99,7 @@ const FeatureBadge = memo(function FeatureBadge({
 }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[12px] font-bold leading-none shadow-xs ${colorClass}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[11px] font-bold leading-none shadow-xs ${colorClass}`}
     >
       <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />
       <span className="whitespace-nowrap">{label}</span>
@@ -119,7 +119,7 @@ const ProductCard = memo(function ProductCard({
 
   const questionText =
     typeof questionCount === "number"
-      ? `${questionCount.toLocaleString("fa-IR")} تست (سراسری)`
+      ? `${questionCount.toLocaleString("fa-IR")} تست (سراسری/ تالیفی)`
       : "تست چهارگزینه‌ای";
 
   return (
@@ -142,7 +142,7 @@ const ProductCard = memo(function ProductCard({
               <div
                 tabIndex={0}
                 onClick={(e) => e.stopPropagation()}
-                className="custom-scrollbar flex h-full max-h-[62px] sm:max-h-[76px] flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pl-1.5"
+                className="custom-scrollbar flex h-full max-h-[62px] sm:max-h-[110px] flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pl-1.5"
               >
                 <FeatureBadge
                   icon={ClipboardList}
