@@ -1,26 +1,45 @@
-import React, { Suspense } from 'react'
-
-import LinearLoader from '@/components/LinearLoader'
-import FetchDataEditProduct from './FetchDataEditProduct'
-import SpinerLoader from '@/components/SpinerLoader';
+import React, { Suspense } from 'react';
+import ShowDataProdcut from './ShowDataProduct';
 import DotsLoader from '@/components/ui/Loading/DotsLoader';
+import { getDataCategory } from '@/actions/category/Actions';
+import { getDataEditProduct } from '@/actions/admin/products/government/Actions';
 
-// ۱. کلمه async را به کامپوننت اضافه کردیم
-// ۲. تایپ params را به Promise تغییر دادیم
-export default async function page({ params }: { params: Promise<{ id: string }> }) {
-    
-    // ۳. در اینجا params را await می‌کنیم تا باز شود و بتوانیم id را بگیریم
-    const { id } = await params;
-    
+interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+// کامپوننت داخلی برای واکشی داده درون مرز Suspense
+async function EditProductContent({ id }: { id: string }) {
+    // واکشی موازی اطلاعات محصول و دسته‌بندی‌ها برای بهینه‌سازی سرعت
+    const [response, allCategories] = await Promise.all([
+        getDataEditProduct(id),
+        getDataCategory()
+    ]);
+
+    // در صورت عدم موفقیت (عدم دسترسی یا یافت نشدن محصول)
+    if (!response.success) {
+        return (
+            <div className="p-4 bg-red-100 text-red-700 rounded-md text-center mt-10">
+                {response.message}
+            </div>
+        );
+    }
 
     return (
         <div>
-            {/* Suspense برای هندل کردن لودینگ تا زمانی که دیتای سرور آماده شود */}
-            <Suspense fallback={<DotsLoader />}>
-                {/* آیدی استخراج شده را به کامپوننت واکشی دیتا پاس می‌دهیم */}
-                <FetchDataEditProduct id={id} />
-            </Suspense>
-     
+            <ShowDataProdcut productData={response.product} allCategories={allCategories.data} />
         </div>
-    )
+    );
+}
+
+export default async function Page({ params }: PageProps) {
+    const { id } = await params;
+
+    return (
+        <div>
+            <Suspense key={id} fallback={<DotsLoader />}>
+                <EditProductContent id={id} />
+            </Suspense>
+        </div>
+    );
 }

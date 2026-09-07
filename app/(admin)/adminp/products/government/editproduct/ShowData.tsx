@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import deleteProductAction from '@/actions/admin/products/government/deleteproduct/Actions';
 import DeleteButton from '@/components/ui/DeleteButton';
 import {
   Plus,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import SearchBar from '@/components/ui/SearchBar';
 import Pagination from '@/components/ui/Pagination';
+import { deleteProductAction } from '@/actions/admin/products/government/Actions';
 
 interface Category {
   id: string;

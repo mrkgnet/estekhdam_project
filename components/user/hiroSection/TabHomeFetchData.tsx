@@ -1,5 +1,5 @@
 import React from 'react'
-import TabHomePage from './TabHomePage'
+import TabHomePage from './hi'
 import { GetCategoriDataAction } from '@/actions/category/Actions'
 
 type Props = {

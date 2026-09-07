@@ -1,6 +1,6 @@
 "use client";
 
-import { editDataProductAction } from "@/actions/admin/products/government/editproduct/Actions";
+import { editDataProductAction } from "@/actions/admin/products/government/Actions";
 import BasicInfoSection from "@/components/admin/products/basicInfoSection/BasicInfoSection";
 import CategorySection from "@/components/admin/products/categorySection/CategorySection";
 import DescriptionSection from "@/components/admin/products/descriptionSection/DescriptionSection";

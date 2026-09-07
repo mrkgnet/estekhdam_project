@@ -1,14 +1,25 @@
-import LinearLoader from '@/components/LinearLoader'
-import React, { Suspense } from 'react'
-import FetchData from './FetchData'
-import SpinerLoader from '@/components/SpinerLoader'
+import React, { Suspense } from 'react';
+import SpinerLoader from '@/components/SpinerLoader';
+import { getDataCategory } from '@/actions/category/Actions';
+import CreateProductPage from './ShowData';
 
-export default function page() {
+// کامپوننت داخلی جهت واکشی دسته‌بندی‌ها در مرز Suspense
+async function CreateProductContent() {
+  const dataCategory = await getDataCategory();
+
+  return (
+    <div>
+      <CreateProductPage dataCategory={dataCategory} />
+    </div>
+  );
+}
+
+export default function Page() {
   return (
     <div>
       <Suspense fallback={<SpinerLoader />}>
-        <FetchData />
+        <CreateProductContent />
       </Suspense>
     </div>
-  )
+  );
 }
