@@ -119,7 +119,7 @@ export default function ShowDataProduct({ productData, allCategories }: EditProd
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6 font-sans" dir="rtl">
+    <div className="w-full  mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-6 font-sans" dir="rtl">
       <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ویرایش محصول</h1>

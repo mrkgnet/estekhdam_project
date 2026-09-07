@@ -44,7 +44,7 @@ export default function FeaturesSection({ features, onFeaturesChange }: Features
                         value={featureInput}
                         onChange={(e) => setFeatureInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="flex-1 px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                        className="flex-1 px-4 py-3.5 border border-gray-400 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                         placeholder="مثال: دارای پاسخنامه تشریحی"
                     />
                     <button

@@ -153,7 +153,7 @@ export default function UploadImage({ onUploadSuccess }: UploadImageProps) {
   const isPdfFile = file?.type === 'application/pdf';
 
   return (
-    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm text-xs">
+    <div className="bg-white p-3 rounded-xl border border-gray-400 shadow-sm text-xs">
       <div className="flex items-center gap-1.5 mb-3">
         <Upload className="w-4 h-4 text-blue-600" />
         <h3 className="text-xs font-semibold text-gray-800">آپلود فایل</h3>

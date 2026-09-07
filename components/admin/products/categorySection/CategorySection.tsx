@@ -46,7 +46,7 @@ export default function CategorySection({
                 <select
                     defaultValue=""
                     onChange={handleSelectCategory}
-                    className="w-full px-4 py-3.5 border border-gray-200 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                    className="w-full px-4 py-3.5 border border-gray-400 rounded bg-gray-50/50 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
                 >
                     <option value="" disabled>
                         جستجو و انتخاب دسته‌بندی...
