@@ -17,6 +17,7 @@ import QCComponent from "@/components/user/questionCounter/QCComponent";
 import BrandsSSR from "@/components/user/brands/BrandsSSR";
 import HiroSection from "@/components/user/hiroSection/HiroSection";
 import HiroGrid from "@/components/user/hiroGrid/HiroGrid";
+import HiroGridSSF from "@/components/user/hiroGrid/HiroGridSSF";
 
 const BreakingNewsComponent = dynamic(() => import("@/components/user/home/breakingnews/Gov/page"), {
     loading: () => <div className="h-40 w-full bg-slate-100 animate-pulse rounded-xl"></div>,
@@ -55,7 +56,7 @@ export default function page() {
                 </div> */}
 
                 <div className="mb-12">
-                    <HiroGrid />
+                    <HiroGridSSF />
                 </div>
                 {/* سکشن دوم: کامپوننت کناری که حالا زیر اسلایدر قرار گرفته */}
                 <section className="w-full px-4">

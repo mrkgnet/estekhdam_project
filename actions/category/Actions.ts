@@ -120,3 +120,60 @@ export async function GetCategoriDataAction(typeInput?: string | CategoryType) {
     };
   }
 }
+
+
+/**
+ * دریافت صرفاً دسته‌های والد (اصلی) بدون واکشی زیردسته‌ها
+ */
+
+
+
+export async function getRootCategoriesWithChildrenAction(type?: CategoryType) {
+  try {
+    const categories = await db.category.findMany({
+      where: {
+        parentId: null, // فقط سردسته‌ها
+        ...(type ? { type } : {}),
+      },
+      select: {
+        id: true,
+        catName: true,
+        catSlug: true,
+        imageUrl: true,
+        children: {
+          select: {
+            id: true,
+            catName: true,
+            catSlug: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    })
+
+    if (!categories || categories.length === 0) {
+      return {
+        success: false,
+        message: 'دسته‌بندی اصلی یافت نشد.',
+        data: [],
+      }
+    }
+
+    return {
+      success: true,
+      data: categories,
+    }
+  } catch (error) {
+    console.error('❌ Error fetching root categories with children:', error)
+    return {
+      success: false,
+      data: [],
+      error: 'خطایی در دریافت دسته‌بندی‌ها رخ داد.',
+    }
+  }
+}
