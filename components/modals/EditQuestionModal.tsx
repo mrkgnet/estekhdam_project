@@ -1,25 +1,46 @@
 "use client";
 
-import React, { useActionState, useEffect } from "react";
+import React, { useActionState, useEffect, useCallback, useMemo } from "react";
 import { X } from "lucide-react";
 import RichTextEditor from "@/components/editor/RichTextEditor";
-import { editQuestionAction } from "@/actions/admin/questions/gov/edit/Actions";
+import { editGovQuestion } from "@/actions/admin/questions/gov/edit/Actions";
+
+interface Chapter {
+  id: string;
+  order: number;
+  title: string;
+  categoryChapter?: {
+    name: string;
+  };
+}
+
+interface CategoryChapter {
+  id: string;
+  name: string;
+}
+
+interface ActionState {
+  success?: boolean;
+  message?: string;
+}
 
 interface EditQuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
   productId: string;
-  chapters: any[];
-  categoryChapters: any[];
+  chapters: Chapter[];
+  categoryChapters: CategoryChapter[];
   question: any;
   questionText: string;
   setQuestionText: (value: string) => void;
   answerText: string;
   setAnswerText: (value: string) => void;
+  studyGuide: string;
+  setStudyGuide: (value: string) => void;
   examPoints: string;
   setExamPoints: (value: string) => void;
   options: string[];
-  setOptions: (options: string[]) => void;
+  setOptions: React.Dispatch<React.SetStateAction<string[]>>;
   correctAnswer: number | null;
   setCorrectAnswer: (index: number | null) => void;
 }
@@ -35,6 +56,8 @@ export default function EditQuestionModal({
   setQuestionText,
   answerText,
   setAnswerText,
+  studyGuide,
+  setStudyGuide,
   examPoints,
   setExamPoints,
   options,
@@ -42,42 +65,49 @@ export default function EditQuestionModal({
   correctAnswer,
   setCorrectAnswer,
 }: EditQuestionModalProps) {
-  const [state, formAction, isPending] = useActionState(editQuestionAction, null);
+  const [state, formAction, isPending] = useActionState<ActionState | null, FormData>(editGovQuestion, null);
 
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
-  // بستن مودال در صورت موفقیت‌آمیز بودن عملیات
   useEffect(() => {
     if (state?.success) {
       onClose();
     }
-  }, [state, onClose]);
+  }, [state?.success, onClose]);
 
-  // بستن مودال با دکمه Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const handleOptionChange = useCallback(
+    (index: number, value: string) => {
+      setOptions((prev) => {
+        const newOptions = [...prev];
+        newOptions[index] = value;
+        return newOptions;
+      });
+    },
+    [setOptions]
+  );
 
-  // جلوگیری از اسکرول صفحه اصلی وقتی مودال باز است
-  useEffect(() => {
-    if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
+  const chapterOptions = useMemo(
+    () =>
+      chapters.map((chapter) => {
+        const categoryPrefix = chapter.categoryChapter?.name
+          ? `[${chapter.categoryChapter.name}] `
+          : "";
+        return (
+          <option key={chapter.id} value={chapter.id}>
+            {categoryPrefix}فصل {chapter.order}: {chapter.title}
+          </option>
+        );
+      }),
+    [chapters]
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      categoryChapters.map((category) => (
+        <option key={category.id} value={category.id}>
+          {category.name}
+        </option>
+      )),
+    [categoryChapters]
+  );
 
   if (!isOpen || !question) return null;
 
@@ -86,35 +116,40 @@ export default function EditQuestionModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-edit-title"
         className="bg-white p-6 rounded w-full max-w-4xl shadow-xl flex flex-col max-h-[95vh]"
       >
         <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h2 className="text-xl font-bold">ویرایش سوال</h2>
+          <h2 id="modal-edit-title" className="text-xl font-bold">
+            ویرایش سوال
+          </h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-            title="بستن"
-            aria-label="بستن"
+            aria-label="بستن مودال"
+            className="p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors cursor-pointer shrink-0"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form action={formAction} className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
+        <form
+          action={formAction}
+          className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 flex-1"
+        >
+          <input type="hidden" name="questionId" value={question.id} />
           <input type="hidden" name="productId" value={productId} />
-          <input type="hidden" name="id" value={question.id} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label htmlFor="questionTypeEdit" className="text-sm font-semibold">
+              <label htmlFor="edit-questionType" className="text-sm font-semibold">
                 نوع سوال *
               </label>
               <select
-                id="questionTypeEdit"
+                id="edit-questionType"
                 name="questionType"
-                required
                 defaultValue={question.questionType || "TALIFI"}
-                className="border p-2 rounded focus:outline-blue-500 bg-white"
+                required
+                className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
               >
                 <option value="TALIFI">تالیفی</option>
                 <option value="SARASARI">سراسری</option>
@@ -122,46 +157,33 @@ export default function EditQuestionModal({
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="categoryChapterIdEdit" className="text-sm font-semibold">
-                دسته‌بندی 
+              <label htmlFor="edit-categoryChapterId" className="text-sm font-semibold">
+                دسته‌بندی
               </label>
               <select
-                id="categoryChapterIdEdit"
+                id="edit-categoryChapterId"
                 name="categoryChapterId"
-                defaultValue={question.categoryChapterId || question.chapter?.categoryChapterId || ""}
-                className="border p-2 rounded focus:outline-blue-500 bg-white"
+                defaultValue={question.categoryChapterId ?? ""}
+                className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
               >
                 <option value="">همه دسته‌بندی‌ها</option>
-                {categoryChapters?.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+                {categoryOptions}
               </select>
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="chapterIdEdit" className="text-sm font-semibold">
-               فصل
+            <label htmlFor="edit-chapterId" className="text-sm font-semibold">
+              فصل
             </label>
             <select
-              id="chapterIdEdit"
+              id="edit-chapterId"
               name="chapterId"
-              defaultValue={question.chapterId || ""}
-              className="border p-2 rounded focus:outline-blue-500 bg-white"
+              defaultValue={question.chapterId ?? ""}
+              className="border p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white transition-shadow"
             >
               <option value="">بدون سرفصل (عمومی)</option>
-              {chapters?.map((chapter) => (
-                <option key={chapter.id} value={chapter.id}>
-                  {chapter.categoryChapter?.name && (
-                    <span className="text-gray-500 text-xs">
-                      [{chapter.categoryChapter.name}]
-                    </span>
-                  )}{" "}
-                  فصل {chapter.order}: {chapter.title}
-                </option>
-              ))}
+              {chapterOptions}
             </select>
           </div>
 
@@ -171,69 +193,68 @@ export default function EditQuestionModal({
             <RichTextEditor value={questionText} onChange={setQuestionText} />
           </div>
 
-          {/* ================= شروع تغییرات بخش گزینه‌ها ================= */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold">
-              گزینه‌ها *{" "}
-              <span className="text-xs text-gray-500 font-normal">
-                (جواب درست را انتخاب کنید)
-              </span>
-            </label>
-
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-sm font-semibold">
+              گزینه‌ها * <span className="text-xs text-gray-500 font-normal">(پاسخ درست را انتخاب کنید)</span>
+            </legend>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {options.map((opt, index) => (
-                <div
-                  key={index}
-                  className={`flex flex-col border rounded p-3 transition-colors ${
-                    correctAnswer === index
-                      ? "border-green-500 bg-green-50/30 shadow-sm"
-                      : "border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-2 border-b pb-2">
-                    <input
-                      type="radio"
-                      name="correctAnswer"
-                      value={index}
-                      required
-                      onChange={() => setCorrectAnswer(index)}
-                      checked={correctAnswer === index}
-                      className="w-4 h-4 cursor-pointer accent-green-600"
-                    />
-                    <span className="text-sm font-bold text-gray-700">
-                      گزینه {index + 1}
-                    </span>
+              {options.map((opt, index) => {
+                const isCorrect = correctAnswer === index;
+                return (
+                  <div
+                    key={index}
+                    className={`flex flex-col border rounded p-3 transition-colors ${
+                      isCorrect ? "border-green-500 bg-green-50/30 shadow-sm" : "border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2 border-b pb-2">
+                      <input
+                        type="radio"
+                        name="correctAnswer"
+                        value={index}
+                        required
+                        onChange={() => setCorrectAnswer(index)}
+                        checked={isCorrect}
+                        className="w-4 h-4 cursor-pointer accent-green-600"
+                      />
+                      <span className="text-sm font-bold text-gray-700">گزینه {index + 1}</span>
+                    </div>
+                    <input type="hidden" name={`option_${index}`} value={opt} />
+                    <div className="flex-grow">
+                      <RichTextEditor value={opt} onChange={(val) => handleOptionChange(index, val)} />
+                    </div>
                   </div>
-                  {/* اینپوت مخفی برای ارسال دیتا به اکشن سمت سرور */}
-                  <input type="hidden" name={`option_${index}`} value={opt} />
-                  
-                  {/* استفاده از ادیتور برای هر گزینه */}
-                  <div className="flex-grow">
-                     <RichTextEditor
-                       value={opt}
-                       onChange={(value) => handleOptionChange(index, value)}
-                     />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          </div>
-          {/* ================= پایان تغییرات بخش گزینه‌ها ================= */}
+          </fieldset>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold">توضیحات سوال *</label>
+            <label className="text-sm font-semibold">پاسخ تشریحی سوال *</label>
             <input type="hidden" name="answerText" value={answerText} />
             <RichTextEditor value={answerText} onChange={setAnswerText} />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold">نکات کنکوری (اختیاری)</label>
+            <label className="text-sm font-semibold">
+              نکات کنکوری <span className="text-xs text-gray-500 font-normal">(اختیاری)</span>
+            </label>
             <input type="hidden" name="examPoints" value={examPoints} />
             <RichTextEditor value={examPoints} onChange={setExamPoints} />
           </div>
 
+          {/* فیلد درس‌نامه بعد از نکات کنکوری */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold text-emerald-800">
+              درس‌نامه <span className="text-xs text-gray-500 font-normal">(اختیاری)</span>
+            </label>
+            <input type="hidden" name="studyGuide" value={studyGuide} />
+            <RichTextEditor value={studyGuide} onChange={setStudyGuide} />
+          </div>
+
           {state?.message && (
             <div
+              role="alert"
               className={`p-3 rounded text-sm ${
                 state.success
                   ? "bg-green-50 text-green-700 border border-green-200"
@@ -255,9 +276,9 @@ export default function EditQuestionModal({
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isPending ? "در حال ذخیره..." : "ویرایش اطلاعات"}
+              {isPending ? "در حال ذخیره..." : "بروزرسانی سوال"}
             </button>
           </div>
         </form>

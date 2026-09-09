@@ -24,7 +24,7 @@ interface Props {
 
 type ExcelRow = (string | number | boolean | undefined)[];
 
-// تطابق دقیق با ایندکس‌ها + اضافه شدن نوع سوال و کد سوال
+// تطابق دقیق با ایندکس‌ها همراه با درس‌نامه
 const EXCEL_COLUMNS = {
   QUESTION_TEXT: 0,
   OPTION_1: 1,
@@ -33,9 +33,10 @@ const EXCEL_COLUMNS = {
   OPTION_4: 4,
   ANSWER_TEXT: 5,
   EXAM_POINTS: 6,
-  CORRECT_ANSWER: 7,
-  QUESTION_TYPE: 8,
-  QUESTION_CODE: 9, // ستون کد سوال (اختیاری)
+  STUDY_GUIDE: 7, // ✅ ستون درس‌نامه (بعد از نکات کنکوری)
+  CORRECT_ANSWER: 8,
+  QUESTION_TYPE: 9,
+  QUESTION_CODE: 10,
 } as const;
 
 // تابع تولید کد رندم برای سوالات
@@ -130,9 +131,10 @@ export default function BatchAddQuestionsModal({
       ],
       answerText: getString(EXCEL_COLUMNS.ANSWER_TEXT),
       examPoints: getString(EXCEL_COLUMNS.EXAM_POINTS),
+      studyGuide: getString(EXCEL_COLUMNS.STUDY_GUIDE), // ✅ استخراج درس‌نامه از اکسل
       correctAnswer: getCorrectAnswerIndex(EXCEL_COLUMNS.CORRECT_ANSWER),
       questionType: getQuestionType(EXCEL_COLUMNS.QUESTION_TYPE),
-      questionCode: finalQuestionCode, // ✅ ارسال کد نهایی به سرور
+      questionCode: finalQuestionCode,
     };
   };
 
@@ -248,11 +250,11 @@ export default function BatchAddQuestionsModal({
                 <br />
                 <span className="font-bold">
                   1. صورت سوال | 2. گزینه اول | 3. گزینه دوم | 4. گزینه سوم | 5. گزینه چهارم <br />
-                  6. پاسخ تشریحی | 7. نکات کنکوری | 8. پاسخ صحیح (1 تا 4) | 9. نوع سوال | 10. کد سوال
+                  6. پاسخ تشریحی | 7. نکات کنکوری | 8. درس‌نامه | 9. پاسخ صحیح (1 تا 4) | 10. نوع سوال | 11. کد سوال
                 </span>
                 <br />
                 <span className="mt-1 block opacity-75">
-                  * ستون نوع سوال (سراسری/تالیفی) و کد سوال اختیاری هستند. سیستم در صورت خالی بودن، کد رندم تولید می‌کند.
+                  * ستون‌های نکات کنکوری، درس‌نامه، نوع سوال (سراسری/تالیفی) و کد سوال اختیاری هستند. سیستم در صورت خالی بودن کد سوال، کد رندم تولید می‌کند.
                 </span>
               </p>
             </div>

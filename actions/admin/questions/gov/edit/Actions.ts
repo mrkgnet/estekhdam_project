@@ -1,44 +1,47 @@
 "use server";
+
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function editQuestionAction(prevState: any, formData: FormData) {
+export async function editGovQuestion(prevState: any, formData: FormData) {
   try {
     const currentUser = await infoCurentUser();
     if (!currentUser || currentUser.role !== "admin") {
       return { success: false, message: "دسترسی غیرمجاز" };
     }
 
-    // دریافت داده‌ها از فرم ویرایش
-    const id = formData.get("id") as string;
+    // دریافت داده‌ها از فرم ویرایش (پشتیبانی از هر دو نام id یا questionId)
+    const id = (formData.get("id") || formData.get("questionId")) as string;
     const productId = formData.get("productId") as string;
     const chapterIdEdit = formData.get("chapterId") as string;
-    const validChapterIdEdit = chapterIdEdit === "" ? null : chapterIdEdit;
+    const validChapterIdEdit =
+      chapterIdEdit && chapterIdEdit.trim() !== "" ? chapterIdEdit : null;
     const text = formData.get("questionText") as string;
-    
-    // ✅ دریافت و تبدیل categoryChapterId به Int
+
+    // دریافت و تبدیل categoryChapterId به Int
     const categoryChapterId = formData.get("categoryChapterId") as string;
-    const validCategoryChapterId = 
-      categoryChapterId && categoryChapterId.trim() !== "" 
-        ? parseInt(categoryChapterId, 10) 
+    const validCategoryChapterId =
+      categoryChapterId && categoryChapterId.trim() !== ""
+        ? parseInt(categoryChapterId, 10)
         : null;
-    
+
     // دریافت نوع سوال از فرم ویرایش
     const questionTypeEdit = formData.get("questionType") as "SARASARI" | "TALIFI";
-    
+
     // دریافت گزینه‌ها
     const option_0 = formData.get("option_0") as string;
     const option_1 = formData.get("option_1") as string;
     const option_2 = formData.get("option_2") as string;
     const option_3 = formData.get("option_3") as string;
 
-    const oldCorrectAnswer = parseInt(formData.get("correctAnswer") as string);
+    const oldCorrectAnswer = parseInt(formData.get("correctAnswer") as string, 10);
     const correctAnswer = oldCorrectAnswer + 1;
 
-    // دریافت توضیحات و نکات کنکوری (Rich Text Editor)
+    // دریافت توضیحات، نکات کنکوری و درس‌نامه
     const explanations = formData.get("answerText") as string;
-    const examPoints = formData.get("examPoints") as string; 
+    const examPoints = formData.get("examPoints") as string;
+    const studyGuide = formData.get("studyGuide") as string; // ✅ دریافت فیلد درس‌نامه
 
     // اعتبارسنجی اولیه
     if (!id || !text || isNaN(correctAnswer)) {
@@ -72,19 +75,20 @@ export async function editQuestionAction(prevState: any, formData: FormData) {
       }
     }
 
-    // آپدیت در دیتابیس
+    // آپدیت در دیتابیس با فیلد studyGuide
     await db.question.update({
       where: { id: id },
       data: {
         questionText: text,
-        chapterId: validChapterIdEdit, 
-        categoryChapterId: validCategoryChapterId, // ✅ اضافه شد
+        chapterId: validChapterIdEdit,
+        categoryChapterId: validCategoryChapterId,
         chapterOrder: finalChapterOrder,
         questionType: questionTypeEdit,
         options: options,
         correctAnswer: correctAnswer,
-        answerText: explanations, 
-        examPoints: examPoints, 
+        answerText: explanations,
+        examPoints: examPoints,
+        studyGuide: studyGuide, // ✅ ذخیره ویرایش درس‌نامه
       },
     });
 

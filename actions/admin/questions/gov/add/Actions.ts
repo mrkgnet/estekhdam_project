@@ -13,6 +13,7 @@ export default async function addGovQuestion(prevState: any, formData: FormData)
 
   const questionText = formData.get("questionText") as string;
   const answerText = formData.get("answerText") as string;
+  const studyGuide = formData.get("studyGuide") as string; // ✅ دریافت فیلد درس‌نامه
   const examPoints = formData.get("examPoints") as string; 
   const productId = formData.get("productId") as string;
   const questionType = formData.get("questionType") as "SARASARI" | "TALIFI";
@@ -21,7 +22,7 @@ export default async function addGovQuestion(prevState: any, formData: FormData)
   const chapterId = formData.get("chapterId") as string;
   const validChapterId = chapterId && chapterId.trim() !== "" ? chapterId : undefined;
 
-  // ✅ تبدیل categoryChapterId به Int
+  // تبدیل categoryChapterId به Int
   const categoryChapterId = formData.get("categoryChapterId") as string;
   const validCategoryChapterId = 
     categoryChapterId && categoryChapterId.trim() !== "" 
@@ -54,11 +55,12 @@ export default async function addGovQuestion(prevState: any, formData: FormData)
         questionText: questionText,
         options: options,
         answerText: answerText,
+        studyGuide: studyGuide, // ✅ ذخیره در دیتابیس
         examPoints: examPoints,
         correctAnswer: correctAnswer,
         productId: productId,
         chapterId: validChapterId,
-        categoryChapterId: validCategoryChapterId, // ✅ حالا به صورت Int ذخیره می‌شه
+        categoryChapterId: validCategoryChapterId,
         chapterOrder: newChapterOrder,
         questionCode: uniqueCode,
         questionType: questionType,

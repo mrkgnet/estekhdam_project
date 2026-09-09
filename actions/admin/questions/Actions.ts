@@ -1,34 +1,43 @@
 "use server";
+
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { QuestionType } from "@prisma/client";
 
 // ================= FETCH DATA QUESTION =================
-export async function fetchDataQuestion(id: string, page: number = 1, limit: number = 10, searchQuery?: string) {
+export async function fetchDataQuestion(
+  id: string,
+  page: number = 1,
+  limit: number = 10,
+  searchQuery?: string
+) {
   try {
     const currentUser = await infoCurentUser();
 
     if (!currentUser || currentUser.role !== "admin") {
       console.log("❌ Access denied: User is not admin");
-      return { questions: [], totalCount: 0 };
+      return { questions: [], totalCount: 0, currentPage: 1, totalPages: 0 };
     }
 
-    // 🔍 ساخت شرط جستجو
+    // 🔍 ساخت شرط جستجو (شامل متن سوال، پاسخ، درس‌نامه، نکات و کد سوال)
     const searchCondition = searchQuery
       ? {
           OR: [
             { questionText: { contains: searchQuery, mode: "insensitive" as const } },
             { answerText: { contains: searchQuery, mode: "insensitive" as const } },
+            { studyGuide: { contains: searchQuery, mode: "insensitive" as const } }, // ✅ اضافه شد
+            { examPoints: { contains: searchQuery, mode: "insensitive" as const } }, // ✅ اضافه شد
+            { questionCode: { contains: searchQuery, mode: "insensitive" as const } }, // ✅ اضافه شد
             { chapter: { title: { contains: searchQuery, mode: "insensitive" as const } } },
           ],
         }
       : {};
 
-    // 📊 محاسبه skip برای پیجینیشن
+    // 📊 محاسبه skip برای صفحه‌بندی
     const skip = (page - 1) * limit;
 
-    // 🔢 دریافت تعداد کل سوالات (برای محاسبه تعداد صفحات)
+    // 🔢 دریافت تعداد کل سوالات
     const totalCount = await db.question.count({
       where: {
         productId: id,
@@ -36,7 +45,7 @@ export async function fetchDataQuestion(id: string, page: number = 1, limit: num
       },
     });
 
-    // 📦 دریافت سوالات با پیجینیشن
+    // 📦 دریافت سوالات با صفحه‌بندی
     const questionData = await db.question.findMany({
       where: {
         productId: id,
@@ -94,15 +103,16 @@ interface BatchQuestionInput {
   correctAnswer: number;
   answerText?: string;
   examPoints?: string;
+  studyGuide?: string; // ✅ اضافه شدن فیلد درس‌نامه به ورودی ثبت گروهی
   questionType?: QuestionType;
-  questionCode?: string; // ✅ اضافه شدن فیلد کد سوال
+  questionCode?: string;
 }
 
 export default async function batchAddQuestionsAction(
   productId: string,
   chapterId: string | null,
   categoryChapterId: number | null,
-  questionsData: BatchQuestionInput[],
+  questionsData: BatchQuestionInput[]
 ) {
   try {
     const currentUser = await infoCurentUser();
@@ -114,7 +124,7 @@ export default async function batchAddQuestionsAction(
       return { success: false, message: "اطلاعات ارسالی ناقص است." };
     }
 
-    // آماده سازی داده ها برای ثبت گروهی
+    // آماده‌سازی داده‌ها برای ثبت گروهی در دیتابیس
     const dataToInsert = questionsData.map((q) => ({
       productId,
       chapterId: chapterId || null,
@@ -122,21 +132,21 @@ export default async function batchAddQuestionsAction(
       questionText: q.questionText,
       options: q.options,
       correctAnswer: Number(q.correctAnswer),
-      answerText: q.answerText || "",
-      examPoints: q.examPoints || "",
+      answerText: q.answerText || null,
+      examPoints: q.examPoints || null,
+      studyGuide: q.studyGuide || null, // ✅ ذخیره فیلد درس‌نامه
       questionType: q.questionType || "TALIFI",
-      questionCode: q.questionCode || null, // ✅ مپ کردن کد سوال برای دیتابیس
+      questionCode: q.questionCode || null,
       isActive: true,
     }));
 
     // ثبت گروهی در دیتابیس با Prisma
     const created = await db.question.createMany({
       data: dataToInsert,
-      skipDuplicates: true, // در صورت وجود خطای تکراری، رد شود
+      skipDuplicates: true,
     });
 
-    // آدرس صفحه‌ای که میخواهید بعد از آپلود رفرش شود را اینجا بگذارید
-    revalidatePath("/adminp/products/[id]", "page");
+    revalidatePath(`/adminp/questions/${productId}`);
 
     return {
       success: true,

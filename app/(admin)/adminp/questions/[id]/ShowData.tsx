@@ -12,6 +12,7 @@ import {
   Download,
   FileSpreadsheet,
   Search,
+  BookMarked,
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import DeleteButton from "@/components/ui/DeleteButton";
@@ -50,18 +51,22 @@ export default function ExamQuestionsPage({
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  // استیت‌های افزودن
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctAnswer, setCorrectAnswer] = useState<number | null>(null);
   const [questionText, setQuestionText] = useState("");
   const [answerText, setAnswerText] = useState("");
   const [examPoints, setExamPoints] = useState("");
+  const [studyGuide, setStudyGuide] = useState(""); // ✅ استیت درس‌نامه
 
+  // استیت‌های ویرایش
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editOptions, setEditOptions] = useState(["", "", "", ""]);
   const [editCorrectAnswer, setEditCorrectAnswer] = useState<number | null>(null);
   const [editQuestionText, setEditQuestionText] = useState("");
   const [editAnswerText, setEditAnswerText] = useState("");
   const [editExamPoints, setEditExamPoints] = useState("");
+  const [editStudyGuide, setEditStudyGuide] = useState(""); // ✅ استیت ویرایش درس‌نامه
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [isPendingDeleteAll, startTransitionDeleteAll] = useTransition();
@@ -83,6 +88,7 @@ export default function ExamQuestionsPage({
     setQuestionText("");
     setAnswerText("");
     setExamPoints("");
+    setStudyGuide("");
   };
 
   const closeEditModal = () => {
@@ -92,6 +98,7 @@ export default function ExamQuestionsPage({
     setEditQuestionText("");
     setEditAnswerText("");
     setEditExamPoints("");
+    setEditStudyGuide("");
   };
 
   const handleOpenEditModal = (q: Question) => {
@@ -101,6 +108,7 @@ export default function ExamQuestionsPage({
     setEditQuestionText(q.questionText || "");
     setEditAnswerText(q.answerText || "");
     setEditExamPoints(q.examPoints || "");
+    setEditStudyGuide(q.studyGuide || ""); // ✅ مقداردهی اولیه درس‌نامه برای ویرایش
   };
 
   const handleDeleteAllQuestions = () => {
@@ -160,8 +168,8 @@ export default function ExamQuestionsPage({
   const startIndex = (currentPage - 1) * 10;
 
   return (
-    <div className="min-h-screen  px-2 sm:px-2 lg:px-4  my-4" dir="rtl">
-      <div className="mx-auto  space-y-5">
+    <div className="min-h-screen px-2 sm:px-2 lg:px-4 my-4" dir="rtl">
+      <div className="mx-auto space-y-5">
         {/* Top Bar */}
         <header className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -221,7 +229,7 @@ export default function ExamQuestionsPage({
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="جستجو در متن سوال، گزینه‌ها، فصل و دسته‌بندی..."
+              placeholder="جستجو در متن سوال، گزینه‌ها، فصل، درس‌نامه و..."
               className="h-11 w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </div>
@@ -233,14 +241,15 @@ export default function ExamQuestionsPage({
             <table className="w-full min-w-[1100px] table-fixed border-collapse text-right">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-600">
-                  <th className="w-[6%] p-4 text-center">ردیف</th>
-                  <th className="w-[10%] p-4 text-center">کد سوال</th>
-                  <th className="w-[34%] p-4">متن سوال</th>
-                  <th className="w-[10%] p-4">نوع</th>
-                  <th className="w-[12%] p-4">دسته‌بندی</th>
-                  <th className="w-[12%] p-4">فصل</th>
-                  <th className="w-[16%] p-4">پاسخ تشریحی</th>
-                  <th className="w-[12%] p-4 text-center">عملیات</th>
+                  <th className="w-[5%] p-4 text-center">ردیف</th>
+                  <th className="w-[9%] p-4 text-center">کد سوال</th>
+                  <th className="w-[32%] p-4">متن سوال</th>
+                  <th className="w-[9%] p-4">نوع</th>
+                  <th className="w-[11%] p-4">دسته‌بندی</th>
+                  <th className="w-[11%] p-4">فصل</th>
+                  <th className="w-[13%] p-4">پاسخ تشریحی</th>
+                  <th className="w-[10%] p-4 text-center">درس‌نامه</th>
+                  <th className="w-[10%] p-4 text-center">عملیات</th>
                 </tr>
               </thead>
 
@@ -330,6 +339,18 @@ export default function ExamQuestionsPage({
                           />
                         </td>
 
+                        {/* ستون وضعیت درس‌نامه */}
+                        <td className="p-4 text-center">
+                          {q.studyGuide && q.studyGuide.trim() !== "" ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">
+                              <BookMarked className="h-3 w-3" />
+                              دارد
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400">ندارد</span>
+                          )}
+                        </td>
+
                         <td className="p-4">
                           <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
                             <button
@@ -354,7 +375,7 @@ export default function ExamQuestionsPage({
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="p-14 text-center">
+                    <td colSpan={9} className="p-14 text-center">
                       <div className="mx-auto max-w-sm">
                         <p className="text-base font-medium text-slate-700">نتیجه‌ای پیدا نشد</p>
                         <p className="mt-1 text-sm text-slate-500">
@@ -392,6 +413,8 @@ export default function ExamQuestionsPage({
             setQuestionText={setQuestionText}
             answerText={answerText}
             setAnswerText={setAnswerText}
+            studyGuide={studyGuide}
+            setStudyGuide={setStudyGuide}
             examPoints={examPoints}
             setExamPoints={setExamPoints}
             options={options}
@@ -415,6 +438,8 @@ export default function ExamQuestionsPage({
             setQuestionText={setEditQuestionText}
             answerText={editAnswerText}
             setAnswerText={setEditAnswerText}
+            studyGuide={editStudyGuide}
+            setStudyGuide={setEditStudyGuide}
             examPoints={editExamPoints}
             setExamPoints={setEditExamPoints}
             options={editOptions}

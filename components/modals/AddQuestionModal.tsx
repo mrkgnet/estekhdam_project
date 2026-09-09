@@ -36,6 +36,8 @@ interface AddQuestionModalProps {
   setQuestionText: (value: string) => void;
   answerText: string;
   setAnswerText: (value: string) => void;
+  studyGuide: string;
+  setStudyGuide: (value: string) => void;
   examPoints: string;
   setExamPoints: (value: string) => void;
   options: string[];
@@ -53,7 +55,8 @@ const EXCEL_COLUMNS = {
   OPTION_4: 4,
   ANSWER_TEXT: 5,
   EXAM_POINTS: 6,
-  CORRECT_ANSWER: 7,
+  STUDY_GUIDE: 7, // بعد از نکات کنکوری
+  CORRECT_ANSWER: 8,
 } as const;
 
 type ExcelRow = (string | number | boolean | undefined)[];
@@ -127,6 +130,7 @@ function parseExcelRow(row: ExcelRow) {
     ],
     answerText: getString(EXCEL_COLUMNS.ANSWER_TEXT),
     examPoints: getString(EXCEL_COLUMNS.EXAM_POINTS),
+    studyGuide: getString(EXCEL_COLUMNS.STUDY_GUIDE),
     correctAnswer: getCorrectAnswerIndex(EXCEL_COLUMNS.CORRECT_ANSWER),
   };
 }
@@ -142,6 +146,8 @@ export default function AddQuestionModal({
   setQuestionText,
   answerText,
   setAnswerText,
+  studyGuide,
+  setStudyGuide,
   examPoints,
   setExamPoints,
   options,
@@ -231,6 +237,7 @@ export default function AddQuestionModal({
           setOptions(parsed.options);
           setAnswerText(parsed.answerText);
           setExamPoints(parsed.examPoints);
+          setStudyGuide(parsed.studyGuide);
           if (parsed.correctAnswer !== null) {
             setCorrectAnswer(parsed.correctAnswer);
           }
@@ -242,12 +249,11 @@ export default function AddQuestionModal({
 
       reader.readAsBinaryString(file);
 
-      // Reset input for re-uploading the same file
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     },
-    [setQuestionText, setOptions, setAnswerText, setExamPoints, setCorrectAnswer]
+    [setQuestionText, setOptions, setAnswerText, setStudyGuide, setExamPoints, setCorrectAnswer]
   );
 
   // Memoized chapter options
@@ -277,7 +283,6 @@ export default function AddQuestionModal({
     [categoryChapters]
   );
 
-  // عدم رندر در صورت بسته بودن مودال
   if (!isOpen) return null;
 
   return (
@@ -409,7 +414,7 @@ export default function AddQuestionModal({
 
           {/* Answer Text */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold">توضیحات سوال *</label>
+            <label className="text-sm font-semibold">پاسخ تشریحی سوال *</label>
             <input type="hidden" name="answerText" value={answerText} />
             <RichTextEditor value={answerText} onChange={setAnswerText} />
           </div>
@@ -422,6 +427,16 @@ export default function AddQuestionModal({
             </label>
             <input type="hidden" name="examPoints" value={examPoints} />
             <RichTextEditor value={examPoints} onChange={setExamPoints} />
+          </div>
+
+          {/* Study Guide (درس‌نامه) - قرار گرفته بعد از نکات کنکوری */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold text-emerald-800">
+              درس‌نامه{" "}
+              <span className="text-xs text-gray-500 font-normal">(اختیاری)</span>
+            </label>
+            <input type="hidden" name="studyGuide" value={studyGuide} />
+            <RichTextEditor value={studyGuide} onChange={setStudyGuide} />
           </div>
 
           {/* Message */}
