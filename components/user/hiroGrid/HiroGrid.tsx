@@ -37,7 +37,7 @@ function CategoryCardImage({
   const [isLoaded, setIsLoaded] = useState(false)
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-slate-50">
+    <div className="relative w-full h-full flex items-center justify-center ">
       {!isLoaded && (
         <div 
           className="absolute inset-0 flex items-center justify-center z-10"
@@ -95,7 +95,7 @@ export default function HiroGrid({ data }: HiroGridProps) {
 
   return (
     <>
-      <section aria-label="دسته‌بندی‌های اصلی" className="w-full mx-auto px-2 py-2">
+      <section aria-label="دسته‌بندی‌های اصلی" className="w-full mx-auto px-4 py-2">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-start">
           {data.map((category, index) => {
             const imageSrc = category.imageUrl || DEFAULT_FALLBACK_IMAGE
@@ -105,7 +105,7 @@ export default function HiroGrid({ data }: HiroGridProps) {
             return (
               <article
                 key={category.id}
-                className="group flex flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-xs hover:border-slate-400 transition-colors"
+                className="group flex flex-col overflow-hidden rounded-md border border-slate-300 bg-white shadow-xs hover:border-slate-400 transition-colors"
               >
                 {/* لینک اصلی کارت */}
                 <Link
@@ -113,7 +113,7 @@ export default function HiroGrid({ data }: HiroGridProps) {
                   className="flex flex-col w-full"
                   title={`مشاهده منابع ${category.catName}`}
                 >
-                  <div className="aspect-[4/3] max-h-28 sm:max-h-36 flex items-center justify-center overflow-hidden relative w-full p-2">
+                  <div className="aspect-[4/3] max-h-30 sm:max-h-36 flex items-center justify-center overflow-hidden relative w-full ">
                     <CategoryCardImage
                       src={imageSrc}
                       alt={category.catName}
@@ -138,10 +138,10 @@ export default function HiroGrid({ data }: HiroGridProps) {
                     onClick={() => openModal(category)}
                     aria-haspopup="dialog"
                     aria-expanded={activeCategory?.id === category.id}
-                    className="w-full py-1.5 px-2 flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50 border-t border-slate-100 hover:bg-slate-100 active:bg-slate-200 cursor-pointer transition-colors"
+                    className="w-full py-2.5 px-2 flex items-center justify-between text-xs font-medium text-slate-700 bg-slate-50 border-t border-slate-100 hover:bg-slate-100 active:bg-slate-200 cursor-pointer transition-colors"
                   >
                     <span className="border border-slate-300 px-2.5 py-0.5 rounded-full text-[14px]">
-                      زیردسته‌ها ({category.children?.length})
+                      مشاهده زیردسته‌ها ({category.children?.length})
                     </span>
                     <svg
                       className="w-3.5 h-3.5 text-slate-400 shrink-0"

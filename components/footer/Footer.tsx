@@ -205,10 +205,10 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
                 <li>
                   <Link
                     href="/"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
                   >
                     <Home className="h-3.5 w-3.5 shrink-0 text-slate-300" aria-hidden="true" />
-                    <span className="border-b border-transparent hover:border-white">
+                    <span className="leading-snug border-b border-transparent hover:border-white">
                       خانه
                     </span>
                   </Link>
@@ -216,32 +216,32 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
                 <li>
                   <Link
                     href="/plans"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
                   >
                     <BookOpen className="h-3.5 w-3.5 shrink-0 text-slate-300" aria-hidden="true" />
-                    <span className="border-b border-transparent hover:border-white">
+                    <span className="leading-snug border-b border-transparent hover:border-white">
                       خرید اشتراک
                     </span>
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/resources/free-questions"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
+                    href="resources/free-resources"
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
                   >
                     <BookOpen className="h-3.5 w-3.5 shrink-0 text-slate-300" aria-hidden="true" />
-                    <span className="border-b border-transparent hover:border-white">
+                    <span className="leading-snug border-b border-transparent hover:border-white">
                       نمونه سوالات رایگان
                     </span>
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/resources/free-booklets"
-                    className="inline-flex items-center gap-1.5 transition-colors hover:text-white"
+                    href="resources/free-resources"
+                    className="flex items-center gap-1.5 transition-colors hover:text-white"
                   >
                     <BookOpen className="h-3.5 w-3.5 shrink-0 text-slate-300" aria-hidden="true" />
-                    <span className="border-b border-transparent hover:border-white">
+                    <span className="leading-snug border-b border-transparent hover:border-white">
                       دفترچه‌های رایگان
                     </span>
                   </Link>
@@ -268,16 +268,14 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
                             className="absolute right-[-15px] top-[9px] h-px w-2.5 border-t border-dashed border-slate-400/50"
                           />
                           <Link
-                            href={`/resources/main-resource?category=${encodeURIComponent(
-                              child.catSlug
-                            )}`}
-                            className="inline-flex max-w-full items-center gap-1.5 transition-colors hover:text-emerald-300"
+                            href={`/resources/main-resource`}
+                            className="flex items-start gap-1.5 transition-colors hover:text-emerald-300"
                           >
                             <BookOpen
-                              className="h-3 w-3 shrink-0 text-slate-400"
+                              className="mt-0.5 h-3 w-3 shrink-0 text-slate-400"
                               aria-hidden="true"
                             />
-                            <span className="truncate border-b border-transparent hover:border-emerald-300">
+                            <span className="break-words leading-relaxed border-b border-transparent hover:border-emerald-300">
                               {child.catName}
                             </span>
                           </Link>
@@ -291,9 +289,7 @@ export default function Footer({ initialCategories = [] }: FooterProps) {
                           className="absolute right-[-15px] top-[17px] h-px w-2.5 border-t border-dashed border-slate-400/50"
                         />
                         <Link
-                          href={`/resources/main-resource?parent=${encodeURIComponent(
-                            parent.catSlug
-                          )}`}
+                          href={`/resources/main-resource`}
                           className="group inline-flex items-center gap-1 rounded-full border border-white/60 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white transition-all hover:border-white hover:bg-white hover:text-slate-900"
                         >
                           <span>مشاهده همه</span>

@@ -40,7 +40,6 @@ enum NewsStatusBannerTop {
   RESULTS_ANNOUNCED
 }
 
-
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -73,44 +72,39 @@ enum CategoryType {
   BLOG // در آینده می‌توانید مقالات را هم اضافه کنید
 }
 
-
 // تعریف انواع محصول
 enum ProductType {
-  MAIN          // محصولات پولی و فروشگاهی (پیش‌فرض)
+  MAIN // محصولات پولی و فروشگاهی (پیش‌فرض)
   FREE_RESOURCE // منابع، جزوات و فایل‌های رایگان
 }
-
-
-
-
 
 // ========= MODELS =========
 
 model User {
-  id            String         @id @default(uuid()) // تغییر آیدی به uuid
-  phoneNumber   String         @unique
-  username      String?
-  otpCode       String?
-  email         String?
-  otpExpires    DateTime?
-  refreshTokens RefreshToken[]
-  firstName     String?
-  lastName      String?
-  nationalCode  String?
-  avatar        String?
-  birthDate     DateTime?
-  gender        Gender         @default(UNKNOWN)
-  role          Role           @default(user)
-  isActive      Boolean        @default(true)
+  id               String                 @id @default(uuid()) // تغییر آیدی به uuid
+  phoneNumber      String                 @unique
+  username         String?
+  otpCode          String?
+  email            String?
+  otpExpires       DateTime?
+  refreshTokens    RefreshToken[]
+  firstName        String?
+  lastName         String?
+  nationalCode     String?
+  avatar           String?
+  birthDate        DateTime?
+  gender           Gender                 @default(UNKNOWN)
+  role             Role                   @default(user)
+  isActive         Boolean                @default(true)
   orders           Order[]
   comments         Comment[]
   tickets          Ticket[]               @relation("UserTickets")
   ticketMessages   TicketMessage[]        @relation("UserMessages")
   contacts         Contact[]
   readGlobalNotifs UserNotificationRead[]
-  subscriptions UserSubscription[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  subscriptions    UserSubscription[]
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 }
 
 model GlobalNotification {
@@ -164,7 +158,7 @@ model GovernmentNews {
   maxAge       Int?
   startAt      DateTime?
   endAt        DateTime?
-  examAt       DateTime?   // تاریخ برگزاری آزمون
+  examAt       DateTime? // تاریخ برگزاری آزمون
   jobs         String[]
   cities       String[]
   isActive     Boolean     @default(true)
@@ -181,7 +175,6 @@ model GovernmentNews {
   @@index([examAt])
 }
 
-
 model MainSlider {
   id          String   @id @default(uuid())
   imageUrl    String
@@ -195,53 +188,54 @@ model MainSlider {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  slug        String      @unique  
+  id             String           @id @default(uuid())
+  name           String
+  slug           String           @unique
   // فیلد جدید برای تعیین نوع محصول
-  type        ProductType @default(MAIN)
+  type           ProductType      @default(MAIN)
   // 🟢 فیلدهای جدید
-  downloadUrl String?     // لینک دانلود (اختیاری)
-  downloadCount Int       @default(0) // تعداد دانلود (پیش‌فرض صفر)
-// 🟢 فیلد جدید برای تعداد خرید
-  purchaseCount Int      @default(0)
-  oldPrice    Int?
-  newPrice    Int?
-  description String?
-  imageUrl    String?
-  features    String[]
-  isActive    Boolean     @default(true) 
+  downloadUrl    String? // لینک دانلود (اختیاری)
+  downloadCount  Int              @default(0) // تعداد دانلود (پیش‌فرض صفر)
+  // 🟢 فیلد جدید برای تعداد خرید
+  purchaseCount  Int              @default(0)
+  oldPrice       Int?
+  newPrice       Int?
+  description    String?
+  imageUrl       String?
+  features       String[]
+  isActive       Boolean          @default(true)
   // رابطه چند به چند با دسته‌بندی
-  categories  Category[]  @relation("ProductCategories")
-  questions   Question[]
-  comments    Comment[]
-  orders      Order[]
-  chapters    Chapter[]
+  categories     Category[]       @relation("ProductCategories")
+  questions      Question[]
+  comments       Comment[]
+  orders         Order[]
+  chapters       Chapter[]
   // رابطه چندبه‌چند با خبر
   governmentNews GovernmentNews[] @relation("ProductNews")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
   // اضافه کردن ایندکس برای جستجوی سریع‌تر بر اساس نوع محصول
   @@index([type])
 }
 
 model Category {
-  id        String       @id @default(uuid())
-  catName   String       @unique
-  catSlug   String       @unique
-  imageUrl  String?
-  
+  id       String  @id @default(uuid())
+  catName  String  @unique
+  catSlug  String  @unique
+  imageUrl String?
+
   // فیلد جدید برای تعیین نوع دسته‌بندی
-  type      CategoryType @default(MAIN)
+  type CategoryType @default(MAIN)
 
-  parentId  String?
-  parent    Category?    @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children  Category[]   @relation("CategoryToCategory")
+  parentId String?
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryToCategory")
 
-  products  Product[]    @relation("ProductCategories") // رابطه با محصول
+  products Product[] @relation("ProductCategories") // رابطه با محصول
 
-  createdAt DateTime?    @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([parentId])
   @@index([type]) // ایندکس برای جستجوی سریع‌تر بر اساس نوع دسته‌بندی
@@ -260,23 +254,20 @@ model Chapter {
 }
 
 model Brand {
-  id        Int      @id @default(autoincrement()) // آیدی عددی و اتوماتیک
-  title     String   // عنوان عکس/برند
-  imageUrl  String   // آدرس عکس
-  isActive  Boolean  @default(true) // وضعیت فعال یا غیرفعال بودن
+  id       Int     @id @default(autoincrement()) // آیدی عددی و اتوماتیک
+  title    String // عنوان عکس/برند
+  imageUrl String // آدرس عکس
+  isActive Boolean @default(true) // وضعیت فعال یا غیرفعال بودن
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
-
 model Setting {
   key       String   @id // مثلاً: "show_brands_section"
-  value     String   // مثلاً: "true" یا "false"
+  value     String // مثلاً: "true" یا "false"
   updatedAt DateTime @updatedAt
 }
-
 
 model CategoryChapter {
   id          Int        @id @default(autoincrement())
@@ -297,6 +288,7 @@ model Question {
   options        String[]
   correctAnswer  Int
   answerText     String?
+  studyGuide     String?
   examPoints     String?
   questionType   QuestionType @default(TALIFI)
   questionCode   String?
@@ -472,13 +464,13 @@ model Notification {
 }
 
 model TopBanner {
-  id          String   @id @default(uuid())
-  title       String   // متن بنر
-  imageUrl    String?  // لینک عکس بنر (اختیاری شد)
-  targetUrl   String?  // لینک مقصد (اختیاری شد)
-  slug        String   @unique // اسلاگ بنر
-  isActive    Boolean  @default(true) // فعال یا غیرفعال
-  newsStatus  NewsStatusBannerTop? // وضعیت خبر فوری
+  id         String               @id @default(uuid())
+  title      String // متن بنر
+  imageUrl   String? // لینک عکس بنر (اختیاری شد)
+  targetUrl  String? // لینک مقصد (اختیاری شد)
+  slug       String               @unique // اسلاگ بنر
+  isActive   Boolean              @default(true) // فعال یا غیرفعال
+  newsStatus NewsStatusBannerTop? // وضعیت خبر فوری
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -486,19 +478,17 @@ model TopBanner {
   @@index([isActive])
 }
 
-
-
 // ==========================================
 // 🟢 مدل‌های جدید برای سیستم پلن اشتراک
 // ==========================================
 
 model SubscriptionPlan {
   id            String   @id @default(uuid())
-  title         String   // عنوان پلن (مثلاً: اشتراک سه ماهه)
+  title         String // عنوان پلن (مثلاً: اشتراک سه ماهه)
   slug          String   @unique
-  durationDays  Int      // مدت زمان به روز (مثلاً 30, 90, 180)
-  price         Int      // قیمت اصلی (تومان)
-  discountPrice Int?     // قیمت با تخفیف (اختیاری)
+  durationDays  Int // مدت زمان به روز (مثلاً 30, 90, 180)
+  price         Int // قیمت اصلی (تومان)
+  discountPrice Int? // قیمت با تخفیف (اختیاری)
   description   String?
   features      String[]
   isPopular     Boolean  @default(false)
