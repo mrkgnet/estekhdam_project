@@ -1,39 +1,14 @@
 // app/(user)/resources/questions/page.tsx
 
-import LinearLoader from '@/components/LinearLoader'
 import React, { Suspense } from 'react'
-import FetchDataQues from './FetchDataQues'
 import Link from 'next/link'
-import { AlertCircle } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { AlertCircle, FileQuestion, Home } from 'lucide-react'
+import { fetchDataQues } from '@/actions/user/resources/course/DataQues/Actions'
+import ExamPage from './ShowDataQues'
 
-export default async function Page({
-  searchParams
-}: {
-  searchParams: Promise<{
-    pid?: string
-    pname?: string
-    step?: string
-    chapterId?: string
-    questionType?: string
-  }>
-}) {
-
-  const { pid, pname, step, chapterId, questionType } = await searchParams
-
-  if (!pid) {
-    return (
-      <div className="min-h-[70vh] max-w-5xl mx-auto flex flex-col items-center justify-center bg-slate-50 text-slate-500 space-y-4 px-4 text-center">
-        <AlertCircle className="w-16 h-16 text-slate-300 mb-2" />
-        <p className="text-lg font-medium text-slate-700">شناسه محصول نامعتبر است</p>
-        <p className="text-sm text-slate-500 max-w-md">لطفاً از طریق صفحه منابع اقدام به ورود به این بخش کنید.</p>
-        <Link href={`/resources/course/${pname}`} className="mt-6 px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl transition-colors shadow-sm font-medium">
-          بازگشت به  منابع
-        </Link>
-      </div>
-    );
-  }
-
- function SkeletonQuesPage() {
+// اسکلتون بارگذاری
+function SkeletonQuesPage() {
   return (
     <div className="min-h-screen max-w-6xl text-bodyall m-auto text-right pb-24 lg:pb-8" dir="rtl">
       {/* Breadcrumb */}
@@ -98,10 +73,7 @@ export default async function Page({
 
             <div className="space-y-3.5">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-14 w-full bg-slate-200 rounded-xl animate-pulse"
-                />
+                <div key={i} className="h-14 w-full bg-slate-200 rounded-xl animate-pulse" />
               ))}
             </div>
 
@@ -125,14 +97,97 @@ export default async function Page({
         </main>
       </div>
     </div>
-  );
+  )
 }
+
+// کامپوننت داخلی دریافت دیتا (برای حفظ رفتار Suspense و Streaming)
+async function QuestionContent({
+  pid,
+  pname,
+  currentStep,
+  chapterId,
+  questionType,
+}: {
+  pid: string
+  pname?: string
+  currentStep: number
+  chapterId?: string
+  questionType?: string
+}) {
+  const response = await fetchDataQues(pid, currentStep, chapterId, questionType)
+  if (response?.requiresSubscription) {
+    redirect('/plans')
+  }
+
+  if (!response?.data && !response?.success && !response?.requiresAuth) {
+    return (
+      <div className="flex flex-col max-w-5xl mx-auto items-center justify-center gap-4 text-center p-12 bg-white border border-slate-200/80 rounded shadow-sm my-6">
+        <div className="p-4 bg-slate-100 rounded-full">
+          <FileQuestion className="w-12 h-12 text-slate-400" />
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-600 mt-2">
+          {response?.message || 'سوالی یافت نشد'}
+        </h3>
+
+        <Link
+          href={`/resources/course/${pname}`}
+          className="mt-4 flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-slate-700 transition-colors shadow-lg shadow-slate-800/20 text-sm"
+        >
+          <Home className="w-4 h-4" />
+          <span>بازگشت به صفحه دوره</span>
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <ExamPage
+      initialResponse={response}
+      courseId={pid}
+      currentStep={currentStep}
+      chapterId={chapterId}
+      questionType={questionType}
+      pname={pname || ''}
+    />
+  )
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    pid?: string
+    pname?: string
+    step?: string
+    chapterId?: string
+    questionType?: string
+  }>
+}) {
+  const { pid, pname, step, chapterId, questionType } = await searchParams
+
+  if (!pid) {
+    return (
+      <div className="min-h-[70vh] max-w-5xl mx-auto flex flex-col items-center justify-center bg-slate-50 text-slate-500 space-y-4 px-4 text-center">
+        <AlertCircle className="w-16 h-16 text-slate-300 mb-2" />
+        <p className="text-lg font-medium text-slate-700">شناسه محصول نامعتبر است</p>
+        <p className="text-sm text-slate-500 max-w-md">لطفاً از طریق صفحه منابع اقدام به ورود به این بخش کنید.</p>
+        <Link
+          href={`/resources/course/${pname}`}
+          className="mt-6 px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl transition-colors shadow-sm font-medium"
+        >
+          بازگشت به منابع
+        </Link>
+      </div>
+    )
+  }
+
   const currentStep = Number(step) || 1
 
   return (
     <div>
       <Suspense fallback={<SkeletonQuesPage />}>
-        <FetchDataQues
+        <QuestionContent
           pid={pid}
           pname={pname}
           currentStep={currentStep}

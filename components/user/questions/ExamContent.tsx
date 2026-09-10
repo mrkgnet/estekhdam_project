@@ -1,7 +1,6 @@
-
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -17,6 +16,8 @@ import {
   Sparkles,
   ListOrdered,
   ArrowUpLeft,
+  X,
+  BookOpen,
 } from "lucide-react";
 import CommentManagment from "@/components/comment/CommentManagmet";
 
@@ -30,6 +31,7 @@ type DBQuestion = {
   answerText: string;
   examPoints: string;
   questionCode: string;
+  studyGuide?: string;
 };
 
 type FormattedQuestion = {
@@ -40,6 +42,7 @@ type FormattedQuestion = {
   explanation: string;
   examPoints: string;
   code: string;
+  studyGuide?: string;
 } | null;
 
 interface ExamContentProps {
@@ -78,7 +81,21 @@ export default function ExamContent({
   setIsJumpModalOpen,
   commentsRef,
 }: ExamContentProps) {
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const showResult = selected !== null;
+
+  // بستن مدال با فشردن کلید Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isLessonModalOpen) {
+        setIsLessonModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLessonModalOpen]);
+
+  const studyGuideContent = q?.studyGuide || dbQuestion?.studyGuide;
 
   return (
     <main
@@ -102,15 +119,10 @@ export default function ExamContent({
             dark:bg-slate-900
           "
         >
-          {/* Main toolbar */}
           <div className="flex flex-col gap-4 px-4 py-3.5 sm:px-5 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
 
-            {/* -----------------------------------------------
-                RIGHT SIDE — TITLE
-            ------------------------------------------------ */}
+            {/* RIGHT SIDE — TITLE */}
             <div className="flex min-w-0 items-center gap-3">
-
-              {/* Icon */}
               <div
                 className="
                   flex
@@ -129,11 +141,8 @@ export default function ExamContent({
                 <GraduationCap className="h-5 w-5" />
               </div>
 
-              {/* Title & status */}
               <div className="min-w-0">
-
                 <div className="flex flex-wrap items-center gap-2">
-
                   <h1
                     className="
                       truncate
@@ -173,21 +182,12 @@ export default function ExamContent({
 
                 {totalCount > 0 ? (
                   <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <span>
-                      سؤال
-                    </span>
-
+                    <span>سؤال</span>
                     <span className="font-semibold text-slate-800 dark:text-slate-200">
                       {currentStep}
                     </span>
-
-                    <span className="text-slate-300 dark:text-slate-600">
-                      /
-                    </span>
-
-                    <span>
-                      {totalCount}
-                    </span>
+                    <span className="text-slate-300 dark:text-slate-600">/</span>
+                    <span>{totalCount}</span>
                   </div>
                 ) : (
                   <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">
@@ -197,13 +197,9 @@ export default function ExamContent({
               </div>
             </div>
 
-            {/* -----------------------------------------------
-                LEFT SIDE — ACTIONS + PROGRESS
-            ------------------------------------------------ */}
+            {/* LEFT SIDE — ACTIONS + PROGRESS */}
             {totalCount > 0 && (
               <div className="flex w-full items-center gap-3 lg:w-auto">
-
-                {/* Jump button */}
                 <button
                   type="button"
                   onClick={() => setIsJumpModalOpen(true)}
@@ -248,26 +244,17 @@ export default function ExamContent({
                       dark:group-hover:text-slate-200
                     "
                   />
-
-                  <span className="text-red-700">
-                    برو به سؤاله
-                  </span>
-
+                  <span className="text-red-700">برو به سؤاله</span>
                   <ArrowUpLeft className="h-3.5 w-3.5 text-red-700" />
                 </button>
 
-                {/* Vertical divider */}
                 <div className="hidden h-7 w-px bg-slate-200 sm:block dark:bg-slate-700" />
 
-                {/* Progress */}
                 <div className="min-w-0 flex-1 lg:w-[210px] lg:flex-none">
-
                   <div className="mb-1.5 flex items-center justify-between">
-
                     <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
                       پیشرفت آزمون
                     </span>
-
                     <span className="text-[11px] font-semibold tabular-nums text-slate-700 dark:text-slate-200">
                       {progressPercentage}%
                     </span>
@@ -301,7 +288,6 @@ export default function ExamContent({
                   </div>
                 </div>
 
-                {/* Percentage indicator */}
                 <div
                   className="
                     hidden
@@ -327,9 +313,6 @@ export default function ExamContent({
             )}
           </div>
 
-          {/* -----------------------------------------------
-              PROGRESS STRIP
-          ------------------------------------------------ */}
           {totalCount > 0 && (
             <div className="h-px w-full bg-slate-100 dark:bg-slate-800">
               <motion.div
@@ -393,24 +376,13 @@ export default function ExamContent({
             <AnimatePresence mode="wait">
               <motion.div
                 key={q.id}
-                initial={{
-                  opacity: 0,
-                  y: 8,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: -8,
-                }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
                 className="p-4 sm:p-5 lg:p-6"
               >
 
-                {/* ==================================================
-                    QUESTION BOX
-                ================================================== */}
+                {/* QUESTION BOX */}
                 <div
                   className="
                     mb-5
@@ -423,8 +395,6 @@ export default function ExamContent({
                     dark:bg-blue-950/20
                   "
                 >
-
-                  {/* Question header */}
                   <div
                     className="
                       flex
@@ -441,7 +411,6 @@ export default function ExamContent({
                     "
                   >
                     <div className="flex items-center gap-2.5">
-
                       <div
                         className="
                           flex
@@ -470,29 +439,36 @@ export default function ExamContent({
                       </div>
                     </div>
 
-                    {q.code && (
-                      <span
+                    {(studyGuideContent || q.code) && (
+                      <button
+                        type="button"
+                        onClick={() => setIsLessonModalOpen(true)}
                         className="
+                          inline-flex
+                          items-center
+                          gap-1.5
                           rounded-lg
                           border
-                          border-blue-200
+                          border-blue-500
                           bg-white
                           px-2.5
                           py-1
                           text-[11px]
-                          font-medium
-                          text-slate-500
+                          font-bold
+                          text-slate-600
+                          hover:bg-blue-50
                           dark:border-blue-800
                           dark:bg-slate-900
-                          dark:text-slate-400
+                          dark:text-slate-300
+                          dark:hover:bg-slate-800
                         "
                       >
-                        {q.code}
-                      </span>
+                        <BookOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                        درسنامه سوال
+                      </button>
                     )}
                   </div>
 
-                  {/* Question text */}
                   <div className="px-4 py-5 sm:px-5 sm:py-6">
                     <div
                       className="
@@ -516,9 +492,7 @@ export default function ExamContent({
                   </div>
                 </div>
 
-                {/* ==================================================
-                    OPTIONS TITLE
-                ================================================== */}
+                {/* OPTIONS TITLE */}
                 <div className="mb-3 flex items-center gap-2">
                   <div className="h-5 w-1 rounded-full bg-emerald-500" />
 
@@ -531,31 +505,20 @@ export default function ExamContent({
                   </span>
                 </div>
 
-                {/* ==================================================
-                    OPTIONS
-                ================================================== */}
+                {/* OPTIONS */}
                 <div className="space-y-2.5">
                   {q.choices.map((ch) => {
-                    const isUserChoice =
-                      selected === ch.key;
-
-                    const isRight =
-                      ch.key === q.correct;
+                    const isUserChoice = selected === ch.key;
+                    const isRight = ch.key === q.correct;
 
                     return (
                       <button
                         key={ch.key}
-                        disabled={
-                          showResult ||
-                          isAnyLoading
-                        }
-                        onClick={() =>
-                          setSelected(ch.key)
-                        }
+                        disabled={showResult || isAnyLoading}
+                        onClick={() => setSelected(ch.key)}
                         className={[
                           "w-full rounded-xl border-2 px-3.5 py-3 text-right transition sm:px-4 sm:py-3.5",
                           "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40",
-
                           !showResult
                             ? "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                             : isRight
@@ -566,11 +529,9 @@ export default function ExamContent({
                         ].join(" ")}
                       >
                         <div className="flex items-center gap-3">
-
                           <span
                             className={[
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-semibold sm:h-9 sm:w-9 sm:text-sm",
-
                               isRight
                                 ? "border-emerald-200 bg-white text-emerald-700 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-400"
                                 : isUserChoice
@@ -584,12 +545,9 @@ export default function ExamContent({
                           <div
                             className={[
                               "min-w-0 flex-1 text-sm sm:text-[15px]",
-
-                              isRight ||
-                              isUserChoice
+                              isRight || isUserChoice
                                 ? "font-medium text-slate-900 dark:text-slate-100"
                                 : "text-slate-700 dark:text-slate-300",
-
                               "[&>p]:m-0 [&>ul]:my-0 [&>ol]:my-0",
                             ].join(" ")}
                             dangerouslySetInnerHTML={{
@@ -597,40 +555,26 @@ export default function ExamContent({
                             }}
                           />
 
-                          {showResult &&
-                            isRight && (
-                              <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
-                            )}
+                          {showResult && isRight && (
+                            <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-emerald-500" />
+                          )}
 
-                          {showResult &&
-                            isUserChoice &&
-                            !isRight && (
-                              <XCircle className="h-4.5 w-4.5 shrink-0 text-rose-500" />
-                            )}
+                          {showResult && isUserChoice && !isRight && (
+                            <XCircle className="h-4.5 w-4.5 shrink-0 text-rose-500" />
+                          )}
                         </div>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* ==================================================
-                    ANSWER + EXPLANATION
-                ================================================== */}
+                {/* ANSWER + EXPLANATION */}
                 <AnimatePresence>
                   {selected && (
                     <motion.div
-                      initial={{
-                        height: 0,
-                        opacity: 0,
-                      }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                      }}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
                       className="
                         mt-4
                         space-y-2.5
@@ -641,8 +585,6 @@ export default function ExamContent({
                         dark:border-slate-700
                       "
                     >
-
-                      {/* Explanation */}
                       <div
                         className="
                           rounded-xl
@@ -657,18 +599,14 @@ export default function ExamContent({
                       >
                         <div className="mb-2.5 flex items-center gap-2 text-slate-800 dark:text-slate-100">
                           <Lightbulb className="h-4.5 w-4.5 text-amber-500" />
-
-                          <span className="text-sm font-semibold">
-                            پاسخ تشریحی
-                          </span>
+                          <span className="text-sm font-semibold">پاسخ تشریحی</span>
                         </div>
 
                         {q.explanation ? (
                           <div
                             className="text-sm leading-7 text-slate-700 dark:text-slate-300"
                             dangerouslySetInnerHTML={{
-                              __html:
-                                q.explanation,
+                              __html: q.explanation,
                             }}
                           />
                         ) : (
@@ -678,7 +616,6 @@ export default function ExamContent({
                         )}
                       </div>
 
-                      {/* Exam points */}
                       <div
                         className="
                           rounded-xl
@@ -693,18 +630,14 @@ export default function ExamContent({
                       >
                         <div className="mb-2.5 flex items-center gap-2 text-slate-800 dark:text-slate-100">
                           <Lightbulb className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
-
-                          <span className="text-sm font-semibold">
-                            نکات کلیدی کنکوری
-                          </span>
+                          <span className="text-sm font-semibold">نکات کلیدی کنکوری</span>
                         </div>
 
                         {q.examPoints ? (
                           <div
                             className="text-sm leading-7 text-slate-700 dark:text-slate-300"
                             dangerouslySetInnerHTML={{
-                              __html:
-                                q.examPoints,
+                              __html: q.examPoints,
                             }}
                           />
                         ) : (
@@ -751,9 +684,7 @@ export default function ExamContent({
             </div>
           )}
 
-          {/* ==================================================
-              NAVIGATION
-          ================================================== */}
+          {/* NAVIGATION */}
           {totalCount > 0 && (
             <div
               className="
@@ -775,17 +706,9 @@ export default function ExamContent({
               "
             >
               <div className="mx-auto flex max-w-lg gap-2.5 lg:max-w-none">
-
                 <button
-                  disabled={
-                    currentStep === 1 ||
-                    isAnyLoading
-                  }
-                  onClick={() =>
-                    handleNavigation(
-                      currentStep - 1
-                    )
-                  }
+                  disabled={currentStep === 1 || isAnyLoading}
+                  onClick={() => handleNavigation(currentStep - 1)}
                   className="
                     inline-flex
                     flex-1
@@ -816,15 +739,8 @@ export default function ExamContent({
                 </button>
 
                 <button
-                  disabled={
-                    currentStep === totalCount ||
-                    isAnyLoading
-                  }
-                  onClick={() =>
-                    handleNavigation(
-                      currentStep + 1
-                    )
-                  }
+                  disabled={currentStep === totalCount || isAnyLoading}
+                  onClick={() => handleNavigation(currentStep + 1)}
                   className="
                     inline-flex
                     flex-1
@@ -849,15 +765,12 @@ export default function ExamContent({
                   سوال بعدی
                   <ChevronLeft className="h-4.5 w-4.5" />
                 </button>
-
               </div>
             </div>
           )}
         </section>
 
-        {/* ==================================================
-            COMMENTS
-        ================================================== */}
+        {/* COMMENTS */}
         <section
           ref={commentsRef}
           className="
@@ -874,11 +787,8 @@ export default function ExamContent({
         >
           {dbQuestion?.id && (
             <div className="space-y-3.5">
-
               <div className="flex items-start justify-between gap-4">
-
                 <div className="flex items-start gap-3">
-
                   <div
                     className="
                       flex
@@ -901,7 +811,6 @@ export default function ExamContent({
                   </div>
 
                   <div>
-
                     <h3
                       className="
                         flex
@@ -914,7 +823,6 @@ export default function ExamContent({
                       "
                     >
                       پرسش و پاسخ
-
                       <Sparkles className="h-4 w-4 text-amber-500" />
                     </h3>
 
@@ -929,12 +837,10 @@ export default function ExamContent({
                     >
                       سوال مرتبط با همین تست را بپرس یا به دیگران پاسخ بده.
                     </p>
-
                   </div>
                 </div>
 
                 <div className="hidden flex-wrap gap-2 sm:flex sm:justify-end">
-
                   <span
                     className="
                       inline-flex
@@ -976,7 +882,6 @@ export default function ExamContent({
                   >
                     پاسخ کوتاه و دقیق
                   </span>
-
                 </div>
               </div>
 
@@ -984,13 +889,59 @@ export default function ExamContent({
                 targetId={dbQuestion.id}
                 targetType="question"
               />
-
             </div>
           )}
         </section>
 
       </div>
+
+      {/* ==================================================
+          LESSON MODAL (Zero-animation / Instant display)
+      ================================================== */}
+      {isLessonModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setIsLessonModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-7xl max-h-[85vh] flex flex-col rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-700 shrink-0">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  درسنامه سوال {currentStep}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsLessonModalOpen(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="py-4 overflow-y-auto min-h-0 flex-1">
+              {studyGuideContent ? (
+                <div
+                  className="prose max-w-none prose-slate dark:prose-invert text-sm leading-8 text-slate-800 dark:text-slate-200 prose-headings:font-bold prose-p:my-2"
+                  dangerouslySetInnerHTML={{
+                    __html: studyGuideContent,
+                  }}
+                />
+              ) : (
+                <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                  درسنامه‌ای برای این سؤال ثبت نشده است.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
-

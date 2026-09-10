@@ -127,7 +127,7 @@ function HeaderContent({ initialCategories }: NavbarProps) {
 
   return (
     <>
-      <header className="relative z-80 w-full border-b border-gray-200 bg-white font-sans transition-all duration-300">
+      <header className="relative z-50 w-full border-b border-gray-200 bg-white font-sans transition-all duration-300">
 
         <div className="mx-auto flex h-[72px] items-center justify-between gap-4 px-4 md:px-6">
 

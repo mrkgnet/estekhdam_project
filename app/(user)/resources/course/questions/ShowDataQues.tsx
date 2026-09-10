@@ -21,6 +21,7 @@ type DBQuestion = {
   answerText: string;
   examPoints: string;
   questionCode: string;
+  studyGuide?: string;
 };
 
 type Chapter = {
@@ -37,6 +38,7 @@ type FormattedQuestion = {
   explanation: string;
   examPoints: string;
   code: string;
+  studyGuide?: string;
 } | null;
 
 type Props = {
@@ -54,7 +56,7 @@ export default function ExamPage({
   currentStep,
   chapterId,
   questionType,
-  pname
+  pname,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -74,7 +76,6 @@ export default function ExamPage({
 
   const dbQuestion = response?.data as DBQuestion;
   const totalCount = response?.totalCount || 0;
-  // بررسی اشتراک هم با نام جدید و هم با نام قدیم
   const hasActiveSubscription = Boolean(response?.hasActiveSubscription ?? response?.hasPurchased);
   const chapters = (response?.chapters || []) as Chapter[];
 
@@ -91,7 +92,6 @@ export default function ExamPage({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [targetStep, setTargetStep] = useState<number | null>(null);
 
-  // ریدایرکت خودکار در صورت عدم دسترسی از سمت سرور
   useEffect(() => {
     if (response?.requiresSubscription) {
       router.replace("/plans");
@@ -125,7 +125,9 @@ export default function ExamPage({
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isJumpModalOpen]);
 
   const toggleTheme = () => {
@@ -152,7 +154,6 @@ export default function ExamPage({
   const handleNavigation = (newStep: number) => {
     if (newStep < 1 || newStep > totalCount) return;
 
-    // فقط اگر کاربر بیشتر از ۵ رفت بررسی می‌شود
     if (newStep > 5) {
       if (isLoading) return;
 
@@ -162,7 +163,6 @@ export default function ExamPage({
         return;
       }
 
-      // اگر کاربر اشتراک ندارد ریدایرکت شود
       if (!hasActiveSubscription) {
         startTransition(() => {
           router.push("/plans");
@@ -223,6 +223,7 @@ export default function ExamPage({
       explanation: dbQ.answerText,
       examPoints: dbQ.examPoints,
       code: dbQ.questionCode,
+      studyGuide: dbQ.studyGuide || "",
     };
   };
 
@@ -247,7 +248,7 @@ export default function ExamPage({
   ];
 
   return (
-    <div className="min-h-screen  max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300" dir="rtl">
+    <div className="min-h-screen max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300" dir="rtl">
       <div className="mt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
@@ -263,12 +264,17 @@ export default function ExamPage({
           <>
             <motion.div
               className="fixed inset-0 z-[100] bg-black/40 dark:bg-black/60 backdrop-blur-sm"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
               onClick={() => setIsJumpModalOpen(false)}
             />
             <motion.div
               className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
-              initial={{ opacity: 0, y: -150, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -120, scale: 0.96 }}
+              initial={{ opacity: 0, y: -150, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -120, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 420, damping: 28 }}
             >
               <div className="bg-white dark:bg-slate-800 rounded shadow-xl w-full max-w-sm overflow-hidden pointer-events-auto border border-slate-200 dark:border-slate-700">
@@ -278,11 +284,17 @@ export default function ExamPage({
                     شماره سوال مورد نظر خود را وارد کنید (بین ۱ تا <span className="font-bold text-slate-700 dark:text-slate-300">{totalCount}</span>).
                   </p>
                   <input
-                    type="number" min={1} max={totalCount} value={jumpTarget}
+                    type="number"
+                    min={1}
+                    max={totalCount}
+                    value={jumpTarget}
                     onChange={(e) => setJumpTarget(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleJumpSubmit(); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleJumpSubmit();
+                    }}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-emerald-500 focus:border-transparent transition-all dark:text-slate-100"
-                    placeholder="مثلاً: 6" autoFocus
+                    placeholder="مثلاً: 6"
+                    autoFocus
                   />
                 </div>
                 <div className="flex bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 p-4 gap-3 justify-end">
