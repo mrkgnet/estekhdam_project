@@ -77,9 +77,9 @@ export default function page() {
                 </section> */}
 
                 {/* بخش اخبار فوری */}
-                {/* <section className="w-full mb-16">
+                <section className="w-full mb-16">
                     <BreakingNewsComponent />
-                </section> */}
+                </section>
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}
                 {/* <section className="mb-16">
                     <QCComponent />

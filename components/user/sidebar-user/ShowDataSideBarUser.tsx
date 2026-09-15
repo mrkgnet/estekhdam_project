@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -238,7 +237,7 @@ export default function ShowDataSideBarUser({
         <div
           onClick={close}
           className={`fixed inset-x-0 mt-1.5 bottom-0 z-40 bg-gray-900/40 backdrop-blur-sm
-            ${isScrolled ? "top-12" : "top-25"}
+            ${isScrolled ? " top-0 md:top-12" : "top-43 md:top-43"}
           `}
           aria-hidden="true"
         />
@@ -249,14 +248,14 @@ export default function ShowDataSideBarUser({
         onMouseEnter={() => handleInteraction(null, 0)}
         className={`fixed right-0 z-70 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
           ${isScrolled
-            ? "top-13 h-[calc(100vh-3.5rem)]"
-            : "top-45 h-[calc(100vh-8rem)]"
+            ? "top-0 h-full md:top-13 h-[calc(100vh-3.5rem)]"
+            : "top-44  md:top-44 h-[calc(100vh-8rem)]"
           }
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* هدر سطح اول + دکمه بستن */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-white md:hidden">
+        <div className="flex items-center justify-between px-3 py-2 border border-gray-300 bg-white md:hidden">
           <span className="font-bold text-gray-800">
             منوی دسته‌بندی‌ها
           </span>
@@ -272,7 +271,7 @@ export default function ShowDataSideBarUser({
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
-          <nav className="w-1/3 md:w-full flex-shrink-0 border-l border-gray-100 md:border-none p-2 md:p-4 space-y-1 overflow-y-auto bg-gray-50 md:bg-white z-20">
+          <nav className="w-1/3 md:w-full flex-shrink-0 border-l border-gray-300 md:border-none p-2 md:p-4 space-y-1 overflow-y-auto bg-gray-50 md:bg-white z-20">
             {dynamicMenuTree.length === 0 ? (
               <p className="text-gray-400 text-center mt-5">
                 منویی یافت نشد.
@@ -458,8 +457,8 @@ export default function ShowDataSideBarUser({
               }
               className={`fixed right-[280px] w-[290px] bg-white shadow-2xl z-[15] flex flex-col border-r border-gray-100 mt-0
                 ${isScrolled
-                  ? "top-0 h-[calc(100vh-3.5rem)]"
-                  : "top-0 h-[calc(100vh-8rem)]"
+                  ? "top-13 h-[calc(100vh-3.5rem)]"
+                  : "top-45 h-[calc(100vh-8rem)]"
                 }
               `}
             >
@@ -557,7 +556,7 @@ export default function ShowDataSideBarUser({
               className={`fixed right-[540px] w-[260px] bg-white shadow-2xl z-[10] border-r border-gray-100 flex flex-col mt-1
                 ${isScrolled
                   ? "top-14 h-[calc(100vh-3.5rem)]"
-                  : "top-32 h-[calc(100vh-8rem)]"
+                  : "top-45 h-[calc(100vh-8rem)]"
                 }
               `}
             >
@@ -587,4 +586,3 @@ export default function ShowDataSideBarUser({
     </>
   );
 }
-
