@@ -264,10 +264,12 @@ export default function ShowDataSideBarUser({
             type="button"
             onClick={close}
             aria-label="بستن سایدبار"
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            className="flex items-center border border-red-600 gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
           >
             <X className="w-5 h-5" />
+            <span>بستن منو</span>
           </button>
+
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
@@ -298,20 +300,18 @@ export default function ShowDataSideBarUser({
                   >
                     <div
                       className={`relative flex flex-col md:flex-row items-center justify-center md:justify-between p-1.5 md:px-4 md:py-1.5 rounded-xl md:rounded-none md:border-b font-medium
-                        ${
-                          isActive || isSelected
-                            ? "md:bg-blue-50 text-blue-700 border-2 md:border-1"
-                            : "text-gray-600 hover:bg-blue-50/50"
+                        ${isActive || isSelected
+                          ? "md:bg-blue-50 text-blue-700 border-2 md:border-1"
+                          : "text-gray-600 hover:bg-blue-50/50"
                         }
                       `}
                     >
                       <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3 relative z-10">
                         <div
-                          className={`p-1.5 rounded-lg ${
-                            isActive || isSelected
+                          className={`p-1.5 rounded-lg ${isActive || isSelected
                               ? "text-blue-600 md:bg-blue-600 md:text-white"
                               : "text-gray-400"
-                          }`}
+                            }`}
                         >
                           {tab.icon && (
                             <tab.icon className="h-6 w-6 md:h-5 md:w-5" />
@@ -326,11 +326,10 @@ export default function ShowDataSideBarUser({
                       {tab.subItems &&
                         tab.subItems.length > 0 && (
                           <ChevronLeft
-                            className={`hidden md:block h-4 w-4 ${
-                              isSelected
+                            className={`hidden md:block h-4 w-4 ${isSelected
                                 ? "text-blue-500"
                                 : "text-gray-400"
-                            }`}
+                              }`}
                           />
                         )}
                     </div>
@@ -411,11 +410,10 @@ export default function ShowDataSideBarUser({
                                 className="p-1 hover:bg-gray-200 rounded-md"
                               >
                                 <ChevronLeft
-                                  className={`w-4 h-4 text-gray-500 ${
-                                    isSubOpen
+                                  className={`w-4 h-4 text-gray-500 ${isSubOpen
                                       ? "-rotate-90"
                                       : ""
-                                  }`}
+                                    }`}
                                 />
                               </button>
                             )}
@@ -457,8 +455,8 @@ export default function ShowDataSideBarUser({
               }
               className={`fixed right-[280px] w-[290px] bg-white shadow-2xl z-[15] flex flex-col border-r border-gray-100 mt-0
                 ${isScrolled
-                  ? "top-13 h-[calc(100vh-3.5rem)]"
-                  : "top-45 h-[calc(100vh-8rem)]"
+                  ? "top-0 h-[calc(100vh-3.5rem)]"
+                  : "top-0 h-[calc(100vh-8rem)]"
                 }
               `}
             >
@@ -511,26 +509,23 @@ export default function ShowDataSideBarUser({
                           handleInteraction(sub.id, 2)
                         }
                         className={`px-4 py-3 rounded-xl flex items-center justify-between
-                          ${
-                            isSubActive
-                              ? "bg-blue-50 text-blue-700"
-                              : "text-gray-600 hover:bg-blue-50/50"
+                          ${isSubActive
+                            ? "bg-blue-50 text-blue-700"
+                            : "text-gray-600 hover:bg-blue-50/50"
                           }
-                          ${
-                            isSubHovered && !isSubActive
-                              ? "bg-blue-50/50 text-blue-700"
-                              : ""
+                          ${isSubHovered && !isSubActive
+                            ? "bg-blue-50/50 text-blue-700"
+                            : ""
                           }
                         `}
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isSubActive ||
-                              isSubHovered
+                            className={`w-1.5 h-1.5 rounded-full ${isSubActive ||
+                                isSubHovered
                                 ? "bg-blue-600"
                                 : "bg-gray-300"
-                            }`}
+                              }`}
                           />
 
                           {sub.title}
