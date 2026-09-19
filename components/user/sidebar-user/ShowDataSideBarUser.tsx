@@ -36,6 +36,12 @@ export default function ShowDataSideBarUser({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handleClose = () => {
+    close();
+    setActiveTabId(null);
+    setActiveSubTabId(null);
+  };
+
   const dynamicMenuTree = useMemo(() => {
     if (!response || !response.success || !response.data) return [];
 
@@ -235,7 +241,7 @@ export default function ShowDataSideBarUser({
     <>
       {isOpen && (
         <div
-          onClick={close}
+          onClick={handleClose}
           className={`fixed inset-x-0 mt-1.5 bottom-0 z-40 bg-gray-900/40 backdrop-blur-sm
             ${isScrolled ? " top-0 md:top-12" : "top-31 md:top-31"}
           `}
@@ -254,22 +260,38 @@ export default function ShowDataSideBarUser({
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
-        {/* هدر سطح اول + دکمه بستن */}
+        {/* هدر سطح اول + دکمه بستن در موبایل */}
         <div className="flex items-center justify-between px-3 py-2 border border-gray-300 bg-white md:hidden">
           <span className="font-bold text-gray-800">
-            منوی دسته‌بندی‌ها
+             دسته‌بندی‌ها
           </span>
 
           <button
             type="button"
-            onClick={close}
+            onClick={handleClose}
             aria-label="بستن سایدبار"
             className="flex items-center border border-red-600 gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
           >
             <X className="w-5 h-5" />
             <span>بستن منو</span>
           </button>
+        </div>
 
+        {/* هدر و دکمه بستن در حالت دسکتاپ */}
+        <div className="hidden md:flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-white">
+          <span className="font-bold text-sm text-gray-800">
+             دسته‌بندی‌ها
+          </span>
+
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="بستن سایدبار"
+            className="flex items-center border border-red-600 gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+          >
+            <X className="w-5 h-5" />
+            <span>بستن منو</span>
+          </button>
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
@@ -344,7 +366,7 @@ export default function ShowDataSideBarUser({
               <>
                 <Link
                   href={activeTab.url}
-                  onClick={close}
+                  onClick={handleClose}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 mb-4 flex items-center gap-1"
@@ -390,7 +412,7 @@ export default function ShowDataSideBarUser({
                           <div className="flex justify-between items-center">
                             <Link
                               href={sub.url}
-                              onClick={close}
+                              onClick={handleClose}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-gray-800 flex-1"
@@ -426,7 +448,7 @@ export default function ShowDataSideBarUser({
                                   <Link
                                     key={lvl3.id}
                                     href={lvl3.url}
-                                    onClick={close}
+                                    onClick={handleClose}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100"
