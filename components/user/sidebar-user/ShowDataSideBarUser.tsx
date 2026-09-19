@@ -237,7 +237,7 @@ export default function ShowDataSideBarUser({
         <div
           onClick={close}
           className={`fixed inset-x-0 mt-1.5 bottom-0 z-40 bg-gray-900/40 backdrop-blur-sm
-            ${isScrolled ? " top-0 md:top-12" : "top-43 md:top-43"}
+            ${isScrolled ? " top-0 md:top-12" : "top-31 md:top-31"}
           `}
           aria-hidden="true"
         />
@@ -249,7 +249,7 @@ export default function ShowDataSideBarUser({
         className={`fixed right-0 z-70 w-full md:w-[280px] bg-white mt-1 flex flex-col shadow-xl border-l border-gray-100
           ${isScrolled
             ? "top-0 h-full md:top-13 h-[calc(100vh-3.5rem)]"
-            : "top-44  md:top-44 h-[calc(100vh-8rem)]"
+            : "top-31  md:top-31 h-[calc(100vh-8rem)]"
           }
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
