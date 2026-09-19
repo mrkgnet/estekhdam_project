@@ -263,7 +263,7 @@ export default function ShowDataSideBarUser({
         {/* هدر سطح اول + دکمه بستن در موبایل */}
         <div className="flex items-center justify-between px-3 py-2 border border-gray-300 bg-white md:hidden">
           <span className="font-bold text-gray-800">
-             دسته‌بندی‌ها
+            دسته‌بندی‌ها
           </span>
 
           <button
@@ -280,14 +280,14 @@ export default function ShowDataSideBarUser({
         {/* هدر و دکمه بستن در حالت دسکتاپ */}
         <div className="hidden md:flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-white">
           <span className="font-bold text-sm text-gray-800">
-             دسته‌بندی‌ها
+            دسته‌بندی‌ها
           </span>
 
-          <button
+           <button
             type="button"
             onClick={handleClose}
             aria-label="بستن سایدبار"
-            className="flex items-center border border-red-600 gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+            className="flex items-center border border-red-600 gap-2 px-3 py-1.5 rounded-lg text-12 font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
           >
             <X className="w-5 h-5" />
             <span>بستن منو</span>
@@ -295,6 +295,7 @@ export default function ShowDataSideBarUser({
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
+          {/* ستون سطح اول موبایل / منوی اصلی دسکتاپ */}
           <nav className="w-1/3 md:w-full flex-shrink-0 border-l border-gray-300 md:border-none p-2 md:p-4 space-y-1 overflow-y-auto bg-gray-50 md:bg-white z-20">
             {dynamicMenuTree.length === 0 ? (
               <p className="text-gray-400 text-center mt-5">
@@ -361,36 +362,40 @@ export default function ShowDataSideBarUser({
             )}
           </nav>
 
-          <div className="w-2/3 md:hidden flex flex-col overflow-y-auto bg-white p-3">
+          {/* ستون سطح دو و سه در حالت موبایل */}
+          <div className="w-2/3 md:hidden flex flex-col h-full bg-white overflow-hidden">
             {hasLevel2 && activeTab && (
               <>
-                <Link
-                  href={activeTab.url}
-                  onClick={handleClose}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 mb-4 flex items-center gap-1"
-                >
-                  {activeTab.title}
+                {/* هدر و سرچ سطح دوم (ثابت در بالای بخش موبایل) */}
+                <div className="p-3 pb-2 border-b border-gray-100 flex-shrink-0 bg-white">
+                  <Link
+                    href={activeTab.url}
+                    onClick={handleClose}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 mb-3 flex items-center gap-1 font-bold text-sm"
+                  >
+                    {activeTab.title}
+                    <ChevronLeft className="w-4 h-4" />
+                  </Link>
 
-                  <ChevronLeft className="w-4 h-4" />
-                </Link>
+                  <div className="relative">
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(e) =>
+                        setSearch(e.target.value)
+                      }
+                      placeholder="جستجو در این دسته‌..."
+                      className="w-full h-9 rounded-xl border border-gray-200 bg-white px-10 text-11 text-gray-700 placeholder:text-gray-400 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    />
 
-                <div className="relative">
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    placeholder="جستجو در این دسته‌..."
-                    className="w-full h-9 rounded-xl mb-2 border border-gray-200 bg-white px-10 text-11 text-gray-700 placeholder:text-gray-400 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                 </div>
 
-                <div className="space-y-4">
+                {/* لیست سطح دو با اسکرول‌بار اختصاصی و مستقل */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f8fafc] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
                   {filteredLevel2Items.length === 0 ? (
                     <p className="text-gray-400 text-sm text-center mt-5">
                       موردی یافت نشد.
@@ -415,7 +420,7 @@ export default function ShowDataSideBarUser({
                               onClick={handleClose}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-gray-800 flex-1"
+                              className="text-gray-800 flex-1 text-sm font-medium"
                             >
                               {sub.title}
                             </Link>
@@ -432,7 +437,7 @@ export default function ShowDataSideBarUser({
                                 className="p-1 hover:bg-gray-200 rounded-md"
                               >
                                 <ChevronLeft
-                                  className={`w-4 h-4 text-gray-500 ${isSubOpen
+                                  className={`w-4 h-4 text-gray-500 transition-transform ${isSubOpen
                                       ? "-rotate-90"
                                       : ""
                                     }`}
@@ -441,8 +446,9 @@ export default function ShowDataSideBarUser({
                             )}
                           </div>
 
+                          {/* سطح سه با اسکرول‌بار اختصاصی داخل آکاردئون */}
                           {isSubOpen && hasLvl3 && (
-                            <div className="space-y-2 mt-3 border-t border-gray-200 pt-3">
+                            <div className="space-y-2 mt-3 border-t border-gray-200 pt-3 max-h-48 overflow-y-auto pl-1 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
                               {sub.subItems.map(
                                 (lvl3: any) => (
                                   <Link
@@ -451,7 +457,7 @@ export default function ShowDataSideBarUser({
                                     onClick={handleClose}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100"
+                                    className="block text-gray-500 hover:text-blue-600 pr-2 border-r-2 border-blue-100 py-0.5 text-xs"
                                   >
                                     {lvl3.title}
                                   </Link>
@@ -469,6 +475,7 @@ export default function ShowDataSideBarUser({
           </div>
         </div>
 
+        {/* بخش دسکتاپ (سطح دو و سطح سه پاپ‌آپ) */}
         <div className="hidden md:block">
           {hasLevel2 && activeTab && (
             <div
