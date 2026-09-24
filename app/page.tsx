@@ -26,7 +26,7 @@ const BreakingNewsComponent = dynamic(() => import("@/components/user/home/break
 
 export default function page() {
     return (
-        <div className="min-h-screen  text-slate-800" dir="rtl">
+        <div className="min-h-screen  text-slate-800 bg-gray-100" dir="rtl">
 
 
             {/* بخش هدر و ناوبری */}
@@ -35,12 +35,12 @@ export default function page() {
             <SideBarUserComponent />
 
             <main className=" mx-auto ">
-                <section className="pb-10">
+                <section className="pb-5">
                     <PlansOffer />
                 </section>
 
                 {/* اسلایدر برندها */}
-                <section className="pb-10">
+                <section className="pb-5">
                     <BrandsSSR />
                 </section>
                 {/* کامپوننت فیلتربار */}
@@ -64,20 +64,13 @@ export default function page() {
                         <SliderTopLeftComponent />
                     </div>
                 </section>
-
-
-
-
-
-
-
-
-                {/* <section className="w-full bg-white my-4 rounded-2xl">
+                
+               {/* <section className="w-full bg-white my-4 rounded-2xl">
                     <CategoryGrid />
                 </section> */}
 
                 {/* بخش اخبار فوری */}
-                <section className="w-full mb-16">
+                <section className="w-full px-4 mb-4 md:mb-6 my-3">
                     <BreakingNewsComponent />
                 </section>
                 {/* هیرو سکشن و اسلایدر - پاس دادن مقدار داینامیک */}

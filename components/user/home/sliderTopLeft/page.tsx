@@ -13,7 +13,7 @@ export default async function FetchDataSLTL() {
   return (
     <div className="w-full">
       <ShowDataSLTL
-        title="محصولات مرتبط با این مورد"
+        title="جدیدترین دوره‌ها"
         initialProducts={response.data}
         totalPages={response.totalPages}
       />

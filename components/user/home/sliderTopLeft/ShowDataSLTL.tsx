@@ -358,8 +358,8 @@ export default function ShowDataSLTL({
       `}</style>
 
       {/* هدر بالای کاروسل */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2.5 px-1 text-xs">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap bg-white py-2 rounded items-center justify-between gap-2 border-b border-gray-100 pb-2.5 px-1 text-xs">
+        <div className="flex items-center gap-2 ">
           <h2 className="text-sm sm:text-base font-bold text-slate-800">{title}</h2>
           <span className="text-[10px] text-slate-400 font-medium">ویژه</span>
         </div>

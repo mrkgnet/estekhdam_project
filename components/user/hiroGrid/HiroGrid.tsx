@@ -186,7 +186,7 @@ export default function HiroGrid({ data }: HiroGridProps) {
           onClick={closeModal}
         >
           <div
-            className="w-full max-w-sm bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
+            className="w-full max-w-sm bg-white rounded shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* هدر مدال */}

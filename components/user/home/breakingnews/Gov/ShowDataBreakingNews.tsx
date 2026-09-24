@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { CalendarDays, SearchX, Briefcase, Landmark } from "lucide-react";
+import { CalendarDays, SearchX } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -25,22 +25,11 @@ interface ShowDataBreakingNewsProps {
   initialNews: any; // داده‌های اولیه از سمت سرور
 }
 
-type CategoryItem = {
-  id: "gov" | "private";
-  label: string;
-  icon: React.ElementType;
-};
-
-const categoryItems: CategoryItem[] = [
-  { id: "gov", label: "دولتی", icon: Landmark },
-  { id: "private", label: "خصوصی", icon: Briefcase },
-];
-
 function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
   const isValidSrc = src && (src.startsWith("http") || src.startsWith("/"));
 
   return (
-    <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-sky-200">
+    <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all duration-0 group-hover:shadow-md group-hover:border-sky-200">
       {isValidSrc ? (
         <Image
           src={src}
@@ -61,7 +50,6 @@ function BrandLogo({ src, alt }: { src?: string | null; alt: string }) {
 /* ---------------- Main Component ---------------- */
 
 export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNewsProps) {
-  const [activeCategoryId, setActiveCategoryId] = useState<"gov" | "private">("gov");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -94,57 +82,30 @@ export default function ShowDataBreakingNews({ initialNews }: ShowDataBreakingNe
     }));
   }, [govNews]);
 
-  // فیلتر اخبار بر اساس تب انتخاب شده
-  const filteredNews = activeCategoryId === "gov" ? formattedGovNews : [];
-
   // نمایش اسکلتون لودینگ تا زمان بارگذاری کامل یا گرفتن دیتا
   const showSkeleton = !mounted || isLoading;
 
   return (
     <div className="w-full rounded border border-slate-200 bg-white p-4 md:p-5 lg:p-6 shadow-sm" dir="rtl">
       {/* header */}
-      <div className="mb-5 md:mb-6 flex flex-col gap-4 border-b border-slate-100 pb-4 md:pb-5 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-6 md:h-7 w-1.5 rounded-full bg-sky-500"></div>
-          <h2 className="text-slate-600 text-base font-bold">جدیدترین اخبار استخدامی</h2>
-        </div>
-
-        <div className="flex w-full md:w-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
-          {categoryItems.map((item) => {
-            const Icon = item.icon;
-            const active = item.id === activeCategoryId;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveCategoryId(item.id)}
-                className={`flex w-1/2 md:w-auto items-center text-13 md:text-14 lg:text-13 font-bold justify-center gap-2 rounded-lg px-4 py-2 transition-all ${
-                  active
-                    ? "bg-white text-sky-600 shadow-sm"
-                    : "text-slate-600 hover:text-slate-700 hover:bg-slate-100/50"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="mb-5 md:mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 md:pb-5">
+        <div className="h-6 md:h-7 w-1.5 rounded-full bg-sky-500"></div>
+        <h2 className="text-slate-600 text-base font-bold">جدیدترین اخبار استخدامی</h2>
       </div>
 
       {/* content */}
       {showSkeleton ? (
         <BreakingNewsListSkeleton />
-      ) : filteredNews.length > 0 ? (
+      ) : formattedGovNews.length > 0 ? (
         <div className="flex max-h-[400px] flex-col gap-3 md:gap-4 overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
-          {filteredNews.map((it) => (
+          {formattedGovNews.map((it) => (
             <Link
               key={it.id}
               href={it.href}
               target="_blank"
               prefetch={true}
               rel="noopener noreferrer"
-              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-300 bg-white p-4 transition-all duration-0 hover:-translate-y-0.1 hover:border-slate-400 hover:shadow-md"
             >
               <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                 <BrandLogo src={it.image} alt={it.title} />

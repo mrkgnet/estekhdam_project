@@ -35,7 +35,7 @@ export default function BrandsTopHome({ brands: initialBrands, title }: Props) {
       )}
 
       <div className="flex overflow-hidden w-full select-none group/marquee">
-        <div className="flex shrink-0 items-center justify-around gap-4 sm:gap-6 px-2 marquee-animation">
+        <div className="flex shrink-0 items-start justify-around gap-0.5 sm:gap-3 px-2 marquee-animation">
           {displayBrands.map((brand, index) => (
             <BrandItem
               key={`track1-${brand.id}-${index}`}
@@ -46,7 +46,7 @@ export default function BrandsTopHome({ brands: initialBrands, title }: Props) {
         </div>
 
         <div
-          className="flex shrink-0 items-center justify-around gap-4 sm:gap-6 px-2 marquee-animation"
+          className="flex shrink-0 items-start justify-around gap-0.5 sm:gap-3 px-2 marquee-animation"
           aria-hidden="true"
         >
           {displayBrands.map((brand, index) => (
@@ -90,10 +90,10 @@ const BrandItem = React.memo(function BrandItem({
   return (
     <Link
       href={`/brands/${brand.id}`}
-      className="flex flex-col items-center gap-2.5 shrink-0 w-20 sm:w-24 outline-none"
+      className="flex flex-col items-center gap-2 shrink-0 w-20 sm:w-24 outline-none"
       title={brand.title}
     >
-      <div className="relative w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] flex items-center justify-center p-3 rounded-full bg-white shadow-sm border border-slate-100/80">
+      <div className="relative w-16 h-16 sm:w-[76px] sm:h-[76px] md:w-[84px] md:h-[84px] flex items-center justify-center p-3 rounded bg-white shadow-sm border border-slate-100/80">
         <Image
           src={brand.imageUrl}
           alt={`لوگو ${brand.title}`}
@@ -107,7 +107,7 @@ const BrandItem = React.memo(function BrandItem({
         />
       </div>
 
-      <span className="font-medium text-slate-600 text-center line-clamp-1 w-full px-1 text-[13px] sm:text-[14px]">
+      <span className="font-medium text-slate-600 text-center w-full px-1 text-[13px] sm:text-[14px] leading-snug whitespace-normal break-words">
         {brand.title}
       </span>
     </Link>
