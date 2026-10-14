@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -22,6 +23,11 @@ import {
   ZoomOut,
   Maximize2,
   Minimize2,
+  Copy,
+  Check,
+  AlignJustify,
+  AlignRight,
+  Maximize,
 } from "lucide-react";
 import CommentManagment from "@/components/comment/CommentManagmet";
 
@@ -32,6 +38,8 @@ import CommentManagment from "@/components/comment/CommentManagmet";
 type ChoiceKey = "A" | "B" | "C" | "D";
 type ReaderTheme = "white" | "sepia" | "dark";
 type LineHeight = "normal" | "relaxed" | "loose";
+type TextAlign = "justify" | "right";
+type ReaderWidth = "standard" | "wide";
 
 const PERSIAN_LETTER_MAP: Record<ChoiceKey, string> = {
   A: "الف",
@@ -89,24 +97,42 @@ interface StudyGuideModalProps {
 }
 
 function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [fontSize, setFontSize] = useState<number>(16);
   const [theme, setTheme] = useState<ReaderTheme>("sepia");
   const [lineHeight, setLineHeight] = useState<LineHeight>("relaxed");
+  const [textAlign, setTextAlign] = useState<TextAlign>("justify");
+  const [readerWidth, setReaderWidth] = useState<ReaderWidth>("standard");
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const modalBoxRef = useRef<HTMLDivElement>(null);
 
-  // قفل کردن اسکرول صفحه اصلی هنگام باز بودن مدال
+  const modalBoxRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // قفل اسکرول صفحه اصلی و جلوگیری از لرزش ناشی از نوار اسکرول
   useEffect(() => {
     if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
     };
   }, [isOpen]);
 
-  // کنترل خروج از فول‌اسکرین با دکمه Esc سیستم‌عامل
+  // کنترل تغییر حالت تمام‌صفحه
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement));
@@ -116,7 +142,7 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // بستن مدال با کلید Escape در صورتی که در حالت تمام‌صفحه نباشد
+  // بستن مدال با فشردن کلید Escape
   useEffect(() => {
     if (!isOpen) return;
 
@@ -130,12 +156,41 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // محاسبه پیشرفت اسکرول برای نوار پیشرفت مطالعه
+  const handleScroll = () => {
+    const element = scrollContainerRef.current;
+    if (!element) return;
+
+    const totalHeight = element.scrollHeight - element.clientHeight;
+    if (totalHeight <= 0) {
+      setScrollProgress(100);
+      return;
+    }
+
+    const currentScroll = element.scrollTop;
+    const progress = Math.min(100, Math.max(0, (currentScroll / totalHeight) * 100));
+    setScrollProgress(Math.round(progress));
+  };
+
   const toggleFullscreen = () => {
     if (!modalBoxRef.current) return;
     if (!document.fullscreenElement) {
       modalBoxRef.current.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  // کپی متن خام درسنامه
+  const handleCopyContent = async () => {
+    if (!content) return;
+    try {
+      const textOnly = scrollContainerRef.current?.innerText || content.replace(/<[^>]+>/g, "");
+      await navigator.clipboard.writeText(textOnly);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      // در صورت عدم دسترسی به کلیپ‌بورد
     }
   };
 
@@ -163,30 +218,45 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
     }
   }, [lineHeight]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`درسنامه سوال ${currentStep}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-2 sm:p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-xs p-2 sm:p-4 select-none sm:select-auto"
       onClick={onClose}
     >
       <div
         ref={modalBoxRef}
-        className={`w-full max-w-5xl h-[92vh] flex flex-col rounded border shadow-2xl overflow-hidden transition-colors duration-200 ${themeClasses}`}
+        className={`w-full max-w-5xl ${
+          isFullscreen
+            ? "h-full max-h-none rounded-none border-0"
+            : "h-[92vh] max-h-[92dvh] rounded-2xl border"
+        } flex flex-col shadow-2xl overflow-hidden transition-colors duration-200 relative ${themeClasses}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header / Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-black/10 dark:border-white/10 shrink-0 bg-black/5 dark:bg-white/5">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-sm sm:text-base font-bold">درسنامه سوال {currentStep}</h3>
+        {/* هدر و تولبار ثابت مدال */}
+        <div className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 px-3.5 py-2.5 sm:px-5 sm:py-3.5 border-b border-black/10 dark:border-white/10 shrink-0 bg-inherit backdrop-blur-md">
+          {/* سمت راست: عنوان و نشانگر پیشرفت مطالعه */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold truncate">
+                درسنامه سوال {currentStep}
+              </h3>
+              <span className="hidden sm:block text-[11px] opacity-60 tabular-nums">
+                مطالعه شده: {scrollProgress}%
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            {/* تم رنگی */}
+          {/* فیلترها و تنظیمات مطالعه */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+            {/* تم مطالعه */}
             <div className="flex items-center rounded-lg border border-black/10 dark:border-white/10 p-0.5 bg-black/5 dark:bg-white/5">
               {(["white", "sepia", "dark"] as ReaderTheme[]).map((t) => (
                 <button
@@ -200,7 +270,7 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
                         : t === "sepia"
                         ? "bg-[#ecd7b0] text-[#3d2e1e] font-bold shadow-xs"
                         : "bg-white text-black font-bold shadow-xs"
-                      : ""
+                      : "opacity-75 hover:opacity-100"
                   }`}
                 >
                   {t === "white" ? "روز" : t === "sepia" ? "کاهی" : "شب"}
@@ -208,13 +278,14 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
               ))}
             </div>
 
-            {/* کنترل اندازه متن */}
+            {/* کنترل اندازه فونت */}
             <div className="flex items-center rounded-lg border border-black/10 dark:border-white/10 p-0.5 bg-black/5 dark:bg-white/5">
               <button
                 type="button"
                 onClick={() => setFontSize((prev) => Math.max(13, prev - 1))}
                 className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
                 aria-label="کوچک‌تر کردن متن"
+                title="کاهش قلم"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
@@ -224,66 +295,138 @@ function StudyGuideModal({ isOpen, onClose, currentStep, content }: StudyGuideMo
                 onClick={() => setFontSize((prev) => Math.min(26, prev + 1))}
                 className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
                 aria-label="بزرگ‌تر کردن متن"
+                title="افزایش قلم"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* فاصله خطوط */}
-            <div className="hidden sm:flex items-center rounded-lg border border-black/10 dark:border-white/10 p-0.5 bg-black/5 dark:bg-white/5">
+            {/* فاصله بین خطوط */}
+            <div className="hidden md:flex items-center rounded-lg border border-black/10 dark:border-white/10 p-0.5 bg-black/5 dark:bg-white/5">
               {(["normal", "relaxed", "loose"] as LineHeight[]).map((lh) => (
                 <button
                   key={lh}
                   type="button"
-                  onClick={() => setReaderLineHeight(lh)}
+                  onClick={() => setLineHeight(lh)}
                   className={`px-2 py-1 rounded-md transition-all ${
-                    lineHeight === lh ? "bg-blue-600 text-white font-bold" : ""
+                    lineHeight === lh
+                      ? "bg-blue-600 text-white font-bold shadow-xs"
+                      : "opacity-75 hover:opacity-100"
                   }`}
                 >
-                  {lh === "normal" ? "کم" : lh === "relaxed" ? "متوسط" : "زیاد"}
+                  {lh === "normal" ? "خط ۱" : lh === "relaxed" ? "خط ۲" : "خط ۳"}
                 </button>
               ))}
             </div>
 
-            {/* حالت تمام‌صفحه */}
+            {/* فیلتر تراز متن (راست‌چین یا جاستیفای) */}
+            <div className="hidden sm:flex items-center rounded-lg border border-black/10 dark:border-white/10 p-0.5 bg-black/5 dark:bg-white/5">
+              <button
+                type="button"
+                onClick={() => setTextAlign("justify")}
+                className={`p-1 rounded transition-all ${
+                  textAlign === "justify" ? "bg-blue-600 text-white shadow-xs" : "opacity-75 hover:opacity-100"
+                }`}
+                title="تراز دوطرفه (Justified)"
+              >
+                <AlignJustify className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setTextAlign("right")}
+                className={`p-1 rounded transition-all ${
+                  textAlign === "right" ? "bg-blue-600 text-white shadow-xs" : "opacity-75 hover:opacity-100"
+                }`}
+                title="راست‌چین"
+              >
+                <AlignRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* فیلتر عرض کادر مطالعه (استاندارد یا پهن) */}
+            <button
+              type="button"
+              onClick={() => setReaderWidth((prev) => (prev === "standard" ? "wide" : "standard"))}
+              className={`p-1.5 rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hidden sm:block ${
+                readerWidth === "wide" ? "bg-blue-600 text-white border-blue-600" : ""
+              }`}
+              title={readerWidth === "standard" ? "نمای عریض" : "نمای متمرکز"}
+            >
+              <Maximize className="w-3.5 h-3.5" />
+            </button>
+
+            {/* دکمه کپی متن */}
+            {content && (
+              <button
+                type="button"
+                onClick={handleCopyContent}
+                className="p-1.5 rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hidden sm:block"
+                title="کپی متن درسنامه"
+              >
+                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            )}
+
+            {/* تمام‌صفحه */}
             <button
               type="button"
               onClick={toggleFullscreen}
               className="p-1.5 rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hidden sm:block"
-              aria-label={isFullscreen ? "خروج از تمام صفحه" : "تمام صفحه"}
+              title={isFullscreen ? "خروج از تمام‌صفحه" : "تمام‌صفحه"}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
             </button>
 
-            {/* بستن */}
+            {/* دکمه برجسته، بزرگ و دایره‌ای بستن */}
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-black/10 dark:hover:bg-white/10 hover:text-rose-500 transition-colors"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 border-rose-500/40 bg-rose-50/80 text-rose-600 shadow-sm transition-all duration-150 hover:scale-105 hover:border-rose-600 hover:bg-rose-600 hover:text-white dark:border-rose-500/50 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white shrink-0 active:scale-95"
               aria-label="بستن پنجره"
+              title="بستن درسنامه (Esc)"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5 stroke-[2.5]" />
             </button>
           </div>
         </div>
 
-        {/* متن درسنامه */}
-        <div className="p-6 sm:p-10 overflow-y-auto min-h-0 flex-1">
-          <div className="max-w-3xl mx-auto" style={{ fontSize: `${fontSize}px` }}>
+        {/* نوار باریک درصد پیشرفت مطالعه زیر هدر */}
+        <div className="h-0.5 w-full bg-black/5 dark:bg-white/5 shrink-0">
+          <div
+            className="h-full bg-blue-600 transition-all duration-150"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
+
+        {/* محتوای درسنامه */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="p-5 sm:p-8 lg:p-10 overflow-y-auto min-h-0 flex-1 overscroll-contain"
+        >
+          <div
+            className={`mx-auto transition-all duration-200 ${
+              readerWidth === "wide" ? "max-w-5xl" : "max-w-3xl"
+            }`}
+            style={{ fontSize: `${fontSize}px` }}
+          >
             {content ? (
               <div
-                className={`prose max-w-none text-justify ${lineHeightClass} ${
-                  theme === "dark" ? "prose-invert" : ""
-                }`}
+                className={`prose max-w-none ${
+                  textAlign === "justify" ? "text-justify" : "text-right"
+                } ${lineHeightClass} ${theme === "dark" ? "prose-invert" : ""}`}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
             ) : (
-              <p className="py-16 text-center text-sm opacity-60">درسنامه‌ای برای این سؤال ثبت نشده است.</p>
+              <p className="py-16 text-center text-sm opacity-60">
+                درسنامه‌ای برای این سؤال ثبت نشده است.
+              </p>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -441,7 +584,7 @@ export default function ExamContent({
                       <button
                         type="button"
                         onClick={() => setIsLessonModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:bg-blue-50 dark:border-blue-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500 bg-white px-2.5 py-1 text-[13px] font-bold text-slate-600 hover:bg-blue-50 dark:border-blue-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                       >
                         <BookOpen className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                         درسنامه سوال
@@ -469,7 +612,6 @@ export default function ExamContent({
                     const isUserChoice = selected === ch.key;
                     const isRight = ch.key === q.correct;
 
-                    // کلاس‌های شرطی استایل گزینه‌ها
                     let buttonStyle = "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800";
                     let badgeStyle = "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300";
 

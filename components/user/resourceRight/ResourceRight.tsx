@@ -6,32 +6,30 @@ import { useQuery } from "@tanstack/react-query";
 import {
   FileText,
   Clock,
-  Text,
-  PlayCircle,
-  ShoppingBasket,
   CheckCircle2,
   Info,
   XCircle,
   DownloadCloud,
   Loader2,
+  Sparkles,
+  ArrowLeft,
+  Crown,
+  HelpCircle,
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
-import { checkUserPurchaseStatus } from "@/actions/user/resources/course/checkUserPurchaseStatus/Actions";
 import { incrementDownloadCountAction } from "@/actions/user/resources/course/counterDownload/Actions";
 import AuthModal from "@/components/modals/AuthModal";
 import { checkUserSubscriptionAction } from "@/actions/admin/plans/Actions";
 
 /* =========================
-   Types
+    Types
 ========================= */
 type Product = {
   id?: string;
   slug?: string;
   type?: "FREE_RESOURCE" | string;
   isActive?: boolean;
-  oldPrice?: number;
-  newPrice?: number;
   downloadUrl?: string;
   _count?: {
     questions?: number;
@@ -41,31 +39,41 @@ type Product = {
 type Props = { product: Product };
 
 /* =========================
-   UI atoms
+    UI Atoms & Styles
 ========================= */
-const cardBase =
-  "bg-white rounded border border-slate-300 shadow-sm overflow-hidden";
-const softCard = "bg-slate-50 border border-slate-300 rounded";
-const btnBase =
-  "w-full h-11 sm:h-12 rounded flex items-center justify-center gap-2 font-bold transition active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed";
-const statusBase =
-  "rounded p-2.5 sm:p-3 flex items-center justify-center gap-2 font-bold border";
+const cardContainer =
+  "bg-white rounded-2xl border border-slate-400 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] overflow-hidden transition-all duration-300";
 
-/* ✅ استایل موج‌دار به صورت ثابت در هر دو حالت */
-const shimmerStyle = (
+const statItemBase =
+  "bg-slate-50/80 hover:bg-slate-100/70 border border-slate-300 rounded-xl p-3 flex items-center justify-between gap-3 transition-colors";
+
+const btnPrimary =
+  "w-full h-12 rounded-xl flex items-center justify-center gap-2.5 font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-500/25 disabled:opacity-60 disabled:pointer-events-none";
+
+const btnSecondary =
+  "w-full h-12 rounded-xl flex items-center justify-center gap-2.5 font-bold text-sm text-slate-700 bg-slate-100 hover:bg-slate-200/80 hover:border-slate-600 active:scale-[0.98] border border-slate-400";
+
+const btnAccent =
+  "w-full h-12 rounded-xl flex items-center justify-center gap-2.5 font-bold text-sm text-white bg-gradient-to-r from-amber-500 via-indigo-600 to-blue-600 hover:opacity-95 active:scale-[0.98] shadow-lg shadow-indigo-500/25";
+
+const shimmerEffect = (
   <style jsx global>{`
     @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
     }
     .skeleton-wave {
       background: linear-gradient(
         90deg,
-        #e2e8f0 0%,
-        #f1f5f9 40%,
+        #f1f5f9 0%,
+        #e2e8f0 40%,
         #f8fafc 50%,
-        #f1f5f9 60%,
-        #e2e8f0 100%
+        #e2e8f0 60%,
+        #f1f5f9 100%
       );
       background-size: 200% 100%;
       animation: shimmer 1.8s infinite linear;
@@ -73,32 +81,9 @@ const shimmerStyle = (
   `}</style>
 );
 
-function PriceDisplay({
-  oldPrice,
-  newPrice,
-}: {
-  oldPrice?: number;
-  newPrice?: number;
-}) {
-  if (!newPrice) return <span className="font-black text-slate-700">—</span>;
-
-  return (
-    <div className="flex flex-col items-end justify-center leading-tight">
-      {oldPrice && oldPrice > newPrice && (
-        <span className="text-rose-500 line-through decoration-rose-400 text-sm">
-          {oldPrice.toLocaleString("fa-IR")}
-        </span>
-      )}
-      <div className="flex items-center gap-1">
-        <span className="font-black text-slate-900">
-          {newPrice.toLocaleString("fa-IR")}
-        </span>
-        <span className="font-normal text-slate-500">تومان</span>
-      </div>
-    </div>
-  );
-}
-
+/* =========================
+    Subcomponents
+========================= */
 function StatusBanner({
   tone = "neutral",
   icon,
@@ -108,29 +93,28 @@ function StatusBanner({
   icon: React.ReactNode;
   text: string;
 }) {
-  const toneClass =
-    tone === "danger"
-      ? "bg-rose-50 border-rose-200 text-rose-700"
-      : tone === "success"
-      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-      : tone === "info"
-      ? "bg-blue-50 border-blue-200 text-blue-700"
-      : "bg-slate-50 border-slate-300 text-slate-600";
+  const toneStyles = {
+    danger: "bg-rose-50/90 border-rose-200/80 text-rose-700",
+    success: "bg-emerald-50/90 border-emerald-200/80 text-emerald-800",
+    info: "bg-blue-50/90 border-blue-200/80 text-blue-700",
+    neutral: "bg-slate-50 border-slate-200/80 text-slate-600",
+  }[tone];
 
   return (
-    <div className={`${statusBase} ${toneClass} text-[11px] sm:text-[13px]`}>
-      {icon}
-      <span>{text}</span>
+    <div
+      className={`rounded-xl px-3.5 py-3 flex items-center gap-2.5 font-medium border text-xs sm:text-[13px] leading-relaxed shadow-sm ${toneStyles}`}
+    >
+      <div className="shrink-0">{icon}</div>
+      <span className="flex-1">{text}</span>
     </div>
   );
 }
 
-/* ✅ اسکلتون StatusBanner موج‌دار */
 function StatusBannerSkeleton() {
   return (
-    <div className="rounded border border-slate-200 p-2.5 sm:p-3 flex items-center gap-2 bg-slate-50">
-      <div className="w-4 h-4 sm:w-5 sm:h-5 skeleton-wave rounded-full shrink-0" />
-      <div className="h-4 w-3/4 skeleton-wave rounded" />
+    <div className="rounded-xl border border-slate-300 p-3.5 flex items-center gap-2.5 bg-slate-50/50">
+      <div className="w-5 h-5 skeleton-wave rounded-full shrink-0" />
+      <div className="h-4 w-3/5 skeleton-wave rounded-md" />
     </div>
   );
 }
@@ -145,65 +129,59 @@ function StatBox({
   value?: string | number;
 }) {
   return (
-    <div className="bg-slate-50 rounded p-2.5 sm:p-3 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 text-slate-700">
-        <span className="text-blue-600">{icon}</span>
-        <span className="text-[11px] sm:text-[12px] font-medium">{title}</span>
+    <div className={statItemBase}>
+      <div className="flex items-center gap-2.5 text-slate-600">
+        <span className="text-blue-600 bg-blue-50 p-1.5 rounded-lg shrink-0">
+          {icon}
+        </span>
+        <span className="text-xs sm:text-sm font-medium text-slate-600">
+          {title}
+        </span>
       </div>
-      {value !== undefined ? (
-        <div className="font-bold text-slate-900 text-[12px] sm:text-[13px]">{value}</div>
-      ) : (
-        <div className="text-[11px] text-slate-400">—</div>
-      )}
+      <div className="font-bold text-slate-900 text-xs sm:text-sm">
+        {value !== undefined ? value : <span className="text-slate-300">—</span>}
+      </div>
     </div>
   );
 }
 
-/* ✅ اسکلتون دکمه‌های پایین موج‌دار */
 function ButtonsSkeleton({ isFreeResource }: { isFreeResource: boolean }) {
   return (
-    <div className="space-y-2 sm:space-y-3 w-full">
-      <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+    <div className="space-y-2.5 w-full">
+      <div className="w-full h-12 rounded-xl skeleton-wave" />
       {!isFreeResource && (
-        <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+        <div className="w-full h-12 rounded-xl skeleton-wave" />
       )}
     </div>
   );
 }
 
-/* ---------------------------------- */
-/* ✅ اسکلتون موج‌دار کامل - برای حالت !mounted */
-/* ---------------------------------- */
 function Skeleton() {
   return (
     <div className="lg:col-span-3 w-full">
-      {shimmerStyle}
-
-      <div className={`${cardBase} lg:sticky lg:top-24`}>
-        <div className="p-2.5 sm:p-3 pb-24 sm:pb-28 lg:pb-3 space-y-3 sm:space-y-4 lg:space-y-6">
-          {/* 1️⃣ StatusBanner اسکلتون */}
+      {shimmerEffect}
+      <div className={`${cardContainer} lg:sticky lg:top-24`}>
+        <div className="p-4 sm:p-5 space-y-4 lg:space-y-5 pb-28 lg:pb-5">
           <StatusBannerSkeleton />
 
-          {/* 2️⃣ سه StatBox اسکلتون */}
-          <div className="grid grid-cols-1 gap-2 sm:gap-3">
+          <div className="space-y-2.5">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-slate-50 rounded p-2.5 sm:p-3 flex items-center justify-between gap-3 border border-slate-100"
+                className="bg-slate-50/80 rounded-xl p-3 flex items-center justify-between border border-slate-300"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 skeleton-wave rounded shrink-0" />
-                  <div className="w-20 sm:w-24 h-3.5 skeleton-wave rounded" />
+                  <div className="w-7 h-7 skeleton-wave rounded-lg shrink-0" />
+                  <div className="w-24 h-4 skeleton-wave rounded" />
                 </div>
-                <div className="w-12 sm:w-16 h-4 skeleton-wave rounded" />
+                <div className="w-14 h-4 skeleton-wave rounded" />
               </div>
             ))}
           </div>
 
-          {/* 3️⃣ دکمه‌های پایین */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-300 p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
-            <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
-            <div className="w-full h-11 sm:h-12 rounded skeleton-wave" />
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-3.5 space-y-2.5 lg:relative lg:border-none lg:bg-transparent lg:p-0">
+            <div className="w-full h-12 rounded-xl skeleton-wave" />
+            <div className="w-full h-12 rounded-xl skeleton-wave" />
           </div>
         </div>
       </div>
@@ -212,7 +190,7 @@ function Skeleton() {
 }
 
 /* =========================
-   Page component
+    Main Component
 ========================= */
 export default function ResourceRight({ product }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -228,19 +206,7 @@ export default function ResourceRight({ product }: Props) {
   const productId = product?.id;
   const userId = user?.id;
 
-  // 🟢 کوئری ۱: بررسی خرید تکی این دوره
-  const {
-    data: hasPurchased = false,
-    isLoading: purchaseLoading,
-  } = useQuery({
-    queryKey: ["purchase-status", productId, userId],
-    queryFn: () => checkUserPurchaseStatus(productId!, userId!),
-    enabled: Boolean(isLoggedIn && userId && productId && !isFreeResource),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  });
-
-  // 🟢 کوئری ۲: بررسی وضعیت اشتراک کاربر
+  // بررسی وضعیت اشتراک فعال کاربر
   const {
     data: subscriptionData = { hasActiveSubscription: false, remainingDays: 0 },
     isLoading: subscriptionLoading,
@@ -253,79 +219,63 @@ export default function ResourceRight({ product }: Props) {
   });
 
   const { hasActiveSubscription, remainingDays } = subscriptionData;
-
-  // محاسبه لودینگ کلی
-  const isLoading =
-    authLoading || (!isFreeResource && (purchaseLoading || subscriptionLoading));
-
-  // داشتن دسترسی (خرید تکی یا اشتراک فعال)
-  const hasAccess = hasPurchased || hasActiveSubscription;
+  const isLoading = authLoading || (!isFreeResource && subscriptionLoading);
+  const hasAccess = hasActiveSubscription;
 
   const topStatus = useMemo(() => {
     if (!isProductActive) {
-      return isFreeResource
-        ? {
-            tone: "danger" as const,
-            icon: <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />,
-            text: "لینک دانلود غیرفعال شده است",
-          }
-        : {
-            tone: "danger" as const,
-            icon: <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />,
-            text: "فروش این محصول متوقف شده",
-          };
+      return {
+        tone: "danger" as const,
+        icon: <XCircle className="w-5 h-5 text-rose-600" />,
+        text: isFreeResource
+          ? "لینک دانلود موقتاً غیرفعال شده است"
+          : "دسترسی به این دوره موقتاً مسدود شده است",
+      };
     }
 
     if (isLoading) return null;
 
     if (isFreeResource) {
-      if (isLoggedIn)
+      if (isLoggedIn) {
         return {
           tone: "info" as const,
-          icon: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />,
-          text: "شما وارد حساب کاربری شده‌اید",
+          icon: <CheckCircle2 className="w-5 h-5 text-blue-600" />,
+          text: "شما وارد شده‌اید و فایل آماده دانلود است",
         };
+      }
       return {
         tone: "neutral" as const,
-        icon: <Info className="w-4 h-4 sm:w-5 sm:h-5" />,
-        text: "برای دانلود فایل، عضو سایت شوید",
+        icon: <Info className="w-5 h-5 text-slate-500" />,
+        text: "برای دانلود رایگان، لطفاً وارد حساب خود شوید",
       };
     }
 
     if (hasActiveSubscription) {
       return {
         tone: "success" as const,
-        icon: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />,
-        text: `اشتراک فعال دارید (${remainingDays} روز باقی‌مانده)`,
+        icon: <Crown className="w-5 h-5 text-emerald-600" />,
+        text: `دسترسی فعال با اشتراک ویژه (${remainingDays} روز باقی‌مانده)`,
       };
     }
 
-    if (hasPurchased) {
-      return {
-        tone: "success" as const,
-        icon: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />,
-        text: "شما دانشجوی این دوره هستید",
-      };
-    }
-
-    if (isLoggedIn)
+    if (isLoggedIn) {
       return {
         tone: "info" as const,
-        icon: <Info className="w-4 h-4 sm:w-5 sm:h-5" />,
-        text: "شما وارد حساب کاربری شده‌اید",
+        icon: <Info className="w-5 h-5 text-blue-600" />,
+        text: "دسترسی به آزمون‌ها نیازمند اشتراک ویژه است",
       };
+    }
 
     return {
       tone: "neutral" as const,
-      icon: <Info className="w-4 h-4 sm:w-5 sm:h-5" />,
-      text: "برای استفاده از دوره، حساب کاربری بسازید",
+      icon: <Info className="w-5 h-5 text-slate-500" />,
+      text: "جهت دسترسی به آزمون‌ها، وارد حساب خود شوید",
     };
   }, [
     isProductActive,
     isFreeResource,
     isLoading,
     isLoggedIn,
-    hasPurchased,
     hasActiveSubscription,
     remainingDays,
   ]);
@@ -343,7 +293,6 @@ export default function ResourceRight({ product }: Props) {
     }
   };
 
-  // ✅ حالت اول: قبل از mount → اسکلتون کامل
   if (!mounted) return <Skeleton />;
 
   return (
@@ -354,19 +303,17 @@ export default function ResourceRight({ product }: Props) {
         onSuccess={() => setIsAuthModalOpen(false)}
       />
 
-      {/* ✅ استایل موج‌دار برای حالت لودینگ بعد از mount */}
-      {shimmerStyle}
+      {shimmerEffect}
 
-      <div className="lg:col-span-3 w-full text-13 sm:text-14">
+      <div className="lg:col-span-3 w-full">
         <aside
-          className={`${cardBase} lg:sticky lg:top-24 ${
-            !isProductActive ? "opacity-70" : ""
+          className={`${cardContainer} lg:sticky lg:top-24 ${
+            !isProductActive ? "opacity-75" : ""
           }`}
-          aria-label="اطلاعات محصول"
+          aria-label="اطلاعات دوره و دسترسی اشتراکی"
         >
-          <div className="p-2.5 sm:p-3 pb-24 sm:pb-28 lg:pb-3 space-y-3 sm:space-y-4 lg:space-y-6">
-            
-            {/* ✅ وضعیت بالا: اسکلتون یا محتوای واقعی */}
+          <div className="p-2 pb-28 lg:pb-5 space-y-4 sm:space-y-5">
+            {/* ۱. بنر وضعیت دسترسی یا اخطار بالا */}
             {isLoading ? (
               <StatusBannerSkeleton />
             ) : topStatus ? (
@@ -377,112 +324,123 @@ export default function ResourceRight({ product }: Props) {
               />
             ) : null}
 
-            {/* ✅ بخش آمار/قیمت: همیشه نمایش داده میشه (از initialData میاد) */}
+            {/* ۲. وضعیت دسترسی دوره (رایگان / ویژه اعضای اشتراکی) */}
             {isFreeResource ? (
-              <div className={`${softCard} p-3 sm:p-4 flex items-center justify-between font-bold`}>
-                <div className="text-slate-500 text-[13px] sm:text-[14px]">قیمت محصول</div>
-                <span className="font-black text-emerald-600 text-[13px] sm:text-[14px]">رایگان</span>
+              <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-emerald-800 text-xs sm:text-sm font-semibold">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>نوع دسترسی</span>
+                </div>
+                <span className="font-black text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-lg text-xs sm:text-sm">
+                  کاملاً رایگان
+                </span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2 sm:gap-3">
-                <StatBox
-                  icon={<FileText className="w-4 h-4" />}
-                  value={product?._count?.questions || 0}
-                  title="تعداد سوالات"
-                />
-                <StatBox
-                  icon={<Clock className="w-4 h-4" />}
-                  value="۴ گزینه‌ای"
-                  title="نوع پرسش"
-                />
-                <StatBox
-                  icon={<Text className="w-4 h-4" />}
-                  value="دارد"
-                  title="پاسخ تشریحی"
-                />
+              <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-amber-900 text-xs sm:text-sm font-semibold">
+                  <Crown className="w-4 h-4 text-amber-600" />
+                  <span>نوع دسترسی</span>
+                </div>
+                <span className="font-bold text-amber-800 bg-amber-100/80 px-2.5 py-1 rounded-lg text-xs sm:text-sm">
+                  اشتراک ویژه (VIP)
+                </span>
               </div>
             )}
 
-            {/* ✅ بخش دکمه‌های ثابت پایین */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-300 p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
+            {/* ۳. مشخصات دوره / منبع */}
+            <div className="space-y-2">
+              <StatBox
+                icon={<FileText className="w-4 h-4" />}
+                value={
+                  product?._count?.questions !== undefined
+                    ? `${product._count.questions.toLocaleString("fa-IR")} تست`
+                    : "۰ تست"
+                }
+                title="تعداد سوالات"
+              />
+              <StatBox
+                icon={<Clock className="w-4 h-4" />}
+                value="۴ گزینه‌ای استاندارد"
+                title="نوع آزمون"
+              />
+              <StatBox
+                icon={<HelpCircle className="w-4 h-4" />}
+                value="تشریحی و کامل"
+                title="پاسخنامه"
+              />
+            </div>
+
+            {/* ۴. دکمه‌های اقدام اصلی (CTA) */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 p-3.5 sm:p-4 space-y-2.5 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] lg:relative lg:border-none lg:bg-transparent lg:p-0 lg:shadow-none">
               {!isProductActive ? (
-                <div className={`${btnBase} bg-rose-100 text-rose-700 border border-rose-200 text-[12px] sm:text-[13px]`}>
-                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                  {isFreeResource ? "دانلود متوقف شده" : "فروش این محصول متوقف شده"}
+                <div className="w-full h-12 rounded-xl flex items-center justify-center gap-2 font-bold text-sm bg-rose-50 text-rose-700 border border-rose-200">
+                  <XCircle className="w-5 h-5 text-rose-500" />
+                  {isFreeResource
+                    ? "دانلود در حال حاضر متوقف است"
+                    : "دسترسی به این محصول متوقف شده است"}
                 </div>
               ) : isLoading ? (
-                /* ✅ اسکلتون موج‌دار برای دکمه‌ها در حالت لودینگ */
                 <ButtonsSkeleton isFreeResource={isFreeResource} />
               ) : isFreeResource ? (
                 !isLoggedIn ? (
                   <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className={`${btnBase} bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 text-[12px] sm:text-[13px]`}
+                    className={btnPrimary}
                   >
-                    <DownloadCloud className="w-4 h-4 sm:w-5 sm:h-5" />
-                    دریافت فایل
+                    <DownloadCloud className="w-5 h-5" />
+                    ورود و دریافت رایگان فایل
                   </button>
                 ) : product?.downloadUrl ? (
                   <button
                     onClick={handleDownloadClick}
                     disabled={isDownloadLoading}
-                    className={`${btnBase} bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 text-[13px] sm:text-[14px]`}
+                    className={btnPrimary}
                     aria-busy={isDownloadLoading}
                   >
                     {isDownloadLoading ? (
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
-                      <DownloadCloud className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <DownloadCloud className="w-5 h-5" />
                     )}
-                    {isDownloadLoading ? "در حال آماده‌سازی..." : "دریافت فایل"}
+                    {isDownloadLoading
+                      ? "در حال آماده‌سازی فایل..."
+                      : "دانلود فایل ضمیمه"}
                   </button>
                 ) : (
-                  <div className={`${btnBase} bg-slate-100 text-slate-500 border border-slate-300 text-[13px] sm:text-[14px]`}>
-                    <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-                    پیوستی برای دانلود موجود نیست
+                  <div className="w-full h-12 rounded-xl flex items-center justify-center gap-2 font-medium text-sm bg-slate-100 text-slate-500 border border-slate-200">
+                    <Info className="w-5 h-5 text-slate-400" />
+                    پیوستی برای دانلود ثبت نشده است
                   </div>
                 )
               ) : hasAccess ? (
-                <>
+                <div className="space-y-2.5">
                   <Link
                     href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${btnBase} bg-blue-600 text-[13px] sm:text-14 hover:bg-blue-700 text-white`}
+                    className={btnPrimary}
                   >
-                    <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                    شروع / ادامه دوره
+                    <span>مشاهده سوالات و آزمون</span>
+                    <ArrowLeft className="w-4 h-4 mr-auto" />
                   </Link>
 
-                  <div className={`${btnBase} bg-emerald-100 text-[13px] sm:text-14 text-emerald-700 border border-emerald-200`}>
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    {hasActiveSubscription
-                      ? "دسترسی فعال با اشتراک"
-                      : "خریداری شده"}
+                  <div className="w-full h-11 rounded-xl flex items-center justify-center gap-2 font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    دسترسی فعال با اشتراک ویژه
                   </div>
-                </>
+                </div>
               ) : (
-                <>
-                  <Link
-                    href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${btnBase} border-2 text-[13px] sm:text-14 border-slate-300 bg-slate-100 hover:bg-slate-50 text-slate-800`}
-                  >
-                    <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    رایگان شروع کن
+                <div className="space-y-2.5">
+                  <Link href={`/plans`} className={btnAccent}>
+                    <Crown className="w-4 h-4 text-amber-300" />
+                    خرید اشتراک ویژه (دسترسی نامحدود)
                   </Link>
 
                   <Link
-                    href={`/plans`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${btnBase} bg-[#3b5998] text-[13px] sm:text-14 hover:bg-[#334e88] text-white`}
+                    href={`/resources/course/questions?pid=${product?.id}&pname=${product?.slug}`}
+                    className={btnSecondary}
                   >
-                    <ShoppingBasket className="w-4 h-4 sm:w-5 sm:h-5" />
-                    خرید اشتراک
+                    شروع پیش‌نمایش رایگان
                   </Link>
-                </>
+                </div>
               )}
             </div>
           </div>

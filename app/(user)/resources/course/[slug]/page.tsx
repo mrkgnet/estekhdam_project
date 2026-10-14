@@ -1,12 +1,11 @@
-
 import React, { Suspense } from 'react'
-import FetchDataQues from './FetchDataCou'
+import { fetchDataResource } from '@/actions/user/resources/course/fetchData/Actions'
+import ExamDetailsPage from './ShowDataCou'
 
-
- function ExamDetailsSkeleton() {
+// کامپوننت اسکلت لودینگ در زمان بارگذاری داده‌ها
+function ExamDetailsSkeleton() {
   return (
-    // Wrapper اصلی دقیقاً مطابق با ExamDetailsPage
-    <div className="min-h-screen bg-slate-50/50 py-6 sm:py-10 px-3 sm:px-6 lg:px-8 pb-28 lg:pb-10 font-sans" dir="rtl">
+    <div className="min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8 pb-28 lg:pb-10 font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
         {/* Breadcrumb Skeleton */}
@@ -45,7 +44,7 @@ import FetchDataQues from './FetchDataCou'
                 ))}
               </div>
 
-              {/* دکمه‌های دسکتاپ (فقط در سایز بزرگ نمایش داده میشن) */}
+              {/* دکمه‌های دسکتاپ */}
               <div className="hidden lg:flex flex-col space-y-3">
                 <div className="w-full h-14 bg-slate-200 rounded-2xl animate-pulse" />
                 <div className="w-full h-14 bg-slate-200 rounded-2xl animate-pulse" />
@@ -80,38 +79,38 @@ import FetchDataQues from './FetchDataCou'
 
             {/* باکس نظرات */}
             <div className="bg-white rounded-3xl sm:rounded-[2rem] shadow-sm border border-slate-200/60 p-4 sm:p-6 md:p-8 h-64 flex flex-col gap-4">
-               <div className="h-6 w-32 bg-slate-200 rounded-md animate-pulse" />
-               <div className="h-24 w-full bg-slate-100 rounded-xl animate-pulse mt-2" />
-               <div className="h-10 w-28 bg-slate-200 rounded-xl animate-pulse mr-auto" />
+              <div className="h-6 w-32 bg-slate-200 rounded-md animate-pulse" />
+              <div className="h-24 w-full bg-slate-100 rounded-xl animate-pulse mt-2" />
+              <div className="h-10 w-28 bg-slate-200 rounded-xl animate-pulse mr-auto" />
             </div>
 
           </div>
         </div>
       </div>
 
-      {/* ==================== نوار دکمه‌های چسبان مخصوص موبایل ==================== */}
+      {/* نوار دکمه‌های چسبان مخصوص موبایل */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 sm:p-4 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 flex gap-3">
-        {/* دکمه خرید */}
         <div className="flex-1 h-12 sm:h-14 bg-slate-200 rounded-xl sm:rounded-2xl animate-pulse" />
-        {/* دکمه شروع آزمون */}
         <div className="flex-[2] h-12 sm:h-14 bg-slate-200 rounded-xl sm:rounded-2xl animate-pulse" />
       </div>
-
     </div>
   );
 }
 
-
-
-
-export default async function page({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+// کامپوننت سروری واکشی اطلاعات
+async function CourseDataLoader({ slugValue }: { slugValue: string }) {
+  const fetchDataR = await fetchDataResource(slugValue);
   
+  return <ExamDetailsPage initialResponse={fetchDataR} slugValue={slugValue} />;
+}
+
+// صفحه اصلی
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+
   return (
-    <div>
-      {/* <Suspense fallback={<ExamDetailsSkeleton />}> */}
-        <FetchDataQues slugValue={slug} />
-      {/* </Suspense> */}
-    </div>
-  )
+    <Suspense fallback={<ExamDetailsSkeleton />}>
+      <CourseDataLoader slugValue={slug} />
+    </Suspense>
+  );
 }

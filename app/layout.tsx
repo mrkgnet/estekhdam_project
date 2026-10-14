@@ -20,7 +20,7 @@ import FooterSSR from "@/components/footer/FooterSSR";
 const iransans = localFont({
   src: [
     {
-      path: "./fonts/IRANSansWeb_Medium_FaNum.ttf",
+      path: "./fonts/YekanBakh-SemiBold.woff2",
       weight: "500",
       style: "normal",
     },
@@ -44,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${iransans.className} !bg-[#F8FAFC] dark:bg-slate-900 text-13 sm:text-13 md:text-13`} suppressHydrationWarning>
+      <body className={`${iransans.className} bg-white   dark:bg-slate-900 text-13 sm:text-13 md:text-13`} suppressHydrationWarning>
         <Providers>
           <NextTopLoader color="#ef4444" height={2} showSpinner={true} />
 
@@ -64,7 +64,7 @@ export default function RootLayout({
               <FetchDataTopBanner />
 
               <LoadingProvider>
-                <main className="bg-white flex-1 dark:bg-slate-900">{children}</main>
+                <main className=" flex-1 dark:bg-slate-900">{children}</main>
                
               </LoadingProvider>
               <FooterSSR />

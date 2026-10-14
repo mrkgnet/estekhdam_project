@@ -26,7 +26,7 @@ const BreakingNewsComponent = dynamic(() => import("@/components/user/home/break
 
 export default function page() {
     return (
-        <div className="min-h-screen  text-slate-800 bg-gray-100" dir="rtl">
+        <div className="min-h-screen  text-slate-800 " dir="rtl">
 
 
             {/* بخش هدر و ناوبری */}
