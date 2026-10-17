@@ -239,4 +239,17 @@ export const tabsDataAdminPanel = [
       },
     ],
   },
+  {
+    id: "16",
+    title: "مدیریت رفرنس آزمون‌ها ",
+    icon: CreditCard,
+    url: "/adminp/reference",
+    subItems: [
+      {
+        id: 161,
+        title: "مدیریت برندهای استخدامی",
+        url: "/adminp/reference",
+      },
+    ],
+  },
 ];

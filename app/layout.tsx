@@ -21,7 +21,7 @@ const iransans = localFont({
   src: [
     {
       path: "./fonts/YekanBakh-SemiBold.woff2",
-      weight: "500",
+      weight: "800",
       style: "normal",
     },
   ],
