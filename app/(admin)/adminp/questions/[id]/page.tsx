@@ -4,53 +4,54 @@ import React, { Suspense } from "react";
 import ExamQuestionsPage from "./ShowData";
 import DotsLoader from "@/components/ui/Loading/DotsLoader";
 
-import { fetchDataQuestion } from "@/actions/admin/questions/Actions";
+import {
+  fetchDataQuestion,
+  fetchQuestionReferencesAction,
+} from "@/actions/admin/questions/Actions";
+
 import { fetchDataChapterAction } from "@/actions/admin/chapter/Actionst";
 import { fetchCategoryChapter } from "@/actions/admin/category_chapter/fetch/Action";
 
-// ============================================
-// Types
-// ============================================
-
 interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
-
+  params: Promise<{ id: string }>;
   searchParams: Promise<{
     page?: string;
     search?: string;
+    reference?: string;
   }>;
 }
 
-interface QuestionsDataLoaderProps {
+interface LoaderProps {
   id: string;
   page: number;
   search?: string;
+  referenceId?: string;
 }
-
-// ============================================
-// Server Data Loader
-// ============================================
 
 async function QuestionsDataLoader({
   id,
   page,
   search,
-}: QuestionsDataLoaderProps) {
-  // دریافت هم‌زمان اطلاعات برای کاهش زمان بارگذاری
+  referenceId,
+}: LoaderProps) {
   const [
     questionsData,
     chapters,
     categoryChaptersResult,
+    referencesResult,
   ] = await Promise.all([
-    fetchDataQuestion(id, page, 10, search),
+    fetchDataQuestion(id, page, 10, search, referenceId),
     fetchDataChapterAction(id),
     fetchCategoryChapter(),
+    fetchQuestionReferencesAction(),
   ]);
 
   const categoryChapters = categoryChaptersResult.success
     ? categoryChaptersResult.data
+    : [];
+
+  const references = referencesResult.success
+    ? referencesResult.data
     : [];
 
   return (
@@ -59,24 +60,18 @@ async function QuestionsDataLoader({
       questionsData={questionsData}
       chapters={chapters}
       categoryChapters={categoryChapters}
+      references={references}
     />
   );
 }
-
-// ============================================
-// Main Page
-// ============================================
 
 export default async function Page({
   params,
   searchParams,
 }: PageProps) {
-  const [{ id }, { page, search }] = await Promise.all([
-    params,
-    searchParams,
-  ]);
+  const [{ id }, { page, search, reference }] =
+    await Promise.all([params, searchParams]);
 
-  // اعتبارسنجی شماره صفحه
   const parsedPage = Number(page);
 
   const currentPage =
@@ -87,13 +82,14 @@ export default async function Page({
   return (
     <main className="min-h-screen">
       <Suspense
-        key={`${id}-${currentPage}-${search ?? ""}`}
+        key={`${id}-${currentPage}-${search ?? ""}-${reference ?? ""}`}
         fallback={<DotsLoader />}
       >
         <QuestionsDataLoader
           id={id}
           page={currentPage}
           search={search}
+          referenceId={reference}
         />
       </Suspense>
     </main>

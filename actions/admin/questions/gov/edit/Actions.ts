@@ -1,103 +1,351 @@
+
 "use server";
 
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { QuestionType } from "@prisma/client";
 
-export async function editGovQuestion(prevState: any, formData: FormData) {
+// ============================================
+// Helpers
+// ============================================
+
+function getFormString(
+  formData: FormData,
+  name: string
+): string {
+  const value = formData.get(name);
+
+  return typeof value === "string"
+    ? value.trim()
+    : "";
+}
+
+// ============================================
+// Edit Question Action
+// ============================================
+
+export async function editGovQuestion(
+  prevState: any,
+  formData: FormData
+) {
   try {
+    // ========================================
+    // Authorization
+    // ========================================
+
     const currentUser = await infoCurentUser();
+
     if (!currentUser || currentUser.role !== "admin") {
-      return { success: false, message: "دسترسی غیرمجاز" };
+      return {
+        success: false,
+        message: "دسترسی غیرمجاز.",
+      };
     }
 
-    // دریافت داده‌ها از فرم ویرایش (پشتیبانی از هر دو نام id یا questionId)
-    const id = (formData.get("id") || formData.get("questionId")) as string;
-    const productId = formData.get("productId") as string;
-    const chapterIdEdit = formData.get("chapterId") as string;
-    const validChapterIdEdit =
-      chapterIdEdit && chapterIdEdit.trim() !== "" ? chapterIdEdit : null;
-    const text = formData.get("questionText") as string;
+    // ========================================
+    // Basic Fields
+    // ========================================
 
-    // دریافت و تبدیل categoryChapterId به Int
-    const categoryChapterId = formData.get("categoryChapterId") as string;
-    const validCategoryChapterId =
-      categoryChapterId && categoryChapterId.trim() !== ""
-        ? parseInt(categoryChapterId, 10)
-        : null;
+    const id =
+      getFormString(formData, "id") ||
+      getFormString(formData, "questionId");
 
-    // دریافت نوع سوال از فرم ویرایش
-    const questionTypeEdit = formData.get("questionType") as "SARASARI" | "TALIFI";
+    const productId = getFormString(
+      formData,
+      "productId"
+    );
 
-    // دریافت گزینه‌ها
-    const option_0 = formData.get("option_0") as string;
-    const option_1 = formData.get("option_1") as string;
-    const option_2 = formData.get("option_2") as string;
-    const option_3 = formData.get("option_3") as string;
+    const questionText = getFormString(
+      formData,
+      "questionText"
+    );
 
-    const oldCorrectAnswer = parseInt(formData.get("correctAnswer") as string, 10);
+    const chapterId =
+      getFormString(formData, "chapterId") || null;
+
+    const rawCategoryChapterId = getFormString(
+      formData,
+      "categoryChapterId"
+    );
+
+    const categoryChapterId = rawCategoryChapterId
+      ? Number(rawCategoryChapterId)
+      : null;
+
+    // ========================================
+    // Reference Field
+    // ========================================
+
+    const referenceFieldExists =
+      formData.has("referenceId");
+
+    const rawReferenceId = getFormString(
+      formData,
+      "referenceId"
+    );
+
+    const selectedReferenceId =
+      rawReferenceId || null;
+
+    // ========================================
+    // Question Type
+    // ========================================
+
+    const rawQuestionType = getFormString(
+      formData,
+      "questionType"
+    );
+
+    const questionType =
+      rawQuestionType || QuestionType.TALIFI;
+
+    // ========================================
+    // Options
+    // ========================================
+
+    const options = [
+      getFormString(formData, "option_0"),
+      getFormString(formData, "option_1"),
+      getFormString(formData, "option_2"),
+      getFormString(formData, "option_3"),
+    ];
+
+    const rawCorrectAnswer = getFormString(
+      formData,
+      "correctAnswer"
+    );
+
+    const oldCorrectAnswer = Number(
+      rawCorrectAnswer
+    );
+
+    // فرم فعلی از اندیس صفر استفاده می‌کند
     const correctAnswer = oldCorrectAnswer + 1;
 
-    // دریافت توضیحات، نکات کنکوری و درس‌نامه
-    const explanations = formData.get("answerText") as string;
-    const examPoints = formData.get("examPoints") as string;
-    const studyGuide = formData.get("studyGuide") as string; // ✅ دریافت فیلد درس‌نامه
+    // ========================================
+    // Additional Fields
+    // ========================================
 
-    // اعتبارسنجی اولیه
-    if (!id || !text || isNaN(correctAnswer)) {
-      return { success: false, message: "اطلاعات ناقص است." };
+    const answerText = getFormString(
+      formData,
+      "answerText"
+    );
+
+    const examPoints = getFormString(
+      formData,
+      "examPoints"
+    );
+
+    const studyGuide = getFormString(
+      formData,
+      "studyGuide"
+    );
+
+    // ========================================
+    // Validation
+    // ========================================
+
+    if (!id || !productId || !questionText) {
+      return {
+        success: false,
+        message: "اطلاعات اصلی سؤال ناقص است.",
+      };
     }
 
-    const options = [option_0, option_1, option_2, option_3];
+    if (
+      rawCorrectAnswer === "" ||
+      !Number.isInteger(oldCorrectAnswer) ||
+      oldCorrectAnswer < 0 ||
+      oldCorrectAnswer >= options.length
+    ) {
+      return {
+        success: false,
+        message: "پاسخ صحیح سؤال نامعتبر است.",
+      };
+    }
 
-    // دریافت اطلاعات فعلی سوال برای بررسی تغییر فصل
-    const existingQuestion = await db.question.findUnique({
-      where: { id: id },
-    });
+    if (
+      categoryChapterId !== null &&
+      (!Number.isInteger(categoryChapterId) ||
+        categoryChapterId <= 0)
+    ) {
+      return {
+        success: false,
+        message: "دسته‌بندی انتخاب‌شده نامعتبر است.",
+      };
+    }
+
+    if (
+      questionType !== QuestionType.TALIFI &&
+      questionType !== QuestionType.SARASARI
+    ) {
+      return {
+        success: false,
+        message: "نوع سؤال نامعتبر است.",
+      };
+    }
+
+    // ========================================
+    // Existing Question
+    // ========================================
+
+    const existingQuestion =
+      await db.question.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          productId: true,
+          chapterId: true,
+          chapterOrder: true,
+          referenceId: true,
+        },
+      });
 
     if (!existingQuestion) {
-      return { success: false, message: "سوال یافت نشد." };
+      return {
+        success: false,
+        message: "سؤال موردنظر یافت نشد.",
+      };
     }
 
-    // محاسبه مجدد شماره سوال در صورت تغییر فصل
-    let finalChapterOrder = existingQuestion.chapterOrder;
+    if (existingQuestion.productId !== productId) {
+      return {
+        success: false,
+        message: "شناسه محصول با سؤال مطابقت ندارد.",
+      };
+    }
 
-    if (existingQuestion.chapterId !== validChapterIdEdit) {
-      if (validChapterIdEdit) {
-        // اگر به فصل جدیدی منتقل شده، برود به عنوان سوال آخر آن فصل
-        const countInNewChapter = await db.question.count({
-          where: { chapterId: validChapterIdEdit },
+    // ========================================
+    // Reference Validation
+    // ========================================
+
+    // سازگاری با فرم‌های قدیمی:
+    // اگر referenceId ارسال نشده باشد،
+    // رفرنس قبلی سؤال بدون تغییر باقی می‌ماند.
+    const finalReferenceId = referenceFieldExists
+      ? selectedReferenceId
+      : existingQuestion.referenceId;
+
+    if (finalReferenceId) {
+      const reference =
+        await db.questionReference.findUnique({
+          where: {
+            id: finalReferenceId,
+          },
+          select: {
+            id: true,
+            isActive: true,
+          },
         });
+
+      if (!reference) {
+        return {
+          success: false,
+          message: "رفرنس انتخاب‌شده وجود ندارد.",
+        };
+      }
+
+      if (
+        !reference.isActive &&
+        existingQuestion.referenceId !== finalReferenceId
+      ) {
+        return {
+          success: false,
+          message:
+            "امکان انتخاب رفرنس غیرفعال وجود ندارد.",
+        };
+      }
+    }
+
+    // ========================================
+    // Chapter Order
+    // ========================================
+
+    let finalChapterOrder =
+      existingQuestion.chapterOrder;
+
+    if (existingQuestion.chapterId !== chapterId) {
+      if (chapterId) {
+        const countInNewChapter =
+          await db.question.count({
+            where: {
+              chapterId,
+              productId,
+            },
+          });
+
         finalChapterOrder = countInNewChapter + 1;
       } else {
-        // اگر کلا از فصل خارج شده (بدون فصل شده)
         finalChapterOrder = null;
       }
     }
 
-    // آپدیت در دیتابیس با فیلد studyGuide
-    await db.question.update({
-      where: { id: id },
+    // ========================================
+    // Update Database
+    // ========================================
+
+    const updatedQuestion = await db.question.update({
+      where: {
+        id,
+      },
       data: {
-        questionText: text,
-        chapterId: validChapterIdEdit,
-        categoryChapterId: validCategoryChapterId,
+        questionText,
+
+        chapterId,
+        categoryChapterId,
         chapterOrder: finalChapterOrder,
-        questionType: questionTypeEdit,
-        options: options,
-        correctAnswer: correctAnswer,
-        answerText: explanations,
-        examPoints: examPoints,
-        studyGuide: studyGuide, // ✅ ذخیره ویرایش درس‌نامه
+
+        questionType: questionType as QuestionType,
+
+        options,
+        correctAnswer,
+
+        answerText,
+        examPoints,
+        studyGuide,
+
+        // ذخیره رفرنس انتخاب‌شده
+        referenceId: finalReferenceId,
+      },
+
+      select: {
+        id: true,
+        productId: true,
+        referenceId: true,
+
+        reference: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            isActive: true,
+          },
+        },
       },
     });
 
-    // بروزرسانی کش صفحه برای نمایش تغییرات
-    revalidatePath(`/adminp/questions/${productId}`);
+    // ========================================
+    // Revalidation
+    // ========================================
 
-    return { success: true, message: "سوال با موفقیت ویرایش شد." };
+    revalidatePath(
+      `/adminp/questions/${updatedQuestion.productId}`
+    );
+
+    return {
+      success: true,
+      message: "سؤال با موفقیت ویرایش شد.",
+      data: updatedQuestion,
+    };
   } catch (error) {
     console.error("Error updating question:", error);
-    return { success: false, message: "خطا در ویرایش سوال." };
+
+    return {
+      success: false,
+      message: "خطا در ویرایش سؤال.",
+    };
   }
 }
