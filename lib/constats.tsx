@@ -247,7 +247,7 @@ export const tabsDataAdminPanel = [
     subItems: [
       {
         id: 161,
-        title: "مدیریت برندهای استخدامی",
+        title: "رفرنس‌های استخدامی",
         url: "/adminp/reference",
       },
     ],

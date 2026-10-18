@@ -1,15 +1,23 @@
+
 import React, { Suspense } from "react";
+
 import ReferencePage from "./ShowData";
+import type { FormattedReferenceItem } from "./ShowData";
+
 import { getQuestionReferences } from "@/actions/admin/reference_question/Actions";
 
 export const dynamic = "force-dynamic";
 
-// کامپوننت سروری واکشی دیتا جهت استریم با ساسپنس
-async function ReferenceDataLoader() {
-  const { references } = await getQuestionReferences(1, 100);
+// ============================================
+// Server Data Loader
+// ============================================
 
-  // تبدیل تاریخ به رشته جهت جلوگیری از ارور Serialization
-  const formattedReferences = references.map((item) => ({
+async function ReferenceDataLoader() {
+  const result = await getQuestionReferences(1, 100);
+
+  const formattedReferences: FormattedReferenceItem[] = (
+    result.references || []
+  ).map((item) => ({
     id: item.id,
     title: item.title,
     slug: item.slug,
@@ -20,46 +28,107 @@ async function ReferenceDataLoader() {
     }).format(new Date(item.createdAt)),
   }));
 
-  return <ReferencePage initialData={formattedReferences} />;
+  return (
+    <ReferencePage
+      initialData={formattedReferences}
+      initialError={
+        result.error
+          ? "دریافت اطلاعات با مشکل مواجه شد. صفحه را مجدداً بارگذاری کنید."
+          : null
+      }
+    />
+  );
 }
 
-// اسکلتون استریمینگ اولیه صفحه
+// ============================================
+// Initial Loading Skeleton
+// ============================================
+
+function SkeletonBlock({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <div
+      className={`animate-pulse rounded-lg bg-slate-200 ${className}`}
+    />
+  );
+}
+
 function ReferenceTableSkeleton() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 min-h-screen text-slate-800 animate-pulse" dir="rtl">
-      {/* هدر اسکلتون */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
-        <div className="space-y-2">
-          <div className="h-7 w-48 bg-slate-200 rounded-md" />
-          <div className="h-4 w-72 bg-slate-200 rounded-md" />
+    <div
+      dir="rtl"
+      role="status"
+      aria-label="در حال بارگذاری رفرنس‌ها"
+      className="mx-auto min-h-screen max-w-[1600px] p-4 text-slate-800 sm:p-6 lg:p-8"
+    >
+      {/* Header */}
+      <div className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-3">
+          <SkeletonBlock className="h-7 w-52" />
+          <SkeletonBlock className="h-4 w-72 max-w-full" />
         </div>
-        <div className="h-10 w-36 bg-slate-200 rounded-lg" />
+
+        <SkeletonBlock className="h-11 w-40" />
       </div>
 
-      {/* جدول اسکلتون */}
-      <div className="mt-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div className="h-12 bg-slate-100 border-b border-slate-200" />
-        <div className="divide-y divide-slate-100">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-14 bg-white flex items-center px-4 gap-4">
-              <div className="h-4 w-8 bg-slate-200 rounded" />
-              <div className="h-4 w-44 bg-slate-200 rounded" />
-              <div className="h-4 w-32 bg-slate-200 rounded" />
-              <div className="h-6 w-14 bg-slate-200 rounded-full mx-auto" />
-              <div className="h-6 w-16 bg-slate-200 rounded-full mx-auto" />
-              <div className="h-4 w-20 bg-slate-200 rounded mx-auto" />
-              <div className="h-8 w-24 bg-slate-200 rounded mx-auto" />
-            </div>
-          ))}
+      {/* Statistics */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="rounded-2xl border border-slate-200 bg-white p-5"
+          >
+            <SkeletonBlock className="mb-4 h-4 w-24" />
+            <SkeletonBlock className="h-8 w-16" />
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-wrap gap-3 border-b border-slate-200 p-4">
+          <SkeletonBlock className="h-10 w-full max-w-sm" />
+          <SkeletonBlock className="h-10 w-36" />
+        </div>
+
+        <div className="overflow-hidden">
+          <div className="h-12 bg-slate-50" />
+
+          <div className="divide-y divide-slate-100">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div
+                key={index}
+                className="flex h-[68px] items-center gap-6 px-5"
+              >
+                <SkeletonBlock className="h-4 w-8 shrink-0" />
+                <SkeletonBlock className="h-4 w-44 shrink-0" />
+                <SkeletonBlock className="h-4 w-28 shrink-0" />
+                <SkeletonBlock className="h-6 w-16 shrink-0" />
+                <SkeletonBlock className="h-6 w-16 shrink-0" />
+                <SkeletonBlock className="h-4 w-24 shrink-0" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <span className="sr-only">
+        لطفاً تا بارگذاری اطلاعات صبر کنید.
+      </span>
     </div>
   );
 }
 
+// ============================================
+// Main Page
+// ============================================
+
 export default function Page() {
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50/70">
       <Suspense fallback={<ReferenceTableSkeleton />}>
         <ReferenceDataLoader />
       </Suspense>
