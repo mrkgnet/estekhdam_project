@@ -1,8 +1,15 @@
 
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { useRouter } from "next/navigation";
+
 import {
   CheckCircle2,
   Library,
@@ -12,6 +19,10 @@ import {
 } from "lucide-react";
 
 import { updateQuestionReferenceIdAction } from "@/actions/admin/questions/Actions";
+
+// ============================================
+// Types
+// ============================================
 
 export interface QuestionReferenceOption {
   id: string;
@@ -37,6 +48,10 @@ interface ReferenceModalProps {
   ) => void;
 }
 
+// ============================================
+// Helpers
+// ============================================
+
 function normalizeSearchText(value: string): string {
   return value
     .normalize("NFC")
@@ -47,6 +62,10 @@ function normalizeSearchText(value: string): string {
     .toLocaleLowerCase("fa-IR");
 }
 
+// ============================================
+// Question Reference Modal
+// ============================================
+
 export default function QuestionReferenceModal({
   question,
   references,
@@ -55,15 +74,33 @@ export default function QuestionReferenceModal({
 }: ReferenceModalProps) {
   const router = useRouter();
 
-  const [selectedReference, setSelectedReference] = useState(
-    question.referenceId || ""
-  );
-  const [referenceSearch, setReferenceSearch] = useState("");
+  // ==========================================
+  // States
+  // ==========================================
+
+  const [selectedReference, setSelectedReference] =
+    useState(question.referenceId || "");
+
+  const [referenceSearch, setReferenceSearch] =
+    useState("");
+
   const [isSaving, setIsSaving] = useState(false);
+
   const [error, setError] = useState("");
 
+  // ==========================================
+  // Refs
+  // ==========================================
+
   const searchInputRef = useRef<HTMLInputElement>(null);
+
   const savingRef = useRef(false);
+
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // ==========================================
   // Filter References
@@ -72,7 +109,9 @@ export default function QuestionReferenceModal({
   const filteredReferences = useMemo(() => {
     const query = normalizeSearchText(referenceSearch);
 
-    if (!query) return references;
+    if (!query) {
+      return references;
+    }
 
     return references.filter((reference) => {
       const title = normalizeSearchText(reference.title);
@@ -81,6 +120,10 @@ export default function QuestionReferenceModal({
       return title.includes(query) || slug.includes(query);
     });
   }, [references, referenceSearch]);
+
+  // ==========================================
+  // Selected Reference
+  // ==========================================
 
   const selectedReferenceItem = useMemo(() => {
     return (
@@ -95,31 +138,38 @@ export default function QuestionReferenceModal({
 
   // ==========================================
   // Accessibility
+  //
+  // توجه:
+  // این کامپوننت دیگر body.overflow را
+  // تغییر نمی‌دهد.
+  // مدیریت اسکرول فقط در ShowData است.
   // ==========================================
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     searchInputRef.current?.focus();
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !savingRef.current) {
+      if (
+        event.key === "Escape" &&
+        !savingRef.current
+      ) {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener(
         "keydown",
         handleEscape
       );
     };
-  }, [onClose]);
+  }, []);
 
   // ==========================================
   // Select Reference
@@ -130,6 +180,16 @@ export default function QuestionReferenceModal({
 
     setSelectedReference(referenceId);
     setError("");
+  };
+
+  // ==========================================
+  // Close Modal
+  // ==========================================
+
+  const handleClose = () => {
+    if (savingRef.current) return;
+
+    onClose();
   };
 
   // ==========================================
@@ -145,14 +205,16 @@ export default function QuestionReferenceModal({
     }
 
     savingRef.current = true;
+
     setIsSaving(true);
     setError("");
 
     try {
-      const result = await updateQuestionReferenceIdAction(
-        question.id,
-        selectedReference || null
-      );
+      const result =
+        await updateQuestionReferenceIdAction(
+          question.id,
+          selectedReference || null
+        );
 
       if (!result.success || !result.data) {
         setError(
@@ -161,24 +223,29 @@ export default function QuestionReferenceModal({
         return;
       }
 
-      const savedReferenceId = result.data.referenceId;
+      const savedReferenceId =
+        result.data.referenceId;
 
       const reference =
         references.find(
           (item) => item.id === savedReferenceId
         ) || null;
 
+      // بروزرسانی اطلاعات جدول
       onSuccess(
         question.id,
         savedReferenceId,
         reference
       );
 
+      // بستن مدال
       onClose();
+
+      // بروزرسانی اطلاعات سرور
       router.refresh();
     } catch (error) {
       console.error(
-        "Save question reference error:",
+        "Save Question Reference Error:",
         error
       );
 
@@ -192,7 +259,7 @@ export default function QuestionReferenceModal({
   };
 
   // ==========================================
-  // UI
+  // Render
   // ==========================================
 
   return (
@@ -200,11 +267,8 @@ export default function QuestionReferenceModal({
       dir="rtl"
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-2 backdrop-blur-[2px] sm:p-4"
       onMouseDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          !savingRef.current
-        ) {
-          onClose();
+        if (event.target === event.currentTarget) {
+          handleClose();
         }
       }}
     >
@@ -215,7 +279,9 @@ export default function QuestionReferenceModal({
         aria-describedby="reference-dialog-description"
         className="flex h-[min(520px,85dvh)] w-full max-w-[540px] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
       >
+        {/* ==================================== */}
         {/* Header */}
+        {/* ==================================== */}
 
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-3 py-2.5 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
@@ -242,19 +308,21 @@ export default function QuestionReferenceModal({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSaving}
             aria-label="بستن پنجره"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-50"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 disabled:opacity-50"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
+        {/* ==================================== */}
         {/* Body */}
+        {/* ==================================== */}
 
         <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden px-3 py-3 sm:px-4">
-          {/* Question Information */}
+          {/* Question Info */}
 
           <div className="flex shrink-0 items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
             <span className="text-[10px] text-slate-500">
@@ -268,7 +336,9 @@ export default function QuestionReferenceModal({
             </span>
           </div>
 
-          {/* Reference Search */}
+          {/* ================================== */}
+          {/* Search References */}
+          {/* ================================== */}
 
           <div className="flex shrink-0 flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2">
@@ -280,7 +350,10 @@ export default function QuestionReferenceModal({
               </label>
 
               <span className="text-[10px] text-slate-400">
-                {filteredReferences.length.toLocaleString("fa-IR")} نتیجه
+                {filteredReferences.length.toLocaleString(
+                  "fa-IR"
+                )}{" "}
+                نتیجه
               </span>
             </div>
 
@@ -294,9 +367,9 @@ export default function QuestionReferenceModal({
                 autoComplete="off"
                 value={referenceSearch}
                 disabled={isSaving}
-                onChange={(event) =>
-                  setReferenceSearch(event.target.value)
-                }
+                onChange={(event) => {
+                  setReferenceSearch(event.target.value);
+                }}
                 placeholder="جست‌وجوی عنوان یا اسلاگ..."
                 className="h-9 w-full rounded-lg border border-slate-300 bg-white pr-8 pl-8 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:opacity-60"
               />
@@ -318,7 +391,9 @@ export default function QuestionReferenceModal({
             </div>
           </div>
 
+          {/* ================================== */}
           {/* Scrollable Reference List */}
+          {/* ================================== */}
 
           <div
             role="group"
@@ -329,6 +404,8 @@ export default function QuestionReferenceModal({
               scrollbarColor: "#cbd5e1 transparent",
             }}
           >
+            {/* No Reference */}
+
             {!referenceSearch.trim() && (
               <button
                 type="button"
@@ -350,6 +427,8 @@ export default function QuestionReferenceModal({
                 )}
               </button>
             )}
+
+            {/* Reference Grid */}
 
             {filteredReferences.length > 0 ? (
               <div className="grid grid-cols-1 gap-1.5 p-2 sm:grid-cols-2">
@@ -434,7 +513,7 @@ export default function QuestionReferenceModal({
                       setReferenceSearch("");
                       searchInputRef.current?.focus();
                     }}
-                    className="mt-2 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700"
+                    className="mt-2 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
                   >
                     نمایش تمام رفرنس‌ها
                   </button>
@@ -443,7 +522,9 @@ export default function QuestionReferenceModal({
             )}
           </div>
 
+          {/* ================================== */}
           {/* Selected Reference */}
+          {/* ================================== */}
 
           <div className="flex shrink-0 items-center justify-between gap-2 rounded-lg border border-indigo-100 bg-indigo-50/60 px-3 py-2">
             <span className="shrink-0 text-[10px] text-indigo-500">
@@ -455,6 +536,8 @@ export default function QuestionReferenceModal({
             </span>
           </div>
 
+          {/* Error */}
+
           {error && (
             <div
               role="alert"
@@ -465,13 +548,15 @@ export default function QuestionReferenceModal({
           )}
         </div>
 
+        {/* ==================================== */}
         {/* Footer */}
+        {/* ==================================== */}
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/50 px-3 py-2.5 sm:px-4">
           <button
             type="button"
             disabled={isSaving}
-            onClick={onClose}
+            onClick={handleClose}
             className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
           >
             انصراف
