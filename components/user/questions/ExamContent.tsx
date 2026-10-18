@@ -819,7 +819,7 @@ export default function ExamContent({
                       <div className="inline-flex max-w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 shadow-sm transition-colors dark:border-blue-800/60 dark:bg-blue-950/30">
                         <BookOpen className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
 
-                        <span className="shrink-0 text-[11px] font-medium text-slate-800 dark:text-slate-400">
+                        <span className="shrink-0 text-[13px] font-medium text-slate-800 dark:text-slate-400">
                           مرجع سؤال:
                         </span>
 
@@ -828,7 +828,7 @@ export default function ExamContent({
                         <span
                           dir="ltr"
                           title={q.referenceSlug}
-                          className="min-w-0 break-all text-left text-xs font-bold tracking-wide text-orange-900 dark:text-blue-300"
+                          className="min-w-0 break-all text-left text-sm font-bold tracking-wide text-orange-900 dark:text-blue-300"
                         >
                           {q.referenceSlug}
                         </span>
