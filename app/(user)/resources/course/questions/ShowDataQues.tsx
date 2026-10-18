@@ -1,11 +1,25 @@
+
 "use client";
 
-import React, { useState, useTransition, useEffect, useRef } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import React, {
+  useState,
+  useTransition,
+  useEffect,
+  useRef,
+} from "react";
+
+import {
+  useRouter,
+  usePathname,
+  useSearchParams,
+} from "next/navigation";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+
 import { fetchDataQues } from "@/actions/user/resources/course/DataQues/Actions";
 import { useAuth } from "@/context/AuthContext";
+
 import AuthModal from "@/components/modals/AuthModal";
 import Breadcrumb from "@/components/Breadcrumb/Breadcrumb";
 import ExamSidebar from "@/components/user/questions/ExamSidebar";
@@ -22,6 +36,11 @@ type DBQuestion = {
   examPoints: string;
   questionCode: string;
   studyGuide?: string;
+
+  // رفرنس دریافت‌شده از سرور
+  reference?: {
+    slug: string;
+  } | null;
 };
 
 type Chapter = {
@@ -33,12 +52,18 @@ type Chapter = {
 type FormattedQuestion = {
   id: string;
   text: string;
-  choices: { key: ChoiceKey; text: string }[];
+  choices: {
+    key: ChoiceKey;
+    text: string;
+  }[];
   correct: ChoiceKey;
   explanation: string;
   examPoints: string;
   code: string;
   studyGuide?: string;
+
+  // اسلاگ رفرنس همین سؤال
+  referenceSlug?: string | null;
 } | null;
 
 type Props = {
@@ -61,51 +86,89 @@ export default function ExamPage({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const commentsRef = useRef<HTMLDivElement | null>(null);
-  const [fontSize, setFontSize] = useState<number>(14);
 
+  const commentsRef = useRef<HTMLDivElement | null>(null);
+
+  const [fontSize, setFontSize] = useState<number>(14);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const { data: response, isFetching } = useQuery({
-    queryKey: ['exam-question', courseId, currentStep, chapterId, questionType],
-    queryFn: async () => await fetchDataQues(courseId, currentStep, chapterId, questionType),
+    queryKey: [
+      "exam-question",
+      courseId,
+      currentStep,
+      chapterId,
+      questionType,
+    ],
+
+    queryFn: async () =>
+      await fetchDataQues(
+        courseId,
+        currentStep,
+        chapterId,
+        questionType
+      ),
+
     initialData: initialResponse,
     staleTime: 1000 * 60 * 2,
   });
 
   const dbQuestion = response?.data as DBQuestion;
+
   const totalCount = response?.totalCount || 0;
-  const hasActiveSubscription = Boolean(response?.hasActiveSubscription ?? response?.hasPurchased);
+
+  const hasActiveSubscription = Boolean(
+    response?.hasActiveSubscription ?? response?.hasPurchased
+  );
+
   const chapters = (response?.chapters || []) as Chapter[];
 
   const currentChapterId = searchParams.get("chapterId");
   const currentQuestionType = searchParams.get("questionType");
 
   const [isPendingRoute, startTransition] = useTransition();
-  const [selected, setSelected] = useState<ChoiceKey | null>(null);
 
-  const [isJumpModalOpen, setIsJumpModalOpen] = useState(false);
+  const [selected, setSelected] =
+    useState<ChoiceKey | null>(null);
+
+  const [isJumpModalOpen, setIsJumpModalOpen] =
+    useState(false);
+
   const [jumpTarget, setJumpTarget] = useState("");
 
   const { isLoggedIn, isLoading } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [targetStep, setTargetStep] = useState<number | null>(null);
+
+  const [isAuthModalOpen, setIsAuthModalOpen] =
+    useState(false);
+
+  const [targetStep, setTargetStep] =
+    useState<number | null>(null);
 
   useEffect(() => {
     if (response?.requiresSubscription) {
       router.replace("/plans");
-    } else if (response?.requiresAuth && !isLoggedIn && !isLoading) {
+    } else if (
+      response?.requiresAuth &&
+      !isLoggedIn &&
+      !isLoading
+    ) {
       setIsAuthModalOpen(true);
     }
   }, [response, isLoggedIn, isLoading, router]);
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined') {
+
+    if (typeof window !== "undefined") {
       const storedTheme = localStorage.getItem("theme");
       const root = document.documentElement;
-      if (storedTheme === "dark" || (!storedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+
+      if (
+        storedTheme === "dark" ||
+        (!storedTheme &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
         setIsDarkMode(true);
         root.classList.add("dark");
       } else {
@@ -125,6 +188,7 @@ export default function ExamPage({
     } else {
       document.body.style.overflow = "";
     }
+
     return () => {
       document.body.style.overflow = "";
     };
@@ -132,6 +196,7 @@ export default function ExamPage({
 
   const toggleTheme = () => {
     const root = document.documentElement;
+
     if (isDarkMode) {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
@@ -144,10 +209,14 @@ export default function ExamPage({
   };
 
   const getClearFiltersUrl = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
+
     params.delete("chapterId");
     params.delete("questionType");
     params.set("step", "1");
+
     return `${pathname}?${params.toString()}`;
   };
 
@@ -172,15 +241,24 @@ export default function ExamPage({
     }
 
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(
+        searchParams.toString()
+      );
+
       params.set("step", newStep.toString());
+
       router.push(`${pathname}?${params.toString()}`);
     });
   };
 
   const handleJumpSubmit = () => {
     const target = parseInt(jumpTarget);
-    if (!isNaN(target) && target >= 1 && target <= totalCount) {
+
+    if (
+      !isNaN(target) &&
+      target >= 1 &&
+      target <= totalCount
+    ) {
       setIsJumpModalOpen(false);
       handleNavigation(target);
       setJumpTarget("");
@@ -191,71 +269,131 @@ export default function ExamPage({
 
   const handleChapterClick = (id: string | null) => {
     if (id === currentChapterId) return;
+
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(
+        searchParams.toString()
+      );
+
       params.set("step", "1");
-      if (id) params.set("chapterId", id);
-      else params.delete("chapterId");
+
+      if (id) {
+        params.set("chapterId", id);
+      } else {
+        params.delete("chapterId");
+      }
+
       router.push(`${pathname}?${params.toString()}`);
     });
   };
 
   const handleTypeClick = (type: string | null) => {
     if (type === currentQuestionType) return;
+
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(
+        searchParams.toString()
+      );
+
       params.set("step", "1");
-      if (type) params.set("questionType", type);
-      else params.delete("questionType");
+
+      if (type) {
+        params.set("questionType", type);
+      } else {
+        params.delete("questionType");
+      }
+
       router.push(`${pathname}?${params.toString()}`);
     });
   };
 
-  const formatQuestion = (dbQ?: DBQuestion): FormattedQuestion => {
+  // تنها تغییر مربوط به خروجی سؤال:
+  // اضافه‌شدن referenceSlug
+  const formatQuestion = (
+    dbQ?: DBQuestion
+  ): FormattedQuestion => {
     if (!dbQ) return null;
+
     const keys: ChoiceKey[] = ["A", "B", "C", "D"];
-    const correctIndex = dbQ.correctAnswer > 0 ? dbQ.correctAnswer - 1 : 0;
+
+    const correctIndex =
+      dbQ.correctAnswer > 0
+        ? dbQ.correctAnswer - 1
+        : 0;
+
     return {
       id: dbQ.id,
       text: dbQ.questionText,
-      choices: dbQ.options.map((optText, i) => ({ key: keys[i], text: optText })),
+
+      choices: dbQ.options.map((optText, i) => ({
+        key: keys[i],
+        text: optText,
+      })),
+
       correct: keys[correctIndex],
       explanation: dbQ.answerText,
       examPoints: dbQ.examPoints,
       code: dbQ.questionCode,
       studyGuide: dbQ.studyGuide || "",
+
+      referenceSlug: dbQ.reference?.slug ?? null,
     };
   };
 
   const q = formatQuestion(dbQuestion);
-  const progressPercentage = totalCount > 0 ? Math.round((currentStep / totalCount) * 100) : 0;
+
+  const progressPercentage =
+    totalCount > 0
+      ? Math.round((currentStep / totalCount) * 100)
+      : 0;
+
   const isAnyLoading = isFetching || isPendingRoute;
 
   const handleLoginSuccess = () => {
     setIsAuthModalOpen(false);
+
     if (targetStep !== null) {
       startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(
+          searchParams.toString()
+        );
+
         params.set("step", targetStep.toString());
+
         router.push(`${pathname}?${params.toString()}`);
       });
     }
   };
 
   const breadcrumbItems = [
-    { label: pname, href: `/resources/course/${pname}` },
-    { label: 'سوالات', href: `` },
+    {
+      label: pname,
+      href: `/resources/course/${pname}`,
+    },
+    {
+      label: "سوالات",
+      href: "",
+    },
   ];
 
   return (
-    <div className="min-h-screen max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300" dir="rtl">
+    <div
+      className="min-h-screen max-w-7xl text-bodyall m-auto text-right pb-24 lg:pb-8 dark:text-slate-200 transition-colors duration-300"
+      dir="rtl"
+    >
       <div className="mt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
       <AnimatePresence>
         {isAuthModalOpen && (
-          <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onSuccess={handleLoginSuccess} />
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            onClose={() =>
+              setIsAuthModalOpen(false)
+            }
+            onSuccess={handleLoginSuccess}
+          />
         )}
       </AnimatePresence>
 
@@ -268,38 +406,84 @@ export default function ExamPage({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              onClick={() => setIsJumpModalOpen(false)}
+              onClick={() =>
+                setIsJumpModalOpen(false)
+              }
             />
+
             <motion.div
               className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
-              initial={{ opacity: 0, y: -150, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -120, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 420, damping: 28 }}
+              initial={{
+                opacity: 0,
+                y: -150,
+                scale: 0.96,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: -120,
+                scale: 0.96,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 28,
+              }}
             >
               <div className="bg-white dark:bg-slate-800 rounded shadow-xl w-full max-w-sm overflow-hidden pointer-events-auto border border-slate-200 dark:border-slate-700">
                 <div className="p-6">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">پرش به سوال خاص</h3>
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+                    پرش به سوال خاص
+                  </h3>
+
                   <p className="text-sm text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-                    شماره سوال مورد نظر خود را وارد کنید (بین ۱ تا <span className="font-bold text-slate-700 dark:text-slate-300">{totalCount}</span>).
+                    شماره سوال مورد نظر خود را وارد کنید
+                    (بین ۱ تا{" "}
+                    <span className="font-bold text-slate-700 dark:text-slate-300">
+                      {totalCount}
+                    </span>
+                    ).
                   </p>
+
                   <input
                     type="number"
                     min={1}
                     max={totalCount}
                     value={jumpTarget}
-                    onChange={(e) => setJumpTarget(e.target.value)}
+                    onChange={(e) =>
+                      setJumpTarget(e.target.value)
+                    }
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleJumpSubmit();
+                      if (e.key === "Enter") {
+                        handleJumpSubmit();
+                      }
                     }}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-emerald-500 focus:border-transparent transition-all dark:text-slate-100"
                     placeholder="مثلاً: 6"
                     autoFocus
                   />
                 </div>
+
                 <div className="flex bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 p-4 gap-3 justify-end">
-                  <button onClick={() => setIsJumpModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white rounded-xl transition-colors">انصراف</button>
-                  <button onClick={handleJumpSubmit} className="px-5 py-2.5 text-sm font-medium bg-red-400 dark:bg-red-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-emerald-600 active:scale-95 transition-all shadow-sm">تایید و انتقال</button>
+                  <button
+                    onClick={() =>
+                      setIsJumpModalOpen(false)
+                    }
+                    className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white rounded-xl transition-colors"
+                  >
+                    انصراف
+                  </button>
+
+                  <button
+                    onClick={handleJumpSubmit}
+                    className="px-5 py-2.5 text-sm font-medium bg-red-400 dark:bg-red-500 text-white rounded-xl hover:bg-green-700 dark:hover:bg-emerald-600 active:scale-95 transition-all shadow-sm"
+                  >
+                    تایید و انتقال
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -308,7 +492,7 @@ export default function ExamPage({
       </AnimatePresence>
 
       <div className="mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-        <ExamSidebar 
+        <ExamSidebar
           fontSize={fontSize}
           setFontSize={setFontSize}
           mounted={mounted}
@@ -325,7 +509,7 @@ export default function ExamPage({
           handleTypeClick={handleTypeClick}
         />
 
-        <ExamContent 
+        <ExamContent
           fontSize={fontSize}
           q={q}
           dbQuestion={dbQuestion}

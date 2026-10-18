@@ -1,3 +1,4 @@
+
 "use server";
 
 import { infoCurentUser } from "@/lib/auth";
@@ -24,7 +25,7 @@ export async function fetchDataQues(
           userId: String(userId),
           isActive: true,
           endDate: {
-            gt: now, // تاریخ انقضا نگذشته باشد
+            gt: now,
           },
         },
         orderBy: {
@@ -43,7 +44,7 @@ export async function fetchDataQues(
       orderBy: { order: "asc" },
     });
 
-    // ۳. بررسی دسترسی از سوال ۶ به بعد (بیش از ۵ سوال رایگان)
+    // ۳. بررسی دسترسی از سوال ۶ به بعد
     if (currentStep > 5) {
       if (!userId) {
         return {
@@ -62,7 +63,8 @@ export async function fetchDataQues(
         return {
           success: false,
           requiresSubscription: true,
-          message: "برای مشاهده سوالات بعد از سوال ۵، نیاز به اشتراک فعال دارید.",
+          message:
+            "برای مشاهده سوالات بعد از سوال ۵، نیاز به اشتراک فعال دارید.",
           data: null,
           totalCount: 0,
           hasActiveSubscription: false,
@@ -87,9 +89,18 @@ export async function fetchDataQues(
       where: whereCondition,
       orderBy: [
         { createdAt: "asc" },
-        { id: "asc" }
+        { id: "asc" },
       ],
       skip: Math.max(0, currentStep - 1),
+
+      // واکشی اسلاگ رفرنس مربوط به همین سؤال
+      include: {
+        reference: {
+          select: {
+            slug: true,
+          },
+        },
+      },
     });
 
     if (!question) {
@@ -113,6 +124,7 @@ export async function fetchDataQues(
     };
   } catch (error) {
     console.error("❌ Error in fetchDataQues:", error);
+
     return {
       success: false,
       message: "خطا در برقراری ارتباط با سرور",
