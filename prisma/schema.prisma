@@ -81,7 +81,7 @@ enum ProductType {
 // ========= MODELS =========
 
 model User {
-  id               String                 @id @default(uuid()) // تغییر آیدی به uuid
+  id               String                 @id @default(uuid())
   phoneNumber      String                 @unique
   username         String?
   otpCode          String?
@@ -103,8 +103,12 @@ model User {
   contacts         Contact[]
   readGlobalNotifs UserNotificationRead[]
   subscriptions    UserSubscription[]
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
+
+  // ارتباط با سؤالات ویژه انتخاب‌شده توسط کاربر
+  specialQuestions UserSpecialQuestion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GlobalNotification {
@@ -294,6 +298,12 @@ model Question {
   questionCode   String?
   isActive       Boolean      @default(true)
 
+  // مشخص می‌کند سؤال توسط ادمین ویژه شده است
+  isSpecial Boolean @default(false)
+
+  // ارتباط با سؤالات ویژه کاربران
+  specialByUsers UserSpecialQuestion[]
+
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -304,14 +314,15 @@ model Question {
   categoryChapter   CategoryChapter? @relation(fields: [categoryChapterId], references: [id], onDelete: SetNull)
 
   // 🟢 فیلد جدید: ارتباط با رفرنس سوال
-  referenceId       String?
-  reference         QuestionReference? @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  referenceId String?
+  reference   QuestionReference? @relation(fields: [referenceId], references: [id], onDelete: SetNull)
 
   issues    QuestionIssue[]
   comments  Comment[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
+  @@index([isSpecial])
   @@index([categoryChapterId])
   @@index([productId])
   @@index([chapterId])
@@ -319,28 +330,46 @@ model Question {
   @@index([referenceId]) // 🟢 ایندکس برای سرعت فیلتر سوالات بر اساس رفرنس
 }
 
-model QuestionReference {
-  id        String     @id @default(uuid())
-  title     String     // عنوان رفرنس (مثال: بانک مهر 1403)
-  slug      String     @unique // اسلاگ یکتا (مثال: bank-mehr-1403)
-  isActive  Boolean    @default(true)
 
-  // رابطه با سوالات
-  questions Question[]
+model UserSpecialQuestion {
+  id String @id @default(uuid())
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  // کاربری که سؤال را ویژه کرده
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([slug])
-  @@index([isActive])
+  // سؤالی که ویژه شده
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // تاریخ ثبت سؤال ویژه
+  createdAt DateTime @default(now())
+
+  // جلوگیری از ثبت تکراری یک سؤال برای یک کاربر
+  @@unique([userId, questionId])
+
+  // دسترسی سریع به کاربران یک سؤال
+  @@index([questionId])
 }
 
 
 
 
+model QuestionReference {
+  id       String  @id @default(uuid())
+  title    String // عنوان رفرنس (مثال: بانک مهر 1403)
+  slug     String  @unique // اسلاگ یکتا (مثال: bank-mehr-1403)
+  isActive Boolean @default(true)
 
+  // رابطه با سوالات
+  questions Question[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([slug])
+  @@index([isActive])
+}
 
 model QuestionIssue {
   id          String   @id @default(uuid())
