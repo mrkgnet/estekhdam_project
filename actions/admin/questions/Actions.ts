@@ -1,28 +1,23 @@
-
 "use server";
-
 import { infoCurentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { Prisma, QuestionType } from "@prisma/client";
-
 const PAGE_SIZE_MAX = 100;
-
 async function checkAdmin() {
   const user = await infoCurentUser();
   return !!user && user.role === "admin";
 }
-
 // ============================================
 // Fetch Questions
 // ============================================
-
 export async function fetchDataQuestion(
   id: string,
   page: number = 1,
   limit: number = 10,
   searchQuery?: string,
-  referenceId?: string
+  referenceId?: string,
+  specialOnly: boolean = false
 ) {
   const emptyResult = {
     questions: [],
@@ -30,26 +25,21 @@ export async function fetchDataQuestion(
     currentPage: 1,
     totalPages: 0,
   };
-
   try {
     if (!(await checkAdmin())) {
       return emptyResult;
     }
-
     const safePage =
       Number.isSafeInteger(page) && page > 0 ? page : 1;
-
     const safeLimit =
       Number.isSafeInteger(limit) && limit > 0
         ? Math.min(limit, PAGE_SIZE_MAX)
         : 10;
-
     const search = searchQuery?.trim().slice(0, 200);
-
     const where: Prisma.QuestionWhereInput = {
       productId: id,
+      ...(specialOnly ? { isSpecial: true } : {}),
     };
-
     if (referenceId) {
       if (referenceId === "unassigned") {
         where.referenceId = null;
@@ -57,7 +47,6 @@ export async function fetchDataQuestion(
         where.referenceId = referenceId;
       }
     }
-
     if (search) {
       where.OR = [
         {
@@ -108,20 +97,16 @@ export async function fetchDataQuestion(
         },
       ];
     }
-
     const [totalCount, questions] = await db.$transaction([
       db.question.count({ where }),
-
       db.question.findMany({
         where,
-
         include: {
           product: {
             select: {
               name: true,
             },
           },
-
           chapter: {
             select: {
               id: true,
@@ -129,14 +114,12 @@ export async function fetchDataQuestion(
               order: true,
             },
           },
-
           categoryChapter: {
             select: {
               id: true,
               name: true,
             },
           },
-
           reference: {
             select: {
               id: true,
@@ -146,17 +129,14 @@ export async function fetchDataQuestion(
             },
           },
         },
-
         orderBy: [
           { questionNumber: "desc" },
           { id: "desc" },
         ],
-
         skip: (safePage - 1) * safeLimit,
         take: safeLimit,
       }),
     ]);
-
     return {
       questions,
       totalCount,
@@ -168,11 +148,9 @@ export async function fetchDataQuestion(
     return emptyResult;
   }
 }
-
 // ============================================
 // Fetch References
 // ============================================
-
 export async function fetchQuestionReferencesAction() {
   try {
     if (!(await checkAdmin())) {
@@ -182,7 +160,6 @@ export async function fetchQuestionReferencesAction() {
         data: [],
       };
     }
-
     const references = await db.questionReference.findMany({
       select: {
         id: true,
@@ -195,7 +172,6 @@ export async function fetchQuestionReferencesAction() {
         { id: "asc" },
       ],
     });
-
     return {
       success: true,
       message: "لیست رفرنس‌ها دریافت شد.",
@@ -203,7 +179,6 @@ export async function fetchQuestionReferencesAction() {
     };
   } catch (error) {
     console.error("Fetch References Error:", error);
-
     return {
       success: false,
       message: "خطا در دریافت رفرنس‌ها.",
@@ -211,11 +186,9 @@ export async function fetchQuestionReferencesAction() {
     };
   }
 }
-
 // ============================================
 // Update Question Reference
 // ============================================
-
 export async function updateQuestionReferenceIdAction(
   questionId: string,
   referenceId: string | null
@@ -227,14 +200,12 @@ export async function updateQuestionReferenceIdAction(
         message: "دسترسی غیرمجاز.",
       };
     }
-
     if (!questionId) {
       return {
         success: false,
         message: "شناسه سؤال نامعتبر است.",
       };
     }
-
     const question = await db.question.findUnique({
       where: {
         id: questionId,
@@ -245,16 +216,13 @@ export async function updateQuestionReferenceIdAction(
         referenceId: true,
       },
     });
-
     if (!question) {
       return {
         success: false,
         message: "سؤال موردنظر یافت نشد.",
       };
     }
-
     const normalizedReferenceId = referenceId || null;
-
     if (normalizedReferenceId) {
       const reference = await db.questionReference.findUnique({
         where: {
@@ -265,14 +233,12 @@ export async function updateQuestionReferenceIdAction(
           isActive: true,
         },
       });
-
       if (!reference) {
         return {
           success: false,
           message: "رفرنس انتخاب‌شده وجود ندارد.",
         };
       }
-
       if (
         !reference.isActive &&
         question.referenceId !== normalizedReferenceId
@@ -283,7 +249,6 @@ export async function updateQuestionReferenceIdAction(
         };
       }
     }
-
     const updated = await db.question.update({
       where: {
         id: questionId,
@@ -305,9 +270,7 @@ export async function updateQuestionReferenceIdAction(
         },
       },
     });
-
     revalidatePath(`/adminp/questions/${updated.productId}`);
-
     return {
       success: true,
       message: "رفرنس سؤال با موفقیت ذخیره شد.",
@@ -315,18 +278,15 @@ export async function updateQuestionReferenceIdAction(
     };
   } catch (error) {
     console.error("Update Reference Error:", error);
-
     return {
       success: false,
       message: "خطا در ذخیره رفرنس سؤال.",
     };
   }
 }
-
 // ============================================
 // Batch Add Questions
 // ============================================
-
 interface BatchQuestionInput {
   questionText: string;
   options: string[];
@@ -338,7 +298,6 @@ interface BatchQuestionInput {
   questionCode?: string;
   referenceId?: string | null;
 }
-
 export default async function batchAddQuestionsAction(
   productId: string,
   chapterId: string | null,
@@ -352,7 +311,6 @@ export default async function batchAddQuestionsAction(
         message: "عدم دسترسی. شما ادمین نیستید.",
       };
     }
-
     if (
       !productId ||
       !Array.isArray(questionsData) ||
@@ -363,7 +321,6 @@ export default async function batchAddQuestionsAction(
         message: "اطلاعات ارسالی ناقص است.",
       };
     }
-
     // اعتبارسنجی رفرنس‌های انتخاب‌شده
     const referenceIds = Array.from(
       new Set(
@@ -372,7 +329,6 @@ export default async function batchAddQuestionsAction(
           .filter((value): value is string => !!value)
       )
     );
-
     if (referenceIds.length > 0) {
       const activeReferences =
         await db.questionReference.findMany({
@@ -384,7 +340,6 @@ export default async function batchAddQuestionsAction(
             id: true,
           },
         });
-
       if (activeReferences.length !== referenceIds.length) {
         return {
           success: false,
@@ -393,7 +348,6 @@ export default async function batchAddQuestionsAction(
         };
       }
     }
-
     const dataToInsert: Prisma.QuestionCreateManyInput[] =
       questionsData.map((q) => ({
         productId,
@@ -410,24 +364,59 @@ export default async function batchAddQuestionsAction(
         questionCode: q.questionCode || null,
         isActive: true,
       }));
-
     const created = await db.question.createMany({
       data: dataToInsert,
       skipDuplicates: true,
     });
-
     revalidatePath(`/adminp/questions/${productId}`);
-
     return {
       success: true,
       message: `${created.count} سؤال با موفقیت ثبت شد.`,
     };
   } catch (error) {
     console.error("Batch Add Error:", error);
-
     return {
       success: false,
       message: "خطایی در ثبت سؤالات رخ داد.",
     };
+  }
+}
+
+// ============================================
+// Update Admin Special Question
+// ============================================
+export async function updateQuestionSpecialAction(
+  questionId: string,
+  productId: string,
+  isSpecial: boolean
+) {
+  try {
+    if (!(await checkAdmin())) {
+      return { success: false, message: "دسترسی غیرمجاز." };
+    }
+
+    if (!questionId?.trim() || !productId?.trim() || typeof isSpecial !== "boolean") {
+      return { success: false, message: "اطلاعات سؤال نامعتبر است." };
+    }
+
+    const result = await db.question.updateMany({
+      where: { id: questionId, productId },
+      data: { isSpecial },
+    });
+
+    if (result.count === 0) {
+      return { success: false, message: "سؤال موردنظر یافت نشد." };
+    }
+
+    revalidatePath(`/adminp/questions/${productId}`);
+
+    return {
+      success: true,
+      message: isSpecial ? "سؤال ویژه شد." : "سؤال از حالت ویژه خارج شد.",
+      isSpecial,
+    };
+  } catch (error) {
+    console.error("Update Special Question Error:", error);
+    return { success: false, message: "خطا در ذخیره وضعیت ویژه سؤال." };
   }
 }

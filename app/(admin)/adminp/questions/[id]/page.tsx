@@ -1,4 +1,3 @@
-
 import React, { Suspense } from "react";
 
 import ExamQuestionsPage from "./ShowData";
@@ -18,6 +17,7 @@ interface PageProps {
     page?: string;
     search?: string;
     reference?: string;
+    special?: string;
   }>;
 }
 
@@ -26,6 +26,7 @@ interface LoaderProps {
   page: number;
   search?: string;
   referenceId?: string;
+  specialOnly: boolean;
 }
 
 async function QuestionsDataLoader({
@@ -33,6 +34,7 @@ async function QuestionsDataLoader({
   page,
   search,
   referenceId,
+  specialOnly,
 }: LoaderProps) {
   const [
     questionsData,
@@ -40,7 +42,7 @@ async function QuestionsDataLoader({
     categoryChaptersResult,
     referencesResult,
   ] = await Promise.all([
-    fetchDataQuestion(id, page, 10, search, referenceId),
+    fetchDataQuestion(id, page, 10, search, referenceId, specialOnly),
     fetchDataChapterAction(id),
     fetchCategoryChapter(),
     fetchQuestionReferencesAction(),
@@ -69,20 +71,21 @@ export default async function Page({
   params,
   searchParams,
 }: PageProps) {
-  const [{ id }, { page, search, reference }] =
+  const [{ id }, { page, search, reference, special }] =
     await Promise.all([params, searchParams]);
 
   const parsedPage = Number(page);
-
   const currentPage =
     Number.isSafeInteger(parsedPage) && parsedPage > 0
       ? parsedPage
       : 1;
 
+  const specialOnly = special === "true";
+
   return (
     <main className="min-h-screen">
       <Suspense
-        key={`${id}-${currentPage}-${search ?? ""}-${reference ?? ""}`}
+        key={`${id}-${currentPage}-${search ?? ""}-${reference ?? ""}-${specialOnly}`}
         fallback={<DotsLoader />}
       >
         <QuestionsDataLoader
@@ -90,6 +93,7 @@ export default async function Page({
           page={currentPage}
           search={search}
           referenceId={reference}
+          specialOnly={specialOnly}
         />
       </Suspense>
     </main>
